@@ -1,44 +1,32 @@
-auction-system/
-├── pom.xml (hoặc build.gradle)                 // Quản lý thư viện chung cho toàn dự án
-│
-├── server/                                     // PHẦN BẠN SẼ LÀM TRONG GIAI ĐOẠN NÀY
-│   ├── src/main/java/com/auction/server/
-│   │   ├── ServerApplication.java              // File main() khởi chạy Server
-│   │   │
-│   │   ├── models/                             // Chứa các đối tượng OOP theo chuẩn
-│   │   │   ├── core/                           // Lớp cơ sở (Entity)
-│   │   │   ├── user/                           // User, Bidder, Seller, Admin
-│   │   │   ├── item/                           // Item, Electronics, Art...
-│   │   │   └── auction/                        // Auction, BidTransaction
-│   │   │
-│   │   ├── dao/                                // Database Access Object (Truy cập CSDL)
-│   │   │   ├── UserDao.java                    // Lưu ý: Chỉ Server mới truy cập database
-│   │   │   ├── ItemDao.java                    
-│   │   │   └── AuctionDao.java
-│   │   │
-│   │   ├── controllers/                        // Xử lý logic nghiệp vụ đấu giá (MVC Server)
-│   │   │   ├── UserController.java             // Logic đăng ký, đăng nhập (3.1.1)
-│   │   │   ├── ItemController.java             // Logic thêm/sửa/xóa sản phẩm (3.1.2)
-│   │   │   └── AuctionController.java          // Logic đặt giá, kết thúc phiên (3.1.3 & 3.1.4)
-│   │   │
-│   │   ├── network/                            // Xử lý giao tiếp mạng (Socket / REST API)
-│   │   │   └── RequestHandler.java 
-│   │   │
-│   │   ├── exceptions/                         // Xử lý lỗi & ngoại lệ (3.1.5)
-│   │   │   ├── InvalidBidException.java        // Lỗi: Đặt giá thấp hơn giá hiện tại
-│   │   │   └── AuctionClosedException.java     // Lỗi: Đấu giá khi phiên đã đóng
-│   │   │
-│   │   └── utils/                              // Các hàm tiện ích (Format thời gian, check logic...)
-│   │
-│   └── src/test/java/com/auction/server/       // Chứa code JUnit Test
-│       ├── controllers/
-│       └── models/
-│
-└── client/                                     // PHẦN GIAO DIỆN (LÀM SAU KHI XONG LOGIC)
-    ├── src/main/java/com/auction/client/
-    │   ├── ClientApplication.java              // File main() khởi chạy Client (JavaFX)
-    │   ├── controllers/                        // Controller của giao diện JavaFX
-    │   └── network/                            // Gửi request lên Server
-    │
-    └── src/main/resources/
-        └── views/                              // Chứa các file giao diện .fxml
+# 🔨 Hệ Thống Đấu Giá Trực Tuyến (Online Auction System)
+
+![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=java&logoColor=white)
+![Maven](https://img.shields.io/badge/Maven-C71A22?style=for-the-badge&logo=apache-maven&logoColor=white)
+![Architecture](https://img.shields.io/badge/Architecture-Client%20/%20Server-blue?style=for-the-badge)
+
+Một hệ thống đấu giá mô hình Lập trình mạng (Client - Server) đa luồng, được thiết kế theo chuẩn hướng đối tượng (OOP) và đảm bảo tính toàn vẹn của dữ liệu giao dịch.
+
+## 🌟 Tính năng nổi bật (Dự kiến)
+* **Kiến trúc Client - Server:** Cho phép nhiều người dùng (Bidders) kết nối vào máy chủ cùng lúc để tham gia đấu giá thời gian thực.
+* **Bảo mật giao dịch:** Sử dụng cấu trúc dữ liệu bất biến (Immutable Transactions) để lưu vết lịch sử đặt giá, chống gian lận.
+* **Quản lý phiên đấu giá:** Tự động mở/đóng phiên đấu giá, tìm ra người chiến thắng dựa trên mức giá cao nhất hợp lệ.
+* **Mở rộng linh hoạt:** Các đối tượng (Models) được thiết kế theo chuẩn Domain-Driven Design, dễ dàng nâng cấp sau này.
+
+## 🏗️ Kiến trúc & Công nghệ
+* **Ngôn ngữ:** Java (JDK 25)
+* **Quản lý thư viện:** Maven
+* **Mô hình mạng:** Java Socket / RMI (Multithreading)
+
+## 📁 Cấu trúc Dự án
+Dự án được chia thành các module độc lập. Hiện tại đang phát triển module `Server`:
+```text
+auction-system
+ ┣ 📂 server
+ ┃ ┗ 📂 src/main/java/com/auction/server
+ ┃   ┣ 📂 models             # Chứa các thực thể cốt lõi
+ ┃   ┃ ┣ 📂 auction          # Auction, BidTransaction, AuctionStatus...
+ ┃   ┃ ┣ 📂 core             # Entity (Lớp cơ sở)
+ ┃   ┃ ┣ 📂 item             # Item, Electronics...
+ ┃   ┃ ┗ 📂 user             # User, Bidder, Seller...
+ ┃   ┗ 📜 ServerApplication.java # Entry point khởi chạy máy chủ
+ ┗ 📜 pom.xml                # Cấu hình Maven
