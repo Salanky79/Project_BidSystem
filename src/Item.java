@@ -2,36 +2,24 @@ public class Item extends Entity {
     private String name;
     private String description;
     private double startingPrice;
-    private int quantity;
-    private String condition;
-    private long sellerId;
 
-    public Item(String name, String description, double startingPrice, int quantity, 
-                String condition, long sellerId) {
-        super();
+    public Item(String name, String description, double startingPrice) {
         this.name = name;
         this.description = description;
         this.startingPrice = startingPrice;
-        this.quantity = quantity;
-        this.condition = condition;
-        this.sellerId = sellerId;
     }
 
     public String getName() { return name; }
     public String getDescription() { return description; }
     public double getStartingPrice() { return startingPrice; }
-    public int getQuantity() { return quantity; }
-    public String getCondition() { return condition; }
-    public long getSellerId() { return sellerId; }
 }
 
 class Art extends Item {
     private String artist;
     private int year;
 
-    public Art(String name, String description, double startingPrice, int quantity, 
-               String condition, long sellerId, String artist, int year) {
-        super(name, description, startingPrice, quantity, condition, sellerId);
+    public Art(String name, double startingPrice, String artist, int year) {
+        super(name, startingPrice);
         this.artist = artist;
         this.year = year;
     }
@@ -44,9 +32,8 @@ class Electronic extends Item {
     private String brand;
     private int warrantyMonths;
 
-    public Electronic(String name, String description, double startingPrice, int quantity,
-                      String condition, long sellerId, String brand, int warrantyMonths) {
-        super(name, description, startingPrice, quantity, condition, sellerId);
+    public Electronic(String name, double startingPrice, String brand, int warrantyMonths) {
+        super(name, startingPrice);
         this.brand = brand;
         this.warrantyMonths = warrantyMonths;
     }
@@ -59,15 +46,14 @@ class Vehicle extends Item {
     private double mileage;
     private String fuelType;
 
-    public Vehicle(String name, String description, double startingPrice, int quantity,
-                   String condition, long sellerId, double mileage, String fuelType) {
-        super(name, description, startingPrice, quantity, condition, sellerId);
+    public Vehicle(String name, double startingPrice, double mileage, String fuelType) {
+        super(name, startingPrice);
         this.mileage = mileage;
         this.fuelType = fuelType;
     }
 
-    public String getMileage() { return mileage; }
-    public double getMileage() { return mileage; } }
+    public String getFuelType() { return fuelType; }
+    public double getMileage() { return mileage; }
 }
 
 class RealEstate extends Item {
@@ -75,10 +61,8 @@ class RealEstate extends Item {
     private double areaSquareMeter; // Diện tích (m²)
     private int rooms;              // Số phòng
 
-    public RealEstate(String name, String description, double startingPrice, int quantity,
-                      String condition, long sellerId, String location,
-                      double areaSquareMeter, int rooms) {
-        super(name, description, startingPrice, quantity, condition, sellerId);
+    public RealEstate(String name,  double startingPrice, String location, double areaSquareMeter, int rooms) {
+        super(name, startingPrice);
         this.location = location;
         this.areaSquareMeter = areaSquareMeter;
         this.rooms = rooms;
@@ -94,10 +78,8 @@ class Jewelry extends Item {
     private double caratWeight;     // Trọng lượng carat
     private String gemstoneType;    // Loại đá quý (Kim cương, Hồng ngọc, Sapphire, v.v.)
 
-    public Jewelry(String name, String description, double startingPrice, int quantity,
-                   String condition,  long sellerId, String material,
-                   double caratWeight, String gemstoneType) {
-        super(name, description, startingPrice, quantity, condition, sellerId);
+    public Jewelry(String name, double startingPrice, String material, double caratWeight, String gemstoneType) {
+        super(name, startingPrice);
         this.material = material;
         this.caratWeight = caratWeight;
         this.gemstoneType = gemstoneType;
