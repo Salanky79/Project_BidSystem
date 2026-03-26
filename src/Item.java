@@ -23,7 +23,6 @@ public class Item extends Entity {
     public int getQuantity() { return quantity; }
     public String getCondition() { return condition; }
     public long getSellerId() { return sellerId; }
-    }
 }
 
 class Art extends Item {
@@ -68,7 +67,7 @@ class Vehicle extends Item {
     }
 
     public String getMileage() { return mileage; }
-    public String getFuelType() { return fuelType; }
+    public double getMileage() { return mileage; } }
 }
 
 class RealEstate extends Item {
