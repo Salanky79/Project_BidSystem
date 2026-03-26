@@ -18,8 +18,8 @@ class Art extends Item {
     private String artist;
     private int year;
 
-    public Art(String name, double startingPrice, String artist, int year) {
-        super(name, startingPrice);
+    public Art(String name, String description, double startingPrice, String artist, int year) {
+        super(name, description, startingPrice);
         this.artist = artist;
         this.year = year;
     }
@@ -32,8 +32,8 @@ class Electronic extends Item {
     private String brand;
     private int warrantyMonths;
 
-    public Electronic(String name, double startingPrice, String brand, int warrantyMonths) {
-        super(name, startingPrice);
+    public Electronic(String name, String description, double startingPrice, String brand, int warrantyMonths) {
+        super(name, description, startingPrice);
         this.brand = brand;
         this.warrantyMonths = warrantyMonths;
     }
@@ -46,8 +46,8 @@ class Vehicle extends Item {
     private double mileage;
     private String fuelType;
 
-    public Vehicle(String name, double startingPrice, double mileage, String fuelType) {
-        super(name, startingPrice);
+    public Vehicle(String name, String description, double startingPrice, double mileage, String fuelType) {
+        super(name, description, startingPrice);
         this.mileage = mileage;
         this.fuelType = fuelType;
     }
@@ -61,8 +61,8 @@ class RealEstate extends Item {
     private double areaSquareMeter; // Diện tích (m²)
     private int rooms;              // Số phòng
 
-    public RealEstate(String name,  double startingPrice, String location, double areaSquareMeter, int rooms) {
-        super(name, startingPrice);
+    public RealEstate(String name, String description, double startingPrice, String location, double areaSquareMeter, int rooms) {
+        super(name, description, startingPrice);
         this.location = location;
         this.areaSquareMeter = areaSquareMeter;
         this.rooms = rooms;
@@ -78,8 +78,8 @@ class Jewelry extends Item {
     private double caratWeight;     // Trọng lượng carat
     private String gemstoneType;    // Loại đá quý (Kim cương, Hồng ngọc, Sapphire, v.v.)
 
-    public Jewelry(String name, double startingPrice, String material, double caratWeight, String gemstoneType) {
-        super(name, startingPrice);
+    public Jewelry(String name, String description, double startingPrice, String material, double caratWeight, String gemstoneType) {
+        super(name, description, startingPrice);
         this.material = material;
         this.caratWeight = caratWeight;
         this.gemstoneType = gemstoneType;
