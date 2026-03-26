@@ -53,7 +53,7 @@ class Electronic extends Item {
     }
 
     public String getBrand() { return brand; }
-    public String getWarrantyMonths() { return warrantyMonths; }
+    public int getWarrantyMonths() { return warrantyMonths; }
 }
 
 class Vehicle extends Item {
