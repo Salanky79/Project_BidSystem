@@ -58,7 +58,7 @@ class Electronic extends Item {
 
 class Vehicle extends Item {
     private double mileage;
-    private String fuelType; // Xăng, Diesel, Điện, v.v.
+    private String fuelType;
 
     public Vehicle(String name, String description, double startingPrice, int quantity,
                    String condition, long sellerId, double mileage, String fuelType) {
