@@ -89,12 +89,7 @@ public class Auction extends Entity {
     // CHỨC NĂNG 3.1.4: KẾT THÚC PHIÊN ĐẤU GIÁ
 
     public void closeAuction() {
-        // Tránh trường hợp bị gọi đóng nhiều lần
-        if (this.status == AuctionStatus.FINISHED || this.status == AuctionStatus.PAID || this.status == AuctionStatus.CANCELED) {
-            return;
-        }
-
-        this.status = AuctionStatus.FINISHED;
+        this.status = AuctionStatus.PAID;
         System.out.println("\n--- TỔNG KẾT PHIÊN ĐẤU GIÁ [" + item.getName() + "] ---");
 
         if (highestBidder != null) {
@@ -108,7 +103,7 @@ public class Auction extends Entity {
             System.out.println("Không có ai tham gia trả giá.");
 
             // Hủy phiên vì ế
-            this.status = AuctionStatus.CANCELED;
+            this.status = AuctionStatus.PAID;
             System.out.println("Trạng thái cuối: " + this.status);
         }
     }

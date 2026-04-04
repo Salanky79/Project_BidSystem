@@ -1,19 +1,16 @@
 package src.models.item;
 
-public class Vehicle extends Item {
+class Vehicle extends Item {
     private double mileage;
     private String fuelType;
 
-    public Vehicle(String name, String description, double startingPrice, double mileage, String fuelType) {
-        super(name, description, startingPrice);
+    public Vehicle(String name, String description, double startingPrice, int quantity,
+                   String condition, double mileage, String fuelType) {
+        super(name, description, startingPrice, quantity, condition);
         this.mileage = mileage;
         this.fuelType = fuelType;
     }
 
-    public String getFuelType() {
-        return fuelType;
-    }
-    public double getMileage() {
-        return mileage;
-    }
+    public double getMileage() { return mileage; }
+    public String getFuelType() { return fuelType; }
 }
