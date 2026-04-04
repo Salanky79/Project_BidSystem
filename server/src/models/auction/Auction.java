@@ -1,3 +1,11 @@
+package src.models.auction;
+
+import src.models.user.Seller;
+import src.models.user.Bidder;
+import src.models.item.Item;
+import Enum.AuctionStatus;
+
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

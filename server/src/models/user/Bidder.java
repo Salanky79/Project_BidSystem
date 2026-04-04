@@ -1,3 +1,7 @@
+package src.models.user;
+
+import Enum.Role;
+
 public class Bidder extends User {
     private double balance; // Số dư tài khoản
 

@@ -1,3 +1,5 @@
+package src.models.item;
+
 public class Jewelry extends Item {
     private String material;        // Vàng, bạc, đồng, v.v.
     private double caratWeight;     // Trọng lượng carat

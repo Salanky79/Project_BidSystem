@@ -1,3 +1,7 @@
+package src.models.user;
+
+import Enum.Role;
+
 public abstract class User extends Entity {
     private String username;
     private String password;

@@ -1,3 +1,7 @@
+package src.models.user;
+
+import Enum.Role;
+
 public class Seller extends User {
     private String storeName;
 

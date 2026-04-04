@@ -1,3 +1,5 @@
+package src.models.item;
+
 public class RealEstate extends Item {
     private String location;        // Địa chỉ / Vị trí
     private double areaSquareMeter; // Diện tích (m²)

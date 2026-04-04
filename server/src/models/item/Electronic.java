@@ -1,3 +1,5 @@
+package src.models.item;
+
 public class Electronic extends Item {
     private String brand;
     private int warrantyMonths;

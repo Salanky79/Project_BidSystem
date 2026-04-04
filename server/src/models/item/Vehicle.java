@@ -1,3 +1,5 @@
+package src.models.item;
+
 public class Vehicle extends Item {
     private double mileage;
     private String fuelType;
