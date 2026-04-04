@@ -8,6 +8,10 @@ public class Art extends Item {
         this.year = year;
     }
 
-    public String getArtist() { return artist; }
-    public int getYear() { return year; }
+    public String getArtist() {
+        return artist;
+    }
+    public int getYear() {
+        return year;
+    }
 }

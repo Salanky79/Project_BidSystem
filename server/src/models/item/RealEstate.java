@@ -10,7 +10,13 @@ public class RealEstate extends Item {
         this.rooms = rooms;
     }
 
-    public String getLocation() { return location; }
-    public double getAreaSquareMeter() { return areaSquareMeter; }
-    public int getRooms() { return rooms; }
+    public String getLocation() {
+        return location;
+    }
+    public double getAreaSquareMeter() {
+        return areaSquareMeter;
+    }
+    public int getRooms() {
+        return rooms;
+    }
 }

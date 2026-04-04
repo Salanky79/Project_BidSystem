@@ -37,9 +37,9 @@ public class Auction extends Entity {
         System.out.println("\n[HỆ THỐNG] Phiên đấu giá cho [" + item.getName() + "] BẮT ĐẦU!");
     }
 
-    // -------------------------------------------------------------
+
     // CHỨC NĂNG (mục 3.1.3): THAM GIA ĐẤU GIÁ
-    // -------------------------------------------------------------
+
 
     public synchronized boolean processBid(Bidder bidder, double amount) {
         LocalDateTime now = LocalDateTime.now();
@@ -76,9 +76,9 @@ public class Auction extends Entity {
         return true;
     }
 
-    // -------------------------------------------------------------
+    
     // CHỨC NĂNG 3.1.4: KẾT THÚC PHIÊN ĐẤU GIÁ
-    // -------------------------------------------------------------
+
     public void closeAuction() {
         // Tránh trường hợp bị gọi đóng nhiều lần
         if (this.status == AuctionStatus.FINISHED || this.status == AuctionStatus.PAID || this.status == AuctionStatus.CANCELED) {

@@ -8,6 +8,10 @@ public class Vehicle extends Item {
         this.fuelType = fuelType;
     }
 
-    public String getFuelType() { return fuelType; }
-    public double getMileage() { return mileage; }
+    public String getFuelType() {
+        return fuelType;
+    }
+    public double getMileage() {
+        return mileage;
+    }
 }

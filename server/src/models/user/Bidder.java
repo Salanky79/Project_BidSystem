@@ -4,7 +4,10 @@ public class Bidder extends User {
     public Bidder(String username, String password, double balance) {
         super(username, password);
         this.balance = balance;
+        this.setRole(Role.BIDDER);
     }
 
-    public double getBalance() { return balance; }
+    public double getBalance() {
+        return balance;
+    }
 }

@@ -10,7 +10,13 @@ public class Jewelry extends Item {
         this.gemstoneType = gemstoneType;
     }
 
-    public String getMaterial() { return material; }
-    public double getCaratWeight() { return caratWeight; }
-    public String getGemstoneType() { return gemstoneType; }
+    public String getMaterial() {
+        return material;
+    }
+    public double getCaratWeight() {
+        return caratWeight;
+    }
+    public String getGemstoneType() {
+        return gemstoneType;
+    }
 }

@@ -8,6 +8,10 @@ public class Electronic extends Item {
         this.warrantyMonths = warrantyMonths;
     }
 
-    public String getBrand() { return brand; }
-    public int getWarrantyMonths() { return warrantyMonths; }
+    public String getBrand() {
+        return brand;
+    }
+    public int getWarrantyMonths() {
+        return warrantyMonths;
+    }
 }
