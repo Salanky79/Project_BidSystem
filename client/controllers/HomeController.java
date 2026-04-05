@@ -22,7 +22,7 @@ public class HomeController {
     public void handleCardClick(javafx.scene.input.MouseEvent mouseEvent) {
             try {
                 // 1. Nạp file FXML chi tiết
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/demo1/AuctionDetail.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/AuctionDetail.fxml"));
                 Parent root = loader.load();
 
                 // 2. Tạo một Stage mới (Cửa sổ mới)
