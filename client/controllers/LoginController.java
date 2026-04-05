@@ -16,7 +16,7 @@ public class LoginController {
         try {
             // 1. Tải file Home.fxml
             // Lưu ý: Đường dẫn phải chính xác với cấu trúc thư mục resources của bạn
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/demo1/Home.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Home.fxml"));
             Parent homeRoot = loader.load();
 
             // 2. Lấy Stage hiện tại (cửa sổ đang hiển thị)
