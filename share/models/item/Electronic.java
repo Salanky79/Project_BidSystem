@@ -1,4 +1,4 @@
-package src.models.item;
+package models.item;
 
 class Electronic extends Item {
     private String brand;

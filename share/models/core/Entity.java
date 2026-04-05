@@ -1,4 +1,4 @@
-package src.models.core;
+package models.core;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,10 +15,6 @@ public abstract class Entity {
     // Getters & Setters
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public LocalDateTime getCreatedAt() {

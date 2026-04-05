@@ -1,9 +1,9 @@
-package src.models.auction;
+package models.auction;
 
-import src.models.user.Seller;
-import src.models.user.Bidder;
-import src.models.item.Item;
-import src.models.core.Entity;
+import models.user.Seller;
+import models.user.Bidder;
+import models.item.Item;
+import models.core.Entity;
 import Enum.AuctionStatus;
 
 

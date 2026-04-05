@@ -1,4 +1,4 @@
-package src.models.item;
+package models.item;
 
 class Vehicle extends Item {
     private double mileage;

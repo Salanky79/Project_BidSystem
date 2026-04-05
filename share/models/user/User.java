@@ -1,13 +1,12 @@
-package src.models.user;
+package models.user;
 
 import Enum.Role;
-import src.models.core.Entity;
+import models.core.Entity;
 
 public abstract class User extends Entity {
     private String username;
     private String password;
     private String fullName;
-    private String uid; //user's Id
     private Role role;
 
     //Constructor
@@ -15,7 +14,6 @@ public abstract class User extends Entity {
         this.username = username;
         this.password = password;
         this.fullName = fullName;
-        this.uid = uid;
     }
 
     public void setRole(Role role){

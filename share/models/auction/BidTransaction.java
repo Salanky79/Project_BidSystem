@@ -1,7 +1,7 @@
-package src.models.auction;
+package models.auction;
 
-import src.models.core.Entity;
-import src.models.user.Bidder;
+import models.core.Entity;
+import models.user.Bidder;
 
 
 import java.time.LocalDateTime;

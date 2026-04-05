@@ -1,6 +1,6 @@
-package src.models.item;
+package models.item;
 
-import src.models.core.Entity;
+import models.core.Entity;
 
 public class Item extends Entity {
     private String name;

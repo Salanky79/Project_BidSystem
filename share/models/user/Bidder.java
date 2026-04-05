@@ -1,6 +1,6 @@
-package src.models.user;
+package models.user;
 
-import src.models.auction.BidTransaction;
+import models.auction.BidTransaction;
 import Enum.Role;
 
 import java.util.ArrayList;

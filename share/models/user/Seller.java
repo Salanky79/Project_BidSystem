@@ -1,7 +1,7 @@
-package src.models.user;
+package models.user;
 
-import src.models.auction.Auction;
-import src.models.item.Item;
+import models.auction.Auction;
+import models.item.Item;
 import Enum.Role;
 
 import java.time.LocalDateTime;
@@ -10,12 +10,12 @@ import java.util.List;
 
 public class Seller extends User {
     private double balance;
-    private List<Auction> auctionList; // Danh sách các phiên đấu giá người này đã tạo
+    private List<String> auctionIdList; // Danh sách id các phiên đấu giá người này đã tạo
 
 
     public Seller(String username, String password, String fullName, String uid) {
         super(username, password, fullName, uid); // Đẩy việc khởi tạo lên cho class User
-        this.auctionList = new ArrayList<>();
+        this.auctionIdList = new ArrayList<>();
         this.balance = 0.0;
         this.setRole(Role.SELLER);
     }
@@ -26,16 +26,16 @@ public class Seller extends User {
         // Gọi đúng thứ tự: item trước, seller (chính là 'this') sau
         Auction newAuction = new Auction(item, this, startTime, endTime);
 
-        this.auctionList.add(newAuction);
+        this.auctionIdList.add(newAuction.getId());
         return newAuction;
 
     }
 
     // Truyền vào phiên đấu giá cụ thể muốn hủy
     public void cancelAuction(Auction auction) {
-        if (this.auctionList.contains(auction)) {
+        if (this.auctionIdList.contains(auction.getId())) {
             // (Sau này bạn có thể gọi auction.setStatus("CANCELLED") ở đây)
-            this.auctionList.remove(auction);
+            this.auctionIdList.remove(auction.getId());
             System.out.println("Đã hủy phiên đấu giá mặt hàng: " + auction.getItem().getName());
         } else {
             System.out.println("Lỗi: Phiên đấu giá này không thuộc về bạn!");
@@ -51,7 +51,5 @@ public class Seller extends User {
         }
     }
 
-    // Getter cho danh sách
-    public List<Auction> getAuctionList() { return auctionList; }
     public double getBalance() { return balance; }
 }

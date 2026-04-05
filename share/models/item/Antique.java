@@ -1,6 +1,4 @@
-package src.models.item;
-
-import src.models.item.Item;
+package models.item;
 
 public class Antique extends Item {
     private String era;                     // Thời kỳ / Niên đại (VD: Thời Lê, Thế kỷ 19)

@@ -1,4 +1,4 @@
-package src.models.item;
+package models.item;
 
 class RealEstate extends Item {
     private String propertyType;    // Loại BĐS (VD: Đất nền, Căn hộ chung cư, Biệt thự)

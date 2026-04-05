@@ -1,4 +1,4 @@
-package src.models.user;
+package models.user;
 
 import Enum.Role;
 

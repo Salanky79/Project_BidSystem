@@ -1,4 +1,4 @@
-package src.models.item;
+package models.item;
 
 class Art extends Item {
     private String artist;

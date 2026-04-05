@@ -1,4 +1,4 @@
-package src.models.item;
+package models.item;
 
 class Jewelry extends Item {
     private String material;        // Vàng, bạc, đồng, v.v.
