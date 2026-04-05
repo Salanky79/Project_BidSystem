@@ -51,5 +51,7 @@ public class Seller extends User {
         }
     }
 
-    public double getBalance() { return balance; }
+    public double getBalance() {
+        return balance;
+    }
 }

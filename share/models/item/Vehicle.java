@@ -1,5 +1,7 @@
 package models.item;
 
+import Enum.Category;
+
 class Vehicle extends Item {
     private double mileage;
     private String fuelType;
@@ -9,8 +11,13 @@ class Vehicle extends Item {
         super(name, description, startingPrice, quantity, condition);
         this.mileage = mileage;
         this.fuelType = fuelType;
+        this.setCategory(Category.VEHICLE);
     }
 
-    public double getMileage() { return mileage; }
-    public String getFuelType() { return fuelType; }
+    public double getMileage() {
+        return mileage;
+    }
+    public String getFuelType() {
+        return fuelType;
+    }
 }

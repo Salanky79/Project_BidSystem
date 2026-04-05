@@ -20,6 +20,10 @@ public abstract class User extends Entity {
         this.role = role;
     }
 
+    public Role getRole(){
+        return role;
+    }
+
     public String getFullName(){
         return this.fullName;
     }

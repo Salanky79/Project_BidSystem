@@ -1,6 +1,7 @@
 package models.item;
 
 import models.core.Entity;
+import Enum.Category;
 
 public class Item extends Entity {
     private String name;
@@ -9,6 +10,7 @@ public class Item extends Entity {
     private int quantity;
     private String condition;
     private long sellerId;
+    private Category category;
 
     public Item(String name, String description, double startingPrice, int quantity,
                 String condition) {
@@ -20,10 +22,28 @@ public class Item extends Entity {
         this.condition = condition;
     }
 
-    public String getName() { return name; }
-    public String getDescription() { return description; }
-    public double getStartingPrice() { return startingPrice; }
-    public int getQuantity() { return quantity; }
-    public String getCondition() { return condition; }
-    public long getSellerId() { return sellerId; }
+    public void setCategory(Category category){
+        this.category = category;
+    }
+    public Category getCategory(){
+        return category;
+    }
+    public String getName() {
+        return name;
+    }
+    public String getDescription() {
+        return description;
+    }
+    public double getStartingPrice() {
+        return startingPrice;
+    }
+    public int getQuantity() {
+        return quantity;
+    }
+    public String getCondition() {
+        return condition;
+    }
+    public long getSellerId() {
+        return sellerId;
+    }
 }

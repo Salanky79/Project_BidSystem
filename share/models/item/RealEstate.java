@@ -1,5 +1,7 @@
 package models.item;
 
+import Enum.Category;
+
 class RealEstate extends Item {
     private String propertyType;    // Loại BĐS (VD: Đất nền, Căn hộ chung cư, Biệt thự)
     private String location;        // Địa chỉ cụ thể
@@ -17,10 +19,19 @@ class RealEstate extends Item {
         this.location = location;
         this.areaSquareMeter = areaSquareMeter;
         this.legalStatus = legalStatus;
+        this.setCategory(Category.REAL_ESTATE);
     }
 
-    public String getPropertyType() { return propertyType; }
-    public String getLocation() { return location; }
-    public double getAreaSquareMeter() { return areaSquareMeter; }
-    public String getLegalStatus() { return legalStatus; }
+    public String getPropertyType() {
+        return propertyType;
+    }
+    public String getLocation() {
+        return location;
+    }
+    public double getAreaSquareMeter() {
+        return areaSquareMeter;
+    }
+    public String getLegalStatus() {
+        return legalStatus;
+    }
 }

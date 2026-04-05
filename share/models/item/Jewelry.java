@@ -1,5 +1,7 @@
 package models.item;
 
+import Enum.Category;
+
 class Jewelry extends Item {
     private String material;        // Vàng, bạc, đồng, v.v.
     private double caratWeight;     // Trọng lượng carat
@@ -12,9 +14,16 @@ class Jewelry extends Item {
         this.material = material;
         this.caratWeight = caratWeight;
         this.gemstoneType = gemstoneType;
+        this.setCategory(Category.JEWELRY);
     }
 
-    public String getMaterial() { return material; }
-    public double getCaratWeight() { return caratWeight; }
-    public String getGemstoneType() { return gemstoneType; }
+    public String getMaterial() {
+        return material;
+    }
+    public double getCaratWeight() {
+        return caratWeight;
+    }
+    public String getGemstoneType() {
+        return gemstoneType;
+    }
 }

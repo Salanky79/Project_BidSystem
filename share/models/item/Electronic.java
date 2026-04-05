@@ -1,5 +1,7 @@
 package models.item;
 
+import Enum.Category;
+
 class Electronic extends Item {
     private String brand;
     private int warrantyMonths;
@@ -9,8 +11,13 @@ class Electronic extends Item {
         super(name, description, startingPrice, quantity, condition);
         this.brand = brand;
         this.warrantyMonths = warrantyMonths;
+        this.setCategory(Category.ELECTRONICS);
     }
 
-    public String getBrand() { return brand; }
-    public int getWarrantyMonths() { return warrantyMonths; }
+    public String getBrand() {
+        return brand;
+    }
+    public int getWarrantyMonths() {
+        return warrantyMonths;
+    }
 }

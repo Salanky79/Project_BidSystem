@@ -1,5 +1,7 @@
 package models.item;
 
+import Enum.Category;
+
 public class Antique extends Item {
     private String era;                     // Thời kỳ / Niên đại (VD: Thời Lê, Thế kỷ 19)
     private String material;                // Chất liệu (VD: Gốm sứ, Gỗ sưa, Đồng thau)
@@ -15,10 +17,17 @@ public class Antique extends Item {
         this.era = era;
         this.material = material;
         this.hasAuthenticityCert = hasAuthenticityCert;
+        this.setCategory(Category.ANTIQUE);
     }
 
-    public String getEra() { return era; }
-    public String getMaterial() { return material; }
+    public String getEra() {
+        return era;
+    }
+    public String getMaterial() {
+        return material;
+    }
 
-    public boolean isHasAuthenticityCert() { return hasAuthenticityCert; }
+    public boolean isHasAuthenticityCert() {
+        return hasAuthenticityCert;
+    }
 }
