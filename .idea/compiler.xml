@@ -9,7 +9,6 @@
         <module name="AuctionSystem (2)" />
         <module name="client" />
         <module name="server" />
-        <module name="AuctionSystem" />
         <module name="share" />
         <module name="demo1" />
       </profile>
