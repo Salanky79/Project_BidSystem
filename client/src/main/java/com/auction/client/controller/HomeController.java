@@ -35,7 +35,7 @@ public class HomeController {
             for (int i = 0; i < itemNames.length; i++) {
 
                 // Lấy cái "Khuôn đúc" ItemCard.fxml ra
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ItemCard.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/ItemCard.fxml"));
                 HBox card = loader.load(); // Vì thẻ của bạn bọc ngoài bằng HBox
 
                 // Lấy "Bác thợ" điều khiển khuôn đúc để đắp dữ liệu vào
