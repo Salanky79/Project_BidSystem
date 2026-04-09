@@ -1,4 +1,4 @@
-package controllers;
+package com.auction.client.controller;
 
 import javafx.application.Application;
 

@@ -16,7 +16,7 @@
 
 <HBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="controllers.LoginController"
+      fx:controller="com.auction.client.controller.LoginController"
       prefWidth="900.0"
       prefHeight="600.0"
       style="-fx-background-color: #ffffff;">

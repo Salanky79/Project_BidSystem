@@ -1,4 +1,4 @@
-package controllers; // Đảm bảo package này khớp với vị trí file Java
+package com.auction.client.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -8,6 +8,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import com.auction.client.controller.ItemCardController;
 
 import java.io.IOException;
 

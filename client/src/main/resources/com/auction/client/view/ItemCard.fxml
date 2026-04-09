@@ -8,7 +8,7 @@
 
 <HBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="controllers.ItemCardController"
+      fx:controller="com.auction.client.controller.ItemCardController"
       prefHeight="160.0"
       style="-fx-background-color: white; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e8e8e8; -fx-border-width: 1; -fx-cursor: hand;">
 

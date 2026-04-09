@@ -1,4 +1,4 @@
-package com.example.demo1;
+package com.auction.client.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
