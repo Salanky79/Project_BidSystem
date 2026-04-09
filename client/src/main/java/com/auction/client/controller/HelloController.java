@@ -11,4 +11,3 @@ public class HelloController {
     protected void handleLogin() {
     }
 }
-

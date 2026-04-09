@@ -12,13 +12,8 @@ public class HelloApplication extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("/com/auction/client/view/Login.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
-        stage.setTitle("Auction System");
+        stage.setTitle("HanoiBid");
         stage.setScene(scene);
         stage.show();
     }
-
-    public static void main(String[] args) {
-        launch();
-    }
 }
-

@@ -19,4 +19,3 @@ public class AuctionDetailController {
         System.out.println("Đã gửi bình luận!");
     }
 }
-

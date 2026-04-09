@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.Label?>
+
+<HBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.auction.client.controller.ItemCardController"
+      prefHeight="160.0"
+      style="-fx-background-color: white; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e8e8e8; -fx-border-width: 1; -fx-cursor: hand;">
+
+    <StackPane prefWidth="160.0" prefHeight="160.0"
+               style="-fx-background-color: #d0d0d0; -fx-background-radius: 12 0 0 12;">
+        <Label fx:id="iconLabel" text="🖼" style="-fx-font-size: 40px;"/>
+        <Label text="Popular Now"
+               style="-fx-background-color: #1a1a1a; -fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 3 8 3 8; -fx-background-radius: 4;"
+               StackPane.alignment="TOP_LEFT"
+               translateX="8.0" translateY="8.0"/>
+    </StackPane>
+
+    <VBox spacing="6.0" style="-fx-padding: 14 14 14 14;" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
+        <HBox alignment="TOP_RIGHT">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="categoryLabel" text="Category"
+                   style="-fx-background-color: #f0a500; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 3 10 3 10; -fx-background-radius: 20;"/>
+        </HBox>
+        <Label fx:id="nameLabel" text="Item Name"
+               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a; -fx-wrap-text: true;"/>
+        <Label fx:id="priceLabel" text="0 USD" style="-fx-font-size: 14px; -fx-text-fill: #333333;"/>
+        <Label fx:id="bidsLabel" text="0 bids" style="-fx-font-size: 13px; -fx-text-fill: #777777;"/>
+        <Label fx:id="timeLabel" text="Ending In : --" style="-fx-font-size: 12px; -fx-text-fill: #555555;"/>
+    </VBox>
+</HBox>
