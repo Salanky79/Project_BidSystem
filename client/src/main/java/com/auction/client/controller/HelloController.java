@@ -1,4 +1,4 @@
-package com.auction.client.controller;
+package com.example.demo1;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -11,4 +11,3 @@ public class HelloController {
     protected void handleLogin() {
     }
 }
-

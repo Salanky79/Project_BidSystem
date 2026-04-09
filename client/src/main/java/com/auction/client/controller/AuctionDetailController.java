@@ -1,4 +1,4 @@
-package com.auction.client.controller;
+package controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -19,4 +19,3 @@ public class AuctionDetailController {
         System.out.println("Đã gửi bình luận!");
     }
 }
-
