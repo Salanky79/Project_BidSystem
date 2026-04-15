@@ -8,7 +8,8 @@ import java.net.Socket;
 public class RequestHandler implements Runnable {
     private Socket socket;
     private User currentUser;
-    // Lấy ông chủ duy nhất ở đây
+
+    // Singleton
     private AuctionManager manager = AuctionManager.getInstance();
 
     public RequestHandler(Socket socket) {
@@ -17,17 +18,17 @@ public class RequestHandler implements Runnable {
 
     @Override
     public void run() {
-        // Khai báo ngoài try để finally có thể dùng được
+        // Khai báo ngoài try để finally có thể dùng được // code trong khoi try thi ton tai trong ngoac
         PrintWriter out = null;
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream())); //byte data
+            out = new PrintWriter(socket.getOutputStream(), true); //AutoFlush: nếu xô chưa đầy vẫn tự động xả
 
             // ĐĂNG KÝ NGƯỜI NGHE
             manager.addObserver(out);
 
             String line;
-            while ((line = in.readLine()) != null) {
+            while ((line = in.readLine()) != null) { // check xem khi nao client thoát chương trình
                 String[] parts = line.split("\\|");
                 String cmd = parts[0];
 

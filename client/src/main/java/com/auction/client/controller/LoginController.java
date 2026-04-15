@@ -67,7 +67,7 @@ public class LoginController {
     public void handleLogin(ActionEvent event) {
         try {
             // 1. Tải file Home.fxml
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Home.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Home.fxml"));
             Parent homeRoot = loader.load();
 
             // 2. Lấy Stage hiện tại (cửa sổ đang hiển thị)
