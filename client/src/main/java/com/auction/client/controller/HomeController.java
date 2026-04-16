@@ -1,5 +1,6 @@
 package com.auction.client.controller;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -56,12 +57,12 @@ public class HomeController {
             System.out.println("Lỗi không tìm thấy file ItemCard.fxml. Hãy kiểm tra lại đường dẫn!");
         }
     }
-    public void handleHome() {}
+
     public void handleLogout(javafx.event.ActionEvent event) {
         System.out.println("Đang đăng xuất... Trở về màn hình Login!");
         try {
             // 1. Tải lại file giao diện Login
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Login.fxml"));
             Parent loginRoot = loader.load();
 
             // 2. Lấy cái cửa sổ (Stage) hiện tại đang hiển thị
@@ -79,29 +80,53 @@ public class HomeController {
         }
     }
 
-    public void handleCardClick(javafx.scene.input.MouseEvent mouseEvent) {
-            try {
-                // 1. Nạp file FXML chi tiết
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/AuctionDetail.fxml"));
-                Parent root = loader.load();
+    public void handleYourListing(ActionEvent actionEvent) {
+        try {
+            // 1. Tải lại file giao diện Addlisting
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/addlisting.fxml"));
+            Parent root = loader.load();
 
-                // 2. Tạo một Stage mới (Cửa sổ mới)
-                Stage detailStage = new Stage();
-                detailStage.setTitle("Chi tiết sản phẩm đấu giá");
+            // 2. Tạo một Stage mới (Cửa sổ mới)
+            Stage newStage = new Stage();
+            newStage.setTitle("Thêm sản phẩm mới");
 
-                // 3. Cấu hình để nó là cửa sổ con (không cho bấm ra ngoài khi chưa đóng)
-                detailStage.initModality(Modality.APPLICATION_MODAL);
-                // Nếu muốn làm giao diện popup đẹp không có thanh tiêu đề Windows:
-                // detailStage.initStyle(StageStyle.TRANSPARENT);
+            // 3. Đưa giao diện vào Stage và hiển thị
+            Scene scene = new Scene(root);
+            newStage.setScene(scene);
 
-                Scene scene = new Scene(root);
-                detailStage.setScene(scene);
-                detailStage.show();
+            // Hiển thị cửa sổ mới, lúc này Home.fxml vẫn đang chạy ở Stage cũ
+            newStage.show();
 
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("Lỗi: Không tìm thấy file AuctionDetail.fxml. Kiểm tra lại đường dẫn!");
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Lỗi: Không tìm thấy file addlisting.fxml!");
         }
-
     }
+
+
+    public void handleHome(ActionEvent actionEvent) {
+    }
+
+    public void handleProfile(ActionEvent actionEvent) {
+        try {
+            // 1. Tải lại file giao diện Addlisting
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/profile.fxml"));
+            Parent root = loader.load();
+
+            // 2. Tạo một Stage mới (Cửa sổ mới)
+            Stage newStage = new Stage();
+            newStage.setTitle("user");
+
+            // 3. Đưa giao diện vào Stage và hiển thị
+            Scene scene = new Scene(root);
+            newStage.setScene(scene);
+
+            // Hiển thị cửa sổ mới, lúc này Home.fxml vẫn đang chạy ở Stage cũ
+            newStage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Lỗi: Không tìm thấy file profile.fxml!");
+        }
+    }
+}

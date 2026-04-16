@@ -1,134 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.shape.Circle?>
-<?import javafx.scene.shape.Rectangle?>
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<BorderPane
-        xmlns="http://javafx.com/javafx/17"
-        xmlns:fx="http://javafx.com/fxml/1"
-        fx:controller="com.auction.client.controller.HomeController"
-        prefWidth="1280.0"
-        prefHeight="720.0"
-        style="-fx-background-color: #f0f0f0;">
+<BorderPane prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: #f0f0f0;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.HomeController">
 
     <top>
-        <HBox prefHeight="80.0"
-              alignment="CENTER_LEFT"
-              style="-fx-background-color: #f0f0f0; -fx-padding: 0 24 0 24; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
-            <Label text="Auction System"
-                   style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a; -fx-font-family: Georgia;"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Label text="Logged In as "
-                   style="-fx-font-size: 14px; -fx-text-fill: #555555;"/>
-            <Label fx:id="usernameLabel"
-                   text="User"
-                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
-            <Region prefWidth="16.0"/>
-            <Button text="Log Out"
-                    fx:id="logoutBtn"
-                    onAction="#handleLogout"
-                    prefWidth="90.0"
-                    prefHeight="36.0"
-                    style="-fx-background-color: transparent; -fx-border-color: #1a1a1a; -fx-border-width: 1.5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+        <HBox alignment="CENTER_LEFT" prefHeight="80.0" style="-fx-background-color: #f0f0f0; -fx-padding: 0 24 0 24; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
+            <Label style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a; -fx-font-family: Georgia;" text="Auction System" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label style="-fx-font-size: 14px; -fx-text-fill: #555555;" text="Logged In as " />
+            <Label fx:id="usernameLabel" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;" text="User" />
+            <Region prefWidth="16.0" />
+            <Button fx:id="logoutBtn" onAction="#handleLogout" prefHeight="36.0" prefWidth="90.0" style="-fx-background-color: transparent; -fx-border-color: #1a1a1a; -fx-border-width: 1.5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand;" text="Log Out" />
         </HBox>
     </top>
 
     <!-- ===== SIDEBAR ===== -->
     <left>
-        <VBox prefWidth="240.0"
-              style="-fx-background-color: #1a1a1a; -fx-padding: 20 0 20 0;">
+        <VBox prefWidth="240.0" style="-fx-background-color: #1a1a1a; -fx-padding: 20 0 20 0;">
 
             <!-- Home (active) -->
-            <Button text="Home"
-                    fx:id="btnHome"
-                    onAction="#handleHome"
-                    prefWidth="200.0"
-                    prefHeight="48.0"
-                    style="-fx-background-color: #f0a500; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;">
-                <VBox.margin><Insets left="20.0" right="20.0"/></VBox.margin>
+            <Button fx:id="btnHome" onAction="#handleHome" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: #f0a500; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;" text="Home">
+                <VBox.margin><Insets left="20.0" right="20.0" /></VBox.margin>
             </Button>
 
-            <Region prefHeight="6.0"/>
+            <Region prefHeight="6.0" />
 
             <!-- Active Listings -->
-            <Button text="Active Listings"
-                    fx:id="btnActiveListings"
-
-                    prefWidth="200.0"
-                    prefHeight="48.0"
-                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;">
-                <VBox.margin><Insets left="20.0" right="20.0"/></VBox.margin>
+            <Button fx:id="btnActiveListings" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;" text="Active Listings">
+                <VBox.margin><Insets left="20.0" right="20.0" /></VBox.margin>
             </Button>
 
             <!-- Trendings -->
-            <Button text="Trendings"
-                    fx:id="btnTrendings"
-
-                    prefWidth="200.0"
-                    prefHeight="48.0"
-                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;">
-                <VBox.margin><Insets left="20.0" right="20.0"/></VBox.margin>
+            <Button fx:id="btnTrendings" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;" text="Trendings">
+                <VBox.margin><Insets left="20.0" right="20.0" /></VBox.margin>
             </Button>
 
             <Separator style="-fx-background-color: #444444;">
-                <VBox.margin><Insets top="10.0" bottom="10.0" left="20.0" right="20.0"/></VBox.margin>
+                <VBox.margin><Insets bottom="10.0" left="20.0" right="20.0" top="10.0" /></VBox.margin>
             </Separator>
 
             <!-- Your Listings -->
-            <Button text="Your Listings"
-                    fx:id="btnYourListings"
-
-                    prefWidth="200.0"
-                    prefHeight="48.0"
-                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;">
-                <VBox.margin><Insets left="20.0" right="20.0"/></VBox.margin>
+            <Button fx:id="btnYourListings" onAction="#handleYourListing" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;" text="Your Listings">
+                <VBox.margin><Insets left="20.0" right="20.0" /></VBox.margin>
             </Button>
 
             <!-- Watchlist -->
-            <Button text="Watchlist"
-                    fx:id="btnWatchlist"
-
-                    prefWidth="200.0"
-                    prefHeight="48.0"
-                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;">
-                <VBox.margin><Insets left="20.0" right="20.0"/></VBox.margin>
+            <Button fx:id="btnWatchlist" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;" text="Watchlist">
+                <VBox.margin><Insets left="20.0" right="20.0" /></VBox.margin>
             </Button>
 
             <!-- Profile -->
-            <Button text="Profile"
-                    fx:id="btnProfile"
-
-                    prefWidth="200.0"
-                    prefHeight="48.0"
-                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;">
-                <VBox.margin><Insets left="20.0" right="20.0"/></VBox.margin>
+            <Button fx:id="btnProfile" onAction="#handleProfile" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;" text="Profile">
+                <VBox.margin><Insets left="20.0" right="20.0" /></VBox.margin>
             </Button>
 
             <Separator style="-fx-background-color: #444444;">
-                <VBox.margin><Insets top="10.0" bottom="10.0" left="20.0" right="20.0"/></VBox.margin>
+                <VBox.margin><Insets bottom="10.0" left="20.0" right="20.0" top="10.0" /></VBox.margin>
             </Separator>
 
-            <Region VBox.vgrow="ALWAYS"/>
+            <Region VBox.vgrow="ALWAYS" />
 
             <!-- Sell button -->
-            <Button text="Sell"
-
-                    prefWidth="200.0"
-                    prefHeight="48.0"
-                    style="-fx-background-color: #f0a500; -fx-text-fill: #1a1a1a; -fx-font-size: 16px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;">
-                <VBox.margin><Insets left="20.0" right="20.0" bottom="10.0"/></VBox.margin>
+            <Button prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: #f0a500; -fx-text-fill: #1a1a1a; -fx-font-size: 16px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;" text="Sell">
+                <VBox.margin><Insets bottom="10.0" left="20.0" right="20.0" /></VBox.margin>
             </Button>
 
         </VBox>
@@ -136,58 +73,28 @@
 
     <!-- ===== CENTER ===== -->
     <center>
-        <VBox style="-fx-background-color: #f0f0f0; -fx-padding: 16 20 16 20;" spacing="16.0">
+        <VBox spacing="16.0" style="-fx-background-color: #f0f0f0; -fx-padding: 16 20 16 20;">
 
             <!-- Filter bar -->
-            <HBox spacing="10.0" alignment="CENTER_LEFT">
-                <Button text="All"
-
-                        prefHeight="38.0" prefWidth="70.0"
-                        style="-fx-background-color: #1a1a1a; -fx-text-fill: white; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"/>
-                <Button text="Jewelry"
-
-                        prefHeight="38.0" prefWidth="85.0"
-                        style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"/>
-                <Button text="Watches"
-
-                        prefHeight="38.0" prefWidth="85.0"
-                        style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"/>
-                <Button text="Bags"
-
-                        prefHeight="38.0" prefWidth="75.0"
-                        style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"/>
-                <Button text="Fine Art"
-
-                        prefHeight="38.0" prefWidth="85.0"
-                        style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"/>
-                <Button text="Cars"
-
-                        prefHeight="38.0" prefWidth="70.0"
-                        style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"/>
-                <Button text="Others"
-
-                        prefHeight="38.0" prefWidth="80.0"
-                        style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Button text="Sort By"
-
-                        prefHeight="38.0" prefWidth="100.0"
-                        style="-fx-background-color: #f0a500; -fx-text-fill: #1a1a1a; -fx-font-size: 13px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;"/>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                <Button prefHeight="38.0" prefWidth="70.0" style="-fx-background-color: #1a1a1a; -fx-text-fill: white; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="All" />
+                <Button prefHeight="38.0" prefWidth="85.0" style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Jewelry" />
+                <Button prefHeight="38.0" prefWidth="85.0" style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Watches" />
+                <Button prefHeight="38.0" prefWidth="75.0" style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Bags" />
+                <Button prefHeight="38.0" prefWidth="85.0" style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Fine Art" />
+                <Button prefHeight="38.0" prefWidth="70.0" style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Cars" />
+                <Button prefHeight="38.0" prefWidth="80.0" style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Others" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button prefHeight="38.0" prefWidth="100.0" style="-fx-background-color: #f0a500; -fx-text-fill: #1a1a1a; -fx-font-size: 13px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;" text="Sort By" />
             </HBox>
 
             <!-- ScrollPane with auction grid -->
-            <ScrollPane fx:id="scrollPane"
-                        VBox.vgrow="ALWAYS"
-                        fitToWidth="true"
-                        hbarPolicy="NEVER"
-                        vbarPolicy="AS_NEEDED"
-                        style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
 
-                <GridPane fx:id="auctionGrid" hgap="16.0" vgap="16.0"
-                          style="-fx-padding: 4 4 4 4;">
+                <GridPane fx:id="auctionGrid" hgap="16.0" style="-fx-padding: 4 4 4 4;" vgap="16.0">
                     <columnConstraints>
-                        <ColumnConstraints percentWidth="50.0"/>
-                        <ColumnConstraints percentWidth="50.0"/>
+                        <ColumnConstraints percentWidth="50.0" />
+                        <ColumnConstraints percentWidth="50.0" />
                     </columnConstraints>
 
 
