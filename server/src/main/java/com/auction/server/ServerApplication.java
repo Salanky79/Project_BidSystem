@@ -10,7 +10,7 @@ public class ServerApplication {
             System.out.println("Server dau gia dang chay tai cong 8080...");
 
             while (true) {
-                Socket clientSocket = serverSocket.accept();
+                Socket clientSocket = serverSocket.accept(); //wait for client
                 // Mỗi khách hàng là một Thread mới
                 new Thread(new RequestHandler(clientSocket)).start(); // truyền vào runnable
             }

@@ -2,75 +2,29 @@ package com.auction.server.controllers;
 
 
 import com.auction.share.models.item.Item;
-import com.auction.share.enums.Category;
 
-public class ItemFactory {
-    // Factory Method: Tập trung việc tạo đối tượng vào một chỗ
+import java.util.HashMap;
+import java.util.Map;
 
-    //Phương thức factory cơ bản - tạo item với mô tả mặc định
-    public static Item createItem(String name, double startingPrice, String condition) {
-        return new Item(name, "Hang dau gia", startingPrice, 1, condition);
+public abstract class ItemFactory {
+    private static final Map<String, ItemCreator> creators = new HashMap<>();
+
+    static {
+        creators.put("art", new ArtFactory());
+        creators.put("electronic", new ElectronicFactory());
+        creators.put("jewelry", new JewelryFactory());
+        creators.put("realestate", new RealEstateFactory());
+        creators.put("vehicle", new VehicleFactory());
     }
 
-    //Factory method tạo item với mô tả tùy chỉnh
-    public static Item createItem(String name, String description, double startingPrice,
-                                   int quantity, String condition) {
-        return new Item(name, description, startingPrice, quantity, condition);
-    }
+    public static Item createItem(String type, String name, String description, double startingPrice, int quantity,
+                                  String condition, String... attributes) {
 
-    //Factory method tạo item điện tử (Electronics)
-    public static Item createElectronicsItem(String name, String description,
-                                             double startingPrice, String condition) {
-        Item item = new Item(name, description, startingPrice, 1, condition);
-        item.setCategory(Category.ELECTRONICS);
-        return item;
-    }
 
-    //Factory method tạo item nghệ thuật (Art)
-    public static Item createArtItem(String name, String description,
-                                      double startingPrice, String condition) {
-        Item item = new Item(name, description, startingPrice, 1, condition);
-        item.setCategory(Category.ART);
-        return item;
-    }
-
-    // Factory method tạo item trang sức (Jewelry)
-    public static Item createJewelryItem(String name, String description,
-                                         double startingPrice, String condition) {
-        Item item = new Item(name, description, startingPrice, 1, condition);
-        item.setCategory(Category.JEWELRY);
-        return item;
-    }
-
-    // Factory method tạo item bất động sản (Real Estate)
-    public static Item createRealEstateItem(String name, String description,
-                                            double startingPrice, int quantity, String condition) {
-        Item item = new Item(name, description, startingPrice, quantity, condition);
-        item.setCategory(Category.REAL_ESTATE);
-        return item;
-    }
-
-    // Factory method tạo item phương tiện (Vehicle)
-    public static Item createVehicleItem(String name, String description,
-                                         double startingPrice, String condition) {
-        Item item = new Item(name, description, startingPrice, 1, condition);
-        item.setCategory(Category.VEHICLE);
-        return item;
-    }
-
-    // Factory method tạo item cổ vật (Antique)
-    public static Item createAntiqueItem(String name, String description,
-                                         double startingPrice, String condition) {
-        Item item = new Item(name, description, startingPrice, 1, condition);
-        item.setCategory(Category.ANTIQUE);
-        return item;
-    }
-
-    // Factory method tạo item với category tùy chỉnh
-    public static Item createItem(String name, String description, double startingPrice,
-                                  int quantity, String condition, Category category) {
-        Item item = new Item(name, description, startingPrice, quantity, condition);
-        item.setCategory(category);
-        return item;
+        ItemCreator creator = creators.get(type.toLowerCase());
+        if (creator == null) {
+            throw new IllegalArgumentException("Loại hàng '" + type + "' không được hỗ trợ!");
+        }
+        return creator.createItem(name, description, startingPrice, quantity, condition, attributes);
     }
 }

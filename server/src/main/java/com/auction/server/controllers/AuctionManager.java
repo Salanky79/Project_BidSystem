@@ -15,7 +15,7 @@ import java.util.List;
 public class AuctionManager {
     private static AuctionManager instance;
 
-    // BÂY GIỜ CHÚNG TA CHỈ QUẢN LÝ PHIÊN ĐẤU GIÁ (AUCTIONS)
+    // CHỈ QUẢN LÝ PHIÊN ĐẤU GIÁ (AUCTIONS)
     private List<Auction> auctions = new ArrayList<>();
     private List<User> users = new ArrayList<>();
     private List<PrintWriter> observers = new ArrayList<>();
@@ -29,7 +29,7 @@ public class AuctionManager {
         Item dummyItem = new Item("iPhone 15", "Like New", 1000.0, 1, "New");
 
         // 2. Tạo phiên đấu giá cho cái iPhone đó (Bắt đầu từ quá khứ, kết thúc sau 1 tiếng)
-        LocalDateTime start = LocalDateTime.now().minusMinutes(5);
+        LocalDateTime start = LocalDateTime.now().minusMinutes(5); // Test
         LocalDateTime end = LocalDateTime.now().plusHours(1);
         Auction dummyAuction = new Auction(dummyItem, dummySeller, start, end);
 
@@ -43,7 +43,8 @@ public class AuctionManager {
 
 
         // --- TẠO ĐỒNG HỒ CHẠY NGẦM (Mục 3 & 5 Tuần 7) ---
-        // Thread -> luồng
+        // tao thong bao sau moi 1s de cap nhap phien dau gia
+
         Thread timerThread = new Thread(() -> {
             while (true) {
                 try {
@@ -82,7 +83,7 @@ public class AuctionManager {
         return instance;
     }
 
-    // --- CÁC HÀM CỦA OBSERVER PATTERN (Giữ nguyên của bạn) ---
+    // --- CÁC HÀM CỦA OBSERVER PATTERN ---
     public synchronized void addObserver(PrintWriter out) {
         observers.add(out);
         System.out.println("Thêm 1 observer. Tổng số: " + observers.size());
@@ -93,9 +94,14 @@ public class AuctionManager {
     }
 
     public synchronized void broadcast(String message) {
+        List<PrintWriter> failedObservers = new ArrayList<>();
         for (PrintWriter writer : observers) {
             writer.println("NOTIFY|" + message);
+            if (writer.checkError()) { // Kiểm tra xem "loa" có hỏng không
+                failedObservers.add(writer);
+            }
         }
+        observers.removeAll(failedObservers); // Tự động dọn dẹp những người đã offline
     }
 
     // --- LOGIC XỬ LÝ ---
@@ -108,7 +114,8 @@ public class AuctionManager {
 
     // SỬA LẠI: Lặp qua danh sách auctions thay vì items
     public String listItems() {
-        StringBuilder sb = new StringBuilder("LIST:");
+        StringBuilder sb = new StringBuilder("LIST:"); // de dang thay doi, immutable
+
         for (Auction a : auctions) {
             // Lấy tên món hàng, giá cao nhất hiện tại và trạng thái
             sb.append(a.getItem().getName()).append("|")
@@ -147,3 +154,5 @@ public class AuctionManager {
         return "FAIL|Khong tim thay phien dau gia nao cho mon hang nay!";
     }
 }
+
+// observer => dăng nhập thành công => placeBid => timerThread => hủy kết nối
