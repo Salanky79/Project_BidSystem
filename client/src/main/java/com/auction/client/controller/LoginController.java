@@ -64,26 +64,29 @@ public class LoginController {
     // PHẦN 3: XỬ LÝ SỰ KIỆN BẤM NÚT LOGIN
     // ==========================================
     @FXML
-    public void handleLogin(ActionEvent event) {
+    private void handleLogin(ActionEvent event) {
         try {
-            // 1. Tải file Home.fxml
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Home.fxml"));
-            Parent homeRoot = loader.load();
+            // 1. Load cái KHUNG (HomeFrame)
+            FXMLLoader frameLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/HomeFrame.fxml"));
+            Parent homeFrameRoot = frameLoader.load();
 
-            // 2. Lấy Stage hiện tại (cửa sổ đang hiển thị)
+            // 2. Lấy Controller của HomeFrame để tí nữa còn ra lệnh
+            HomeFrameController frameController = frameLoader.getController();
+
+            // 3. Load cái nội dung HOME
+            FXMLLoader homeLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Home.fxml"));
+            Node homeNode = homeLoader.load();
+
+            // 4. Đẩy Home vào ScrollPane của HomeFrame
+            frameController.setView(homeNode);
+
+            // 5. Hiển thị HomeFrame lên cửa sổ (Stage)
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
-            // 3. Tạo Scene mới với nội dung là Home.fxml
-            Scene homeScene = new Scene(homeRoot);
-
-            // 4. Đặt Scene mới lên Stage và hiển thị
-            stage.setScene(homeScene);
-            stage.centerOnScreen(); // Căn giữa lại màn hình vì Home thường to hơn Login
+            stage.setScene(new Scene(homeFrameRoot));
             stage.show();
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Không tìm thấy file Home.fxml hoặc lỗi nạp file!");
         }
     }
 }

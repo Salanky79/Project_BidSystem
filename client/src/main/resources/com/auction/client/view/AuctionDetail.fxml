@@ -1,47 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.Region?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
-<?import javafx.scene.shape.Circle?>
-<?import javafx.scene.shape.Rectangle?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.image.Image?>
-<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<StackPane xmlns="http://javafx.com/javafx/17"
-           xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="com.auction.client.controller.AuctionDetailController"
-           prefWidth="1100.0"
-           prefHeight="900.0"
-           style="-fx-background-color: rgba(0,0,0,0.4);">
+<StackPane maxHeight="600.0" maxWidth="900.0" minHeight="600.0" minWidth="900.0" prefHeight="600.0" prefWidth="900.0" style="-fx-background-color: rgba(0,0,0,0.4);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.AuctionDetailController">
 
     <!-- Main popup card -->
-    <VBox prefWidth="1060.0"
-          style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 0;">
+    <VBox prefWidth="1060.0" style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 0;">
 
         <!-- Close button row -->
         <HBox alignment="TOP_RIGHT" style="-fx-padding: 12 12 0 12;">
-            <Button text="X"
-                    fx:id="closeBtn"
-                    onAction="#handleClose"
-                    prefWidth="36.0"
-                    prefHeight="36.0"
-                    style="-fx-background-color: #1a1a1a;
-                           -fx-text-fill: white;
-                           -fx-font-size: 14px;
-                           -fx-font-weight: bold;
-                           -fx-border-radius: 50;
-                           -fx-background-radius: 50;
-                           -fx-cursor: hand;"/>
+            <Button fx:id="closeBtn" onAction="#handleClose" prefHeight="36.0" prefWidth="36.0" style="-fx-background-color: #1a1a1a;                            -fx-text-fill: white;                            -fx-font-size: 14px;                            -fx-font-weight: bold;                            -fx-border-radius: 50;                            -fx-background-radius: 50;                            -fx-cursor: hand;" text="X" />
         </HBox>
 
         <!-- Main content: Left + Right -->
@@ -51,17 +29,11 @@
             <VBox prefWidth="420.0" spacing="16.0">
 
                 <!-- Image box with gold background -->
-                <StackPane prefWidth="420.0" prefHeight="420.0"
-                           style="-fx-background-color: #c9a84c;
-                                  -fx-background-radius: 12;">
+                <StackPane prefHeight="420.0" prefWidth="420.0" style="-fx-background-color: #c9a84c;                                   -fx-background-radius: 12;">
                     <!-- White inner frame -->
-                    <StackPane prefWidth="340.0" prefHeight="360.0"
-                               style="-fx-background-color: white;
-                                      -fx-background-radius: 4;">
+                    <StackPane prefHeight="360.0" prefWidth="340.0" style="-fx-background-color: white;                                       -fx-background-radius: 4;">
                         <!-- Placeholder image area -->
-                        <Label fx:id="itemImagePlaceholder"
-                               text="🖼"
-                               style="-fx-font-size: 80px;"/>
+                        <Label fx:id="itemImagePlaceholder" style="-fx-font-size: 80px;" text="🖼" />
                         <!-- Swap with ImageView when image is available:
                         <ImageView fx:id="itemImage"
                                    fitWidth="320.0" fitHeight="340.0"
@@ -71,22 +43,15 @@
                 </StackPane>
 
                 <!-- Listed By -->
-                <HBox spacing="8.0" alignment="CENTER_LEFT">
-                    <Label text="Listed By : "
-                           style="-fx-font-size: 16px; -fx-text-fill: #555555;"/>
-                    <Label fx:id="listedByLabel"
-                           text="Myrle Oxnam"
-                           style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
+                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                    <Label style="-fx-font-size: 16px; -fx-text-fill: #555555;" text="Listed By : " />
+                    <Label fx:id="listedByLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;" text="Myrle Oxnam" />
                 </HBox>
 
                 <!-- Description -->
                 <VBox spacing="6.0">
-                    <Label text="Description :"
-                           style="-fx-font-size: 16px; -fx-text-fill: #555555;"/>
-                    <Label fx:id="descriptionLabel"
-                           text="Kobe Bryant Game Worn Jersey From Final NBA Opening Day 2015-2016 Season"
-                           style="-fx-font-size: 15px; -fx-text-fill: #333333; -fx-wrap-text: true;"
-                           prefWidth="400.0"/>
+                    <Label style="-fx-font-size: 16px; -fx-text-fill: #555555;" text="Description :" />
+                    <Label fx:id="descriptionLabel" prefWidth="400.0" style="-fx-font-size: 15px; -fx-text-fill: #333333; -fx-wrap-text: true;" text="Kobe Bryant Game Worn Jersey From Final NBA Opening Day 2015-2016 Season" />
                 </VBox>
 
             </VBox>
@@ -95,168 +60,99 @@
             <VBox prefWidth="560.0" spacing="14.0">
 
                 <!-- Item title -->
-                <Label fx:id="itemTitleLabel"
-                       text="Adidas"
-                       style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a; -fx-font-family: Georgia;"/>
+                <Label fx:id="itemTitleLabel" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a; -fx-font-family: Arial;" text="Adidas">
+               <font>
+                  <Font name="Arial" size="12.0" />
+               </font></Label>
 
                 <!-- Status + Category badges -->
-                <HBox spacing="12.0" alignment="CENTER_LEFT">
-                    <Label fx:id="statusLabel"
-                           text="Active"
-                           style="-fx-background-color: #1a1a1a;
-                                  -fx-text-fill: white;
-                                  -fx-font-size: 13px;
-                                  -fx-font-weight: bold;
-                                  -fx-padding: 6 20 6 20;
-                                  -fx-background-radius: 20;"/>
-                    <Label fx:id="categoryLabel"
-                           text="Other"
-                           style="-fx-background-color: #c9a84c;
-                                  -fx-text-fill: white;
-                                  -fx-font-size: 13px;
-                                  -fx-font-weight: bold;
-                                  -fx-padding: 6 20 6 20;
-                                  -fx-background-radius: 20;"/>
+                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                    <Label fx:id="statusLabel" style="-fx-background-color: #1a1a1a;                                   -fx-text-fill: white;                                   -fx-font-size: 13px;                                   -fx-font-weight: bold;                                   -fx-padding: 6 20 6 20;                                   -fx-background-radius: 20;" text="Active" />
+                    <Label fx:id="categoryLabel" style="-fx-background-color: #c9a84c;                                   -fx-text-fill: white;                                   -fx-font-size: 13px;                                   -fx-font-weight: bold;                                   -fx-padding: 6 20 6 20;                                   -fx-background-radius: 20;" text="Other" />
                 </HBox>
 
                 <!-- Price / Bids / Dates -->
                 <VBox spacing="10.0" style="-fx-padding: 6 0 6 0;">
 
-                    <HBox spacing="24.0" alignment="CENTER_LEFT">
-                        <Label text="Current Price"
-                               prefWidth="120.0" style="-fx-font-size: 15px; -fx-text-fill: #555555; "/>
-                        <Label fx:id="currentPriceLabel"
-                               text="140000.0"
-                               style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
+                    <HBox alignment="CENTER_LEFT" spacing="24.0">
+                        <Label prefWidth="120.0" style="-fx-font-size: 15px; -fx-text-fill: #555555; " text="Current Price" />
+                        <Label fx:id="currentPriceLabel" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;" text="140000.0" />
                     </HBox>
 
-                    <HBox spacing="24.0" alignment="CENTER_LEFT">
-                        <Label text="Total Bids :"
-                               prefWidth="120.0" style="-fx-font-size: 15px; -fx-text-fill: #555555; "/>
-                        <Label fx:id="totalBidsLabel"
-                               text="0"
-                               style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
+                    <HBox alignment="CENTER_LEFT" spacing="24.0">
+                        <Label prefWidth="120.0" style="-fx-font-size: 15px; -fx-text-fill: #555555; " text="Total Bids :" />
+                        <Label fx:id="totalBidsLabel" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;" text="0" />
                     </HBox>
 
-                    <HBox spacing="24.0" alignment="CENTER_LEFT">
-                        <Label text="Started On :"
-                               prefWidth="120.0" style="-fx-font-size: 15px; -fx-text-fill: #555555; "/>
-                        <Label fx:id="startDateLabel"
-                               text="23/12/2022 00:08"
-                               style="-fx-font-size: 15px; -fx-text-fill: #1a1a1a;"/>
+                    <HBox alignment="CENTER_LEFT" spacing="24.0">
+                        <Label prefWidth="120.0" style="-fx-font-size: 15px; -fx-text-fill: #555555; " text="Started On :" />
+                        <Label fx:id="startDateLabel" style="-fx-font-size: 15px; -fx-text-fill: #1a1a1a;" text="23/12/2022 00:08" />
                     </HBox>
 
-                    <HBox spacing="24.0" alignment="CENTER_LEFT">
-                        <Label text="End On :"
-                               prefWidth="120.0" style="-fx-font-size: 15px; -fx-text-fill: #555555; "/>
-                        <Label fx:id="endDateLabel"
-                               text="01/02/2023 00:08"
-                               style="-fx-font-size: 15px; -fx-text-fill: #1a1a1a;"/>
+                    <HBox alignment="CENTER_LEFT" spacing="24.0">
+                        <Label prefWidth="120.0" style="-fx-font-size: 15px; -fx-text-fill: #555555; " text="End On :" />
+                        <Label fx:id="endDateLabel" style="-fx-font-size: 15px; -fx-text-fill: #1a1a1a;" text="01/02/2023 00:08" />
                     </HBox>
 
                 </VBox>
 
-                <Separator/>
+                <Separator />
 
                 <!-- Place bid row -->
-                <HBox spacing="12.0" alignment="CENTER_LEFT">
-                    <TextField fx:id="bidField"
-                               promptText="Place Bid"
-                               prefHeight="44.0"
-                               prefWidth="320.0"
-                               style="-fx-background-color: white;
-                                      -fx-border-color: #1a1a1a;
-                                      -fx-border-width: 1.5;
-                                      -fx-border-radius: 8;
-                                      -fx-background-radius: 8;
-                                      -fx-font-size: 14px;
-                                      -fx-padding: 0 14 0 14;"/>
-                    <Button text="Place"
-                            fx:id="placeBidBtn"
-
-                            prefWidth="90.0"
-                            prefHeight="44.0"
-                            style="-fx-background-color: #c9a84c;
-                                   -fx-text-fill: white;
-                                   -fx-font-size: 14px;
-                                   -fx-font-weight: bold;
-                                   -fx-border-radius: 8;
-                                   -fx-background-radius: 8;
-                                   -fx-cursor: hand;"/>
+                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                    <TextField fx:id="bidField" prefHeight="44.0" prefWidth="320.0" promptText="Place Bid" style="-fx-background-color: white;                                       -fx-border-color: #1a1a1a;                                       -fx-border-width: 1.5;                                       -fx-border-radius: 8;                                       -fx-background-radius: 8;                                       -fx-font-size: 14px;                                       -fx-padding: 0 14 0 14;" />
+                    <Button fx:id="placeBidBtn" prefHeight="44.0" prefWidth="90.0" style="-fx-background-color: #c9a84c;                                    -fx-text-fill: white;                                    -fx-font-size: 14px;                                    -fx-font-weight: bold;                                    -fx-border-radius: 8;                                    -fx-background-radius: 8;                                    -fx-cursor: hand;" text="Place" />
                 </HBox>
 
                 <!-- Validation label -->
-                <Label fx:id="validationLabel"
-                       text=""
-                       visible="false"
-                       style="-fx-text-fill: #e74c3c; -fx-font-size: 13px; -fx-font-style: italic;"/>
+                <Label fx:id="validationLabel" style="-fx-text-fill: #e74c3c; -fx-font-size: 13px; -fx-font-style: italic;" text="" visible="false" />
 
                 <!-- Comments section -->
-                <Label text="Comments"
-                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
+                <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;" text="Comments" />
 
                 <!-- Comment list -->
-                <ScrollPane fx:id="commentScrollPane"
-                            prefHeight="220.0"
-                            fitToWidth="true"
-                            hbarPolicy="NEVER"
-                            vbarPolicy="AS_NEEDED"
-                            style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+                <ScrollPane fx:id="commentScrollPane" fitToWidth="true" hbarPolicy="NEVER" prefHeight="220.0" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" vbarPolicy="AS_NEEDED">
 
-                    <VBox fx:id="commentList"
-                          spacing="0.0"
-                          style="-fx-background-color: #1a1a1a; -fx-background-radius: 10; -fx-padding: 0;">
+                    <VBox fx:id="commentList" spacing="0.0" style="-fx-background-color: #1a1a1a; -fx-background-radius: 10; -fx-padding: 0;">
 
                         <!-- Comment item 1 -->
                         <VBox style="-fx-padding: 12 16 12 16; -fx-border-color: #333333; -fx-border-width: 0 0 1 0;">
                             <HBox alignment="CENTER_LEFT">
-                                <Label text="Ahmed Abdullah"
-                                       style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #c9a84c;"/>
-                                <Region HBox.hgrow="ALWAYS"/>
-                                <Label text="23/12/2022 00:36"
-                                       style="-fx-font-size: 12px; -fx-text-fill: #aaaaaa;"/>
+                                <Label style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #c9a84c;" text="Nguyễn Sơn" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Label style="-fx-font-size: 12px; -fx-text-fill: #aaaaaa;" text="15/04/2026 00:36" />
                             </HBox>
-                            <Label text="Nice man"
-                                   style="-fx-font-size: 13px; -fx-text-fill: white; -fx-wrap-text: true;"/>
+                            <Label style="-fx-font-size: 13px; -fx-text-fill: white; -fx-wrap-text: true;" text="Chất vl" />
                         </VBox>
 
                         <!-- Comment item 2 -->
                         <VBox style="-fx-padding: 12 16 12 16; -fx-border-color: #333333; -fx-border-width: 0 0 1 0;">
                             <HBox alignment="CENTER_LEFT">
-                                <Label text="Ahmed Abdullah"
-                                       style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #c9a84c;"/>
-                                <Region HBox.hgrow="ALWAYS"/>
-                                <Label text="23/12/2022 00:36"
-                                       style="-fx-font-size: 12px; -fx-text-fill: #aaaaaa;"/>
+                                <Label style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #c9a84c;" text="Hoàng Tùng" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Label style="-fx-font-size: 12px; -fx-text-fill: #aaaaaa;" text="15/04/2026 18:36" />
                             </HBox>
-                            <Label text="But i dont like basket ball"
-                                   style="-fx-font-size: 13px; -fx-text-fill: white; -fx-wrap-text: true;"/>
+                            <Label style="-fx-font-size: 13px; -fx-text-fill: white; -fx-wrap-text: true;" text="Mấy con gà biết gì" />
                         </VBox>
 
                         <!-- Comment item 3 -->
                         <VBox style="-fx-padding: 12 16 12 16; -fx-border-color: #333333; -fx-border-width: 0 0 1 0;">
                             <HBox alignment="CENTER_LEFT">
-                                <Label text="Ahmed Abdullah"
-                                       style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #c9a84c;"/>
-                                <Region HBox.hgrow="ALWAYS"/>
-                                <Label text="23/12/2022 00:36"
-                                       style="-fx-font-size: 12px; -fx-text-fill: #aaaaaa;"/>
+                                <Label style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #c9a84c;" text="Xuân Tân" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Label style="-fx-font-size: 12px; -fx-text-fill: #aaaaaa;" text="13/04/2026 00:36" />
                             </HBox>
-                            <Label text="If this was ronaldo shirt then i'll buy it"
-                                   style="-fx-font-size: 13px; -fx-text-fill: white; -fx-wrap-text: true;"/>
+                            <Label style="-fx-font-size: 13px; -fx-text-fill: white; -fx-wrap-text: true;" text="Đồ của Ronaldo thì chốt" />
                         </VBox>
 
                         <!-- Comment item 4 -->
                         <VBox style="-fx-padding: 12 16 12 16;">
                             <HBox alignment="CENTER_LEFT">
-                                <Label text="Ahmed Abdullah"
-                                       style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #c9a84c;"/>
-                                <Region HBox.hgrow="ALWAYS"/>
-                                <Label text="23/12/2022 00:37"
-                                       style="-fx-font-size: 12px; -fx-text-fill: #aaaaaa;"/>
+                                <Label style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #c9a84c;" text="Ahmed Abdullah" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Label style="-fx-font-size: 12px; -fx-text-fill: #aaaaaa;" text="23/12/2022 00:37" />
                             </HBox>
-                            <Label text="Crazy Expensive"
-                                   style="-fx-font-size: 13px; -fx-text-fill: white; -fx-wrap-text: true;"/>
+                            <Label style="-fx-font-size: 13px; -fx-text-fill: white; -fx-wrap-text: true;" text="Crazy Expensive" />
                         </VBox>
 
                     </VBox>
@@ -264,34 +160,21 @@
 
                 <!-- New comment input -->
                 <StackPane style="-fx-padding: 8 0 0 0;">
-                    <TextField fx:id="commentField"
-                               prefHeight="52.0"
-                               style="-fx-background-color: white;
-                                      -fx-border-color: #1a1a1a;
-                                      -fx-border-width: 1.5;
-                                      -fx-border-radius: 8;
-                                      -fx-background-radius: 8;
-                                      -fx-font-size: 14px;
-                                      -fx-padding: 0 100 0 14;"/>
-                    <Label text="Comment"
-                           style="-fx-font-size: 11px; -fx-text-fill: #888888; -fx-background-color: white; -fx-padding: 0 4 0 4;"
-                           StackPane.alignment="TOP_LEFT"
-                           translateX="14.0"
-                           translateY="-1.0"/>
-                    <Button text="Post"
-                            fx:id="postCommentBtn"
-                            onAction="#handlePostComment"
-                            prefWidth="72.0"
-                            prefHeight="38.0"
-                            style="-fx-background-color: #c9a84c;
-                                   -fx-text-fill: white;
-                                   -fx-font-size: 14px;
-                                   -fx-font-weight: bold;
-                                   -fx-border-radius: 8;
-                                   -fx-background-radius: 8;
-                                   -fx-cursor: hand;"
-                            StackPane.alignment="CENTER_RIGHT"
-                            translateX="-8.0"/>
+                    <TextField fx:id="commentField" prefHeight="38.0" prefWidth="462.0" style="-fx-background-color: white;                                       -fx-border-color: #1a1a1a;                                       -fx-border-width: 1.5;                                       -fx-border-radius: 8;                                       -fx-background-radius: 8;                                       -fx-font-size: 14px;                                       -fx-padding: 0 100 0 14;">
+                  <opaqueInsets>
+                     <Insets right="10.0" />
+                  </opaqueInsets>
+                  <StackPane.margin>
+                     <Insets right="10.0" />
+                  </StackPane.margin></TextField>
+                    <Button fx:id="postCommentBtn" onAction="#handlePostComment" prefHeight="38.0" prefWidth="72.0" style="-fx-background-color: #c9a84c;                                    -fx-text-fill: white;                                    -fx-font-size: 14px;                                    -fx-font-weight: bold;                                    -fx-border-radius: 8;                                    -fx-background-radius: 8;                                    -fx-cursor: hand;" text="Post" translateX="-8.0" StackPane.alignment="CENTER_RIGHT">
+                  <StackPane.margin>
+                     <Insets bottom="1.0" right="4.0" />
+                  </StackPane.margin></Button>
+                    <Label style="-fx-font-size: 11px; -fx-text-fill: #888888; -fx-background-color: white; -fx-padding: 0 4 0 4;" text="Comment" translateX="14.0" translateY="-1.0" StackPane.alignment="TOP_LEFT">
+                  <StackPane.margin>
+                     <Insets top="9.0" />
+                  </StackPane.margin></Label>
                 </StackPane>
 
             </VBox>
