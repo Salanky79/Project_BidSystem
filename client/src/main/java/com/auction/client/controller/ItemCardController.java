@@ -1,16 +1,8 @@
 package com.auction.client.controller;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-
-import java.io.IOException;
 
 public class ItemCardController {
 
@@ -21,19 +13,21 @@ public class ItemCardController {
     @FXML private Label priceLabel;
     @FXML private Label bidsLabel;
     @FXML private Label timeLabel;
+    @FXML private Label statusLabel;
 
     private String icon;
     private String category;
     private String name;
+    private String status;
     private double price;
     private int bids;
     private String time;
 
 
+
     // Hàm này sẽ được HomeController gọi để truyền dữ liệu vào
-    public void setData(String icon, String category, String name, double price, int bids, String time) {
-
-
+    public void setData(String icon, String category, String name, double price, int bids, String time, String status) {
+        statusLabel.setText(status);
         iconLabel.setText(icon);
         categoryLabel.setText(category);
         nameLabel.setText(name);
@@ -44,6 +38,7 @@ public class ItemCardController {
         this.price    = price;
         this.bids     = bids;
         this.time = time;
+        this.status = status;
 
         // Format số tiền cho đẹp (vd: 1000.0 -> "1,000 USD")
         priceLabel.setText(String.format("%,.0f USD", price));
@@ -55,11 +50,24 @@ public class ItemCardController {
         if (cardRoot != null) {
             cardRoot.setOnMouseClicked(event -> handleCardClick());
         }
+        //Set màu cho status
+        if (status.equals("Active")) {
+            statusLabel.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px; -fx-padding: 2 5 2 5;");
+        }
+        if (status.equals("End")) {
+            statusLabel.setStyle("-fx-background-color: #FF3737; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px; -fx-padding: 2 5 2 5;");
+        }
+        if (status.equals("In Queue")) {
+            statusLabel.setStyle("-fx-background-color: #4C8CE4; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px; -fx-padding: 2 5 2 5;");
+        }
+        if (status.equals("Cacelled")) {
+            statusLabel.setStyle("-fx-background-color: #605B51; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px; -fx-padding: 2 5 2 5;");
+        }
 
     }
 
     @FXML
     private void handleCardClick() {
-        AuctionDetailController.open(icon, category, name, price, bids, time);
+        AuctionDetailController.open(icon, category, name, price, bids, time, status);
     }
 }

@@ -7,7 +7,7 @@
 
     <StackPane fx:id="itemcard" mouseTransparent="true" onMouseClicked="#handleCardClick" prefHeight="160.0" prefWidth="160.0" style="-fx-background-color: #d0d0d0; -fx-background-radius: 12 0 0 12;">
         <Label fx:id="iconLabel" mouseTransparent="true" style="-fx-font-size: 40px;" text="🖼" />
-        <Label style="-fx-background-color: #1a1a1a; -fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 3 8 3 8; -fx-background-radius: 4;" text="Popular Now" translateX="8.0" translateY="8.0" StackPane.alignment="TOP_LEFT" />
+        <Label fx:id="statusLabel" style="-fx-background-color: #1a1a1a; -fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 3 8 3 8; -fx-background-radius: 4;" text="Popular Now" translateX="8.0" translateY="8.0" StackPane.alignment="TOP_LEFT" />
     </StackPane>
 
     <VBox mouseTransparent="true" spacing="6.0" style="-fx-padding: 14 14 14 14;" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">

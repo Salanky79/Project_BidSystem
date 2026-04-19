@@ -61,7 +61,9 @@ public class AuctionDetailController {
                         String name,
                         double price,
                         int    bids,
-                        String time) {
+                        String time,
+                        String status
+    ) {
         this.currentPrice = price;
         this.totalBids    = bids;
 
@@ -71,6 +73,7 @@ public class AuctionDetailController {
         currentPriceLabel.setText(String.format("$%.2f", price));
         totalBidsLabel.setText(String.valueOf(bids));
         endDateLabel.setText(time);
+        statusLabel.setText(status);
 
         // Mặc định – thay bằng dữ liệu thật từ server khi có
         listedByLabel.setText("Unknown");
@@ -219,7 +222,7 @@ public class AuctionDetailController {
     //  AuctionDetailController.open(icon, category, name, price, bids, timeLeft);
     // ──────────────────────────────────────────────────────
     public static void open(String icon, String category, String name,
-                            double price, int bids, String time) {
+                            double price, int bids, String time, String status) {
         try {
             FXMLLoader loader = new FXMLLoader(
                     AuctionDetailController.class.getResource(
@@ -228,7 +231,7 @@ public class AuctionDetailController {
             Parent root = loader.load();
 
             AuctionDetailController controller = loader.getController();
-            controller.setData(icon, category, name, price, bids, time);
+            controller.setData(icon, category, name, price, bids, time, status);
 
             Stage stage = new Stage();
             stage.setTitle("Auction – " + name);
