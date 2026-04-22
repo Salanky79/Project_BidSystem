@@ -7,8 +7,8 @@ public class Art extends Item {
     private int year;
 
     public Art(String name, String description, double startingPrice, int quantity,
-               String condition, String artist, int year) {
-        super(name, description, startingPrice, quantity, condition);
+               String condition, String artist, int year, String sellerId) {
+        super(name, description, startingPrice, quantity, condition, sellerId);
         this.artist = artist;
         this.year = year;
         this.setCategory(Category.ART);

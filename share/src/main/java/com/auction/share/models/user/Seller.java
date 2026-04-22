@@ -12,8 +12,8 @@ public class Seller extends User {
     private double balance;
     private List<String> auctionIdList;
 
-    public Seller(String username, String password, String fullName, String uid) {
-        super(username, password, fullName, uid);
+    public Seller(String username, String password, String fullName) {
+        super(username, password, fullName);
         this.auctionIdList = new ArrayList<>();
         this.balance = 0.0;
         this.setRole(Role.SELLER);
@@ -34,6 +34,10 @@ public class Seller extends User {
         }
     }
 
+
+    public void setBalance(double balance){
+        this.balance = balance;
+    }
     public void addBalance(double amount) {
         if (amount > 0) {
             this.balance += amount;
