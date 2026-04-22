@@ -6,14 +6,12 @@ public class Jewelry extends Item {
     private String material;
     private double caratWeight;
 
-
     public Jewelry(String name, String description, double startingPrice, int quantity,
                    String condition, String material,
-                   double caratWeight) {
-        super(name, description, startingPrice, quantity, condition);
+                   double caratWeight, String sellerId) {
+        super(name, description, startingPrice, quantity, condition, sellerId);
         this.material = material;
         this.caratWeight = caratWeight;
-
         this.setCategory(Category.JEWELRY);
     }
 
@@ -23,6 +21,5 @@ public class Jewelry extends Item {
     public double getCaratWeight() {
         return caratWeight;
     }
-
 }
 

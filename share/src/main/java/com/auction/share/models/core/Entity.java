@@ -1,9 +1,10 @@
 package com.auction.share.models.core;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public abstract class Entity {
+public abstract class Entity implements Serializable {
     private String id;
     private LocalDateTime createdAt;
 
@@ -15,6 +16,9 @@ public abstract class Entity {
     // Getters & Setters
     public String getId() {
         return id;
+    }
+    public void setID(String id){
+        this.id = id;
     }
 
     public LocalDateTime getCreatedAt() {

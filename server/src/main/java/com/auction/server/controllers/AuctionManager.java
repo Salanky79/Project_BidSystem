@@ -22,11 +22,11 @@ public class AuctionManager {
 
     private AuctionManager() {
         // 1. Tạo dữ liệu mẫu: Người bán, Người mua và Món hàng
-        Seller dummySeller = new Seller("seller1", "123", "Người Bán", "Hà Nội");
-        Bidder dummyBidder = new Bidder("admin", "123", "Admin", "Hanoi", "000");
+        Seller dummySeller = new Seller("seller1", "123", "Người Bán");
+        Bidder dummyBidder = new Bidder("admin", "123", "Admin", "Hanoi");
         dummyBidder.deposit(10000.0); // Nạp tiền cho admin để test không bị lỗi thiếu tiền
 
-        Item dummyItem = new Item("iPhone 15", "Like New", 1000.0, 1, "New");
+        Item dummyItem = new Item("iPhone 15", "Like New", 1000.0, 1, "New", dummySeller.getId());
 
         // 2. Tạo phiên đấu giá cho cái iPhone đó (Bắt đầu từ quá khứ, kết thúc sau 1 tiếng)
         LocalDateTime start = LocalDateTime.now().minusMinutes(5); // Test

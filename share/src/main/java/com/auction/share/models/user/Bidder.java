@@ -11,8 +11,8 @@ public class Bidder extends User {
     private String address;
     private List<BidTransaction> bidHistory;
 
-    public Bidder(String username, String password, String fullName, String uid, String address) {
-        super(username, password, fullName, uid);
+    public Bidder(String username, String password, String fullName, String address) {
+        super(username, password, fullName);
         this.address = address;
         this.balance = 0.0;
         this.bidHistory = new ArrayList<>();
@@ -22,7 +22,9 @@ public class Bidder extends User {
     public String getName() { 
         return this.getFullName();
     }
-    
+    public String getAddress(){
+        return address;
+    }
     public double getBalance() { 
         return balance; 
     }
@@ -34,6 +36,9 @@ public class Bidder extends User {
         this.balance -= amount;
     }
 
+    public void setBalance(double balance){
+        this.balance = balance;
+    }
     public void deposit(double amount) {
         if (amount > 0) {
             this.balance += amount;

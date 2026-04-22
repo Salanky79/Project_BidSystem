@@ -25,6 +25,6 @@ public class ArtFactory implements ItemCreator {
         }
 
         // Tạo và trả về đối tượng Art
-        return new Art(name, description, startingPrice, quantity, condition, artist, year);
+        return new Art(name, description, startingPrice, quantity, condition, artist, year, sellerId);
     }
 }

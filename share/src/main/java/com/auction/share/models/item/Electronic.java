@@ -7,8 +7,8 @@ public class Electronic extends Item {
     private int warrantyMonths;
 
     public Electronic(String name, String description, double startingPrice, int quantity,
-                      String condition, String brand, int warrantyMonths) {
-        super(name, description, startingPrice, quantity, condition);
+                      String condition, String brand, int warrantyMonths, String sellerId) {
+        super(name, description, startingPrice, quantity, condition, sellerId);
         this.brand = brand;
         this.warrantyMonths = warrantyMonths;
         this.setCategory(Category.ELECTRONICS);
