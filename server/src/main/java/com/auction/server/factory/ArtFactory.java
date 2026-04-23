@@ -1,4 +1,4 @@
-package com.auction.server.controllers;
+package com.auction.server.factory;
 
 import com.auction.share.models.item.Art;
 import com.auction.share.models.item.Item;
