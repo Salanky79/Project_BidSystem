@@ -5,21 +5,22 @@ import com.auction.share.enums.Category;
 
 public class Item extends Entity {
     private String name;
-    private String description;
+    private String description = "";
     private double startingPrice;
     private int quantity;
     private String condition;
-    private long sellerId;
+    private String sellerId;
     private Category category;
 
     public Item(String name, String description, double startingPrice, int quantity,
-                String condition) {
+                String condition, String sellerId) {
         super();
         this.name = name;
         this.description = description;
         this.startingPrice = startingPrice;
         this.quantity = quantity;
         this.condition = condition;
+        this.sellerId = sellerId;
     }
 
     public void setCategory(Category category){
@@ -43,7 +44,7 @@ public class Item extends Entity {
     public String getCondition() {
         return condition;
     }
-    public long getSellerId() {
+    public String getSellerId() {
         return sellerId;
     }
 }

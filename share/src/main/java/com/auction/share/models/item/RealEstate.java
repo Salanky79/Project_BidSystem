@@ -6,14 +6,13 @@ public class RealEstate extends Item {
     private String location;
     private double areaSquareMeter;
 
-    public RealEstate(String name, String description, double startingPrice, int quantity,
-                      String condition, String location, double areaSquareMeter) {
-        super(name, description, startingPrice, quantity, condition);
+    public RealEstate(String name, String description, double startingPrice, int quantity, String condition,
+                      String location, double areaSquareMeter, String sellerId) {
+        super(name, description, startingPrice, quantity, condition, sellerId);
         this.location = location;
         this.areaSquareMeter = areaSquareMeter;
         this.setCategory(Category.REAL_ESTATE);
     }
-
 
     public String getLocation() {
         return location;
@@ -21,6 +20,5 @@ public class RealEstate extends Item {
     public double getAreaSquareMeter() {
         return areaSquareMeter;
     }
-
 }
 
