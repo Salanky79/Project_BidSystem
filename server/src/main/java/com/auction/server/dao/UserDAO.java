@@ -1,10 +1,12 @@
 package com.auction.server.dao;
 
+import com.auction.server.factory.UserDBFactory;
 import com.auction.server.util.DatabaseConnection;
 import com.auction.share.models.user.*;
 
-import javax.xml.transform.Result;
+
 import java.sql.*;
+import com.auction.server.factory.UserDBFactory;
 
 public class UserDAO {
     // LƯU TÀI KHOẢN MỚI
@@ -42,39 +44,6 @@ public class UserDAO {
     }
 
 
-    private static User mapUser(ResultSet rs) throws SQLException {
-        String uuid = rs.getString("id");
-        String username = rs.getString("username");
-        String password = rs.getString("password");
-        String fullname = rs.getString("fullname");
-        String role = rs.getString("role");
-        double balance = rs.getDouble("balance");
-        String address = rs.getString("address");
-        int accessLevel = rs.getInt("access_level");
-
-        switch (role) {
-            case "SELLER":
-                Seller seller = new Seller(username, password, fullname);
-                seller.setID(uuid);
-                seller.setBalance(balance);
-                return seller;
-
-            case "BIDDER":
-                Bidder bidder = new Bidder(username, password, fullname, address);
-                bidder.setID(uuid);
-                bidder.setBalance(balance);
-                return bidder;
-
-            case "ADMIN":
-                Admin admin = new Admin(username, password, fullname, accessLevel);
-                admin.setID(uuid);
-                return admin;
-        }
-        return null;
-    }
-
-
-
     public static User findById(String id) throws SQLException{
         String sql = "SELECT * FROM users WHERE id = ?";
         try(Connection conn = DatabaseConnection.getConnection();
@@ -84,7 +53,7 @@ public class UserDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return mapUser(rs);
+                    return UserDBFactory.mapUser(rs);
                 }
             }
         }
@@ -101,10 +70,34 @@ public class UserDAO {
 
             try(ResultSet rs = ps.executeQuery()){
                 if(rs.next()){
-                    return mapUser(rs);
+                    return UserDBFactory.mapUser(rs);
                     }
                 }
             }
         return null;
+    }
+
+    public static boolean updateUserPassword(String id, String password) throws SQLException {
+        String sql = "UPDATE users SET password = ? WHERE id = ?";
+        try(Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
+
+            ps.setString(1, password);
+            ps.setString(2, id);
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    public static boolean updateUserAddress(String id, String address) throws SQLException {
+        String sql = "UPDATE users SET address = ? WHERE id = ?";
+        try(Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
+
+            ps.setString(1, address);
+            ps.setString(2, id);
+
+            return ps.executeUpdate() > 0;
+        }
     }
 }
