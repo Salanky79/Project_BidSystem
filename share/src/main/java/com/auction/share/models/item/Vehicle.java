@@ -1,17 +1,14 @@
 package com.auction.share.models.item;
 
-import com.auction.share.enums.Category;
-
 public class Vehicle extends Item {
     private double mileage;
     private String fuelType;
 
-    public Vehicle(String name, String description, double startingPrice, int quantity,
-                   String condition, double mileage, String fuelType, String sellerId) {
-        super(name, description, startingPrice, quantity, condition, sellerId);
+    public Vehicle(String name, String description, double startingPrice, String sellerId ,
+                    double mileage, String fuelType) {
+        super(name, description, startingPrice, sellerId);
         this.mileage = mileage;
         this.fuelType = fuelType;
-        this.setCategory(Category.VEHICLE);
     }
 
     public double getMileage() {
