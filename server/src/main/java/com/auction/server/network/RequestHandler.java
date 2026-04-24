@@ -1,6 +1,10 @@
 package com.auction.server.network;
 
 import com.auction.server.controllers.AuctionManager;
+import com.auction.server.exceptions.*;
+import com.auction.server.exceptions.InsufficientFundsException;
+import com.auction.share.exceptions.*;
+import com.auction.share.exceptions.InvalidBidException;
 import com.auction.share.models.user.User;
 import java.io.*;
 import java.net.Socket;
@@ -18,33 +22,55 @@ public class RequestHandler implements Runnable {
 
     @Override
     public void run() {
-        // Khai báo ngoài try để finally có thể dùng được // code trong khoi try thi ton tai trong ngoac
         PrintWriter out = null;
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream())); //byte data
-            out = new PrintWriter(socket.getOutputStream(), true); //AutoFlush: nếu xô chưa đầy vẫn tự động xả
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            out = new PrintWriter(socket.getOutputStream(), true);
 
-            // ĐĂNG KÝ NGƯỜI NGHE
             manager.addObserver(out);
 
             String line;
-            while ((line = in.readLine()) != null) { // check xem khi nao client thoát chương trình
+            while ((line = in.readLine()) != null) {
                 String[] parts = line.split("\\|");
                 String cmd = parts[0];
 
-                if (cmd.equals("LOGIN")) {
-                    currentUser = manager.login(parts[1], parts[2]);
-                    if (currentUser != null) out.println("SUCCESS|Chao " + currentUser.getUsername());
-                    else out.println("FAIL|Sai tai khoan");
-                }
-                else if (cmd.equals("LIST")) {
-                    out.println(manager.listItems());
+                try {
+                    if (cmd.equals("LOGIN")) {
+                        currentUser = manager.login(parts[1], parts[2]);
+                        out.println("SUCCESS|Chao " + currentUser.getUsername());
+                    }
+                    else if (cmd.equals("LIST")) {
+                        out.println(manager.listItems());
+                    }
+                    else if (cmd.equals("BID")) {
+                        String result = manager.placeBid(parts[1], Double.parseDouble(parts[2]), currentUser);
+                        out.println(result);
+                    }
+                } catch (UserAuthenticationException e) {
+                    out.println("FAIL|" + e.getMessage());
+                } catch (InvalidUserRoleException e) {
+                    out.println("FAIL|" + e.getMessage());
+                } catch (AuctionNotFoundException e) {
+                    out.println("FAIL|" + e.getMessage());
+                } catch (AuctionNotStartedException e) {
+                    out.println("FAIL|" + e.getMessage());
+                } catch (AuctionClosedException e) {
+                    out.println("FAIL|" + e.getMessage());
+                } catch (AuctionNotRunningException e) {
+                    out.println("FAIL|" + e.getMessage());
+                } catch (InvalidBidException e) {
+                    out.println("FAIL|" + e.getMessage());
+                } catch (BidTooLowException e) {
+                    out.println("FAIL|" + e.getMessage());
+                } catch (InsufficientFundsException e) {
+                    out.println("FAIL|" + e.getMessage());
+                } catch (RuntimeException e) {
+                    out.println("FAIL|Lỗi: " + e.getMessage());
                 }
             }
         } catch (IOException e) {
-            System.out.println("Mot khach hang da ngat ket noi.");
+            System.out.println("Một khách hàng đã ngắt kết nối.");
         } finally {
-            // Kiểm tra nếu out khác null thì mới xóa
             if (out != null) {
                 manager.removeObserver(out);
             }

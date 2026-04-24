@@ -1,17 +1,14 @@
 package com.auction.share.models.auction;
 
 import com.auction.share.enums.AuctionStatus;
-import com.auction.share.models.auction.BidTransaction;
+import com.auction.share.exceptions.*;
 import com.auction.share.models.core.Entity;
 import com.auction.share.models.item.Item;
 import com.auction.share.models.user.Bidder;
 import com.auction.share.models.user.Seller;
-import com.auction.share.enums.AuctionStatus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Auction extends Entity {
     private Item item;
@@ -59,26 +56,44 @@ public class Auction extends Entity {
 
         // 1. Kiểm tra thời gian
         if (now.isBefore(startTime)) {
-            throw new RuntimeException("Lỗi: Phiên đấu giá chưa tới giờ bắt đầu!");
+            throw new AuctionNotStartedException(
+                "Phiên đấu giá [" + item.getName() + "] chưa bắt đầu. " +
+                "Thời gian bắt đầu: " + startTime
+            );
         }
+
         if (now.isAfter(endTime)) {
             closeAuction();
-            throw new RuntimeException("Lỗi: Phiên đấu giá đã kết thúc vào lúc " + endTime);
+            throw new AuctionClosedException(
+                "Phiên đấu giá [" + item.getName() + "] đã kết thúc vào lúc " + endTime
+            );
         }
 
         // 2. Kiểm tra trạng thái
         if (this.status != AuctionStatus.RUNNING) {
-            throw new RuntimeException("Lỗi: Phiên đấu giá không ở trạng thái hoạt động!");
+            throw new AuctionNotRunningException(
+                "Phiên đấu giá [" + item.getName() + "] không ở trạng thái hoạt động. " +
+                "Trạng thái hiện tại: " + status
+            );
         }
 
         // 3. Kiểm tra tính hợp lệ của giá đặt
-        if (amount <= this.currentHighestBid) {
-            throw new RuntimeException("Lỗi: Giá đặt (" + amount + ") phải lớn hơn giá hiện tại (" + this.currentHighestBid + ")");
+        if (amount <= 0) {
+            throw new InvalidBidException("Giá đặt không hợp lệ!");
         }
 
-        // 4. KIỂM TRA SỐ DƯ (THÊM MỚI Ở ĐÂY)
+        if (amount <= this.currentHighestBid) {
+            throw new BidTooLowException(
+                    "Giá đặt (" + amount + "$) phải cao hơn giá hiện tại (" + currentHighestBid + "$)"
+            );
+        }
+
+        // 4. Kiểm tra số dư
         if (bidder.getBalance() < amount) {
-            throw new RuntimeException("Từ chối: [" + bidder.getUsername() + "] không đủ tiền! Số dư hiện tại chỉ có " + bidder.getBalance() + "$, nhưng đòi trả " + amount + "$");
+            throw new InsufficientFundsException(
+                "Bidder [" + bidder.getUsername() + "] không đủ tiền! " +
+                "Số dư: " + bidder.getBalance() + "$, yêu cầu: " + amount + "$"
+            );
         }
 
         // 5. Cập nhật dữ liệu người dẫn đầu
