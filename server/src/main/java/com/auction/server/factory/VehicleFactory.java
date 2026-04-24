@@ -1,11 +1,11 @@
-package com.auction.server.controllers;
+package com.auction.server.factory;
 
 import com.auction.share.models.item.Item;
 import com.auction.share.models.item.Vehicle;
 
 public class VehicleFactory implements ItemCreator {
     @Override
-    public Item createItem(String name, String description, double startingPrice, int quantity, String condition, String... attributes) {
+    public Item createItem(String name, String description, double startingPrice, String sellerID, String... attributes) {
         // Giá trị mặc định
         double mileage = 0.0;
         String fuelType = "Chưa xác định";
@@ -25,6 +25,6 @@ public class VehicleFactory implements ItemCreator {
             fuelType = attributes[1];
         }
 
-        return new Vehicle(name, description, startingPrice, quantity, condition, mileage, fuelType);
+        return new Vehicle(name, description, startingPrice, sellerID, mileage, fuelType);
     }
 }

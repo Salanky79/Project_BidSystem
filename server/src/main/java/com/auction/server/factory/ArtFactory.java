@@ -1,11 +1,11 @@
-package com.auction.server.controllers;
+package com.auction.server.factory;
 
 import com.auction.share.models.item.Art;
 import com.auction.share.models.item.Item;
 
 public class ArtFactory implements ItemCreator {
     @Override
-    public Item createItem(String name, String description, double startingPrice, int quantity, String condition, String... attributes) {
+    public Item createItem(String name, String description, double startingPrice, String sellerID, String... attributes) {
         // Mặc định nếu không truyền attributes
         String artist = "Unknown Artist";
         int year = 0;
@@ -25,6 +25,6 @@ public class ArtFactory implements ItemCreator {
         }
 
         // Tạo và trả về đối tượng Art
-        return new Art(name, description, startingPrice, quantity, condition, artist, year, sellerId);
+        return new Art(name, description, startingPrice, sellerID, artist, year);
     }
 }

@@ -26,7 +26,7 @@ public class AuctionManager {
         Bidder dummyBidder = new Bidder("admin", "123", "Admin", "Hanoi");
         dummyBidder.deposit(10000.0); // Nạp tiền cho admin để test không bị lỗi thiếu tiền
 
-        Item dummyItem = new Item("iPhone 15", "Like New", 1000.0, 1, "New", dummySeller.getId());
+        Item dummyItem = new Item("iPhone 15", "Like New", 1000.0, dummySeller.getId());
 
         // 2. Tạo phiên đấu giá cho cái iPhone đó (Bắt đầu từ quá khứ, kết thúc sau 1 tiếng)
         LocalDateTime start = LocalDateTime.now().minusMinutes(5); // Test

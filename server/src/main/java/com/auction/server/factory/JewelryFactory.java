@@ -1,11 +1,11 @@
-package com.auction.server.controllers;
+package com.auction.server.factory;
 
 import com.auction.share.models.item.Item;
 import com.auction.share.models.item.Jewelry;
 
 public class JewelryFactory implements ItemCreator {
     @Override
-    public Item createItem(String name, String description, double startingPrice, int quantity, String condition, String... attributes) {
+    public Item createItem(String name, String description, double startingPrice, String sellerID, String... attributes) {
         // Giá trị mặc định
         String material = "Unknown";
         double caratWeight = 0.0;
@@ -31,6 +31,6 @@ public class JewelryFactory implements ItemCreator {
 
 
         // Tạo và trả về đối tượng Jewelry
-        return new Jewelry(name, description, startingPrice, quantity, condition, material, caratWeight);
+        return new Jewelry(name, description, startingPrice, sellerID, material, caratWeight);
     }
 }

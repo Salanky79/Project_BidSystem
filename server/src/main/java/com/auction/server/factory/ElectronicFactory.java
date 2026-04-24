@@ -1,11 +1,11 @@
-package com.auction.server.controllers;
+package com.auction.server.factory;
 
 import com.auction.share.models.item.Electronic;
 import com.auction.share.models.item.Item;
 
 public class ElectronicFactory implements ItemCreator {
     @Override
-    public Item createItem(String name, String description, double startingPrice, int quantity, String condition, String... attributes) {
+    public Item createItem(String name, String description, double startingPrice, String sellerID, String... attributes) {
         // Giả sử: attributes[0] là brand, attributes[1] là warrantyMonths
         String brand = (attributes.length > 0) ? attributes[0] : "Unknown";
 
@@ -18,6 +18,6 @@ public class ElectronicFactory implements ItemCreator {
             }
         }
 
-        return new Electronic(name, description, startingPrice, quantity, condition, brand, warrantyMonths);
+        return new Electronic(name, description, startingPrice, sellerID, brand, warrantyMonths);
     }
 }
