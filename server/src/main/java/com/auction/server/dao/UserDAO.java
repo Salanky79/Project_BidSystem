@@ -1,9 +1,10 @@
 package com.auction.server.dao;
 
+import com.auction.server.exceptions.DataValidationException;
+import com.auction.server.exceptions.DatabaseConnectionException;
 import com.auction.server.factory.UserDBFactory;
 import com.auction.server.util.DatabaseConnection;
 import com.auction.share.models.user.*;
-
 
 import java.sql.*;
 import com.auction.server.factory.UserDBFactory;
@@ -12,6 +13,15 @@ public class UserDAO {
     // LƯU TÀI KHOẢN MỚI
     public static boolean saveUser(User user) throws SQLException {
         String sql = "INSERT INTO users (id, fullname, username, password, role, balance, address, access_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+        if (user == null) throw new DataValidationException("User is required");
+        if (user.getUsername() == null || user.getUsername().isEmpty())
+            throw new DataValidationException("Username is required");
+        if (user.getPassword() == null || user.getPassword().isEmpty())
+            throw new DataValidationException("Password is required");
+        if (user.getFullName() == null || user.getFullName().isEmpty())
+            throw new DataValidationException("Full name is required");
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -26,18 +36,21 @@ public class UserDAO {
 
             int row = ps.executeUpdate();
             return row > 0;
+        } catch (DatabaseConnectionException e) {
+            System.err.println("Database connection error: " + e.getMessage());
+            throw e;
         }
     }
 
     // KIỂM TRA USERNAME ĐÃ TỒN TẠI CHƯA
-    public static boolean isUsernameTaken(String username) throws SQLException{
+    public static boolean isUsernameTaken(String username) throws SQLException {
         String sql = "SELECT username FROM users WHERE username = ?";
-        try(Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = DatabaseConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
 
             ps.setString(1, username);
 
-            try(ResultSet rs = ps.executeQuery()) {
+            try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
             }
         }
