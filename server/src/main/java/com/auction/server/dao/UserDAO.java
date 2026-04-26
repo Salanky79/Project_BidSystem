@@ -7,7 +7,6 @@ import com.auction.server.util.DatabaseConnection;
 import com.auction.share.models.user.*;
 
 import java.sql.*;
-import com.auction.server.factory.UserDBFactory;
 
 public class UserDAO {
     // LƯU TÀI KHOẢN MỚI
