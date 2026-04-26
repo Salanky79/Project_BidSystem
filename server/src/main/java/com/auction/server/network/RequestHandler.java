@@ -1,7 +1,9 @@
 package com.auction.server.network;
 
 import com.auction.server.controllers.AuctionManager;
-import com.auction.server.exceptions.*;
+import com.auction.server.exceptions.AuctionNotFoundException;
+import com.auction.server.exceptions.InvalidUserRoleException;
+import com.auction.server.exceptions.UserAuthenticationException;
 import com.auction.server.exceptions.InsufficientFundsException;
 import com.auction.share.exceptions.*;
 import com.auction.share.exceptions.InvalidBidException;
