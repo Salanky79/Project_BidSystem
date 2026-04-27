@@ -16,5 +16,7 @@ public class UserController {
             throw new UsernameAlreadyExistsException("Username '" + user.getUsername() + "' is already taken.");
 
         }
+
+        return UserDAO.saveUser(user);
     }
 }

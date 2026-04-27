@@ -11,6 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDateTime;
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -94,13 +95,33 @@ public class AuctionTest {
     // startTime <= Thời gian <= emdTime
     @ParameterizedTest
     @ValueSource(longs = {0, 1, 60, 3600})
-    public void testProcessBidDuringAuction(long amount) {
+    public void testProcessBidAfterAuctionStart(long amount) {
         LocalDateTime nowStart = LocalDateTime.now().minusSeconds(amount);
         LocalDateTime nowEnd = LocalDateTime.now().plusSeconds(amount + 3600);
         Auction nowAuction = new Auction(item, seller, nowStart, nowEnd);
+        nowAuction.startAuction();
 
         assertEquals(AuctionStatus.RUNNING, nowAuction.getStatus());
-        assertThrows(AuctionNotStartedException.class, () -> nowAuction.processBid(bidder1, 1500));
+        assertTrue(nowAuction.processBid(bidder1, 1500));
+    }
+
+    // Test: Khi đặt bid dưới 30 giây trước khi endTime → endTime tự động gia hạn +1 phút
+    @ParameterizedTest
+    @ValueSource(longs = {1, 15, 29}) // 1s, 15s, 29s trước khi kết thúc (< 30s)
+    public void testProcessBidUnder30SecondsBeforeAuctionEnd(long secondsLeft) {
+        // Arrange: Tạo phiên kết thúc sau secondsLeft giây
+        LocalDateTime startTime = LocalDateTime.now().minusHours(1);
+        LocalDateTime endTime = LocalDateTime.now().plusSeconds(secondsLeft);
+        Auction nowAuction = new Auction(item, seller, startTime, endTime);
+        nowAuction.startAuction();
+
+        LocalDateTime oldEndTime = nowAuction.getEndTime();
+
+        assertTrue(nowAuction.processBid(bidder1, 1500));
+        LocalDateTime newEndTime = nowAuction.getEndTime();
+
+        long durationInSeconds = Duration.between(oldEndTime, newEndTime).getSeconds();
+        assertEquals(60, durationInSeconds);
     }
 
     // Thời gian > endTime (đã kết thúc)
@@ -110,8 +131,8 @@ public class AuctionTest {
         LocalDateTime pastStart = LocalDateTime.now().minusSeconds(amount + 3600);
         LocalDateTime pastEnd = LocalDateTime.now().minusSeconds(amount);
         Auction pastAuction = new Auction(item, seller, pastStart, pastEnd);
-        pastAuction.startAuction();
 
+        assertEquals(AuctionStatus.CANCELED, pastAuction.getStatus());
         assertThrows(AuctionClosedException.class, () -> pastAuction.processBid(bidder1, 1500));
     }
 
