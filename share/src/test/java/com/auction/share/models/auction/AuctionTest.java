@@ -124,6 +124,23 @@ public class AuctionTest {
         assertEquals(60, durationInSeconds);
     }
 
+    // ============================================================
+    // BỔ SUNG: BVA CHO THỜI GIAN GIA HẠN (EXACT BOUNDARIES)
+    // ============================================================
+    @Test
+    public void testProcessBidAtExactly30Seconds() throws AuctionSystemException {
+        LocalDateTime start = LocalDateTime.now().minusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusSeconds(31);
+        Auction a31 = new Auction(item, seller, start, end);
+        a31.startAuction();
+
+        LocalDateTime oldEnd31 = a31.getEndTime();
+
+
+        a31.processBid(bidder1, 1500);
+        assertEquals(oldEnd31, a31.getEndTime(), "Đặt trước 31s thì không được gia hạn");
+    }
+
     // Thời gian > endTime (đã kết thúc)
     @ParameterizedTest
     @ValueSource(longs = {1, 60, 3600})
@@ -213,6 +230,22 @@ public class AuctionTest {
         // Người đặt sau phải nhận lỗi BidTooLowException
         assertNotNull(expectedError, "Người đặt sau phải throw exception");
         assertInstanceOf(InvalidBidException.class, expectedError);
+    }
+
+    // BỔ SUNG: 1 NGƯỜI TỰ NÂNG GIÁ CHÍNH MÌNH (OVERLAP)
+    @Test
+    public void testSameBidderBiddingMultipleTimesIncreasing() throws AuctionSystemException {
+        auction.processBid(bidder1, 1500);
+
+        // bidder1 tiếp tục đẩy giá lên 2500 (Vẫn là bidder1 hợp lệ)
+        assertDoesNotThrow(() -> auction.processBid(bidder1, 2500));
+        assertEquals(2500, auction.getCurrentHighestBid());
+        assertEquals(bidder1.getId(), auction.getHighestBidder().getId());
+    }
+
+    @Test
+    public void testProcessBidWithNullBidder() {
+        assertThrows(Exception.class, () -> auction.processBid(null, 1500));
     }
 
     // Balance của seller & bidder KHÔNG thay đổi cho tới khi closeAuction

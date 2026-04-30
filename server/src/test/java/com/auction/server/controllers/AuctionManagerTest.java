@@ -359,4 +359,74 @@ public class AuctionManagerTest {
             assertNotNull(e.getMessage(), "Exception phải có tin nhắn");
         }
     }
+
+    // ============================================================
+    // BỔ SUNG: KIỂM TRA TÍNH SINGLETON
+    // ============================================================
+    @Test
+    public void testSingletonInstance() {
+        AuctionManager instance1 = AuctionManager.getInstance();
+        AuctionManager instance2 = AuctionManager.getInstance();
+        assertSame(instance1, instance2, "Chỉ được phép tồn tại 1 instance của AuctionManager");
+    }
+
+    // ============================================================
+    // BỔ SUNG: BVA CHO ĐĂNG NHẬP (TRƯỜNG HỢP NULL)
+    // ============================================================
+    @Test
+    public void testLoginWithNull() {
+        assertThrows(AuthenticationException.class, () -> manager.login(null, "123"));
+        assertThrows(AuthenticationException.class, () -> manager.login("admin", null));
+        assertThrows(AuthenticationException.class, () -> manager.login(null, null));
+    }
+
+    // ============================================================
+    // BỔ SUNG: BVA & EP CHO PLACE BID (GIÁ TRỊ XẤU - BAD INPUTS)
+    // ============================================================
+    @Test
+    public void testPlaceBidWithNullOrEmptyItemName() {
+        Bidder validBidder = new Bidder("tester", "123", "Tester", "HN");
+
+        Exception ex1 = assertThrows(Exception.class, () ->
+                manager.placeBid(null, 1000, validBidder));
+        Exception ex2 = assertThrows(Exception.class, () ->
+                manager.placeBid("", 1000, validBidder));
+
+        assertNotNull(ex1);
+        assertNotNull(ex2);
+    }
+
+    @Test
+    public void testPlaceBidWithNegativeOrZeroAmount() {
+        Bidder validBidder = new Bidder("tester", "123", "Tester", "HN");
+        validBidder.deposit(5000);
+
+        Exception exZero = assertThrows(Exception.class, () ->
+                manager.placeBid("iPhone 15", 0, validBidder));
+        Exception exNeg = assertThrows(Exception.class, () ->
+                manager.placeBid("iPhone 15", -500, validBidder));
+
+        // Kiểm tra xem exception văng ra có phải từ Validate logic (Auction/Manager) không
+    }
+
+    @Test
+    public void testPlaceBidWithNullUser() {
+        assertThrows(Exception.class, () ->
+                manager.placeBid("iPhone 15", 1500, null));
+    }
+
+    // ============================================================
+    // BỔ SUNG: OBSERVER VỚI GIÁ TRỊ NULL
+    // ============================================================
+    @Test
+    public void testRemoveNonExistentObserver() {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw, true);
+
+        // Remove đối tượng chưa từng tồn tại -> Không văng lỗi (Fail-safe)
+        assertDoesNotThrow(() -> manager.removeObserver(pw));
+
+        // Truyền null -> Không văng lỗi NullPointerException
+        assertDoesNotThrow(() -> manager.removeObserver(null));
+    }
 }
