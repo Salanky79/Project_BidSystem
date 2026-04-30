@@ -51,12 +51,12 @@ public class Auction extends Entity {
     // -------------------------------------------------------------
     // CHỨC NĂNG (mục 3.1.3): THAM GIA ĐẤU GIÁ
     // -------------------------------------------------------------
-    public synchronized boolean processBid(Bidder bidder, double amount) {
+    public synchronized boolean processBid(Bidder bidder, double amount) throws AuctionSystemException {
         LocalDateTime now = LocalDateTime.now();
 
         // 1. Kiểm tra thời gian
         if (now.isBefore(startTime)) {
-            throw new AuctionNotStartedException(
+            throw new AuctionClosedException(
                 "Phiên đấu giá [" + item.getName() + "] chưa bắt đầu. " +
                 "Thời gian bắt đầu: " + startTime
             );
@@ -71,7 +71,7 @@ public class Auction extends Entity {
 
         // 2. Kiểm tra trạng thái
         if (this.status != AuctionStatus.RUNNING) {
-            throw new AuctionNotRunningException(
+            throw new AuctionClosedException(
                 "Phiên đấu giá [" + item.getName() + "] không ở trạng thái hoạt động. " +
                 "Trạng thái hiện tại: " + status
             );
@@ -83,7 +83,7 @@ public class Auction extends Entity {
         }
 
         if (amount <= this.currentHighestBid) {
-            throw new BidTooLowException(
+            throw new InvalidBidException(
                     "Giá đặt (" + amount + "$) phải cao hơn giá hiện tại (" + currentHighestBid + "$)"
             );
         }

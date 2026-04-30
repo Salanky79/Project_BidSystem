@@ -1,12 +1,10 @@
 package com.auction.share.exceptions;
 
-// Quăng khi phiên đấu giá đã kết thúc
-public class AuctionClosedException extends RuntimeException {
+/**
+ * Ném ra khi người dùng cố gắng thao tác trên một phiên đấu giá đã đóng.
+ */
+public class AuctionClosedException extends AuctionSystemException {
     public AuctionClosedException(String message) {
         super(message);
-    }
-
-    public AuctionClosedException(String message, Throwable cause) {
-        super(message, cause);
     }
 }

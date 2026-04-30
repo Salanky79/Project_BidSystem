@@ -1,8 +1,9 @@
 package com.auction.server.controllers;
 
-import com.auction.server.exceptions.UserAuthenticationException;
-import com.auction.server.exceptions.InvalidUserRoleException;
-import com.auction.server.exceptions.AuctionNotFoundException;
+import com.auction.server.exceptions.DataValidationException;
+import com.auction.share.exceptions.AuctionSystemException;
+import com.auction.share.exceptions.AuthenticationException;
+import com.auction.share.exceptions.AuctionNotFoundException;
 import com.auction.share.models.auction.Auction;
 import com.auction.share.models.item.Item;
 import com.auction.share.models.user.Bidder;
@@ -108,11 +109,11 @@ public class AuctionManager {
     }
 
     // --- LOGIC XỬ LÝ ---
-    public User login(String user, String pass) {
+    public User login(String user, String pass) throws AuthenticationException {
         for (User u : users) {
             if (u.getUsername().equals(user) && u.getPassword().equals(pass)) return u;
         }
-        throw new UserAuthenticationException("Đăng nhập thất bại: Sai tên đăng nhập hoặc mật khẩu!");
+        throw new AuthenticationException("Đăng nhập thất bại: Sai tên đăng nhập hoặc mật khẩu!");
     }
 
     // SỬA LẠI: Lặp qua danh sách auctions thay vì items
@@ -129,10 +130,10 @@ public class AuctionManager {
     }
 
     // SỬA LẠI: Chuyển việc kiểm tra giá cho lớp Auction.java lo
-    public String placeBid(String itemName, double amount, User user) {
+    public String placeBid(String itemName, double amount, User user) throws AuctionSystemException {
         // Chỉ Bidder (người mua) mới được đặt giá
         if (!(user instanceof Bidder)) {
-            throw new InvalidUserRoleException(
+            throw new DataValidationException(
                 "Chỉ BIDDER (người mua) mới được đặt giá. Bạn là: " + user.getRole());
         }
         Bidder bidder = (Bidder) user;

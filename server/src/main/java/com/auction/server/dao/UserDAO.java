@@ -1,16 +1,17 @@
 package com.auction.server.dao;
 
+import com.auction.server.exceptions.DataConnectionException;
 import com.auction.server.exceptions.DataValidationException;
-import com.auction.server.exceptions.DatabaseConnectionException;
 import com.auction.server.factory.UserDBFactory;
 import com.auction.server.util.DatabaseConnection;
+import com.auction.share.exceptions.AuctionSystemException;
 import com.auction.share.models.user.*;
 
 import java.sql.*;
 
 public class UserDAO {
     // LƯU TÀI KHOẢN MỚI
-    public static boolean saveUser(User user) throws SQLException {
+    public static boolean saveUser(User user) throws SQLException, AuctionSystemException {
         String sql = "INSERT INTO users (id, fullname, username, password, role, balance, address, access_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         if (user == null) throw new DataValidationException("User is required");
@@ -35,9 +36,8 @@ public class UserDAO {
 
             int row = ps.executeUpdate();
             return row > 0;
-        } catch (DatabaseConnectionException e) {
-            System.err.println("Database connection error: " + e.getMessage());
-            throw e;
+        } catch (SQLException e) {
+            throw new DataConnectionException("Error saving user: " + e.getMessage());
         }
     }
 

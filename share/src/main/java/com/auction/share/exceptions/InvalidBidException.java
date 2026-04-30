@@ -1,12 +1,10 @@
 package com.auction.share.exceptions;
 
-// Quăng khi giá đặt không hợp lệ (âm, 0, hoặc không phải số)
-public class InvalidBidException extends RuntimeException {
+/**
+ * Ném ra khi giá đặt không hợp lệ (ví dụ: thấp hơn giá hiện tại).
+ */
+public class InvalidBidException extends AuctionSystemException {
     public InvalidBidException(String message) {
         super(message);
-    }
-
-    public InvalidBidException(String message, Throwable cause) {
-        super(message, cause);
     }
 }

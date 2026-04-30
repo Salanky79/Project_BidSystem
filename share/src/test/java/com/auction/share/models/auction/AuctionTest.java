@@ -62,13 +62,13 @@ public class AuctionTest {
     @ParameterizedTest
     @ValueSource(doubles = {0.01, 500.0, 999.99, 1000.0}) // Gồm cả on boundary
     public void testProcessBidBelowOrEqualCurrentHighestBid(double amount) {
-        assertThrows(BidTooLowException.class, () -> auction.processBid(bidder1, amount));
+        assertThrows(InvalidBidException.class, () -> auction.processBid(bidder1, amount));
     }
 
     // balance (5000) >= amount > currentHighestBid (1000)
     @ParameterizedTest
     @ValueSource(doubles = {1000.01, 2500, 5000})
-    public void testProcessBidAboveCurrentBid(double amount) {
+    public void testProcessBidAboveCurrentBid(double amount) throws AuctionSystemException {
         auction.processBid(bidder1, amount);
         assertEquals(amount, auction.getCurrentHighestBid(), 0.01);
     }
@@ -89,13 +89,13 @@ public class AuctionTest {
         Auction futureAuction = new Auction(item, seller, futureStart, futureEnd);
 
         assertEquals(AuctionStatus.OPEN, futureAuction.getStatus());
-        assertThrows(AuctionNotStartedException.class, () -> futureAuction.processBid(bidder1, 1500));
+        assertThrows(AuctionClosedException.class, () -> futureAuction.processBid(bidder1, 1500));
     }
 
     // startTime <= Thời gian <= emdTime
     @ParameterizedTest
     @ValueSource(longs = {0, 1, 60, 3600})
-    public void testProcessBidAfterAuctionStart(long amount) {
+    public void testProcessBidAfterAuctionStart(long amount) throws AuctionSystemException {
         LocalDateTime nowStart = LocalDateTime.now().minusSeconds(amount);
         LocalDateTime nowEnd = LocalDateTime.now().plusSeconds(amount + 3600);
         Auction nowAuction = new Auction(item, seller, nowStart, nowEnd);
@@ -108,7 +108,7 @@ public class AuctionTest {
     // Test: Khi đặt bid dưới 30 giây trước khi endTime → endTime tự động gia hạn +1 phút
     @ParameterizedTest
     @ValueSource(longs = {1, 15, 29}) // 1s, 15s, 29s trước khi kết thúc (< 30s)
-    public void testProcessBidUnder30SecondsBeforeAuctionEnd(long secondsLeft) {
+    public void testProcessBidUnder30SecondsBeforeAuctionEnd(long secondsLeft) throws AuctionSystemException {
         // Arrange: Tạo phiên kết thúc sau secondsLeft giây
         LocalDateTime startTime = LocalDateTime.now().minusHours(1);
         LocalDateTime endTime = LocalDateTime.now().plusSeconds(secondsLeft);
@@ -139,8 +139,20 @@ public class AuctionTest {
     // Test 2 bidders đặt giá cùng lúc với giá KHÁC nhau
     @Test
     public void testConcurrentBidWithDifferentAmountsFirstLarger() throws InterruptedException {
-        Thread thread1 = new Thread(() -> auction.processBid(bidder1, 2000.0));
-        Thread thread2 = new Thread(() -> auction.processBid(bidder2, 3000.0));
+        Thread thread1 = new Thread(() -> {
+            try {
+                auction.processBid(bidder1, 2000.0);
+            } catch (AuctionSystemException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        Thread thread2 = new Thread(() -> {
+            try {
+                auction.processBid(bidder2, 3000.0);
+            } catch (AuctionSystemException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         thread1.start();
         thread2.start();
@@ -200,12 +212,12 @@ public class AuctionTest {
 
         // Người đặt sau phải nhận lỗi BidTooLowException
         assertNotNull(expectedError, "Người đặt sau phải throw exception");
-        assertInstanceOf(BidTooLowException.class, expectedError);
+        assertInstanceOf(InvalidBidException.class, expectedError);
     }
 
     // Balance của seller & bidder KHÔNG thay đổi cho tới khi closeAuction
     @Test
-    public void testBalanceNotChangedDuringBidding() {
+    public void testBalanceNotChangedDuringBidding() throws AuctionSystemException {
         double initialSellerBalance = seller.getBalance(); // 0
         double initialBidderBalance = bidder1.getBalance();
 
@@ -218,7 +230,7 @@ public class AuctionTest {
     // closeAuction với winner
     @ParameterizedTest
     @ValueSource(doubles = {1500, 5000})
-    public void testCloseAuctionWithWinner(double amount) {
+    public void testCloseAuctionWithWinner(double amount) throws AuctionSystemException {
         double initBidder1Balance = bidder1.getBalance(); // 5000
         double initSellerBalance = seller.getBalance();   // 0
 
@@ -244,7 +256,7 @@ public class AuctionTest {
 
     // Test toàn bộ flow: multiple bids → closeAuction → verify results
     @Test
-    public void testCompleteAuctionFlow() {
+    public void testCompleteAuctionFlow() throws AuctionSystemException {
         // Initial state
         assertEquals(AuctionStatus.RUNNING, auction.getStatus());
         assertEquals(1000.0, auction.getCurrentHighestBid(), 0.01);
