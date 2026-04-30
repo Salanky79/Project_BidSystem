@@ -1,12 +1,11 @@
 package com.auction.server.controllers;
 
-import com.auction.server.exceptions.UserAuthenticationException;
-import com.auction.server.exceptions.InvalidUserRoleException;
-import com.auction.server.exceptions.AuctionNotFoundException;
 import com.auction.share.models.user.Bidder;
 import com.auction.share.models.user.Seller;
 import com.auction.share.models.user.User;
 import com.auction.share.enums.AuctionStatus;
+import com.auction.share.exceptions.AuthenticationException;
+import com.auction.share.exceptions.AuctionNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,13 +20,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * AuctionManagerTest: Kiểm Tra Tầng Controller Server (Kiểm Tra Integration)
- *
+ * AuctionManagerTest: Kiểm Tra Tầng Controller Server (Kiểm Tra Integration)*
  * Chiến Lược: Tối Thiểu Nhưng Toàn Diện
  * - Dùng @ParameterizedTest để test nhiều scenario cùng 1 method
  * - Tránh test lại business logic của Auction (đã test ở AuctionTest)
- * - Tập Trung: Định Tuyến, Xác Thực, Phát Sóng, Định Dạng Dữ Liệu
- *
+ * - Tập Trung: Định Tuyến, Xác Thực, Phát Sóng, Định Dạng Dữ Liệu*
  * Bao Phủ:
  * ✓ EP: Đăng nhập tài khoản hợp lệ/không hợp lệ
  * ✓ EP: Xác thực vai trò đặt giá (Bidder vs Seller)
@@ -64,7 +61,7 @@ public class AuctionManagerTest {
      * BVA: Username & password khớp chính xác
      */
     @Test
-    public void testLoginSuccess() {
+    public void testLoginSuccess() throws AuthenticationException {
         // Dùng credentials từ AuctionManager constructor (admin)
         User user = manager.login("admin", "123");
 
@@ -91,8 +88,8 @@ public class AuctionManagerTest {
         ",123"                     // Username rỗng
     })
     public void testLoginInvalidCredentials(String username, String password) {
-        assertThrows(UserAuthenticationException.class, () -> manager.login(username, password),
-                "Tài khoản không hợp lệ phải throw UserAuthenticationException");
+        assertThrows(AuthenticationException.class, () -> manager.login(username, password),
+                "Tài khoản không hợp lệ phải throw AuthenticationException");
     }
 
     // ============================================================
@@ -135,9 +132,6 @@ public class AuctionManagerTest {
      */
     @Test
     public void testListItemsPriceUpdate() {
-        String listBefore = manager.listItems();
-        String priceBefore = listBefore.split("\\|")[1]; // Lấy giá mặt hàng đầu
-
         // Đặt giá (tạo Bidder)
         Bidder bidderToUse = new Bidder("admin", "123", "Admin", "Hanoi");
         bidderToUse.deposit(10000);
@@ -168,7 +162,7 @@ public class AuctionManagerTest {
      */
     @Test
     public void testPlaceBidWithSellerRole() {
-        assertThrows(InvalidUserRoleException.class, () -> manager.placeBid(
+        assertThrows(AuthenticationException.class, () -> manager.placeBid(
                 "iPhone 15", 1500, seller), "Người bán không được phép đặt giá");
     }
 
@@ -303,7 +297,7 @@ public class AuctionManagerTest {
      * Quy trình thành công: Đăng Nhập → Danh Sách → Đặt Giá
      */
     @Test
-    public void testCompleteWorkflow() {
+    public void testCompleteWorkflow() throws AuthenticationException {
         // Bước 1: Đăng nhập
         User loginUser = manager.login("admin", "123");
         assertNotNull(loginUser);

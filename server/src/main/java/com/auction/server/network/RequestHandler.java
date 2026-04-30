@@ -1,12 +1,8 @@
 package com.auction.server.network;
 
 import com.auction.server.controllers.AuctionManager;
-import com.auction.server.exceptions.AuctionNotFoundException;
-import com.auction.server.exceptions.InvalidUserRoleException;
-import com.auction.server.exceptions.UserAuthenticationException;
-import com.auction.server.exceptions.InsufficientFundsException;
+import com.auction.server.exceptions.*;
 import com.auction.share.exceptions.*;
-import com.auction.share.exceptions.InvalidBidException;
 import com.auction.share.models.user.User;
 import java.io.*;
 import java.net.Socket;
@@ -48,26 +44,8 @@ public class RequestHandler implements Runnable {
                         String result = manager.placeBid(parts[1], Double.parseDouble(parts[2]), currentUser);
                         out.println(result);
                     }
-                } catch (UserAuthenticationException e) {
+                } catch (AuctionSystemException e) {
                     out.println("FAIL|" + e.getMessage());
-                } catch (InvalidUserRoleException e) {
-                    out.println("FAIL|" + e.getMessage());
-                } catch (AuctionNotFoundException e) {
-                    out.println("FAIL|" + e.getMessage());
-                } catch (AuctionNotStartedException e) {
-                    out.println("FAIL|" + e.getMessage());
-                } catch (AuctionClosedException e) {
-                    out.println("FAIL|" + e.getMessage());
-                } catch (AuctionNotRunningException e) {
-                    out.println("FAIL|" + e.getMessage());
-                } catch (InvalidBidException e) {
-                    out.println("FAIL|" + e.getMessage());
-                } catch (BidTooLowException e) {
-                    out.println("FAIL|" + e.getMessage());
-                } catch (InsufficientFundsException e) {
-                    out.println("FAIL|" + e.getMessage());
-                } catch (RuntimeException e) {
-                    out.println("FAIL|Lỗi: " + e.getMessage());
                 }
             }
         } catch (IOException e) {

@@ -1,7 +1,7 @@
 package com.auction.share.models.user;
 
-import com.auction.share.models.auction.BidTransaction;
 import com.auction.share.exceptions.InsufficientFundsException;
+import com.auction.share.models.auction.BidTransaction;
 import com.auction.share.enums.Role;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class Bidder extends User {
         return balance; 
     }
 
-    public void deductBalance(double amount) {
+    public void deductBalance(double amount) throws InsufficientFundsException {
         if (amount > balance) {
             throw new InsufficientFundsException(
                 "Không đủ tiền để thanh toán! Số dư: " + balance + "$, yêu cầu: " + amount + "$"
