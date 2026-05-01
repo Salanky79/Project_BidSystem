@@ -4,16 +4,22 @@ import com.auction.share.models.auction.Auction;
 import com.auction.share.models.item.Item;
 import com.auction.share.enums.Role;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Seller extends User {
+    private String phoneNumber;
+    private String email;
     private double balance;
     private List<String> auctionIdList;
 
-    public Seller(String username, String password, String fullName) {
+    public Seller(String username, String password, String fullName, String phoneNumber, String email) {
         super(username, password, fullName);
+        this.phoneNumber = phoneNumber;
+        this.email = email;
         this.auctionIdList = new ArrayList<>();
         this.balance = 0.0;
         this.setRole(Role.SELLER);
@@ -26,12 +32,7 @@ public class Seller extends User {
     }
 
     public void cancelAuction(Auction auction) {
-        if (this.auctionIdList.contains(auction.getId())) {
-            this.auctionIdList.remove(auction.getId());
-            System.out.println("Đã hủy phiên đấu giá mặt hàng: " + auction.getItem().getName());
-        } else {
-            System.out.println("Lỗi: Phiên đấu giá này không thuộc về bạn!");
-        }
+        this.auctionIdList.remove(auction.getId());
     }
 
 
@@ -39,16 +40,29 @@ public class Seller extends User {
         this.balance = balance;
     }
     public void addBalance(double amount) {
-        if (amount > 0) {
-            this.balance += amount;
-            System.out.println("[$] Biến động số dư: Seller [" + this.getUsername() + "] được cộng +" + amount + "$. Số dư hiện tại: " + this.balance + "$");
-        } else {
-            System.out.println("Lỗi: Số tiền cộng vào phải lớn hơn 0!");
-        }
+        this.balance += amount;
     }
 
     public double getBalance() {
         return balance;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    // Trong Seller
+    @Override
+    public void fillPreparedStatement(PreparedStatement ps) throws SQLException {
+        ps.setString(5, this.phoneNumber);
+        ps.setString(6, this.email);
+        ps.setDouble(8, this.balance);
+        ps.setNull(9, java.sql.Types.VARCHAR);
+        ps.setInt(10, 0);
     }
 }
 

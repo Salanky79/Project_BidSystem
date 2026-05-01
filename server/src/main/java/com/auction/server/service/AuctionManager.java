@@ -1,9 +1,5 @@
-package com.auction.server.controllers;
+package com.auction.server.service;
 
-import com.auction.server.exceptions.DataValidationException;
-import com.auction.share.exceptions.AuctionSystemException;
-import com.auction.share.exceptions.AuthenticationException;
-import com.auction.share.exceptions.AuctionNotFoundException;
 import com.auction.share.models.auction.Auction;
 import com.auction.share.models.item.Item;
 import com.auction.share.models.user.Bidder;
@@ -109,12 +105,6 @@ public class AuctionManager {
     }
 
     // --- LOGIC XỬ LÝ ---
-    public User login(String user, String pass) throws AuthenticationException {
-        for (User u : users) {
-            if (u.getUsername().equals(user) && u.getPassword().equals(pass)) return u;
-        }
-        throw new AuthenticationException("Đăng nhập thất bại: Sai tên đăng nhập hoặc mật khẩu!");
-    }
 
     // SỬA LẠI: Lặp qua danh sách auctions thay vì items
     public String listItems() {
@@ -130,30 +120,32 @@ public class AuctionManager {
     }
 
     // SỬA LẠI: Chuyển việc kiểm tra giá cho lớp Auction.java lo
-    public String placeBid(String itemName, double amount, User user) throws AuctionSystemException {
+    public String placeBid(String itemName, double amount, User user) {
         // Chỉ Bidder (người mua) mới được đặt giá
         if (!(user instanceof Bidder)) {
-            throw new DataValidationException(
-                "Chỉ BIDDER (người mua) mới được đặt giá. Bạn là: " + user.getRole());
+            return "FAIL|Chi co nguoi mua (Bidder) moi duoc dat gia!";
         }
         Bidder bidder = (Bidder) user;
 
         for (Auction auction : auctions) {
             if (auction.getItem().getName().equalsIgnoreCase(itemName)) {
-                // Giao việc xử lý nghiệp vụ cho file Auction của bạn
-                // Nó sẽ tự ktra thời gian, trạng thái, số dư tiền...
-                boolean success = auction.processBid(bidder, amount);
+                try {
+                    // Giao việc xử lý nghiệp vụ cho file Auction của bạn
+                    // Nó sẽ tự ktra thời gian, trạng thái, số dư tiền...
+                    boolean success = auction.processBid(bidder, amount);
 
-                if (success) {
-                    // Gọi loa phường báo cho cả làng
-                    broadcast("BID_UPDATE|" + itemName + "|" + amount + "|" + bidder.getUsername());
-                    return "SUCCESS|Ban da dat gia thanh cong!";
+                    if (success) {
+                        // Gọi loa phường báo cho cả làng
+                        broadcast("BID_UPDATE|" + itemName + "|" + amount + "|" + bidder.getUsername());
+                        return "SUCCESS|Ban da dat gia thanh cong!";
+                    }
+                } catch (RuntimeException e) {
+                    // Nếu code Auction quăng lỗi (như chưa tới giờ, thiếu tiền...), ta bắt lấy và báo cho Client
+                    return "FAIL|" + e.getMessage();
                 }
             }
         }
-        throw new AuctionNotFoundException(
-            "Không tìm thấy phiên đấu giá nào cho sản phẩm: " + itemName
-        );
+        return "FAIL|Khong tim thay phien dau gia nao cho mon hang nay!";
     }
 }
 

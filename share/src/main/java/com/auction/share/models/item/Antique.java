@@ -4,8 +4,7 @@ public class Antique extends Item {
     private String era;
     private String material;
 
-    public Antique(String name, String description, double startingPrice, int i, String sellerID , String era,
-                   String material, String sellerId) {
+    public Antique(String name, String description, double startingPrice, String sellerId, String era, String material) {
         super(name, description, startingPrice, sellerId);
         this.era = era;
         this.material = material;
@@ -14,8 +13,8 @@ public class Antique extends Item {
     public String getEra() {
         return era;
     }
+
     public String getMaterial() {
         return material;
     }
 }
-
