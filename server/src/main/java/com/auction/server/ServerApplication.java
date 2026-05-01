@@ -1,6 +1,7 @@
 package com.auction.server;
 
-import com.auction.server.network.RequestHandler;
+import com.auction.server.controller.RequestHandler;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 

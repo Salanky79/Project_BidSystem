@@ -6,31 +6,28 @@ import com.auction.share.models.item.Jewelry;
 public class JewelryFactory implements ItemCreator {
     @Override
     public Item createItem(String name, String description, double startingPrice, String sellerID, String... attributes) {
-        // Giá trị mặc định
-        String material = "Unknown";
-        double caratWeight = 0.0;
+        String material = getTextAttribute(attributes, 0, "Unknown");
+        double caratWeight = parseDoubleAttribute(attributes, 1, 0.0);
 
-
-        // Bóc tách attributes:
-        // attributes[0] -> material
-        // attributes[1] -> caratWeight
-        // attributes[2] -> gemstoneType
-
-        if (attributes != null && attributes.length > 0) {
-            material = attributes[0];
-        }
-
-        if (attributes != null && attributes.length > 1) {
-            try {
-                caratWeight = Double.parseDouble(attributes[1]);
-            } catch (NumberFormatException e) {
-                System.err.println("Lỗi định dạng khối lượng carat: " + attributes[1]);
-                caratWeight = 0.0;
-            }
-        }
-
-
-        // Tạo và trả về đối tượng Jewelry
         return new Jewelry(name, description, startingPrice, sellerID, material, caratWeight);
+    }
+
+    private static String getTextAttribute(String[] attributes, int index, String defaultValue) {
+        if (attributes == null || attributes.length <= index || attributes[index] == null || attributes[index].isBlank()) {
+            return defaultValue;
+        }
+        return attributes[index];
+    }
+
+    private static double parseDoubleAttribute(String[] attributes, int index, double defaultValue) {
+        String value = getTextAttribute(attributes, index, null);
+        if (value == null) {
+            return defaultValue;
+        }
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 }

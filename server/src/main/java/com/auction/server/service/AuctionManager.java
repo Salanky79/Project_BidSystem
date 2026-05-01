@@ -1,4 +1,4 @@
-package com.auction.server.controllers;
+package com.auction.server.service;
 
 import com.auction.share.models.auction.Auction;
 import com.auction.share.models.item.Item;
@@ -105,12 +105,6 @@ public class AuctionManager {
     }
 
     // --- LOGIC XỬ LÝ ---
-    public User login(String user, String pass) {
-        for (User u : users) {
-            if (u.getUsername().equals(user) && u.getPassword().equals(pass)) return u;
-        }
-        return null;
-    }
 
     // SỬA LẠI: Lặp qua danh sách auctions thay vì items
     public String listItems() {

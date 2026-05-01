@@ -6,18 +6,28 @@ import com.auction.share.models.item.Item;
 public class ElectronicFactory implements ItemCreator {
     @Override
     public Item createItem(String name, String description, double startingPrice, String sellerID, String... attributes) {
-        // Giả sử: attributes[0] là brand, attributes[1] là warrantyMonths
-        String brand = (attributes.length > 0) ? attributes[0] : "Unknown";
-
-        int warrantyMonths = 0;
-        if (attributes.length > 1) {
-            try {
-                warrantyMonths = Integer.parseInt(attributes[1]);
-            } catch (NumberFormatException e) {
-                warrantyMonths = 0; // Giá trị mặc định nếu lỗi định dạng
-            }
-        }
+        String brand = getTextAttribute(attributes, 0, "Unknown");
+        int warrantyMonths = parseIntAttribute(attributes, 1, 0);
 
         return new Electronic(name, description, startingPrice, sellerID, brand, warrantyMonths);
+    }
+
+    private static String getTextAttribute(String[] attributes, int index, String defaultValue) {
+        if (attributes == null || attributes.length <= index || attributes[index] == null || attributes[index].isBlank()) {
+            return defaultValue;
+        }
+        return attributes[index];
+    }
+
+    private static int parseIntAttribute(String[] attributes, int index, int defaultValue) {
+        String value = getTextAttribute(attributes, index, null);
+        if (value == null) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 }

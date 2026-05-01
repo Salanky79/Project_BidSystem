@@ -8,35 +8,42 @@ import com.auction.share.models.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class UserDBFactory {
+public final class UserDBFactory {
+    private UserDBFactory() {
+    }
+
     public static User mapUser(ResultSet rs) throws SQLException {
         String uuid = rs.getString("id");
         String username = rs.getString("username");
         String password = rs.getString("password");
-        String fullname = rs.getString("fullname");
+        String fullName = rs.getString("fullname");
+        String phoneNumber = rs.getString("phoneNumber");
+        String email = rs.getString("email");
         String role = rs.getString("role");
         double balance = rs.getDouble("balance");
         String address = rs.getString("address");
         int accessLevel = rs.getInt("access_level");
 
+        User user;
         switch (role) {
             case "SELLER":
-                Seller seller = new Seller(username, password, fullname);
-                seller.setID(uuid);
+                Seller seller = new Seller(username, password, fullName, phoneNumber, email);
                 seller.setBalance(balance);
-                return seller;
-
+                user = seller;
+                break;
             case "BIDDER":
-                Bidder bidder = new Bidder(username, password, fullname, address);
-                bidder.setID(uuid);
+                Bidder bidder = new Bidder(username, password, fullName, phoneNumber, email, address);
                 bidder.setBalance(balance);
-                return bidder;
-
+                user = bidder;
+                break;
             case "ADMIN":
-                Admin admin = new Admin(username, password, fullname, accessLevel);
-                admin.setID(uuid);
-                return admin;
+                user = new Admin(username, password, fullName, accessLevel);
+                break;
+            default:
+                throw new SQLException("Unsupported role from database: " + role);
         }
-        return null;
+
+        user.setID(uuid);
+        return user;
     }
 }
