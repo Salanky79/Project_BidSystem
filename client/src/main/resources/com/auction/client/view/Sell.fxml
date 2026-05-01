@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane maxHeight="650.0" maxWidth="600.0" minHeight="650.0" minWidth="600.0" prefHeight="650.0" prefWidth="600.0" stylesheets="@../addlistingstyles.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.SellController">
+   <children>
+      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="33.0" layoutY="40.0" prefHeight="35.0" prefWidth="535.0" text="Add Listing" textAlignment="CENTER" AnchorPane.leftAnchor="33.0" AnchorPane.rightAnchor="32.0" AnchorPane.topAnchor="20.0">
+         <font>
+            <Font name="Berlin Sans FB" size="31.0" />
+         </font>
+      </Label>
+      <TextField fx:id="name" layoutX="112.0" layoutY="99.0" prefHeight="52.0" prefWidth="354.0" promptText="Title" styleClass="fields" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0" />
+      <ComboBox fx:id="category" layoutX="112.0" layoutY="177.0" prefHeight="52.0" prefWidth="354.0" promptText="Category" styleClass="fields" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0" />
+      <TextField fx:id="startingprice" layoutX="112.0" layoutY="261.0" prefHeight="52.0" prefWidth="354.0" promptText="Starting Price" styleClass="fields" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0" />
+      <DatePicker fx:id="enddate" layoutX="112.0" layoutY="337.0" prefHeight="54.0" prefWidth="354.0" promptText="End Date" styleClass="fields" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0" />
+      <TextField fx:id="description" alignment="TOP_LEFT" layoutX="112.0" layoutY="422.0" prefHeight="87.0" prefWidth="354.0" promptText="Description" styleClass="fields" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0" />
+      <Button fx:id="chooseImageButton" layoutX="368.0" layoutY="542.0" styleClass="myButtons" text="Choose Image" AnchorPane.rightAnchor="123.0" />
+      <Label fx:id="imageLabel" layoutX="112.0" layoutY="541.0" prefHeight="26.0" prefWidth="196.0" text="File Upload Label" AnchorPane.leftAnchor="123.0" />
+      <Button fx:id="addButton" layoutX="235.0" layoutY="586.0" prefHeight="35.0" prefWidth="102.0" styleClass="myButtons" text="Add" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="249.0" AnchorPane.rightAnchor="249.0" />
+      <Label fx:id="validationLabel" layoutX="112.0" layoutY="518.0" prefHeight="18.0" prefWidth="348.0" text="This is a validation label" textFill="RED" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0" />
+      <ImageView fx:id="closeButton" fitHeight="26.0" fitWidth="25.0" layoutX="660.0" layoutY="14.0" pickOnBounds="true">
+      </ImageView>
+   </children>
+</AnchorPane>
