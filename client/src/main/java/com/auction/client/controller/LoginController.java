@@ -13,6 +13,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.application.Platform;
 import com.auction.client.network.NetworkClient;
+import com.auction.client.network.RestClient;
 
 import java.io.IOException;
 
@@ -86,12 +87,15 @@ public class LoginController {
         // Tạm ẩn lỗi trước khi gửi request
         errorLabel.setVisible(false);
 
-        // Gửi request thông qua NetworkClient
-        NetworkClient.getInstance().sendRequest("LOGIN|" + username + "|" + password, response -> {
+        // Gửi request thông qua RestClient (HTTP API)
+        RestClient.getInstance().login(username, password, response -> {
             // Cập nhật giao diện thì phải nằm trong Platform.runLater
             Platform.runLater(() -> {
-                if (response != null && response.startsWith("SUCCESS")) {
+                if (response != null && response.contains("\"status\":\"SUCCESS\"")) {
                     try {
+                        // Khởi động TCP Socket sau khi đăng nhập thành công
+                        NetworkClient.getInstance();
+
                         // 1. Load cái KHUNG (HomeFrame)
                         FXMLLoader frameLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/HomeFrame.fxml"));
                         Parent homeFrameRoot = frameLoader.load();
@@ -118,7 +122,15 @@ public class LoginController {
                     }
                 } else {
                     // Hiển thị lỗi từ server
-                    String errorMsg = response != null ? response.replace("FAIL|", "") : "Không thể kết nối Server!";
+                    String errorMsg = "Không thể kết nối Server!";
+                    if (response != null && response.contains("\"message\":\"")) {
+                        // Trích xuất chuỗi lỗi đơn giản
+                        int start = response.indexOf("\"message\":\"") + 11;
+                        int end = response.indexOf("\"", start);
+                        if (end > start) {
+                            errorMsg = response.substring(start, end);
+                        }
+                    }
                     errorLabel.setText(errorMsg);
                     errorLabel.setVisible(true);
                 }
