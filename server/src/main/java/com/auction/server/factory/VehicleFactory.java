@@ -6,25 +6,28 @@ import com.auction.share.models.item.Vehicle;
 public class VehicleFactory implements ItemCreator {
     @Override
     public Item createItem(String name, String description, double startingPrice, String sellerID, String... attributes) {
-        // Giá trị mặc định
-        double mileage = 0.0;
-        String fuelType = "Chưa xác định";
-
-        // attributes[0] -> mileage (Số km)
-        // attributes[1] -> fuelType (Xăng/Dầu/Điện)
-
-        if (attributes != null && attributes.length > 0) {
-            try {
-                mileage = Double.parseDouble(attributes[0]);
-            } catch (NumberFormatException e) {
-                mileage = 0.0;
-            }
-        }
-
-        if (attributes != null && attributes.length > 1) {
-            fuelType = attributes[1];
-        }
+        double mileage = parseDoubleAttribute(attributes, 0, 0.0);
+        String fuelType = getTextAttribute(attributes, 1, "Unknown Fuel");
 
         return new Vehicle(name, description, startingPrice, sellerID, mileage, fuelType);
+    }
+
+    private static String getTextAttribute(String[] attributes, int index, String defaultValue) {
+        if (attributes == null || attributes.length <= index || attributes[index] == null || attributes[index].isBlank()) {
+            return defaultValue;
+        }
+        return attributes[index];
+    }
+
+    private static double parseDoubleAttribute(String[] attributes, int index, double defaultValue) {
+        String value = getTextAttribute(attributes, index, null);
+        if (value == null) {
+            return defaultValue;
+        }
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 }

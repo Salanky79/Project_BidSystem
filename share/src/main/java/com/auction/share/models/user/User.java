@@ -2,6 +2,8 @@ package com.auction.share.models.user;
 
 import com.auction.share.enums.Role;
 import com.auction.share.models.core.Entity;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public abstract class User extends Entity{
     private String username;
@@ -34,14 +36,12 @@ public abstract class User extends Entity{
     public String getPassword(){
         return  this.password;
     }
-    public double getBalance() {
-        return 0;
+
+    public void setPassword(String password){
+        this.password = password;
     }
-    public String getAddress() {
-        return null;
-    }
-    public int getAccessLevel() {
-        return 0;
-    }
+
+    // Trong abstract class User
+    public abstract void fillPreparedStatement(PreparedStatement ps) throws SQLException;
 }
 
