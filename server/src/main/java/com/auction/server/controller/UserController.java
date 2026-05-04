@@ -129,7 +129,7 @@ public class UserController {
             case BIDDER:
                 return new Bidder(username, password, fullName, phoneNumber, email, address);
             case SELLER:
-                return new Seller(username, password, fullName, phoneNumber, email);
+                return new Seller(username, password, fullName, phoneNumber, email, address);
             case ADMIN:
                 return new Admin(username, password, fullName, 1);
             default:
@@ -164,6 +164,7 @@ public class UserController {
         } else if (user instanceof Seller seller) {
             phoneNumber = seller.getPhoneNumber();
             email = seller.getEmail();
+            address = seller.getAddress();
             balance = seller.getBalance();
         }
 

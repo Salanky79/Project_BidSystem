@@ -108,6 +108,7 @@ public class UserService {
                 Seller seller = (Seller) user;
                 validateRequiredText(seller.getPhoneNumber(), "Phone number is required.");
                 validateRequiredText(seller.getEmail(), "Email is required.");
+                validateRequiredText(seller.getAddress(), "Address is required for seller accounts.");
                 break;
             case ADMIN:
                 break;

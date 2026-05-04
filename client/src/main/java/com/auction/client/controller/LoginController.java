@@ -12,8 +12,10 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.application.Platform;
-import com.auction.client.network.NetworkClient;
 import com.auction.client.network.RestClient;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
 
@@ -91,11 +93,8 @@ public class LoginController {
         RestClient.getInstance().login(username, password, response -> {
             // Cập nhật giao diện thì phải nằm trong Platform.runLater
             Platform.runLater(() -> {
-                if (response != null && response.contains("\"status\":\"SUCCESS\"")) {
+                if (isLoginSuccess(response)) {
                     try {
-                        // Khởi động TCP Socket sau khi đăng nhập thành công
-                        NetworkClient.getInstance();
-
                         // 1. Load cái KHUNG (HomeFrame)
                         FXMLLoader frameLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/HomeFrame.fxml"));
                         Parent homeFrameRoot = frameLoader.load();
@@ -121,20 +120,38 @@ public class LoginController {
                         errorLabel.setVisible(true);
                     }
                 } else {
-                    // Hiển thị lỗi từ server
-                    String errorMsg = "Không thể kết nối Server!";
-                    if (response != null && response.contains("\"message\":\"")) {
-                        // Trích xuất chuỗi lỗi đơn giản
-                        int start = response.indexOf("\"message\":\"") + 11;
-                        int end = response.indexOf("\"", start);
-                        if (end > start) {
-                            errorMsg = response.substring(start, end);
-                        }
-                    }
-                    errorLabel.setText(errorMsg);
+                    errorLabel.setText(extractErrorMessage(response));
                     errorLabel.setVisible(true);
                 }
             });
         });
+    }
+
+    /** Cùng shape JSON với {@link com.auction.share.DTO.Response} từ server (field {@code success}, {@code message}). */
+    private static JsonObject parseResponseBody(String response) {
+        if (response == null || response.isBlank()) {
+            return null;
+        }
+        try {
+            return JsonParser.parseString(response).getAsJsonObject();
+        } catch (JsonSyntaxException | IllegalStateException | UnsupportedOperationException e) {
+            return null;
+        }
+    }
+
+    private static boolean isLoginSuccess(String response) {
+        JsonObject root = parseResponseBody(response);
+        if (root == null || !root.has("success") || root.get("success").isJsonNull()) {
+            return false;
+        }
+        return root.get("success").getAsBoolean();
+    }
+
+    private static String extractErrorMessage(String response) {
+        JsonObject root = parseResponseBody(response);
+        if (root != null && root.has("message") && !root.get("message").isJsonNull()) {
+            return root.get("message").getAsString();
+        }
+        return "Không thể kết nối Server!";
     }
 }

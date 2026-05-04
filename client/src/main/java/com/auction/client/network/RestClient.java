@@ -1,5 +1,9 @@
 package com.auction.client.network;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -10,6 +14,12 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class RestClient {
+
+    /** Phải trùng với {@code ServerApplication} (Javalin). */
+    private static final String API_BASE = "http://localhost:8080";
+
+    private static final Gson gson = new Gson();
+
     private static RestClient instance;
     private HttpClient httpClient;
     private ExecutorService executorService;
@@ -32,11 +42,13 @@ public class RestClient {
     public void login(String username, String password, Consumer<String> onResponse) {
         executorService.submit(() -> {
             try {
-                // Tạo chuỗi JSON đơn giản
-                String jsonBody = "{\"username\":\"" + username + "\", \"password\":\"" + password + "\"}";
+                JsonObject body = new JsonObject();
+                body.addProperty("username", username);
+                body.addProperty("password", password);
+                String jsonBody = gson.toJson(body);
 
                 HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8081/api/login"))
+                        .uri(URI.create(API_BASE + "/api/auth/login"))
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                         .build();
@@ -49,7 +61,12 @@ public class RestClient {
             } catch (Exception e) {
                 e.printStackTrace();
                 if (onResponse != null) {
-                    onResponse.accept("{\"status\":\"ERROR\", \"message\":\"Lỗi kết nối REST API: " + e.toString() + "\"}");
+                    String detail = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+                    JsonObject err = new JsonObject();
+                    err.addProperty("success", false);
+                    err.addProperty("message", detail);
+                    err.add("data", JsonNull.INSTANCE);
+                    onResponse.accept(gson.toJson(err));
                 }
             }
         });
