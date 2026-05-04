@@ -7,9 +7,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    private static HikariConfig config = new HikariConfig();
-    private static HikariDataSource ds;
-    public static Dotenv dotenv = Dotenv.load();
+    private static final HikariConfig config = new HikariConfig();
+    private static final HikariDataSource ds;
+    public static Dotenv dotenv = loadDotenv();
+
+    private static Dotenv loadDotenv() {
+        return Dotenv.load();
+    }
 
     private DatabaseConnection(){}
 

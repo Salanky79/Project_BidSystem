@@ -150,7 +150,7 @@ public class UserDAO {
             ps.setString(5, seller.getPhoneNumber());
             ps.setString(6, seller.getEmail());
             ps.setDouble(8, seller.getBalance());
-            ps.setNull(9, java.sql.Types.VARCHAR);
+            ps.setString(9, seller.getAddress());
             ps.setInt(10, 0);
             return;
         }

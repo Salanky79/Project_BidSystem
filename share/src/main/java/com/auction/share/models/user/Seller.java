@@ -11,13 +11,15 @@ import java.util.List;
 public class Seller extends User {
     private String phoneNumber;
     private String email;
+    private String address;
     private double balance;
     private List<String> auctionIdList;
 
-    public Seller(String username, String password, String fullName, String phoneNumber, String email) {
+    public Seller(String username, String password, String fullName, String phoneNumber, String email, String address) {
         super(username, password, fullName);
         this.phoneNumber = phoneNumber;
         this.email = email;
+        this.address = address;
         this.auctionIdList = new ArrayList<>();
         this.balance = 0.0;
         this.setRole(Role.SELLER);
@@ -51,6 +53,14 @@ public class Seller extends User {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }
 
