@@ -14,7 +14,7 @@ import java.sql.SQLException;
 
 public class UserDAO {
     // LƯU TÀI KHOẢN MỚI
-    public static boolean saveUser(User user) throws SQLException {
+    public boolean saveUser(User user) throws SQLException {
         String sql = "INSERT INTO users (id, fullname, username, password, phoneNumber, email, role, balance, address, access_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -24,7 +24,7 @@ public class UserDAO {
             ps.setString(3, user.getUsername());
             ps.setString(4, user.getPassword());
             ps.setString(7, user.getRole().name());
-            user.fillPreparedStatement(ps);
+            bindRoleSpecificFields(ps, user);
 
             int row = ps.executeUpdate();
             return row > 0;
@@ -32,7 +32,7 @@ public class UserDAO {
     }
 
     // KIỂM TRA USERNAME ĐÃ TỒN TẠI CHƯA
-    public static boolean isUsernameTaken(String username) throws SQLException{
+    public boolean isUsernameTaken(String username) throws SQLException{
         String sql = "SELECT username FROM users WHERE username = ?";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
@@ -46,7 +46,7 @@ public class UserDAO {
     }
 
 
-    public static User findById(String id) throws SQLException{
+    public User findById(String id) throws SQLException{
         String sql = "SELECT * FROM users WHERE id = ?";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -63,7 +63,7 @@ public class UserDAO {
     }
 
 
-    public static User findByUsername(String username) throws SQLException{
+    public User findByUsername(String username) throws SQLException{
         String sql = "SELECT * FROM users WHERE username = ?";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
@@ -79,7 +79,7 @@ public class UserDAO {
         return null;
     }
 
-    public static boolean updateUserPassword(String id, String password) throws SQLException {
+    public boolean updateUserPassword(String id, String password) throws SQLException {
         String sql = "UPDATE users SET password = ? WHERE id = ?";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
@@ -91,7 +91,7 @@ public class UserDAO {
         }
     }
 
-    public static boolean updateUserAddress(String id, String address) throws SQLException {
+    public boolean updateUserAddress(String id, String address) throws SQLException {
         String sql = "UPDATE users SET address = ? WHERE id = ?";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
@@ -103,7 +103,19 @@ public class UserDAO {
         }
     }
 
-    public static boolean isEmailTaken(String email) throws SQLException {
+    public boolean updateUserEmail(String id, String email) throws SQLException {
+        String sql = "UPDATE users SET email = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, email);
+            ps.setString(2, id);
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    public boolean isEmailTaken(String email) throws SQLException {
         String sql = "SELECT email FROM users WHERE email = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -114,7 +126,7 @@ public class UserDAO {
         }
     }
 
-    public static boolean updateBalance(String id, double newBalance) throws SQLException {
+    public boolean updateBalance(String id, double newBalance) throws SQLException {
         String sql = "UPDATE users SET balance = ? WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -122,5 +134,36 @@ public class UserDAO {
             ps.setString(2, id);
             return ps.executeUpdate() > 0;
         }
+    }
+
+    private void bindRoleSpecificFields(PreparedStatement ps, User user) throws SQLException {
+        if (user instanceof Bidder bidder) {
+            ps.setString(5, bidder.getPhoneNumber());
+            ps.setString(6, bidder.getEmail());
+            ps.setDouble(8, bidder.getBalance());
+            ps.setString(9, bidder.getAddress());
+            ps.setInt(10, 0);
+            return;
+        }
+
+        if (user instanceof Seller seller) {
+            ps.setString(5, seller.getPhoneNumber());
+            ps.setString(6, seller.getEmail());
+            ps.setDouble(8, seller.getBalance());
+            ps.setNull(9, java.sql.Types.VARCHAR);
+            ps.setInt(10, 0);
+            return;
+        }
+
+        if (user instanceof Admin admin) {
+            ps.setNull(5, java.sql.Types.VARCHAR);
+            ps.setNull(6, java.sql.Types.VARCHAR);
+            ps.setDouble(8, 0.0);
+            ps.setNull(9, java.sql.Types.VARCHAR);
+            ps.setInt(10, admin.getAccessLevel());
+            return;
+        }
+
+        throw new IllegalArgumentException("Unsupported user type: " + user.getClass().getSimpleName());
     }
 }

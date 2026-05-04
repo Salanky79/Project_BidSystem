@@ -22,7 +22,7 @@ public class HomeFrameController {
     }
 
     public void handleLogout(ActionEvent event) {
-        System.out.println("Đang đăng xuất... Trở về màn hình Login!");
+        System.out.println("Logging out... Returning to Login screen.");
         try {
             // 1. Tải lại file giao diện Login
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Login.fxml"));
@@ -39,7 +39,7 @@ public class HomeFrameController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Lỗi: Không tìm thấy file Login.fxml!");
+            System.out.println("Error: Login.fxml file not found.");
         }
     }
 
@@ -64,7 +64,7 @@ public class HomeFrameController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Lỗi: Không tìm thấy file " + fxmlFile);
+            System.out.println("Error: File not found " + fxmlFile);
         }
     }
 

@@ -17,7 +17,7 @@ public class HomeController extends HomeFrameController {
     private VBox Content;
 
     // 1. Tạo một mảng dữ liệu giả lập (Sau này bạn sẽ lấy List<Item> từ Server trả về)
-    String[] itemNames = {"iPhone 15 Pro", "Đồng hồ Rolex", "Túi xách Chanel", "Siêu xe Porsche", "Tranh Van Gogh", "Nhẫn kim cương"};
+    String[] itemNames = {"iPhone 15 Pro", "Rolex Watch", "Chanel Handbag", "Porsche Supercar", "Van Gogh Painting", "Diamond Ring"};
     String[] categories = {"Electronic", "Watch", "Hand Bag", "Car", "Fine Art", "Jewelry"};
     String[] icons = {"📱", "⌚", "👜", "🚗", "🖼", "💍"};
     double[] prices = {1200.0, 5500.0, 3200.0, 150000.0, 85000.0, 12000.0};
@@ -52,7 +52,7 @@ public class HomeController extends HomeFrameController {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Lỗi không tìm thấy file ItemCard.fxml. Hãy kiểm tra lại đường dẫn!");
+            System.out.println("Error: ItemCard.fxml file not found. Please check the path.");
         }
     }
 
