@@ -1,7 +1,7 @@
 package com.auction.server;
 
 import com.auction.server.network.LoginHttpHandler;
-import com.auction.server.network.RequestHandler;
+import com.auction.server.controller.RequestHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.net.InetSocketAddress;
