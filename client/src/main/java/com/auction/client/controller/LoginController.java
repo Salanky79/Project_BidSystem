@@ -7,19 +7,29 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.application.Platform;
+import com.auction.client.network.NetworkClient;
+import com.auction.client.network.RestClient;
 
 import java.io.IOException;
 
 public class LoginController {
 
     // ==========================================
-    // PHẦN 1: KHAI BÁO CÁC BIẾN CHO NÚT CON MẮT
+    // PHẦN 1: KHAI BÁO CÁC BIẾN CHO NÚT CON MẮT VÀ ĐĂNG NHẬP
     // ==========================================
     @FXML
+    private TextField usernameField;
+
+    @FXML
     private PasswordField passwordField;
+
+    @FXML
+    private Label errorLabel;
 
     @FXML
     private TextField passwordVisible;
@@ -65,28 +75,66 @@ public class LoginController {
     // ==========================================
     @FXML
     private void handleLogin(ActionEvent event) {
-        try {
-            // 1. Load cái KHUNG (HomeFrame)
-            FXMLLoader frameLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/HomeFrame.fxml"));
-            Parent homeFrameRoot = frameLoader.load();
+        String username = usernameField.getText();
+        String password = passwordField.getText();
 
-            // 2. Lấy Controller của HomeFrame để tí nữa còn ra lệnh
-            HomeFrameController frameController = frameLoader.getController();
-
-            // 3. Load cái nội dung HOME
-            FXMLLoader homeLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Home.fxml"));
-            Node homeNode = homeLoader.load();
-
-            // 4. Đẩy Home vào ScrollPane của HomeFrame
-            frameController.setView(homeNode);
-
-            // 5. Hiển thị HomeFrame lên cửa sổ (Stage)
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(homeFrameRoot));
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (username.isEmpty() || password.isEmpty()) {
+            errorLabel.setText("Username và Password không được để trống!");
+            errorLabel.setVisible(true);
+            return;
         }
+
+        // Tạm ẩn lỗi trước khi gửi request
+        errorLabel.setVisible(false);
+
+        // Gửi request thông qua RestClient (HTTP API)
+        RestClient.getInstance().login(username, password, response -> {
+            // Cập nhật giao diện thì phải nằm trong Platform.runLater
+            Platform.runLater(() -> {
+                if (response != null && response.contains("\"status\":\"SUCCESS\"")) {
+                    try {
+                        // Khởi động TCP Socket sau khi đăng nhập thành công
+                        NetworkClient.getInstance();
+
+                        // 1. Load cái KHUNG (HomeFrame)
+                        FXMLLoader frameLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/HomeFrame.fxml"));
+                        Parent homeFrameRoot = frameLoader.load();
+
+                        // 2. Lấy Controller của HomeFrame để tí nữa còn ra lệnh
+                        HomeFrameController frameController = frameLoader.getController();
+
+                        // 3. Load cái nội dung HOME
+                        FXMLLoader homeLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Home.fxml"));
+                        Node homeNode = homeLoader.load();
+
+                        // 4. Đẩy Home vào ScrollPane của HomeFrame
+                        frameController.setView(homeNode);
+
+                        // 5. Hiển thị HomeFrame lên cửa sổ (Stage)
+                        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                        stage.setScene(new Scene(homeFrameRoot));
+                        stage.show();
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        errorLabel.setText("Lỗi giao diện: " + e.getMessage());
+                        errorLabel.setVisible(true);
+                    }
+                } else {
+                    // Hiển thị lỗi từ server
+                    String errorMsg = "Không thể kết nối Server!";
+                    if (response != null && response.contains("\"message\":\"")) {
+                        // Trích xuất chuỗi lỗi đơn giản
+                        int start = response.indexOf("\"message\":\"") + 11;
+                        int end = response.indexOf("\"", start);
+                        if (end > start) {
+                            errorMsg = response.substring(start, end);
+                        }
+                    }
+                    errorLabel.setText(errorMsg);
+                    errorLabel.setVisible(true);
+                }
+            });
+        });
     }
 }
