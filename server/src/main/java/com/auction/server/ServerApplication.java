@@ -1,10 +1,12 @@
 package com.auction.server;
 
+
 import com.auction.server.controller.UserController;
 import com.google.gson.Gson;
 import io.javalin.Javalin;
 import io.javalin.json.JsonMapper;
 import org.jetbrains.annotations.NotNull;
+
 
 import java.lang.reflect.Type;
 
