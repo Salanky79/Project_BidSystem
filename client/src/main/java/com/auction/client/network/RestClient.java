@@ -42,14 +42,15 @@ public class RestClient {
                         .build();
 
                 HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                
+
                 if (onResponse != null) {
                     onResponse.accept(response.body());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 if (onResponse != null) {
-                    onResponse.accept("{\"status\":\"ERROR\", \"message\":\"Lỗi kết nối REST API: " + e.toString() + "\"}");
+                    onResponse.accept(
+                            "{\"status\":\"ERROR\", \"message\":\"Lỗi kết nối REST API: " + e.toString() + "\"}");
                 }
             }
         });
