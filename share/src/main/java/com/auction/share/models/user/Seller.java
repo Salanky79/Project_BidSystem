@@ -4,8 +4,6 @@ import com.auction.share.models.auction.Auction;
 import com.auction.share.models.item.Item;
 import com.auction.share.enums.Role;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,16 +51,6 @@ public class Seller extends User {
 
     public String getEmail() {
         return email;
-    }
-
-    // Trong Seller
-    @Override
-    public void fillPreparedStatement(PreparedStatement ps) throws SQLException {
-        ps.setString(5, this.phoneNumber);
-        ps.setString(6, this.email);
-        ps.setDouble(8, this.balance);
-        ps.setNull(9, java.sql.Types.VARCHAR);
-        ps.setInt(10, 0);
     }
 }
 
