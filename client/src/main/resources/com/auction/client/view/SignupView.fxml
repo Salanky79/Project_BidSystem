@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Line?>
+
+<HBox prefHeight="600.0" prefWidth="950.0" style="-fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.SignupController">
+   <StackPane prefHeight="600" prefWidth="400" style="-fx-background-color: #0a0a0a;">
+      <children>
+         <VBox alignment="CENTER" spacing="14" style="-fx-padding: 40 30 30 30;">
+            <children>
+               <ImageView fitHeight="305.0" fitWidth="362.0" pickOnBounds="true" preserveRatio="true">
+                  <image>
+                     <Image url="@Logo.png" />
+                  </image>
+               </ImageView>
+               <Label style="-fx-font-size: 28px; -fx-font-weight: bold;                               -fx-text-fill: white; -fx-font-family: 'Arial Black';" text="WELCOME" />
+               <Label style="-fx-font-size: 28px; -fx-font-weight: bold;                               -fx-text-fill: white; -fx-font-family: 'Arial Black';" text="TO" />
+               <VBox alignment="CENTER" spacing="2" />
+               <HBox alignment="CENTER" spacing="10">
+                  <children>
+                     <ImageView fitHeight="111.0" fitWidth="73.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                           <Image url="@Logo2.png" />
+                        </image>
+                     </ImageView>
+                     <VBox alignment="CENTER_LEFT" spacing="2">
+                        <children>
+                           <Label style="-fx-font-size: 24px; -fx-text-fill: white;                                   -fx-font-family: Georgia; -fx-font-style: italic;" text="HanoiBid" />
+                           <Label style="-fx-font-size: 10px; -fx-text-fill: #c9a84c;" text="AUCTIONS" />
+                           <Label style="-fx-font-size: 9px; -fx-text-fill: #c9a84c;" text="ESTB. 1744" />
+                        </children>
+                     </VBox>
+                  </children>
+               </HBox>
+               <HBox alignment="CENTER" spacing="5">
+                  <children>
+                     <Line endX="28.0" startX="0.0" stroke="#c9a84c" strokeWidth="1.0" />
+                     <Circle fill="#c9a84c" radius="1.5" />
+                     <Circle fill="#c9a84c" radius="2.5" />
+                     <Circle fill="#c9a84c" radius="4.0" />
+                     <Circle fill="#c9a84c" radius="2.5" />
+                     <Circle fill="#c9a84c" radius="1.5" />
+                     <Line endX="28.0" startX="0.0" stroke="#c9a84c" strokeWidth="1.0" />
+                  </children>
+               </HBox>
+            </children>
+         </VBox>
+      </children>
+   </StackPane>
+
+    <!-- ===== RIGHT PANEL (Form) ===== -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: #ffffff;                        -fx-background-color: #ffffff;                        -fx-border-color: transparent;" HBox.hgrow="ALWAYS">
+        <VBox spacing="0" style="-fx-background-color: #ffffff; -fx-padding: 30 44 30 44;">
+
+            <!-- Top bar -->
+            <HBox alignment="CENTER_RIGHT" spacing="10">
+                <VBox.margin><Insets bottom="26" /></VBox.margin>
+                <Label style="-fx-text-fill: #888888; -fx-font-size: 12px;" text="Already have an account?" />
+                <Button onAction="#handleLogin" style="-fx-background-color: transparent;                                -fx-border-color: #333333; -fx-border-width: 1;                                -fx-border-radius: 4; -fx-background-radius: 4;                                -fx-font-size: 12px; -fx-cursor: hand;                                -fx-padding: 5 18 5 18;" text="Login" />
+            </HBox>
+
+            <!-- Title -->
+            <Label style="-fx-font-family: 'Georgia'; -fx-font-size: 30px;                           -fx-text-fill: #1a1a1a;" text="Sign Up">
+                <VBox.margin><Insets bottom="22" /></VBox.margin>
+            </Label>
+
+            <!-- ROW 1: Full Name + Username -->
+            <HBox spacing="14">
+                <VBox.margin><Insets bottom="12" /></VBox.margin>
+
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label style="-fx-text-fill: #888888; -fx-font-size: 10px; -fx-font-weight: bold;" text="FULL NAME *" />
+                    <TextField fx:id="fullnameField" promptText="Nguyen Van A" style="-fx-background-color:#ffffff; -fx-border-color:#cccccc;                                       -fx-border-width:1; -fx-border-radius:6;                                       -fx-background-radius:6; -fx-font-size:13px;                                       -fx-padding:9 12 9 12; -fx-pref-height:40;" />
+                    <Label fx:id="fullnameError" managed="false" style="-fx-text-fill:#cc3333; -fx-font-size:10px;" text="* Vui long nhap ho ten" visible="false" />
+                </VBox>
+
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label style="-fx-text-fill: #888888; -fx-font-size: 10px; -fx-font-weight: bold;" text="USERNAME *" />
+                    <TextField fx:id="usernameField" promptText="ten_dang_nhap" style="-fx-background-color:#ffffff; -fx-border-color:#cccccc;                                       -fx-border-width:1; -fx-border-radius:6;                                       -fx-background-radius:6; -fx-font-size:13px;                                       -fx-padding:9 12 9 12; -fx-pref-height:40;" />
+                    <Label fx:id="usernameError" managed="false" style="-fx-text-fill:#cc3333; -fx-font-size:10px;" text="* Vui long nhap ten dang nhap" visible="false" />
+                </VBox>
+            </HBox>
+
+            <!-- ROW 2: Password + Confirm Password -->
+            <HBox spacing="14">
+                <VBox.margin><Insets bottom="12" /></VBox.margin>
+
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label style="-fx-text-fill: #888888; -fx-font-size: 10px; -fx-font-weight: bold;" text="PASSWORD *" />
+                    <PasswordField fx:id="passwordField" promptText="it nhat 6 ky tu" style="-fx-background-color:#ffffff; -fx-border-color:#cccccc;                                           -fx-border-width:1; -fx-border-radius:6;                                           -fx-background-radius:6; -fx-font-size:13px;                                           -fx-padding:9 12 9 12; -fx-pref-height:40;" />
+                    <Label fx:id="passwordError" managed="false" style="-fx-text-fill:#cc3333; -fx-font-size:10px;" text="* Mat khau it nhat 6 ky tu" visible="false" />
+                </VBox>
+
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label style="-fx-text-fill: #888888; -fx-font-size: 10px; -fx-font-weight: bold;" text="CONFIRM PASSWORD *" />
+                    <PasswordField fx:id="confirmField" promptText="Nhap lai mat khau" style="-fx-background-color:#ffffff; -fx-border-color:#cccccc;                                           -fx-border-width:1; -fx-border-radius:6;                                           -fx-background-radius:6; -fx-font-size:13px;                                           -fx-padding:9 12 9 12; -fx-pref-height:40;" />
+                    <Label fx:id="confirmError" managed="false" style="-fx-text-fill:#cc3333; -fx-font-size:10px;" text="* Mat khau khong khop" visible="false" />
+                </VBox>
+            </HBox>
+
+            <!-- ROW 3: Email + Phone -->
+            <HBox spacing="14">
+                <VBox.margin><Insets bottom="12" /></VBox.margin>
+
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label style="-fx-text-fill: #888888; -fx-font-size: 10px; -fx-font-weight: bold;" text="EMAIL *" />
+                    <TextField fx:id="emailField" promptText="example@email.com" style="-fx-background-color:#ffffff; -fx-border-color:#cccccc;                                       -fx-border-width:1; -fx-border-radius:6;                                       -fx-background-radius:6; -fx-font-size:13px;                                       -fx-padding:9 12 9 12; -fx-pref-height:40;" />
+                    <Label fx:id="emailError" managed="false" style="-fx-text-fill:#cc3333; -fx-font-size:10px;" text="* Email khong hop le" visible="false" />
+                </VBox>
+
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label style="-fx-text-fill: #888888; -fx-font-size: 10px; -fx-font-weight: bold;" text="PHONE NUMBER *" />
+                    <TextField fx:id="phoneField" promptText="0912345678" style="-fx-background-color:#ffffff; -fx-border-color:#cccccc;                                       -fx-border-width:1; -fx-border-radius:6;                                       -fx-background-radius:6; -fx-font-size:13px;                                       -fx-padding:9 12 9 12; -fx-pref-height:40;" />
+                    <Label fx:id="phoneError" managed="false" style="-fx-text-fill:#cc3333; -fx-font-size:10px;" text="* So dien thoai khong hop le" visible="false" />
+                </VBox>
+            </HBox>
+
+            <!-- ROW 4: Address (full width) -->
+            <VBox spacing="4">
+                <VBox.margin><Insets bottom="12" /></VBox.margin>
+                <Label style="-fx-text-fill: #888888; -fx-font-size: 10px; -fx-font-weight: bold;" text="ADDRESS *" />
+                <TextField fx:id="addressField" promptText="So nha, duong, phuong/xa, quan/huyen, tinh/thanh pho" style="-fx-background-color:#ffffff; -fx-border-color:#cccccc;                                   -fx-border-width:1; -fx-border-radius:6;                                   -fx-background-radius:6; -fx-font-size:13px;                                   -fx-padding:9 12 9 12; -fx-pref-height:40;" />
+                <Label fx:id="addressError" managed="false" style="-fx-text-fill:#cc3333; -fx-font-size:10px;" text="* Vui long nhap dia chi" visible="false" />
+            </VBox>
+
+            <!-- ROW 5: Role selection -->
+            <VBox spacing="8">
+                <VBox.margin><Insets bottom="20" /></VBox.margin>
+                <Label style="-fx-text-fill: #888888; -fx-font-size: 10px; -fx-font-weight: bold;" text="ROLE *" />
+
+                <HBox alignment="CENTER_LEFT" spacing="14">
+
+                    <!-- Seller card -->
+                    <VBox fx:id="sellerCard" alignment="CENTER" onMouseClicked="#selectSeller" prefHeight="82" prefWidth="155" spacing="4" style="-fx-border-color:#cccccc; -fx-border-width:1.5;                                  -fx-border-radius:8; -fx-background-radius:8;                                  -fx-background-color:#ffffff; -fx-cursor:hand;                                  -fx-padding:10;">
+                        <Label style="-fx-font-size:11px; -fx-text-fill:#555555;" text="[SELLER]" />
+                        <Label style="-fx-font-family:'Georgia'; -fx-font-size:15px;                                       -fx-text-fill:#1a1a1a; -fx-font-weight:bold;" text="Seller" />
+                        <Label style="-fx-font-size:10px; -fx-text-fill:#999999;" text="Dang ban dau gia" />
+                    </VBox>
+
+                    <!-- Bidder card -->
+                    <VBox fx:id="bidderCard" alignment="CENTER" onMouseClicked="#selectBidder" prefHeight="82" prefWidth="155" spacing="4" style="-fx-border-color:#cccccc; -fx-border-width:1.5;                                  -fx-border-radius:8; -fx-background-radius:8;                                  -fx-background-color:#ffffff; -fx-cursor:hand;                                  -fx-padding:10;">
+                        <Label style="-fx-font-size:11px; -fx-text-fill:#555555;" text="[BIDDER]" />
+                        <Label style="-fx-font-family:'Georgia'; -fx-font-size:15px;                                       -fx-text-fill:#1a1a1a; -fx-font-weight:bold;" text="Bidder" />
+                        <Label style="-fx-font-size:10px; -fx-text-fill:#999999;" text="Tham gia dau gia" />
+                    </VBox>
+
+                    <!-- Hidden ComboBox to store selected role value -->
+                    <ComboBox fx:id="roleCombo" managed="false" visible="false" />
+                </HBox>
+
+                <Label fx:id="roleError" managed="false" style="-fx-text-fill:#cc3333; -fx-font-size:10px;" text="* Vui long chon vai tro (Seller hoac Bidder)" visible="false" />
+            </VBox>
+
+            <!-- SIGN UP button -->
+            <Button maxWidth="Infinity" onAction="#handleSignup" style="-fx-background-color:#1a1a1a; -fx-text-fill:#c9a84c;                            -fx-font-family:'Georgia'; -fx-font-size:14px;                            -fx-background-radius:6; -fx-cursor:hand;                            -fx-padding:12 0 12 0;" text="SIGN UP">
+                <VBox.margin><Insets bottom="10" /></VBox.margin>
+            </Button>
+
+            <!-- Status message -->
+            <Label fx:id="statusLabel" alignment="CENTER" maxWidth="Infinity" style="-fx-font-size:12px; -fx-text-fill:#228B22;" text="" wrapText="true" />
+
+        </VBox>
+    </ScrollPane>
+
+</HBox>

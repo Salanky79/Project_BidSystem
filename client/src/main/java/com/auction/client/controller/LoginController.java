@@ -137,4 +137,25 @@ public class LoginController {
             });
         });
     }
+
+    public void handleSignup(ActionEvent event) {
+        try {
+            // 1. Tải lại file giao diện Login
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/SignupView.fxml"));
+            Parent loginRoot = loader.load();
+
+            // 2. Lấy cái cửa sổ (Stage) hiện tại đang hiển thị
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // 3. Đổi cảnh sang Login
+            Scene scene = new Scene(loginRoot);
+            stage.setScene(scene);
+            stage.centerOnScreen();
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Lỗi: Không tìm thấy file SignupView.fxml!");
+        }
+    }
 }

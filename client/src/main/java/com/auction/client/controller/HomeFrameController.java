@@ -7,15 +7,15 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.Region;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
-
 import java.io.IOException;
 
 public class HomeFrameController {
     
     @FXML
     private ScrollPane scrollContent;
+    private HomeController currentHomeController;
 
     public void setView(Node node) {
         scrollContent.setContent(node);
@@ -43,11 +43,17 @@ public class HomeFrameController {
         }
     }
 
-    public void handleYourListing(ActionEvent actionEvent) {
-        changeView("/com/auction/client/view/addlisting.fxml");
+    public void handleSell() {
+        changeView("/com/auction/client/view/Sell.fxml");
     }
     public void handleProfile() {
         changeView("/com/auction/client/view/profile.fxml");
+    }
+    public void handleActiveListings() {
+        loadHomePage();
+        if (currentHomeController != null) {
+            currentHomeController.loadAuction("Active");
+        }
     }
     private void changeView(String fxmlFile) {
         try {
@@ -56,6 +62,7 @@ public class HomeFrameController {
             Node newNode = loader.load();
 
             scrollContent.setContent(newNode);
+            currentHomeController = null;
 
             // Nếu muốn dãn hết chiều ngang (thường VBox đã mặc định Fill Width)
             if (newNode instanceof Region) {
@@ -69,6 +76,27 @@ public class HomeFrameController {
     }
 
     public void handleHome(ActionEvent actionEvent) {
-        changeView("/com/auction/client/view/Home.fxml");
+        loadHomePage(); // Sử dụng hàm loadHomePage thay vì changeView
+        if (currentHomeController != null) {
+            currentHomeController.loadAuction("All"); // Hiện tất cả khi về Home
+        }
+    }
+
+    public void handleYourListing(ActionEvent actionEvent) {
+
+    }
+    public void loadHomePage() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Home.fxml"));
+            Node node = loader.load();
+
+            // CỰC KỲ QUAN TRỌNG: Phải lấy controller mới sau mỗi lần load
+            currentHomeController = loader.getController();
+
+            scrollContent.setContent(node);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Lỗi: Không load được Home.fxml");
+        }
     }
 }
