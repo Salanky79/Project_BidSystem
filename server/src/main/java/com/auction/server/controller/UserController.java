@@ -36,6 +36,10 @@ public class UserController {
             // Lỗi database → ẩn chi tiết, chỉ trả thông báo chung
             e.printStackTrace();
             ctx.status(500).json(Response.fail("System error. Please try again later."));
+        } catch (Exception e) {
+            // Lỗi không mong muốn (VD: BCrypt throw IllegalArgumentException nếu hash bị lỗi)
+            e.printStackTrace();
+            ctx.status(500).json(Response.fail("System error. Please try again later."));
         }
     }
 
@@ -49,6 +53,9 @@ public class UserController {
         } catch (AuctionSystemException e) {
             ctx.status(400).json(Response.fail(e.getMessage()));
         } catch (SQLException e) {
+            e.printStackTrace();
+            ctx.status(500).json(Response.fail("System error. Please try again later."));
+        } catch (Exception e) {
             e.printStackTrace();
             ctx.status(500).json(Response.fail("System error. Please try again later."));
         }
