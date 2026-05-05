@@ -12,7 +12,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.application.Platform;
-import com.auction.client.network.NetworkClient;
+
 import com.auction.client.network.RestClient;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
