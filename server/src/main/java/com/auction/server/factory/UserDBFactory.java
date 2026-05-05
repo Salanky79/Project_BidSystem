@@ -27,7 +27,7 @@ public final class UserDBFactory {
         User user;
         switch (role) {
             case "SELLER":
-                Seller seller = new Seller(username, password, fullName, phoneNumber, email);
+                Seller seller = new Seller(username, password, fullName, phoneNumber, email, address);
                 seller.setBalance(balance);
                 user = seller;
                 break;

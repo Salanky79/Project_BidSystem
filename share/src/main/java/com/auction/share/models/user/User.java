@@ -2,8 +2,6 @@ package com.auction.share.models.user;
 
 import com.auction.share.enums.Role;
 import com.auction.share.models.core.Entity;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public abstract class User extends Entity{
     private String username;
@@ -41,7 +39,5 @@ public abstract class User extends Entity{
         this.password = password;
     }
 
-    // Trong abstract class User
-    public abstract void fillPreparedStatement(PreparedStatement ps) throws SQLException;
 }
 

@@ -27,7 +27,7 @@ public class BidTransaction extends Entity {
     public LocalDateTime getTimestamp() { return timestamp; }
 
     public String getTransactionDetails() {
-        return "Tài khoản [" + bidder.getUsername() + "] đã đặt " +
-                amount + " VNĐ vào lúc " + timestamp.toString();
+        return "Account [" + bidder.getUsername() + "] placed " +
+                amount + " VND at " + timestamp;
     }
 }

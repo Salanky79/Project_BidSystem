@@ -4,8 +4,6 @@ import com.auction.share.models.auction.Auction;
 import com.auction.share.models.item.Item;
 import com.auction.share.enums.Role;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +11,15 @@ import java.util.List;
 public class Seller extends User {
     private String phoneNumber;
     private String email;
+    private String address;
     private double balance;
     private List<String> auctionIdList;
 
-    public Seller(String username, String password, String fullName, String phoneNumber, String email) {
+    public Seller(String username, String password, String fullName, String phoneNumber, String email, String address) {
         super(username, password, fullName);
         this.phoneNumber = phoneNumber;
         this.email = email;
+        this.address = address;
         this.auctionIdList = new ArrayList<>();
         this.balance = 0.0;
         this.setRole(Role.SELLER);
@@ -55,14 +55,12 @@ public class Seller extends User {
         return email;
     }
 
-    // Trong Seller
-    @Override
-    public void fillPreparedStatement(PreparedStatement ps) throws SQLException {
-        ps.setString(5, this.phoneNumber);
-        ps.setString(6, this.email);
-        ps.setDouble(8, this.balance);
-        ps.setNull(9, java.sql.Types.VARCHAR);
-        ps.setInt(10, 0);
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }
 

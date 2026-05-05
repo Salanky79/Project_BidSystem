@@ -52,8 +52,8 @@ public class ProfileController implements Initializable {
      * Giả lập dữ liệu người dùng thay cho Database
      */
     private void loadMockUserData() {
-        nameLabel.setText("Nguyễn Thái Sơn");
-        nameField.setText("Nguyễn Thái Sơn");
+        nameLabel.setText("Nguyen Thai Son");
+        nameField.setText("Nguyen Thai Son");
         usernameField.setText("songay.femboy");
         emailField.setText("songay@gmail.com");
         phoneField.setText("0123.456.789");
@@ -74,9 +74,9 @@ public class ProfileController implements Initializable {
      */
     private void loadMockTableData() {
         ObservableList<AuctionHistory> history = FXCollections.observableArrayList(
-                new AuctionHistory("Đồng hồ Rolex Submariner", "Thắng cuộc", 15500.0, "12/04/2026"),
-                new AuctionHistory("Siêu xe Porsche 911", "Đang diễn ra", 140000.0, "14/04/2026"),
-                new AuctionHistory("Nhẫn kim cương 24k", "Thua cuộc", 12000.0, "10/04/2026")
+                new AuctionHistory("Rolex Submariner Watch", "Won", 15500.0, "12/04/2026"),
+                new AuctionHistory("Porsche 911 Supercar", "Running", 140000.0, "14/04/2026"),
+                new AuctionHistory("24k Diamond Ring", "Lost", 12000.0, "10/04/2026")
         );
         table.setItems(history);
     }
@@ -100,7 +100,7 @@ public class ProfileController implements Initializable {
             editButton.setStyle("-fx-background-color: #1a1a1a; -fx-text-fill: white;");
 
             // Thông báo nhỏ
-            System.out.println("Đã cập nhật thông tin thành công!");
+            System.out.println("Profile updated successfully!");
         }
     }
 
