@@ -9,7 +9,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;import javafx.stage.Stage;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.scene.control.ComboBox;
 
 import java.io.IOException;
 
@@ -29,6 +32,10 @@ public class SignupController {
     @FXML private Label passwordError;
     @FXML private Label confirmError;
     @FXML private Label statusLabel;
+    
+    @FXML private VBox sellerCard;
+    @FXML private VBox bidderCard;
+    @FXML private ComboBox<String> roleCombo;
 
     /** Gọi khi người dùng nhấn nút SIGN UP */
     @FXML
@@ -81,6 +88,27 @@ public class SignupController {
             statusLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #228B22;");
             statusLabel.setText("Đăng ký thành công! Chào mừng, "
                     + fullnameField.getText().trim() + " 🎉");
+            
+            com.auction.client.factory.RoleUIFactory factory;
+            if ("Seller".equals(roleCombo.getValue())) {
+                factory = new com.auction.client.factory.SellerUIFactory();
+            } else {
+                factory = new com.auction.client.factory.BidderUIFactory();
+            }
+            
+            try {
+                com.auction.client.factory.DashboardProduct dashboard = factory.createDashboard();
+                Scene scene = dashboard.getScene();
+                Stage stage = (Stage) statusLabel.getScene().getWindow();
+                stage.setScene(scene);
+                stage.setTitle(dashboard.getTitle());
+                stage.centerOnScreen();
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+                statusLabel.setText("Lỗi khi chuyển màn hình!");
+                statusLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #cc3333;");
+            }
         } else {
             statusLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #cc3333;");
             statusLabel.setText("Vui lòng điền đầy đủ các trường bắt buộc.");
@@ -126,9 +154,27 @@ public class SignupController {
         }
     }
 
+    private final String defaultStyle = "-fx-border-color:#cccccc; -fx-border-width:1.5; " +
+            "-fx-border-radius:8; -fx-background-radius:8; " +
+            "-fx-background-color:#ffffff; -fx-cursor:hand; -fx-padding:10;";
+            
+    private final String selectedStyle = "-fx-border-color:#3366cc; -fx-border-width:1.5; " +
+            "-fx-border-radius:8; -fx-background-radius:8; " +
+            "-fx-background-color:#e6f0ff; -fx-cursor:hand; -fx-padding:10;";
+
     public void selectSeller(MouseEvent mouseEvent) {
+        sellerCard.setStyle(selectedStyle);
+        bidderCard.setStyle(defaultStyle);
+        if (roleCombo != null) {
+            roleCombo.setValue("Seller");
+        }
     }
 
     public void selectBidder(MouseEvent mouseEvent) {
+        bidderCard.setStyle(selectedStyle);
+        sellerCard.setStyle(defaultStyle);
+        if (roleCombo != null) {
+            roleCombo.setValue("Bidder");
+        }
     }
 }

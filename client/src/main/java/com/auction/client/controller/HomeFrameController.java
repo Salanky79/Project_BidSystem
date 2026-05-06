@@ -14,8 +14,8 @@ import java.io.IOException;
 public class HomeFrameController {
     
     @FXML
-    private ScrollPane scrollContent;
-    private HomeController currentHomeController;
+    protected ScrollPane scrollContent;
+    protected HomeController currentHomeController;
 
     public void setView(Node node) {
         scrollContent.setContent(node);

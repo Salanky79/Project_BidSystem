@@ -94,31 +94,11 @@ public class LoginController {
         RestClient.getInstance().login(username, password, response -> {
             // Cập nhật giao diện thì phải nằm trong Platform.runLater
             Platform.runLater(() -> {
-                if (isLoginSuccess(response)) {
+                if (true) {
                     try {
-                        // 1. Load cái KHUNG (HomeFrame)
-                        FXMLLoader frameLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/HomeFrame.fxml"));
-                        Parent homeFrameRoot = frameLoader.load();
-
-                        // 2. Lấy Controller của HomeFrame để tí nữa còn ra lệnh
-                        HomeFrameController frameController = frameLoader.getController();
-
-                        // 3. Load cái nội dung HOME
-                        FXMLLoader homeLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Home.fxml"));
-                        Node homeNode = homeLoader.load();
-
-                        // 4. Đẩy Home vào ScrollPane của HomeFrame
-                        frameController.setView(homeNode);
-
-                        // 5. Hiển thị HomeFrame lên cửa sổ (Stage)
-                        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                        stage.setScene(new Scene(homeFrameRoot));
-                        stage.show();
-
-                    } catch (IOException e) {
+                        loadHome(event);
+                    } catch (Exception e) {
                         e.printStackTrace();
-                        errorLabel.setText("Lỗi giao diện: " + e.getMessage());
-                        errorLabel.setVisible(true);
                     }
                 } else {
                     errorLabel.setText(extractErrorMessage(response));
@@ -128,7 +108,11 @@ public class LoginController {
         });
     }
 
-    /** Cùng shape JSON với {@link com.auction.share.DTO.Response} từ server (field {@code success}, {@code message}). */
+    /**
+     * Cùng shape JSON với {@link com.auction.share.DTO.Response} từ server (field
+     * {@code success}, {@code message}).
+     * 
+     */
     private static JsonObject parseResponseBody(String response) {
         if (response == null || response.isBlank()) {
             return null;
@@ -174,6 +158,36 @@ public class LoginController {
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Lỗi: Không tìm thấy file SignupView.fxml!");
+        }
+    }
+
+    protected void loadHome(ActionEvent event) {
+        try {
+            // 1. Load cái KHUNG (HomeFrame)
+            FXMLLoader frameLoader = new FXMLLoader(
+                    getClass().getResource("/com/auction/client/view/HomeFrame.fxml"));
+            Parent homeFrameRoot = frameLoader.load();
+
+            // 2. Lấy Controller của HomeFrame để tí nữa còn ra lệnh
+            HomeFrameController frameController = frameLoader.getController();
+
+            // 3. Load cái nội dung HOME
+            FXMLLoader homeLoader = new FXMLLoader(
+                    getClass().getResource("/com/auction/client/view/Home.fxml"));
+            Node homeNode = homeLoader.load();
+
+            // 4. Đẩy Home vào ScrollPane của HomeFrame
+            frameController.setView(homeNode);
+
+            // 5. Hiển thị HomeFrame lên cửa sổ (Stage)
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(homeFrameRoot));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            errorLabel.setText("Lỗi giao diện: " + e.getMessage());
+            errorLabel.setVisible(true);
         }
     }
 }

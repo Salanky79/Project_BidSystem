@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1100.0" style="-fx-background-color: #F0F2F5;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.SellerDashboardController">
+   <!-- Sidebar bên trái -->
+   <left>
+      <VBox prefHeight="720.0" prefWidth="220.0" style="-fx-background-color: #1E1E1E;" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="HanoiBid" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+               <VBox.margin>
+                  <Insets bottom="30.0" left="20.0" top="20.0" />
+               </VBox.margin>
+            </Label>
+            <Button alignment="BASELINE_LEFT" mnemonicParsing="false" prefHeight="45.0" prefWidth="200.0" style="-fx-background-color: #F39C12; -fx-background-radius: 10;" text="Seller Dashboard" textFill="WHITE">
+               <VBox.margin>
+                  <Insets left="10.0" right="10.0" />
+               </VBox.margin>
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Button>
+            <VBox prefHeight="400.0" prefWidth="220.0" spacing="10.0">
+               <children>
+                  <Button mnemonicParsing="false" style="-fx-background-color: transparent;" text="My Listings" textFill="#b2b2b2" />
+                  <Button mnemonicParsing="false" style="-fx-background-color: transparent;" text="      Drafts" textFill="#b2b2b2" />
+                  <Button mnemonicParsing="false" style="-fx-background-color: transparent;" text="      Active" textFill="#b2b2b2" />
+                  <Button mnemonicParsing="false" style="-fx-background-color: transparent;" text="      Sold" textFill="#b2b2b2" />
+                  <Separator opacity="0.1" prefWidth="200.0" />
+                  <Button mnemonicParsing="false" style="-fx-background-color: transparent;" text="Create Auction" textFill="#b2b2b2" />
+                  <Button mnemonicParsing="false" style="-fx-background-color: transparent;" text="Orders &amp; Payments" textFill="#b2b2b2" />
+                  <Button mnemonicParsing="false" style="-fx-background-color: transparent;" text="Performance Analytics" textFill="#b2b2b2" />
+                  <Button mnemonicParsing="false" style="-fx-background-color: transparent;" text="Settings" textFill="#b2b2b2" />
+               </children>
+               <padding>
+                  <Insets left="20.0" top="20.0" />
+               </padding>
+            </VBox>
+            <VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+               <children>
+                  <Button mnemonicParsing="false" prefHeight="50.0" prefWidth="180.0" style="-fx-background-color: #F39C12; -fx-background-radius: 10;" text="Create New Auction" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Button>
+               </children>
+               <padding>
+                  <Insets bottom="30.0" />
+               </padding>
+            </VBox>
+         </children>
+      </VBox>
+   </left>
+   
+   <!-- Nội dung chính bên phải -->
+   <center>
+      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+         <children>
+            <!-- Header -->
+            <HBox alignment="CENTER_LEFT" prefHeight="80.0" prefWidth="880.0" style="-fx-background-color: white;">
+               <children>
+                  <Label text="Auction System">
+                     <font>
+                        <Font name="Serif Bold" size="28.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets left="30.0" />
+                     </HBox.margin>
+                  </Label>
+                  <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label text="Logged in as Seller">
+                           <HBox.margin>
+                              <Insets right="15.0" />
+                           </HBox.margin>
+                        </Label>
+                        <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="80.0" style="-fx-background-color: white; -fx-border-color: #333; -fx-border-radius: 8;" text="Log Out">
+                           <HBox.margin>
+                              <Insets right="30.0" />
+                           </HBox.margin>
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+            
+            <ScrollPane fitToWidth="true" prefHeight="640.0" prefWidth="880.0" style="-fx-background-color: transparent; -fx-background: transparent;">
+               <content>
+                  <VBox prefHeight="900.0" prefWidth="865.0" spacing="20.0">
+                     <padding>
+                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                     </padding>
+                     <children>
+                        <!-- Thẻ Thống kê -->
+                        <HBox spacing="20.0">
+                           <children>
+                              <VBox prefHeight="120.0" prefWidth="200.0" style="-fx-background-color: white; -fx-background-radius: 15;">
+                                 <padding>
+                                    <Insets left="20.0" top="20.0" />
+                                 </padding>
+                                 <children>
+                                    <Label text="Total Revenue" textFill="#777" />
+                                    <Label text="\$45,800.00">
+                                       <font>
+                                          <Font name="System Bold" size="24.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="120.0" prefWidth="180.0" style="-fx-background-color: white; -fx-background-radius: 15;">
+                                 <padding>
+                                    <Insets left="20.0" top="20.0" />
+                                 </padding>
+                                 <children>
+                                    <Label text="Active Auctions" textFill="#777" />
+                                    <Label text="12">
+                                       <font>
+                                          <Font name="System Bold" size="24.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="120.0" prefWidth="180.0" style="-fx-background-color: white; -fx-background-radius: 15;">
+                                 <padding>
+                                    <Insets left="20.0" top="20.0" />
+                                 </padding>
+                                 <children>
+                                    <Label text="Completed Sales" textFill="#777" />
+                                    <Label text="5">
+                                       <font>
+                                          <Font name="System Bold" size="24.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="120.0" prefWidth="180.0" style="-fx-background-color: white; -fx-background-radius: 15;">
+                                 <padding>
+                                    <Insets left="20.0" top="20.0" />
+                                 </padding>
+                                 <children>
+                                    <Label text="Awaiting Shipment" textFill="#777" />
+                                    <Label text="3">
+                                       <font>
+                                          <Font name="System Bold" size="24.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                        
+                        <!-- Bộ lọc -->
+                        <HBox alignment="CENTER_LEFT" spacing="15.0">
+                           <children>
+                              <Label text="Status: All / Active / Ended" />
+                              <Label text="Date: This Month / Last 7 Days">
+                                 <HBox.margin>
+                                    <Insets left="30.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #1A1A1A; -fx-background-radius: 8;" text="Manage" textFill="WHITE" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </HBox>
+                        
+                        <!-- Grid sản phẩm -->
+                        <GridPane hgap="20.0" vgap="20.0">
+                          <children>
+                             <!-- Sản phẩm 1 -->
+                             <AnchorPane prefHeight="180.0" prefWidth="410.0" style="-fx-background-color: white; -fx-background-radius: 15;" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                <children>
+                                   <Label alignment="CENTER" layoutX="14.0" layoutY="14.0" prefHeight="120.0" prefWidth="120.0" style="-fx-background-color: black; -fx-background-radius: 10;" text="💎" textFill="WHITE">
+                                      <font>
+                                         <Font size="48.0" />
+                                      </font>
+                                   </Label>
+                                   <Label layoutX="150.0" layoutY="20.0" text="Kim cương 15 carat">
+                                      <font>
+                                         <Font name="System Bold" size="16.0" />
+                                      </font>
+                                   </Label>
+                                   <Label layoutX="150.0" layoutY="45.0" text="Status: Active" textFill="#27AE60" />
+                                   <Label layoutX="150.0" layoutY="65.0" text="End Time: 4/26/2026 @ 3:33 AM" textFill="#777" />
+                                   <Label layoutX="150.0" layoutY="85.0" text="Current Bid: $12,500 USD">
+                                      <font>
+                                         <Font name="System Bold" size="13.0" />
+                                      </font>
+                                   </Label>
+                                   <Button layoutX="150.0" layoutY="125.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #F39C12; -fx-background-radius: 8;" text="View Bids" textFill="WHITE">
+                                      <font>
+                                         <Font name="System Bold" size="12.0" />
+                                      </font>
+                                   </Button>
+                                   <Button layoutX="280.0" layoutY="125.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: white; -fx-border-color: #333; -fx-border-radius: 8;" text="Edit" />
+                                   <Label alignment="CENTER" layoutX="346.0" layoutY="14.0" prefHeight="25.0" prefWidth="50.0" style="-fx-background-color: #D5F5E3; -fx-background-radius: 10;" text="Active" textFill="#1d8348">
+                                      <font>
+                                         <Font size="10.0" />
+                                      </font>
+                                   </Label>
+                                </children>
+                             </AnchorPane>
+                             
+                             <!-- Sản phẩm 2 -->
+                             <AnchorPane prefHeight="180.0" prefWidth="410.0" style="-fx-background-color: white; -fx-background-radius: 15;" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                <children>
+                                   <Label alignment="CENTER" layoutX="14.0" layoutY="14.0" prefHeight="120.0" prefWidth="120.0" style="-fx-background-color: #EEE; -fx-background-radius: 10;" text="👜">
+                                      <font>
+                                         <Font size="48.0" />
+                                      </font>
+                                   </Label>
+                                   <Label layoutX="150.0" layoutY="20.0" text="Túi xách Chanel">
+                                      <font>
+                                         <Font name="System Bold" size="16.0" />
+                                      </font>
+                                   </Label>
+                                   <Label layoutX="150.0" layoutY="45.0" text="Status: Ended" textFill="#E74C3C" />
+                                   <Label layoutX="150.0" layoutY="85.0" text="Winning Bid: $4,200 USD">
+                                      <font>
+                                         <Font name="System Bold" size="13.0" />
+                                      </font>
+                                   </Label>
+                                   <Button layoutX="150.0" layoutY="125.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #F39C12; -fx-background-radius: 8;" text="Create Invoice" textFill="WHITE">
+                                      <font>
+                                         <Font name="System Bold" size="12.0" />
+                                      </font>
+                                   </Button>
+                                   <Button layoutX="280.0" layoutY="125.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: white; -fx-border-color: #333; -fx-border-radius: 8;" text="Archive" />
+                                   <Label alignment="CENTER" layoutX="346.0" layoutY="14.0" prefHeight="25.0" prefWidth="50.0" style="-fx-background-color: #FADBD8; -fx-background-radius: 10;" text="Ended" textFill="#943126">
+                                      <font>
+                                         <Font size="10.0" />
+                                      </font>
+                                   </Label>
+                                </children>
+                             </AnchorPane>
+
+                             <!-- Sản phẩm 3 -->
+                             <AnchorPane prefHeight="180.0" prefWidth="410.0" style="-fx-background-color: white; -fx-background-radius: 15;" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                <children>
+                                   <Label alignment="CENTER" layoutX="14.0" layoutY="14.0" prefHeight="120.0" prefWidth="120.0" style="-fx-background-color: #EEE; -fx-background-radius: 10;" text="🎨">
+                                      <font>
+                                         <Font size="48.0" />
+                                      </font>
+                                   </Label>
+                                   <Label layoutX="150.0" layoutY="20.0" text="Tranh Van Gogh">
+                                      <font>
+                                         <Font name="System Bold" size="16.0" />
+                                      </font>
+                                   </Label>
+                                   <Label layoutX="150.0" layoutY="45.0" text="Status: Active" textFill="#27AE60" />
+                                   <Label layoutX="150.0" layoutY="85.0" text="Current Bid: $87,000 USD">
+                                      <font>
+                                         <Font name="System Bold" size="13.0" />
+                                      </font>
+                                   </Label>
+                                   <Button layoutX="150.0" layoutY="125.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #F39C12; -fx-background-radius: 8;" text="View Bids" textFill="WHITE">
+                                      <font>
+                                         <Font name="System Bold" size="12.0" />
+                                      </font>
+                                   </Button>
+                                   <Button layoutX="280.0" layoutY="125.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: white; -fx-border-color: #333; -fx-border-radius: 8;" text="Edit" />
+                                   <Label alignment="CENTER" layoutX="346.0" layoutY="14.0" prefHeight="25.0" prefWidth="50.0" style="-fx-background-color: #D5F5E3; -fx-background-radius: 10;" text="Active" textFill="#1d8348">
+                                      <font>
+                                         <Font size="10.0" />
+                                      </font>
+                                   </Label>
+                                </children>
+                             </AnchorPane>
+
+                             <!-- Sản phẩm 4 (Dạng nháp) -->
+                             <AnchorPane prefHeight="180.0" prefWidth="410.0" style="-fx-background-color: #E5E7E9; -fx-background-radius: 15;" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                <children>
+                                   <Label alignment="CENTER" layoutX="14.0" layoutY="14.0" prefHeight="120.0" prefWidth="120.0" style="-fx-background-color: #BDC3C7; -fx-background-radius: 10;" text="🖼️">
+                                      <font>
+                                         <Font size="48.0" />
+                                      </font>
+                                   </Label>
+                                   <Label layoutX="150.0" layoutY="20.0" text="Bàn ghế cổ">
+                                      <font>
+                                         <Font name="System Bold" size="16.0" />
+                                      </font>
+                                   </Label>
+                                   <Label layoutX="150.0" layoutY="45.0" text="Status: Draft" textFill="#5D6D7E" />
+                                   <Button layoutX="150.0" layoutY="125.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="230.0" style="-fx-background-color: #F39C12; -fx-background-radius: 8;" text="Complete Listing" textFill="WHITE">
+                                      <font>
+                                         <Font name="System Bold" size="12.0" />
+                                      </font>
+                                   </Button>
+                                   <Label alignment="CENTER" layoutX="346.0" layoutY="14.0" prefHeight="25.0" prefWidth="50.0" style="-fx-background-color: #AEB6BF; -fx-background-radius: 10;" text="Draft" textFill="#2E4053">
+                                      <font>
+                                         <Font size="10.0" />
+                                      </font>
+                                   </Label>
+                                </children>
+                             </AnchorPane>
+                          </children>
+                        </GridPane>
+                     </children>
+                  </VBox>
+               </content>
+            </ScrollPane>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>
