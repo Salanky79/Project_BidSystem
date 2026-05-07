@@ -68,7 +68,7 @@ public class LoginController {
 
         RestClient.getInstance().login(username, password, response -> {
             Platform.runLater(() -> {
-                if (true) {
+                if (isLoginSuccess(response)) {
                     try {
                         loadHome(event);
                     } catch (Exception e) {
