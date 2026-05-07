@@ -15,6 +15,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.javalin.http.Context;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLException;
 
 public class UserController {
@@ -33,9 +34,7 @@ public class UserController {
             // Lỗi business logic (validation, auth) → trả message cho client
             ctx.status(400).json(Response.fail(e.getMessage()));
         } catch (SQLException e) {
-            // Lỗi database → ẩn chi tiết, chỉ trả thông báo chung
-            e.printStackTrace();
-            ctx.status(500).json(Response.fail("System error. Please try again later."));
+            handleSqlException(ctx, e);
         }
     }
 
@@ -49,8 +48,7 @@ public class UserController {
         } catch (AuctionSystemException e) {
             ctx.status(400).json(Response.fail(e.getMessage()));
         } catch (SQLException e) {
-            e.printStackTrace();
-            ctx.status(500).json(Response.fail("System error. Please try again later."));
+            handleSqlException(ctx, e);
         }
     }
 
@@ -69,8 +67,7 @@ public class UserController {
         } catch (AuctionSystemException e) {
             ctx.status(400).json(Response.fail(e.getMessage()));
         } catch (SQLException e) {
-            e.printStackTrace();
-            ctx.status(500).json(Response.fail("System error. Please try again later."));
+            handleSqlException(ctx, e);
         }
     }
 
@@ -89,8 +86,7 @@ public class UserController {
         } catch (AuctionSystemException e) {
             ctx.status(400).json(Response.fail(e.getMessage()));
         } catch (SQLException e) {
-            e.printStackTrace();
-            ctx.status(500).json(Response.fail("System error. Please try again later."));
+            handleSqlException(ctx, e);
         }
     }
 
@@ -109,8 +105,7 @@ public class UserController {
         } catch (AuctionSystemException e) {
             ctx.status(400).json(Response.fail(e.getMessage()));
         } catch (SQLException e) {
-            e.printStackTrace();
-            ctx.status(500).json(Response.fail("System error. Please try again later."));
+            handleSqlException(ctx, e);
         }
     }
 
@@ -194,5 +189,22 @@ public class UserController {
             return null;
         }
         return obj.get(key).getAsString();
+    }
+
+    private static void handleSqlException(Context ctx, SQLException e) {
+        e.printStackTrace();
+
+        if (e instanceof SQLIntegrityConstraintViolationException) {
+            ctx.status(409).json(Response.fail("Duplicate or invalid reference data."));
+            return;
+        }
+
+        String sqlState = e.getSQLState();
+        if (sqlState != null && sqlState.startsWith("23")) {
+            ctx.status(409).json(Response.fail("Duplicate or invalid reference data."));
+            return;
+        }
+
+        ctx.status(500).json(Response.fail("System error. Please try again later."));
     }
 }

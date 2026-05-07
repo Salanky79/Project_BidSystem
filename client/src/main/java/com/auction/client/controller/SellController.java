@@ -4,7 +4,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -15,29 +19,38 @@ import java.time.LocalDate;
 import java.util.ResourceBundle;
 
 public class SellController implements Initializable {
-
-    // ──────────────── FXML Fields ────────────────
-    @FXML private TextField name;
-    @FXML private ComboBox<String> category;
-    @FXML private TextField startingprice;
-    @FXML private DatePicker enddate;
-    @FXML private TextField description;
-    @FXML private Button chooseImageButton;
-    @FXML private Label imageLabel;
-    @FXML private Button addButton;
-    @FXML private Label validationLabel;
-    @FXML private ImageView closeButton;
-
-    // ──────────────── State ────────────────
-    private File selectedImageFile;
-
-    // ──────────────── Categories ────────────────
+    private static final String DEFAULT_IMAGE_LABEL = "File Upload Label";
+    private static final String NO_FILE_SELECTED_LABEL = "No file selected";
+    private static final String ERROR_LABEL_STYLE = "-fx-text-fill: red;";
+    private static final String SUCCESS_LABEL_STYLE = "-fx-text-fill: green;";
     private static final ObservableList<String> CATEGORIES = FXCollections.observableArrayList(
             "Antiques", "Art", "Books", "Clothing", "Collectibles",
             "Electronics", "Jewelry", "Music", "Sports", "Toys", "Other"
     );
 
-    // ──────────────── Initialization ────────────────
+    @FXML
+    private TextField name;
+    @FXML
+    private ComboBox<String> category;
+    @FXML
+    private TextField startingprice;
+    @FXML
+    private DatePicker enddate;
+    @FXML
+    private TextField description;
+    @FXML
+    private Button chooseImageButton;
+    @FXML
+    private Label imageLabel;
+    @FXML
+    private Button addButton;
+    @FXML
+    private Label validationLabel;
+    @FXML
+    private ImageView closeButton;
+
+    private File selectedImageFile;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         category.setItems(CATEGORIES);
@@ -48,11 +61,6 @@ public class SellController implements Initializable {
         closeButton.setOnMouseClicked(e -> handleClose());
     }
 
-    // ──────────────── Handlers ────────────────
-
-    /**
-     * Opens a FileChooser for the user to select an image.
-     */
     private void handleChooseImage() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Image");
@@ -66,23 +74,21 @@ public class SellController implements Initializable {
         if (selectedImageFile != null) {
             imageLabel.setText(selectedImageFile.getName());
         } else {
-            imageLabel.setText("No file selected");
+            imageLabel.setText(NO_FILE_SELECTED_LABEL);
         }
     }
 
-    /**
-     * Validates inputs and adds the listing.
-     */
     private void handleAddListing() {
-        if (!validateInputs()) return;
+        if (!validateInputs()) {
+            return;
+        }
 
-        String listingName      = name.getText().trim();
-        String listingCategory  = category.getValue();
-        double listingPrice     = Double.parseDouble(startingprice.getText().trim());
-        LocalDate listingDate   = enddate.getValue();
-        String listingDesc      = description.getText().trim();
+        String listingName = name.getText().trim();
+        String listingCategory = category.getValue();
+        double listingPrice = Double.parseDouble(startingprice.getText().trim());
+        LocalDate listingDate = enddate.getValue();
+        String listingDesc = description.getText().trim();
 
-        // TODO: Replace with your actual database / service call
         System.out.println("=== New Listing ===");
         System.out.println("Title       : " + listingName);
         System.out.println("Category    : " + listingCategory);
@@ -95,30 +101,22 @@ public class SellController implements Initializable {
         clearFields();
     }
 
-    /**
-     * Closes the current window.
-     */
     private void handleClose() {
         Stage stage = (Stage) closeButton.getScene().getWindow();
         stage.close();
     }
 
-    // ──────────────── Validation ────────────────
-
     private boolean validateInputs() {
-        // Title
         if (name.getText().trim().isEmpty()) {
             showError("Please enter a title.");
             return false;
         }
 
-        // Category
         if (category.getValue() == null) {
             showError("Please select a category.");
             return false;
         }
 
-        // Starting Price – must be a positive number
         String priceText = startingprice.getText().trim();
         if (priceText.isEmpty()) {
             showError("Please enter a starting price.");
@@ -135,7 +133,6 @@ public class SellController implements Initializable {
             return false;
         }
 
-        // End Date – must be in the future
         if (enddate.getValue() == null) {
             showError("Please select an end date.");
             return false;
@@ -145,7 +142,6 @@ public class SellController implements Initializable {
             return false;
         }
 
-        // Description
         if (description.getText().trim().isEmpty()) {
             showError("Please enter a description.");
             return false;
@@ -154,17 +150,15 @@ public class SellController implements Initializable {
         return true;
     }
 
-    // ──────────────── Helpers ────────────────
-
     private void showError(String message) {
         validationLabel.setVisible(true);
-        validationLabel.setStyle("-fx-text-fill: red;");
+        validationLabel.setStyle(ERROR_LABEL_STYLE);
         validationLabel.setText(message);
     }
 
     private void showSuccess(String message) {
         validationLabel.setVisible(true);
-        validationLabel.setStyle("-fx-text-fill: green;");
+        validationLabel.setStyle(SUCCESS_LABEL_STYLE);
         validationLabel.setText(message);
     }
 
@@ -174,7 +168,8 @@ public class SellController implements Initializable {
         startingprice.clear();
         enddate.setValue(null);
         description.clear();
-        imageLabel.setText("File Upload Label");
+        imageLabel.setText(DEFAULT_IMAGE_LABEL);
         selectedImageFile = null;
     }
 }
+
