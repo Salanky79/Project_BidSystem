@@ -8,7 +8,7 @@ import java.io.IOException;
 public class SellerDashboardProduct implements DashboardProduct {
     @Override
     public Scene getScene() throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/com/auction/client/view/SellerDashboard.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("com/auction/client/view/SellerDashboard.fxml"));
         return new Scene(root);
     }
 
