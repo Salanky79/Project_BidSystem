@@ -94,7 +94,7 @@ public class LoginController {
         RestClient.getInstance().login(username, password, response -> {
             // Cập nhật giao diện thì phải nằm trong Platform.runLater
             Platform.runLater(() -> {
-                if (true) {
+                if (isLoginSuccess(response)) {
                     try {
                         loadHome(event);
                     } catch (Exception e) {
