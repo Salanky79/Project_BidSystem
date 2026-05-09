@@ -7,12 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Bidder extends User {
+    private String phoneNumber;
+    private String email;
     private double balance;
     private String address;
     private List<BidTransaction> bidHistory;
 
-    public Bidder(String username, String password, String fullName, String uid, String address) {
-        super(username, password, fullName, uid);
+    public Bidder(String username, String password, String fullName,String phoneNumber, String email, String address) {
+        super(username, password, fullName);
+        this.phoneNumber = phoneNumber;
+        this.email = email;
         this.address = address;
         this.balance = 0.0;
         this.bidHistory = new ArrayList<>();
@@ -22,26 +26,33 @@ public class Bidder extends User {
     public String getName() { 
         return this.getFullName();
     }
-    
+    public String getAddress(){
+        return address;
+    }
     public double getBalance() { 
         return balance; 
     }
+    public String getPhoneNumber(){
+        return phoneNumber;
+    }
+    public String getEmail(){
+        return email;
+    }
 
     public void deductBalance(double amount) {
-        if (amount > balance) {
-            throw new RuntimeException("Lỗi: Số dư không đủ để thanh toán!");
-        }
         this.balance -= amount;
     }
 
+    public void setBalance(double balance){
+        this.balance = balance;
+    }
     public void deposit(double amount) {
-        if (amount > 0) {
             this.balance += amount;
-        }
     }
 
     public void recordBidHistory(BidTransaction transaction) {
         this.bidHistory.add(transaction);
     }
+
 }
 

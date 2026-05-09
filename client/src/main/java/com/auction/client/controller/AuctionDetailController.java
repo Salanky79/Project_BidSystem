@@ -130,7 +130,7 @@ public class AuctionDetailController {
         String input = bidField.getText().trim();
 
         if (input.isEmpty()) {
-            showError("Vui lòng nhập số tiền muốn đặt.");
+            showError("Please enter your bid amount.");
             return;
         }
 
@@ -138,13 +138,13 @@ public class AuctionDetailController {
             double bidAmount = Double.parseDouble(input);
 
             if (bidAmount <= currentPrice) {
-                showError("Giá đặt phải cao hơn giá hiện tại: "
+                showError("Your bid must be higher than the current price: "
                         + String.format("$%.2f", currentPrice));
                 return;
             }
 
             // TODO: Gửi bid lên Server
-            System.out.println("Đặt giá: $" + bidAmount);
+            System.out.println("Placed bid: $" + bidAmount);
 
             // Cập nhật UI tạm thời (server push về sau)
             currentPrice = bidAmount;
@@ -155,7 +155,7 @@ public class AuctionDetailController {
             hideValidation();
 
         } catch (NumberFormatException e) {
-            showError("Số tiền không hợp lệ. Vui lòng nhập số.");
+            showError("Invalid amount. Please enter a number.");
         }
     }
 
@@ -165,7 +165,7 @@ public class AuctionDetailController {
         if (text.isEmpty()) return;
 
         // Tạo comment row mới, thêm vào cuối commentList
-        VBox row = buildCommentRow("Bạn", text,
+        VBox row = buildCommentRow("You", text,
                 LocalDateTime.now().format(FORMATTER));
         commentList.getChildren().add(row);
 
@@ -240,7 +240,7 @@ public class AuctionDetailController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Lỗi: Không tìm thấy AuctionDetail.fxml!");
+            System.out.println("Error: AuctionDetail.fxml file not found.");
         }
     }
 }

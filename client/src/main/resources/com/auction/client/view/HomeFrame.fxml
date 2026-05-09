@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="600" prefWidth="900" style="-fx-background-color: #f0f0f0;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.HomeFrameController">
+<BorderPane prefHeight="600" prefWidth="950 " style="-fx-background-color: #f0f0f0;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.HomeFrameController">
 
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="80.0" style="-fx-background-color: #f0f0f0; -fx-padding: 0 24 0 24; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
@@ -29,7 +29,7 @@
             <Region prefHeight="6.0" />
 
             <!-- Active Listings -->
-            <Button fx:id="btnActiveListings" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;" text="Active Listings">
+            <Button fx:id="btnActiveListings" onAction="#handleActiveListings" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;" text="Active Listings">
                 <VBox.margin><Insets left="20.0" right="20.0" /></VBox.margin>
             </Button>
 
@@ -64,7 +64,7 @@
             <Region VBox.vgrow="ALWAYS" />
 
             <!-- Sell button -->
-            <Button prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: #f0a500; -fx-text-fill: #1a1a1a; -fx-font-size: 16px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;" text="Sell">
+            <Button fx:id="btnSell" onAction="#handleSell" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: #f0a500; -fx-text-fill: #1a1a1a; -fx-font-size: 16px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;" text="Sell">
                 <VBox.margin><Insets bottom="10.0" left="20.0" right="20.0" /></VBox.margin>
             </Button>
 

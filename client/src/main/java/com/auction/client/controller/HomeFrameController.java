@@ -7,22 +7,22 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.Region;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
-
 import java.io.IOException;
 
 public class HomeFrameController {
     
     @FXML
-    private ScrollPane scrollContent;
+    protected ScrollPane scrollContent;
+    protected HomeController currentHomeController;
 
     public void setView(Node node) {
         scrollContent.setContent(node);
     }
 
     public void handleLogout(ActionEvent event) {
-        System.out.println("Đang đăng xuất... Trở về màn hình Login!");
+        System.out.println("Logging out... Returning to Login screen.");
         try {
             // 1. Tải lại file giao diện Login
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Login.fxml"));
@@ -39,15 +39,21 @@ public class HomeFrameController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Lỗi: Không tìm thấy file Login.fxml!");
+            System.out.println("Error: Login.fxml file not found.");
         }
     }
 
-    public void handleYourListing(ActionEvent actionEvent) {
-        changeView("/com/auction/client/view/addlisting.fxml");
+    public void handleSell() {
+        changeView("/com/auction/client/view/Sell.fxml");
     }
     public void handleProfile() {
         changeView("/com/auction/client/view/profile.fxml");
+    }
+    public void handleActiveListings() {
+        loadHomePage();
+        if (currentHomeController != null) {
+            currentHomeController.loadAuction("Active");
+        }
     }
     private void changeView(String fxmlFile) {
         try {
@@ -56,6 +62,7 @@ public class HomeFrameController {
             Node newNode = loader.load();
 
             scrollContent.setContent(newNode);
+            currentHomeController = null;
 
             // Nếu muốn dãn hết chiều ngang (thường VBox đã mặc định Fill Width)
             if (newNode instanceof Region) {
@@ -64,11 +71,32 @@ public class HomeFrameController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Lỗi: Không tìm thấy file " + fxmlFile);
+            System.out.println("Error: File not found " + fxmlFile);
         }
     }
 
     public void handleHome(ActionEvent actionEvent) {
-        changeView("/com/auction/client/view/Home.fxml");
+        loadHomePage(); // Sử dụng hàm loadHomePage thay vì changeView
+        if (currentHomeController != null) {
+            currentHomeController.loadAuction("All"); // Hiện tất cả khi về Home
+        }
+    }
+
+    public void handleYourListing(ActionEvent actionEvent) {
+
+    }
+    public void loadHomePage() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Home.fxml"));
+            Node node = loader.load();
+
+            // CỰC KỲ QUAN TRỌNG: Phải lấy controller mới sau mỗi lần load
+            currentHomeController = loader.getController();
+
+            scrollContent.setContent(node);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Lỗi: Không load được Home.fxml");
+        }
     }
 }
