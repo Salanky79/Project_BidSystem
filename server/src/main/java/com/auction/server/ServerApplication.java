@@ -2,6 +2,8 @@ package com.auction.server;
 
 
 import com.auction.server.controller.UserController;
+import com.auction.server.dao.UserDAO;
+import com.auction.server.service.UserService;
 import com.google.gson.Gson;
 import io.javalin.Javalin;
 import io.javalin.json.JsonMapper;
@@ -31,12 +33,16 @@ public class ServerApplication {
             });
         });
 
+        UserDAO userDao = new UserDAO();
+        UserService userService = new UserService(userDao);
+        UserController userController = new UserController(userService);
+
         // ──────────── REST API Routes ────────────
-        app.post("/api/auth/login", UserController::login);
-        app.post("/api/auth/register", UserController::register);
-        app.put("/api/users/password", UserController::updatePassword);
-        app.put("/api/users/email", UserController::updateEmail);
-        app.put("/api/users/address", UserController::updateAddress);
+        app.post("/api/auth/login", userController::login);
+        app.post("/api/auth/register", userController::register);
+        app.put("/api/users/password", userController::updatePassword);
+        app.put("/api/users/email", userController::updateEmail);
+        app.put("/api/users/address", userController::updateAddress);
 
         // TODO: Thêm routes cho Auction khi có AuctionController
         // app.get("/api/auctions", AuctionController::list);

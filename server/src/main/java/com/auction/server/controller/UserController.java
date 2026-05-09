@@ -18,10 +18,14 @@ import io.javalin.http.Context;
 import java.sql.SQLException;
 
 public class UserController {
-    private static final UserService USER_SERVICE = new UserService(new UserDAO());
+    private UserService USER_SERVICE;
+
+    public UserController(UserService USER_SERVICE){
+        this.USER_SERVICE = USER_SERVICE;
+    }
 
     // ──────────── POST /api/auth/login ────────────
-    public static void login(Context ctx) {
+    public void login(Context ctx) {
         try {
             JsonObject body = JsonParser.parseString(ctx.body()).getAsJsonObject();
             String username = getStringOrThrow(body, "username");
@@ -40,7 +44,7 @@ public class UserController {
     }
 
     // ──────────── POST /api/auth/register ────────────
-    public static void register(Context ctx) {
+    public void register(Context ctx) {
         try {
             JsonObject body = JsonParser.parseString(ctx.body()).getAsJsonObject();
             User user = createUserFromJson(body);
@@ -54,7 +58,7 @@ public class UserController {
         }
     }
 
-    public static void updatePassword(Context ctx) {
+    public void updatePassword(Context ctx) {
         try {
             JsonObject body = JsonParser.parseString(ctx.body()).getAsJsonObject();
             String userId = getStringOrThrow(body, "userId");
@@ -74,7 +78,7 @@ public class UserController {
         }
     }
 
-    public static void updateEmail(Context ctx) {
+    public void updateEmail(Context ctx) {
         try {
             JsonObject body = JsonParser.parseString(ctx.body()).getAsJsonObject();
             String userId = getStringOrThrow(body, "userId");
@@ -94,7 +98,7 @@ public class UserController {
         }
     }
 
-    public static void updateAddress(Context ctx) {
+    public void updateAddress(Context ctx) {
         try {
             JsonObject body = JsonParser.parseString(ctx.body()).getAsJsonObject();
             String userId = getStringOrThrow(body, "userId");
