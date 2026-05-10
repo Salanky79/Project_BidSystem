@@ -1,10 +1,10 @@
 package com.auction.share.DTO;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 public abstract class Request implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+    private String requestId = UUID.randomUUID().toString();
     private final String action;
 
     protected Request(String action) {
@@ -14,4 +14,11 @@ public abstract class Request implements Serializable {
     public String getAction() {
         return action;
     }
+    public Request withUserId(String userId) {
+        return this;
+    }
+    public String getRequestId(){
+        return requestId;
+    }
+
 }

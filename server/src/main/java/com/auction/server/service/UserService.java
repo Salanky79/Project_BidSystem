@@ -49,6 +49,15 @@ public class UserService {
         return user;
     }
 
+    public User getById(String id) throws SQLException, ValidationException {
+        validateRequiredText(id, "User id is required.");
+        User user = userDAO.findById(id);
+        if (user == null) {
+            throw new ValidationException("User not found.");
+        }
+        return user;
+    }
+
     public boolean updatePassword(String id, String password) throws SQLException, ValidationException {
         validateRequiredText(id, "User id is required.");
         validatePassword(password);

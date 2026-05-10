@@ -57,4 +57,20 @@ public class CreateAuctionRequest extends Request {
     public String getEndTime() {
         return endTime;
     }
+
+    @Override
+    public Request withUserId(String userId) {
+        if (this.sellerId == null || this.sellerId.isBlank()) {
+            return new CreateAuctionRequest(
+                    userId,
+                    itemName,
+                    description,
+                    category,
+                    startingPrice,
+                    startTime,
+                    endTime
+            );
+        }
+        return this;
+    }
 }

@@ -1,6 +1,6 @@
 package com.auction.server.dao;
 
-import com.auction.server.factory.UserDBFactory;
+import com.auction.server.util.MapUserDB;
 import com.auction.server.util.DatabaseConnection;
 import com.auction.share.models.user.Admin;
 import com.auction.share.models.user.Bidder;
@@ -55,7 +55,7 @@ public class UserDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return UserDBFactory.mapUser(rs);
+                    return MapUserDB.mapUser(rs);
                 }
             }
         }
@@ -72,7 +72,7 @@ public class UserDAO {
 
             try(ResultSet rs = ps.executeQuery()){
                 if(rs.next()){
-                    return UserDBFactory.mapUser(rs);
+                    return MapUserDB.mapUser(rs);
                     }
                 }
             }

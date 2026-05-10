@@ -3,7 +3,7 @@ package com.auction.share.DTO;
 import java.io.Serializable;
 
 public class Response<T> implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private String resquestId;
 
     private final boolean success;
     private final String message;
@@ -19,6 +19,12 @@ public class Response<T> implements Serializable {
         return success;
     }
 
+    public void setResquestId(String resquestId){
+        this.resquestId = resquestId;
+    }
+    public String getRequestId(){
+        return resquestId;
+    }
     public String getMessage() {
         return message;
     }

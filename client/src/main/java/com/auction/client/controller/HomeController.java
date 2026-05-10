@@ -1,29 +1,27 @@
 package com.auction.client.controller;
 
+import com.auction.client.ClientContext;
+import com.auction.client.service.AuctionService;
+import com.auction.share.DTO.AuctionSummaryDTO;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
+import java.util.List;
 
 public class HomeController extends HomeFrameController {
+    private final AuctionService auctionService = ClientContext.auctionService();
 
 // Kéo cái lưới trống từ giao diện FXML vào đây để điều khiển
     @FXML
     private GridPane auctionGrid;
     @FXML
     private VBox Content;
-
-    // 1. Tạo một mảng dữ liệu giả lập (Sau này bạn sẽ lấy List<Item> từ Server trả về)
-    String[] itemNames = {"iPhone 15 Pro", "Rolex Watch", "Chanel Handbag", "Porsche Supercar", "Van Gogh Painting", "Diamond Ring"};
-    String[] categories = {"Electronic", "Watch", "Hand Bag", "Car", "Fine Art", "Jewelry"};
-    String[] icons = {"📱", "⌚", "👜", "🚗", "🖼", "💍"};
-    double[] prices = {1200.0, 5500.0, 3200.0, 150000.0, 85000.0, 12000.0};
-    String[] status = {"Active", "End", "Cancelled", "In Queue", "Active", "End"};
 
     @FXML
     public void initialize() {
@@ -33,37 +31,46 @@ public class HomeController extends HomeFrameController {
     public void loadAuction(String filterStatus) {
         auctionGrid.getChildren().clear();
 
-        int column = 0;
-        int row = 0;
+        auctionService.getAuctions(response -> Platform.runLater(() -> {
+            if (response != null && response.isSuccess() && response.getData() instanceof List<?> list) {
+                int column = 0;
+                int row = 0;
 
-        try {
-            // 2. Vòng lặp để đẻ ra 6 cái thẻ sản phẩm
-            for (int i = 0; i < itemNames.length; i++) {
+                for (Object obj : list) {
+                    if (obj instanceof AuctionSummaryDTO dto) {
+                        if (filterStatus.equals("All") || dto.getStatus().equalsIgnoreCase(filterStatus)) {
+                            try {
+                                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/ItemCard.fxml"));
+                                HBox card = loader.load();
 
-                // KIỂM TRA ĐIỀU KIỆN LỌC
-                // Nếu filter là "All" HOẶC status trùng với filter thì mới vẽ
-                if (filterStatus.equals("All") || status[i].equalsIgnoreCase(filterStatus)) {
+                                ItemCardController cardController = loader.getController();
+                                // Temporary icon mapping based on category for UI consistency
+                                String icon = "📦";
+                                if ("Electronic".equalsIgnoreCase(dto.getCategory())) icon = "📱";
+                                else if ("Watch".equalsIgnoreCase(dto.getCategory())) icon = "⌚";
+                                else if ("Hand Bag".equalsIgnoreCase(dto.getCategory()) || "Clothing".equalsIgnoreCase(dto.getCategory())) icon = "👜";
+                                else if ("Car".equalsIgnoreCase(dto.getCategory())) icon = "🚗";
+                                else if ("Art".equalsIgnoreCase(dto.getCategory()) || "Art".equalsIgnoreCase(dto.getCategory())) icon = "🖼";
+                                else if ("Jewelry".equalsIgnoreCase(dto.getCategory())) icon = "💍";
+                                
+                                cardController.setData(icon, dto.getCategory(), dto.getItemName(), dto.getCurrentPrice(), 0, dto.getEndTime(), dto.getStatus(), dto.getAuctionId());
 
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/ItemCard.fxml"));
-                    HBox card = loader.load();
-
-                    ItemCardController cardController = loader.getController();
-                    cardController.setData(icons[i], categories[i], itemNames[i], prices[i], 0, "12 D 05 Hrs", status[i]);
-
-                    if (column == 2) {
-                        column = 0;
-                        row++;
+                                if (column == 2) {
+                                    column = 0;
+                                    row++;
+                                }
+                                auctionGrid.add(card, column++, row);
+                                GridPane.setMargin(card, new Insets(10));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
-                    auctionGrid.add(card, column++, row);
-
-                    // Thêm khoảng cách giữa các card cho đẹp
-                    GridPane.setMargin(card, new Insets(10));
                 }
+            } else {
+                System.out.println("Failed to load auctions: " + (response != null ? response.getMessage() : "Unknown error"));
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Error: ItemCard.fxml file not found. Please check the path.");
-        }
+        }));
     }
 
 }
