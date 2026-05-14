@@ -19,7 +19,7 @@ public class Response<T> implements Serializable {
         return success;
     }
 
-    public void setResquestId(String resquestId){
+    public void setRequestId(String resquestId){
         this.resquestId = resquestId;
     }
     public String getRequestId(){

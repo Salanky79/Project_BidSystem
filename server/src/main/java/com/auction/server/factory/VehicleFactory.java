@@ -9,7 +9,7 @@ public class VehicleFactory implements ItemCreator {
         double mileage = parseDoubleAttribute(attributes, 0, 0.0);
         String fuelType = getTextAttribute(attributes, 1, "Unknown Fuel");
 
-        return new Vehicle(name, description, startingPrice, sellerID, mileage, fuelType);
+        return new Vehicle(name, description, startingPrice, sellerID, fuelType);
     }
 
     private static String getTextAttribute(String[] attributes, int index, String defaultValue) {

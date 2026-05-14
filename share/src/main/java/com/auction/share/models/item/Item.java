@@ -1,5 +1,6 @@
 package com.auction.share.models.item;
 
+import com.auction.share.enums.Category;
 import com.auction.share.models.core.Entity;
 
 public class Item extends Entity {
@@ -7,13 +8,19 @@ public class Item extends Entity {
     private String description = "";
     private double startingPrice;
     private String sellerId;
+    private Category category;
 
     public Item(String name, String description, double startingPrice, String sellerId) {
+        this(name, description, startingPrice, sellerId, Category.ITEM);
+    }
+
+    public Item(String name, String description, double startingPrice, String sellerId, Category category) {
         super();
         this.name = name;
         this.description = description;
         this.startingPrice = startingPrice;
         this.sellerId = sellerId;
+        this.category = category;
     }
 
     public String getName() {
@@ -27,6 +34,10 @@ public class Item extends Entity {
     }
     public String getSellerId() {
         return sellerId;
+    }
+
+    public Category getCategory() {
+        return category;
     }
 }
 

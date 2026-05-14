@@ -7,6 +7,7 @@ import com.auction.share.DTO.Response;
 import com.auction.share.DTO.UpdateProfileRequest;
 import com.auction.share.DTO.UserDTO;
 import com.auction.share.enums.Role;
+import com.auction.share.exceptions.ValidationException;
 import com.auction.share.models.user.Admin;
 import com.auction.share.models.user.Bidder;
 import com.auction.share.models.user.Seller;
@@ -20,12 +21,17 @@ public class UserController {
     }
 
     public Response<UserDTO> login(LoginRequest request) throws Exception {
-        User user = userService.login(request.getUsername(), request.getPassword());
+        String username = request.getUsername();
+        String password = request.getPassword();
+        validateRequiredText(username, "Username is required.");
+        validateRequiredText(password, "Password is required.");
+        User user = userService.login(username, password);
         return Response.success("Login success.", toUserDTO(user));
     }
 
     public Response<UserDTO> register(RegisterRequest request) throws Exception {
         User user = toUser(request);
+        validateUserForRegister(user);
         userService.register(user);
         return Response.success("Register success.", toUserDTO(user));
     }
@@ -44,10 +50,16 @@ public class UserController {
         if (request.getAddress() != null && !request.getAddress().isBlank()) {
             userService.updateAddress(request.getUserId(), request.getAddress());
         }
+        if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()){
+            userService.updatePhoneNumber(request.getUserId(), request.getPhoneNumber());
+        }
 
         User user = userService.getById(request.getUserId());
         return Response.success("Profile updated successfully.", toUserDTO(user));
     }
+
+
+    //HELPER
 
     private User toUser(RegisterRequest request) {
         Role role = Role.valueOf(request.getRole().trim().toUpperCase());
@@ -105,5 +117,49 @@ public class UserController {
                 address,
                 balance
         );
+    }
+
+    private static void validateUserForRegister(User user) throws ValidationException {
+        if (user == null) {
+            throw new ValidationException("User is required.");
+        }
+
+        validateRequiredText(user.getUsername(), "Username is required.");
+        validateRequiredText(user.getFullName(), "Full name is required.");
+        validatePassword(user.getPassword());
+
+        switch (user.getRole()) {
+            case BIDDER:
+                Bidder bidder = (Bidder) user;
+                validateRequiredText(bidder.getPhoneNumber(), "Phone number is required.");
+                validateRequiredText(bidder.getEmail(), "Email is required.");
+                validateRequiredText(bidder.getAddress(), "Address is required for bidder accounts.");
+                break;
+            case SELLER:
+                Seller seller = (Seller) user;
+                validateRequiredText(seller.getPhoneNumber(), "Phone number is required.");
+                validateRequiredText(seller.getEmail(), "Email is required.");
+                validateRequiredText(seller.getAddress(), "Address is required for seller accounts.");
+                break;
+            case ADMIN:
+                break;
+            default:
+                throw new ValidationException("Invalid role.");
+        }
+    }
+
+    private static void validateRequiredText(String value, String message) throws ValidationException {
+        if (value == null || value.isBlank()) {
+            throw new ValidationException(message);
+        }
+    }
+
+    private static void validatePassword(String password) throws ValidationException {
+        validateRequiredText(password, "Password is required.");
+        if (password.length() < 6) {
+            throw new ValidationException(
+                    "Password must be at least " + 6 + " characters."
+            );
+        }
     }
 }

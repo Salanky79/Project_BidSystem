@@ -23,7 +23,6 @@ public class SocketClient {
     private final Map<String, Consumer<Response<?>>> callbacks;
     private final SessionManager sessionManager;
 
-    private final Object connectionLock = new Object();
     private Socket socket;
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
@@ -35,10 +34,6 @@ public class SocketClient {
         this.sessionManager = sessionManager;
         this.executorService = Executors.newVirtualThreadPerTaskExecutor();
         this.callbacks = new ConcurrentHashMap<>();
-    }
-
-    public void login(LoginRequest request, Consumer<Response<?>> onResponse) {
-        send(request, onResponse);
     }
 
     public void send(Request request, Consumer<Response<?>> onResponse) {
@@ -57,10 +52,8 @@ public class SocketClient {
         }
 
         try {
-            synchronized (connectionLock) {
-                outputStream.writeObject(outboundRequest);
-                outputStream.flush();
-            }
+            outputStream.writeObject(outboundRequest);
+            outputStream.flush();
         } catch (IOException e) {
             if (onResponse != null) {
                 callbacks.remove(request.getRequestId());
@@ -70,23 +63,15 @@ public class SocketClient {
         }
     }
 
-    public void disconnect() {
-        closeConnection();
-    }
-
     private void ensureConnected() throws IOException {
         if (socket != null && socket.isConnected() && !socket.isClosed()) {
             return;
         }
-        synchronized (connectionLock) {
-            if (socket != null && socket.isConnected() && !socket.isClosed()) {
-                return;
-            }
-            socket = new Socket(host, port);
-            outputStream = new ObjectOutputStream(socket.getOutputStream());
-            inputStream = new ObjectInputStream(socket.getInputStream());
-            startListening();
-        }
+
+        socket = new Socket(host, port);
+        outputStream = new ObjectOutputStream(socket.getOutputStream());
+        inputStream = new ObjectInputStream(socket.getInputStream());
+        startListening();
     }
 
     private void startListening() {
@@ -131,7 +116,6 @@ public class SocketClient {
     }
 
     private void closeConnection() {
-        synchronized (connectionLock) {
             try {
                 if (inputStream != null) {
                     inputStream.close();
@@ -149,7 +133,6 @@ public class SocketClient {
                     socket.close();
                 }
             } catch (IOException ignored) {
-            }
             inputStream = null;
             outputStream = null;
             socket = null;

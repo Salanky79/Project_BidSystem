@@ -14,7 +14,7 @@ public class UserNetwork {
     }
 
     public void login(LoginRequest request, Consumer<Response<?>> onResponse) {
-        socketClient.login(request, onResponse);
+        socketClient.send(request, onResponse);
     }
 
     public void signup(RegisterRequest request, Consumer<Response<?>> onResponse) {
