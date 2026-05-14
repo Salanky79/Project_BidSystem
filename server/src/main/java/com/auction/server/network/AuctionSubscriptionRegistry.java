@@ -14,6 +14,7 @@ public class AuctionSubscriptionRegistry {
             return;
         }
 
+        // lay dsach auction ma client trc day da xem
         String previousAuctionId = auctionBySession.get(session);
         if (previousAuctionId != null && !previousAuctionId.equals(auctionId)) {
             Set<ClientSession> previousSessions = subscribersByAuction.get(previousAuctionId);
@@ -25,9 +26,11 @@ public class AuctionSubscriptionRegistry {
             }
         }
 
+        // Thêm session vào danh sách subscriber của auction
         subscribersByAuction
                 .computeIfAbsent(auctionId, ignored -> new HashSet<>())
                 .add(session);
+        // session này đang xem auction nào
         auctionBySession.put(session, auctionId);
     }
 

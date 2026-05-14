@@ -16,6 +16,7 @@ public class BidBroadcastService {
         this.subscriptionRegistry = subscriptionRegistry;
     }
 
+    // Gửi thông báo "có bid mới" đến tất cả client đang xem auction đó
     public void broadcastBidUpdate(BidUpdateEvent event) {
         Response<BidUpdateEvent> pushMessage = Response.success(BID_UPDATED, event);
 

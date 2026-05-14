@@ -21,13 +21,16 @@ public class RequestHandler {
     private final AuctionController auctionController;
     private final AuctionSubscriptionRegistry subscriptionRegistry;
 
+    // quet dinh xem request se di dau
     public RequestHandler(
             UserService userService,
             AuctionService auctionService,
             AuctionSubscriptionRegistry subscriptionRegistry
     ) {
+        // can service rieng cho tung client
         this.userController = new UserController(userService);
         this.auctionController = new AuctionController(auctionService);
+        // real time dealer
         this.subscriptionRegistry = subscriptionRegistry;
     }
 

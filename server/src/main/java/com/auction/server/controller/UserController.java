@@ -16,6 +16,8 @@ import com.auction.share.models.user.User;
 public class UserController {
     private final UserService userService;
 
+    // RequestHandler → UserController → UserService → DAO
+    // kiem tra validate login, register
     public UserController(UserService userService) {
         this.userService = userService;
     }
@@ -25,6 +27,8 @@ public class UserController {
         String password = request.getPassword();
         validateRequiredText(username, "Username is required.");
         validateRequiredText(password, "Password is required.");
+
+        // goi service => goi DAO
         User user = userService.login(username, password);
         return Response.success("Login success.", toUserDTO(user));
     }
@@ -60,7 +64,7 @@ public class UserController {
 
 
     //HELPER
-
+    // Tao object User trong he thong
     private User toUser(RegisterRequest request) {
         Role role = Role.valueOf(request.getRole().trim().toUpperCase());
         return switch (role) {
@@ -89,6 +93,7 @@ public class UserController {
         };
     }
 
+    // map user cua client gui len server voi ca DATABSE
     private UserDTO toUserDTO(User user) {
         String phoneNumber = null;
         String email = null;

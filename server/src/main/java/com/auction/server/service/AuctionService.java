@@ -99,6 +99,7 @@ public class AuctionService {
 
                 bidTransactionDAO.saveBidTransaction(conn, transaction);
                 conn.commit();
+                // Gửi thông báo "có bid mới" đến tất cả client đang xem auction đó
                 bidBroadcastService.broadcastBidUpdate(new BidUpdateEvent(
                         BidBroadcastService.BID_UPDATED,
                         auction.getId(),
@@ -107,10 +108,11 @@ public class AuctionService {
                         req.getAmount(),
                         req.getAmount(),
                         transaction.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                        // chuyen datetime thanh chuoi chuan theo format ngay thang
                 ));
                 return true;
             } catch (SQLException | ValidationException e) {
-                conn.rollback();
+                conn.rollback(); // huy toan bi thay doi
                 throw e;
             } finally {
                 conn.setAutoCommit(true);
