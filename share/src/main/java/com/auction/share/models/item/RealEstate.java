@@ -1,12 +1,14 @@
 package com.auction.share.models.item;
 
+import com.auction.share.enums.Category;
+
 public class RealEstate extends Item {
     private String location;
     private double areaSquareMeter;
 
     public RealEstate(String name, String description, double startingPrice, String sellerId,
                       String location, double areaSquareMeter) {
-        super(name, description, startingPrice, sellerId);
+        super(name, description, startingPrice, sellerId, Category.REALESTATE);
         this.location = location;
         this.areaSquareMeter = areaSquareMeter;
     }

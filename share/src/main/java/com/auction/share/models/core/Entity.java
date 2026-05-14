@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public abstract class Entity implements Serializable {
+public abstract class Entity {
     private String id;
     private LocalDateTime createdAt;
 

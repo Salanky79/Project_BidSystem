@@ -1,6 +1,6 @@
 package com.auction.server.dao;
 
-import com.auction.server.factory.UserDBFactory;
+import com.auction.server.util.MapUserDB;
 import com.auction.server.util.DatabaseConnection;
 import com.auction.share.models.user.Admin;
 import com.auction.share.models.user.Bidder;
@@ -55,7 +55,7 @@ public class UserDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return UserDBFactory.mapUser(rs);
+                    return MapUserDB.mapUser(rs);
                 }
             }
         }
@@ -72,7 +72,7 @@ public class UserDAO {
 
             try(ResultSet rs = ps.executeQuery()){
                 if(rs.next()){
-                    return UserDBFactory.mapUser(rs);
+                    return MapUserDB.mapUser(rs);
                     }
                 }
             }
@@ -115,6 +115,21 @@ public class UserDAO {
         }
     }
 
+    public boolean updateUserPhoneNumber(String id, String phoneNumber) throws SQLException{
+        String sql = "UPDATE users SET phoneNumber = ? WHERE id = ?";
+        try(Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, phoneNumber);
+            ps.setString(2, id);
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+
+
+
     public boolean isEmailTaken(String email) throws SQLException {
         String sql = "SELECT email FROM users WHERE email = ?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -136,6 +151,9 @@ public class UserDAO {
         }
     }
 
+
+
+    //HELPER
     private void bindRoleSpecificFields(PreparedStatement ps, User user) throws SQLException {
         if (user instanceof Bidder bidder) {
             ps.setString(5, bidder.getPhoneNumber());

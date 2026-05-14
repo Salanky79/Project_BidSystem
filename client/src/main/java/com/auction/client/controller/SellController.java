@@ -9,12 +9,20 @@ import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import com.auction.client.service.AuctionService;
+import com.auction.client.ClientContext;
+import com.auction.share.exceptions.ValidationException;
+import javafx.application.Platform;
+
 import java.io.File;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 public class SellController implements Initializable {
+    private final AuctionService auctionService = ClientContext.auctionService();
 
     // ──────────────── FXML Fields ────────────────
     @FXML private TextField name;
@@ -74,25 +82,30 @@ public class SellController implements Initializable {
      * Validates inputs and adds the listing.
      */
     private void handleAddListing() {
-        if (!validateInputs()) return;
-
         String listingName      = name.getText().trim();
         String listingCategory  = category.getValue();
-        double listingPrice     = Double.parseDouble(startingprice.getText().trim());
+        String listingPrice     = startingprice.getText().trim();
         LocalDate listingDate   = enddate.getValue();
         String listingDesc      = description.getText().trim();
 
-        // TODO: Replace with your actual database / service call
-        System.out.println("=== New Listing ===");
-        System.out.println("Title       : " + listingName);
-        System.out.println("Category    : " + listingCategory);
-        System.out.println("Start Price : " + listingPrice);
-        System.out.println("End Date    : " + listingDate);
-        System.out.println("Description : " + listingDesc);
-        System.out.println("Image       : " + (selectedImageFile != null ? selectedImageFile.getAbsolutePath() : "None"));
+        String startTimeStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        String endTimeStr = listingDate != null ? listingDate.atTime(23, 59).format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "";
 
-        showSuccess("Listing added successfully!");
-        clearFields();
+        try {
+            auctionService.createAuction(
+                    listingName, listingDesc, listingCategory, listingPrice, startTimeStr, endTimeStr,
+                    response -> Platform.runLater(() -> {
+                        if (response != null && response.isSuccess()) {
+                            showSuccess("Listing added successfully!");
+                            clearFields();
+                        } else {
+                            showError(response != null ? response.getMessage() : "Lỗi kết nối máy chủ");
+                        }
+                    })
+            );
+        } catch (ValidationException e) {
+            showError(e.getMessage());
+        }
     }
 
     /**
@@ -106,52 +119,7 @@ public class SellController implements Initializable {
     // ──────────────── Validation ────────────────
 
     private boolean validateInputs() {
-        // Title
-        if (name.getText().trim().isEmpty()) {
-            showError("Please enter a title.");
-            return false;
-        }
-
-        // Category
-        if (category.getValue() == null) {
-            showError("Please select a category.");
-            return false;
-        }
-
-        // Starting Price – must be a positive number
-        String priceText = startingprice.getText().trim();
-        if (priceText.isEmpty()) {
-            showError("Please enter a starting price.");
-            return false;
-        }
-        try {
-            double price = Double.parseDouble(priceText);
-            if (price <= 0) {
-                showError("Starting price must be greater than 0.");
-                return false;
-            }
-        } catch (NumberFormatException e) {
-            showError("Starting price must be a valid number.");
-            return false;
-        }
-
-        // End Date – must be in the future
-        if (enddate.getValue() == null) {
-            showError("Please select an end date.");
-            return false;
-        }
-        if (!enddate.getValue().isAfter(LocalDate.now())) {
-            showError("End date must be a future date.");
-            return false;
-        }
-
-        // Description
-        if (description.getText().trim().isEmpty()) {
-            showError("Please enter a description.");
-            return false;
-        }
-
-        return true;
+        return true; // Delegation to Service layer
     }
 
     // ──────────────── Helpers ────────────────

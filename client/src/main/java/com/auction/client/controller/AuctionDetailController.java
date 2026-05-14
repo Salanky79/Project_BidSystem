@@ -17,11 +17,17 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import com.auction.client.service.BidService;
+import com.auction.client.ClientContext;
+import com.auction.share.exceptions.ValidationException;
+import javafx.application.Platform;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class AuctionDetailController {
+    private final BidService bidService = ClientContext.bidService();
 
     @FXML private Button closeBtn;
     @FXML private Button     placeBidBtn;
@@ -49,6 +55,7 @@ public class AuctionDetailController {
 
     private double currentPrice;
     private int    totalBids;
+    private String auctionId;
 
     private static final DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -62,7 +69,8 @@ public class AuctionDetailController {
                         double price,
                         int    bids,
                         String time,
-                        String status
+                        String status,
+                        String auctionId
     ) {
         this.currentPrice = price;
         this.totalBids    = bids;
@@ -79,7 +87,8 @@ public class AuctionDetailController {
         listedByLabel.setText("Unknown");
         descriptionLabel.setText("No description provided.");
         startDateLabel.setText(LocalDateTime.now().format(FORMATTER));
-        statusLabel.setText("Active");
+        
+        this.auctionId = auctionId;
     }
 
     // ──────────────────────────────────────────────────────
@@ -129,33 +138,24 @@ public class AuctionDetailController {
     private void handlePlaceBid() {
         String input = bidField.getText().trim();
 
-        if (input.isEmpty()) {
-            showError("Please enter your bid amount.");
-            return;
-        }
-
         try {
-            double bidAmount = Double.parseDouble(input);
-
-            if (bidAmount <= currentPrice) {
-                showError("Your bid must be higher than the current price: "
-                        + String.format("$%.2f", currentPrice));
-                return;
-            }
-
-            // TODO: Gửi bid lên Server
-            System.out.println("Placed bid: $" + bidAmount);
-
-            // Cập nhật UI tạm thời (server push về sau)
-            currentPrice = bidAmount;
-            totalBids++;
-            currentPriceLabel.setText(String.format("$%.2f", currentPrice));
-            totalBidsLabel.setText(String.valueOf(totalBids));
-            bidField.clear();
-            hideValidation();
-
-        } catch (NumberFormatException e) {
-            showError("Invalid amount. Please enter a number.");
+            bidService.placeBid(this.auctionId, input, currentPrice, response -> Platform.runLater(() -> {
+                if (response != null && response.isSuccess()) {
+                    System.out.println("Placed bid: $" + input);
+                    
+                    // Cập nhật UI tạm thời (server push về sau)
+                    currentPrice = Double.parseDouble(input);
+                    totalBids++;
+                    currentPriceLabel.setText(String.format("$%.2f", currentPrice));
+                    totalBidsLabel.setText(String.valueOf(totalBids));
+                    bidField.clear();
+                    hideValidation();
+                } else {
+                    showError(response != null ? response.getMessage() : "Lỗi kết nối máy chủ");
+                }
+            }));
+        } catch (ValidationException e) {
+            showError(e.getMessage());
         }
     }
 
@@ -222,7 +222,7 @@ public class AuctionDetailController {
     //  AuctionDetailController.open(icon, category, name, price, bids, timeLeft);
     // ──────────────────────────────────────────────────────
     public static void open(String icon, String category, String name,
-                            double price, int bids, String time, String status) {
+                            double price, int bids, String time, String status, String auctionId) {
         try {
             FXMLLoader loader = new FXMLLoader(
                     AuctionDetailController.class.getResource(
@@ -231,7 +231,7 @@ public class AuctionDetailController {
             Parent root = loader.load();
 
             AuctionDetailController controller = loader.getController();
-            controller.setData(icon, category, name, price, bids, time, status);
+            controller.setData(icon, category, name, price, bids, time, status, auctionId);
 
             Stage stage = new Stage();
             stage.setTitle("Auction – " + name);

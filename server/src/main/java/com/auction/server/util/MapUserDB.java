@@ -1,4 +1,4 @@
-package com.auction.server.factory;
+package com.auction.server.util;
 
 import com.auction.share.models.user.Admin;
 import com.auction.share.models.user.Bidder;
@@ -8,8 +8,8 @@ import com.auction.share.models.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public final class UserDBFactory {
-    private UserDBFactory() {
+public final class MapUserDB {
+    private MapUserDB() {
     }
 
     public static User mapUser(ResultSet rs) throws SQLException {

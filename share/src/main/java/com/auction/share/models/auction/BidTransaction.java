@@ -11,7 +11,7 @@ public class BidTransaction extends Entity {
     private final Auction auction;
     private final Bidder bidder;
     private final double amount;
-    private final LocalDateTime timestamp;
+    private LocalDateTime timestamp;
 
     public BidTransaction(Auction auction, Bidder bidder, double amount) {
         super();
@@ -22,8 +22,12 @@ public class BidTransaction extends Entity {
     }
 
     // Chỉ có hàm GET (Đọc), KHÔNG viết hàm SET (Sửa)
+    public Auction getAuction() { return auction; }
     public Bidder getBidder() { return bidder; }
     public double getAmount() { return amount; }
+    public void setTimestamp(LocalDateTime timestamp){
+        this.timestamp = timestamp;
+    }
     public LocalDateTime getTimestamp() { return timestamp; }
 
     public String getTransactionDetails() {

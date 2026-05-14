@@ -1,61 +1,77 @@
 package com.auction.server;
 
-
-import com.auction.server.controller.UserController;
 import com.auction.server.dao.UserDAO;
+import com.auction.server.controller.RequestHandler;
+import com.auction.server.dao.AuctionDAO;
+import com.auction.server.dao.BidTransactionDAO;
+import com.auction.server.dao.ItemDAO;
+import com.auction.server.network.AuctionSubscriptionRegistry;
+import com.auction.server.network.AuctionServer;
+import com.auction.server.service.AuctionService;
+import com.auction.server.service.AuctionStatusScheduler;
+import com.auction.server.service.BidBroadcastService;
 import com.auction.server.service.UserService;
-import com.google.gson.Gson;
-import io.javalin.Javalin;
-import io.javalin.json.JsonMapper;
-import org.jetbrains.annotations.NotNull;
+import com.auction.server.util.DatabaseConnection;
 
-
-import java.lang.reflect.Type;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ServerApplication {
-
-    private static final Gson gson = new Gson();
+    private static final ExecutorService clientExecutor = Executors.newVirtualThreadPerTaskExecutor();
+    private static final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
+    private static final int port = 8080;
 
     public static void main(String[] args) {
-
-        Javalin app = Javalin.create(config -> {
-            // Cấu hình Gson làm JSON mapper cho Javalin
-            config.jsonMapper(new JsonMapper() {
-                @Override
-                public @NotNull String toJsonString(@NotNull Object obj, @NotNull Type type) {
-                    return gson.toJson(obj, type);
-                }
-
-                @Override
-                public <T> @NotNull T fromJsonString(@NotNull String json, @NotNull Type targetType) {
-                    return gson.fromJson(json, targetType);
-                }
-            });
-        });
-
         UserDAO userDao = new UserDAO();
         UserService userService = new UserService(userDao);
-        UserController userController = new UserController(userService);
+        ItemDAO itemDao = new ItemDAO();
+        AuctionDAO auctionDao = new AuctionDAO();
+        BidTransactionDAO bidTransactionDao = new BidTransactionDAO();
+        AuctionSubscriptionRegistry subscriptionRegistry = new AuctionSubscriptionRegistry();
+        BidBroadcastService bidBroadcastService = new BidBroadcastService(subscriptionRegistry);
+        AuctionService auctionService = new AuctionService(
+                auctionDao,
+                itemDao,
+                bidTransactionDao,
+                userDao,
+                bidBroadcastService
+        );
+        AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionDao, 1000);
+        backgroundExecutor.submit(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    auctionStatusScheduler.run();
+                } catch (RuntimeException e) {
+                    System.err.println("Auction status scheduler failed, restarting: " + e.getMessage());
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException interruptedException) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }
+        });
 
-        // ──────────── REST API Routes ────────────
-        app.post("/api/auth/login", userController::login);
-        app.post("/api/auth/register", userController::register);
-        app.put("/api/users/password", userController::updatePassword);
-        app.put("/api/users/email", userController::updateEmail);
-        app.put("/api/users/address", userController::updateAddress);
+        RequestHandler requestHandler = new RequestHandler(userService, auctionService, subscriptionRegistry);
 
-        // TODO: Thêm routes cho Auction khi có AuctionController
-        // app.get("/api/auctions", AuctionController::list);
-        // app.get("/api/auctions/{id}", AuctionController::getDetail);
-        // app.post("/api/auctions", AuctionController::create);
-
-        // ──────────── WebSocket cho Bidding Realtime ────────────
-
-
-        // Start server tại cổng 8080
-        app.start(8080);
-        System.out.println("Server dau gia dang chay tai cong 8080...");
-        System.out.println("  REST API:  http://localhost:8080/api/...");
-        System.out.println("  WebSocket: ws://localhost:8080/ws/auction");
+        try(ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Server start on port: " + port);
+            while(!serverSocket.isClosed()){
+                Socket clientSocket = serverSocket.accept();
+                clientExecutor.submit(new AuctionServer(clientSocket, requestHandler, subscriptionRegistry));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            auctionStatusScheduler.shutdown();
+            backgroundExecutor.shutdownNow();
+            clientExecutor.shutdown();
+            DatabaseConnection.shutdown();
+        }
     }
 }

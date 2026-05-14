@@ -12,7 +12,6 @@ import com.auction.share.models.user.User;
 import java.sql.SQLException;
 
 public class UserService {
-    private static final int MIN_PASSWORD_LENGTH = 6;
     private final UserDAO userDAO;
 
     public UserService(UserDAO userDAO) {
@@ -20,8 +19,6 @@ public class UserService {
     }
 
     public boolean register(User user) throws SQLException, ValidationException, DuplicateResourceException {
-        validateUserForRegister(user);
-
         if (userDAO.isUsernameTaken(user.getUsername())) {
             throw new DuplicateResourceException("Username already exists.");
         }
@@ -36,9 +33,6 @@ public class UserService {
     }
 
     public User login(String username, String password) throws SQLException, AuthenticationException, ValidationException {
-        validateRequiredText(username, "Username is required.");
-        validateRequiredText(password, "Password is required.");
-
         User user = userDAO.findByUsername(username);
         if (user == null) {
             throw new AuthenticationException("Account does not exist.");
@@ -49,89 +43,32 @@ public class UserService {
         return user;
     }
 
-    public boolean updatePassword(String id, String password) throws SQLException, ValidationException {
-        validateRequiredText(id, "User id is required.");
-        validatePassword(password);
-
-        String hashedPassword = PasswordUtil.hashPassword(password);
-        return userDAO.updateUserPassword(id, hashedPassword);
-    }
-
-    public boolean updateEmail(String id, String email) throws SQLException, ValidationException, DuplicateResourceException {
-        validateRequiredText(id, "User id is required.");
-        validateRequiredText(email, "Email is required.");
-
+    public User getById(String id) throws SQLException, ValidationException {
         User user = userDAO.findById(id);
         if (user == null) {
             throw new ValidationException("User not found.");
         }
-
-        String normalizedEmail = email.trim();
-        String currentEmail = extractEmail(user);
-        if (currentEmail == null) {
-            throw new ValidationException("This account does not support email update.");
-        }
-        if (currentEmail.equalsIgnoreCase(normalizedEmail)) {
-            return true;
-        }
-        if (userDAO.isEmailTaken(normalizedEmail)) {
-            throw new DuplicateResourceException("Email already exists.");
-        }
-
-        return userDAO.updateUserEmail(id, normalizedEmail);
+        return user;
     }
 
-    public boolean updateAddress(String id, String address) throws SQLException, ValidationException {
-        validateRequiredText(id, "User id is required.");
-        validateRequiredText(address, "Address is required.");
+    public boolean updatePassword(String id, String password) throws SQLException {
+        String hashedPassword = PasswordUtil.hashPassword(password);
+        return userDAO.updateUserPassword(id, hashedPassword);
+    }
 
+    public boolean updateEmail(String id, String email) throws SQLException {
+        return userDAO.updateUserEmail(id, email);
+    }
+
+    public boolean updateAddress(String id, String address) throws SQLException {
         return userDAO.updateUserAddress(id, address);
     }
-
-    private static void validateUserForRegister(User user) throws ValidationException {
-        if (user == null) {
-            throw new ValidationException("User is required.");
-        }
-
-        validateRequiredText(user.getUsername(), "Username is required.");
-        validateRequiredText(user.getFullName(), "Full name is required.");
-        validatePassword(user.getPassword());
-
-        switch (user.getRole()) {
-            case BIDDER:
-                Bidder bidder = (Bidder) user;
-                validateRequiredText(bidder.getPhoneNumber(), "Phone number is required.");
-                validateRequiredText(bidder.getEmail(), "Email is required.");
-                validateRequiredText(bidder.getAddress(), "Address is required for bidder accounts.");
-                break;
-            case SELLER:
-                Seller seller = (Seller) user;
-                validateRequiredText(seller.getPhoneNumber(), "Phone number is required.");
-                validateRequiredText(seller.getEmail(), "Email is required.");
-                validateRequiredText(seller.getAddress(), "Address is required for seller accounts.");
-                break;
-            case ADMIN:
-                break;
-            default:
-                throw new ValidationException("Invalid role.");
-        }
+    public boolean updatePhoneNumber(String id, String phoneNumber) throws SQLException{
+        return userDAO.updateUserPhoneNumber(id, phoneNumber);
     }
 
-    private static void validatePassword(String password) throws ValidationException {
-        validateRequiredText(password, "Password is required.");
-        if (password.length() < MIN_PASSWORD_LENGTH) {
-            throw new ValidationException(
-                    "Password must be at least " + MIN_PASSWORD_LENGTH + " characters."
-            );
-        }
-    }
 
-    private static void validateRequiredText(String value, String message) throws ValidationException {
-        if (value == null || value.isBlank()) {
-            throw new ValidationException(message);
-        }
-    }
-
+    //HELPER
     private static String extractEmail(User user) {
         if (user instanceof Bidder bidder) {
             return bidder.getEmail();
