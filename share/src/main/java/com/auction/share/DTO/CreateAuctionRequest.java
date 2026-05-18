@@ -65,7 +65,6 @@ public class CreateAuctionRequest extends Request {
         return attributes.clone();
     }
 
-    @Override
     public Request withUserId(String userId) {
         if (this.sellerId == null || this.sellerId.isBlank()) {
             return new CreateAuctionRequest(

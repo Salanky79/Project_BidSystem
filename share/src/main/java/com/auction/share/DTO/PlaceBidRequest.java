@@ -26,7 +26,6 @@ public class PlaceBidRequest extends Request {
         return amount;
     }
 
-    @Override
     public Request withUserId(String userId) {
         if (this.bidderId == null || this.bidderId.isBlank()) {
             return new PlaceBidRequest(auctionId, userId, amount);

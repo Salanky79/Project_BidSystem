@@ -1,5 +1,6 @@
 package com.auction.server.service;
 
+import com.auction.share.exceptions.AuctionSystemException;
 import com.auction.share.models.auction.Auction;
 import com.auction.share.models.item.Item;
 import com.auction.share.models.user.Bidder;
@@ -134,7 +135,7 @@ public class AuctionManager {
     }
 
     // SỬA LẠI: Chuyển việc kiểm tra giá cho lớp Auction.java lo
-    public String placeBid(String itemName, double amount, User user) {
+    public String placeBid(String itemName, double amount, User user) throws AuctionSystemException {
         // Chỉ Bidder (người mua) mới được đặt giá
         if (!(user instanceof Bidder)) {
             return "FAIL|Chi co nguoi mua (Bidder) moi duoc dat gia!";

@@ -17,7 +17,6 @@ public class ListAuctionRequest extends Request {
         return status;
     }
 
-    @Override
     public Request withUserId(String userId) {
         return this;
     }
