@@ -63,6 +63,45 @@ public class LoginController {
         }
     }
 
+    private static String extractErrorMessage(Response<?> response) {
+        if (response != null && response.getMessage() != null && !response.getMessage().isBlank()) {
+            return response.getMessage();
+        }
+        return "Khong the ket noi Server!";
+    }
+
+    protected void loadHome(ActionEvent event) {
+        try {
+            FXMLLoader frameLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/HomeFrame.fxml"));
+            Parent homeFrameRoot = frameLoader.load();
+            HomeFrameController frameController = frameLoader.getController();
+            frameController.loadHomePage("All");
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(homeFrameRoot));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            errorLabel.setText("Loi giao dien: " + e.getMessage());
+            errorLabel.setVisible(true);
+        }
+    }
+
+    protected void loadSellerDashboard(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/SellerDashboard.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            errorLabel.setText("Loi giao dien: " + e.getMessage());
+            errorLabel.setVisible(true);
+        }
+    }
+
     @FXML
     private void handleLogin(ActionEvent event) {
         String username = usernameField.getText() == null ? "" : usernameField.getText().trim();
@@ -97,14 +136,6 @@ public class LoginController {
         }
     }
 
-
-    private static String extractErrorMessage(Response<?> response) {
-        if (response != null && response.getMessage() != null && !response.getMessage().isBlank()) {
-            return response.getMessage();
-        }
-        return "Khong the ket noi Server!";
-    }
-
     public void handleSignup(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/SignupView.fxml"));
@@ -117,38 +148,6 @@ public class LoginController {
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Loi: Khong tim thay file SignupView.fxml!");
-        }
-    }
-
-    protected void loadHome(ActionEvent event) {
-        try {
-            FXMLLoader frameLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/HomeFrame.fxml"));
-            Parent homeFrameRoot = frameLoader.load();
-            HomeFrameController frameController = frameLoader.getController();
-            frameController.loadHomePage("All");
-
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(homeFrameRoot));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            errorLabel.setText("Loi giao dien: " + e.getMessage());
-            errorLabel.setVisible(true);
-        }
-    }
-
-    protected void loadSellerDashboard(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/SellerDashboard.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            errorLabel.setText("Loi giao dien: " + e.getMessage());
-            errorLabel.setVisible(true);
         }
     }
 }

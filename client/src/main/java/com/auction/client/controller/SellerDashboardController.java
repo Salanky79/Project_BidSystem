@@ -72,15 +72,12 @@ public class SellerDashboardController extends FrameController {
     }
 
     public void handleDrafts(ActionEvent actionEvent) {
-        changeView("/com/auction/client/view/SellerDashboard.fxml");
     }
 
     public void handleActive(ActionEvent actionEvent) {
-        changeView("/com/auction/client/view/SellerDashboard.fxml");
     }
 
     public void handleSold(ActionEvent actionEvent) {
-        changeView("/com/auction/client/view/SellerDashboard.fxml");
     }
 
     public void handleProfile(ActionEvent actionEvent) {
@@ -89,5 +86,9 @@ public class SellerDashboardController extends FrameController {
 
     public void handleProfile() {
         changeView("/com/auction/client/view/profile.fxml");
+    }
+
+    public void handleSell(ActionEvent actionEvent) {
+        changeView("/com/auction/client/view/Sell.fxml");
     }
 }

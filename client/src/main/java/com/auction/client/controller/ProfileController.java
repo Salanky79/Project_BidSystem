@@ -76,21 +76,6 @@ public class ProfileController implements Initializable {
         table.setItems(history);
     }
 
-    private void handleEditAction() {
-        if (!isEditing) {
-            isEditing = true;
-            setFieldsEditable(true);
-            editButton.setText("SAVE CHANGES");
-            editButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
-        } else {
-            nameLabel.setText(nameField.getText());
-            isEditing = false;
-            setFieldsEditable(false);
-            editButton.setText("Edit Profile");
-            editButton.setStyle("-fx-background-color: #1a1a1a; -fx-text-fill: white;");
-        }
-    }
-
     private void setFieldsEditable(boolean canEdit) {
         nameField.setEditable(canEdit);
         emailField.setEditable(canEdit);
@@ -104,5 +89,20 @@ public class ProfileController implements Initializable {
         emailField.setStyle(style);
         phoneField.setStyle(style);
         usernameField.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: transparent;");
+    }
+
+    private void handleEditAction() {
+        if (!isEditing) {
+            isEditing = true;
+            setFieldsEditable(true);
+            editButton.setText("SAVE CHANGES");
+            editButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
+        } else {
+            nameLabel.setText(nameField.getText());
+            isEditing = false;
+            setFieldsEditable(false);
+            editButton.setText("Edit Profile");
+            editButton.setStyle("-fx-background-color: #1a1a1a; -fx-text-fill: white;");
+        }
     }
 }

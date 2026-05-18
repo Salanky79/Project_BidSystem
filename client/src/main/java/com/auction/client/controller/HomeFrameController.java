@@ -10,30 +10,6 @@ public class HomeFrameController extends FrameController {
 
     protected HomeController currentHomeController;
 
-    public void handleLogout(ActionEvent event) {
-        System.out.println("Logging out... Returning to Login screen.");
-        showLogin(event);
-    }
-
-    public void handleSell() {
-        changeView("/com/auction/client/view/Sell.fxml");
-    }
-
-    public void handleProfile() {
-        changeView("/com/auction/client/view/profile.fxml");
-    }
-
-    public void handleActiveListings() {
-        loadHomePage("RUNNING");
-    }
-
-    public void handleHome(ActionEvent actionEvent) {
-        loadHomePage("All");
-    }
-
-    public void handleYourListing(ActionEvent actionEvent) {
-    }
-
     public void loadHomePage() {
         loadHomePage("All");
     }
@@ -58,5 +34,29 @@ public class HomeFrameController extends FrameController {
     @Override
     protected void onViewChanged(Node newNode) {
         currentHomeController = null;
+    }
+
+    public void handleLogout(ActionEvent event) {
+        System.out.println("Logging out... Returning to Login screen.");
+        showLogin(event);
+    }
+
+    public void handleProfile() {
+        changeView("/com/auction/client/view/profile.fxml");
+    }
+
+    public void handleSell() {
+        changeView("/com/auction/client/view/Sell.fxml");
+    }
+
+    public void handleActiveListings() {
+        loadHomePage("RUNNING");
+    }
+
+    public void handleHome(ActionEvent actionEvent) {
+        loadHomePage("All");
+    }
+
+    public void handleYourListing(ActionEvent actionEvent) {
     }
 }

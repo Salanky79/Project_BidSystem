@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
@@ -19,9 +20,14 @@
       <TextField fx:id="description" alignment="TOP_LEFT" layoutX="112.0" layoutY="422.0" prefHeight="87.0" prefWidth="354.0" promptText="Description" styleClass="fields" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0" />
       <Button fx:id="chooseImageButton" layoutX="368.0" layoutY="542.0" styleClass="myButtons" text="Choose Image" AnchorPane.rightAnchor="123.0" />
       <Label fx:id="imageLabel" layoutX="112.0" layoutY="541.0" prefHeight="26.0" prefWidth="196.0" text="File Upload Label" AnchorPane.leftAnchor="123.0" />
-      <Button fx:id="addButton" layoutX="235.0" layoutY="586.0" prefHeight="35.0" prefWidth="102.0" styleClass="myButtons" text="Add" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="249.0" AnchorPane.rightAnchor="249.0" />
+      <Button fx:id="addButton" layoutX="329.0" layoutY="595.0" prefHeight="35.0" prefWidth="102.0" styleClass="myButtons" text="Add" AnchorPane.rightAnchor="150.0" />
       <Label fx:id="validationLabel" layoutX="112.0" layoutY="518.0" prefHeight="18.0" prefWidth="348.0" text="This is a validation label" textFill="RED" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0" />
       <ImageView fx:id="closeButton" fitHeight="26.0" fitWidth="25.0" layoutX="660.0" layoutY="14.0" pickOnBounds="true">
       </ImageView>
+      <Button fx:id="saveDraftBtn" layoutX="163.0" layoutY="595.0" onAction="#handleSaveDraft" prefHeight="35.0" prefWidth="102.0" style="-fx-background-color: Grey;" styleClass="myButtons" text="Save Draft" textFill="WHITE" AnchorPane.leftAnchor="150.0">
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+      </Button>
    </children>
 </AnchorPane>
