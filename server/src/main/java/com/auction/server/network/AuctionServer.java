@@ -30,35 +30,54 @@ public class AuctionServer implements Runnable {
     // Client <====== socket ======> Server
     public void run() {
         ClientSession session = null;
-        try (
-                Socket socket = clientSocket;
-                ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-                ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream())
-        ) {
+        Socket socket = clientSocket;
+
+        try {
+            ObjectOutputStream outputStream =
+                    new ObjectOutputStream(socket.getOutputStream());
+
+            outputStream.flush();
+
+            ObjectInputStream inputStream =
+                    new ObjectInputStream(socket.getInputStream());
+
             session = new ClientSession(outputStream);
+
             while (!socket.isClosed()) {
-                // server doc du lieu
+
                 Object incoming = inputStream.readObject();
+
                 if (!(incoming instanceof Request request)) {
                     session.send(Response.fail("Invalid request payload."));
                     continue;
                 }
 
-                // neu dung logic thi goi requesthandler de xu li nghiep vu
-                Response<?> response = requestHandler.handle(request, session);
+                Response<?> response =
+                        requestHandler.handle(request, session);
+
                 if (response.isSuccess()) {
-                    // neu request la xem dau gia thi: =>
                     if (request instanceof GetAuctionDetailRequest detailRequest) {
-                        subscriptionRegistry.subscribe(detailRequest.getAuctionId(), session);
+                        subscriptionRegistry.subscribe(
+                                detailRequest.getAuctionId(),
+                                session
+                        );
                     }
                 }
+
                 session.send(response);
             }
+
         } catch (EOFException ignored) {
-            // Client disconnected gracefully.
+
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
+
         } finally {
+            try {
+                clientSocket.close();
+            } catch (IOException ignored) {
+            }
+
             if (session != null) {
                 subscriptionRegistry.unsubcribe(session);
             }

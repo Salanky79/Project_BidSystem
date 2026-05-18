@@ -7,7 +7,7 @@ import com.auction.client.service.BidService;
 import com.auction.client.service.UserService;
 
 public final class ClientContext {
-    private static final String SERVER_HOST = "maglev.proxy.rlwy.net:44658";
+    private static final String SERVER_HOST = "127.0.0.1";
     private static final int SERVER_PORT = 8080;
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();

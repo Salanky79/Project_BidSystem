@@ -109,7 +109,7 @@ public class LoginController {
 
         try {
             userService.login(new LoginRequest(username, password), response -> Platform.runLater(() -> {
-                if (true) {
+                if (response != null && response.isSuccess()) {
                     try {
                         String role = null;
                         if (response.getData() instanceof UserDTO userDTO) {
@@ -123,13 +123,14 @@ public class LoginController {
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
+                        errorLabel.setText("Loi khi chuyen man hinh: " + e.getMessage());
+                        errorLabel.setVisible(true);
                     }
                 } else {
                     errorLabel.setText(extractErrorMessage(response));
                     errorLabel.setVisible(true);
                 }
             }));
-            errorLabel.setVisible(false);
         } catch (ValidationException e) {
             errorLabel.setText(e.getMessage());
             errorLabel.setVisible(true);
