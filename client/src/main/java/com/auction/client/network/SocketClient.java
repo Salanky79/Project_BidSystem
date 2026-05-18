@@ -1,7 +1,6 @@
 package com.auction.client.network;
 
 import com.auction.client.session.SessionManager;
-import com.auction.share.DTO.LoginRequest;
 import com.auction.share.DTO.Request;
 import com.auction.share.DTO.Response;
 
