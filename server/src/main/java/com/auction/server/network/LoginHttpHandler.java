@@ -1,6 +1,6 @@
 package com.auction.server.network;
 
-import com.auction.server.controllers.AuctionManager;
+import com.auction.server.service.AuctionManager;
 import com.auction.share.exceptions.AuthenticationException;
 import com.auction.share.models.user.User;
 import com.sun.net.httpserver.HttpExchange;

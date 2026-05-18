@@ -29,4 +29,3 @@ public abstract class Entity implements Serializable {
         this.createdAt = createdAt;
     }
 }
-

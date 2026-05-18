@@ -6,6 +6,7 @@ import com.auction.share.models.user.Bidder;
 import com.auction.share.models.user.Seller;
 import com.auction.share.models.user.User;
 import com.auction.share.enums.AuctionStatus;
+import com.auction.share.exceptions.AuthenticationException;
 
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
@@ -22,8 +23,21 @@ public class AuctionManager {
 
     private AuctionManager() {
         // 1. Tạo dữ liệu mẫu: Người bán, Người mua và Món hàng
-        Seller dummySeller = new Seller("seller1", "123", "Người Bán");
-        Bidder dummyBidder = new Bidder("admin", "123", "Admin", "Hanoi");
+        Seller dummySeller = new Seller(
+                "seller1",
+                "123",
+                "Người Bán",
+                "0900000000",
+                "seller1@example.com"
+        );
+        Bidder dummyBidder = new Bidder(
+                "admin",
+                "123",
+                "Admin",
+                "0901111111",
+                "admin@example.com",
+                "Hanoi"
+        );
         dummyBidder.deposit(10000.0); // Nạp tiền cho admin để test không bị lỗi thiếu tiền
 
         Item dummyItem = new Item("iPhone 15", "Like New", 1000.0, dummySeller.getId());
@@ -146,6 +160,20 @@ public class AuctionManager {
             }
         }
         return "FAIL|Khong tim thay phien dau gia nao cho mon hang nay!";
+    }
+
+    public User login(String username, String password) throws AuthenticationException {
+        if (username == null || username.isBlank() || password == null || password.isBlank()) {
+            throw new AuthenticationException("Username và password không được để trống.");
+        }
+
+        for (User user : users) {
+            if (username.equals(user.getUsername()) && password.equals(user.getPassword())) {
+                return user;
+            }
+        }
+
+        throw new AuthenticationException("Tài khoản hoặc mật khẩu không đúng.");
     }
 }
 

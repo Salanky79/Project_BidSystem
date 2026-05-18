@@ -138,7 +138,7 @@ public class Auction extends Entity {
                 this.seller.addBalance(currentHighestBid);
 
                 // 3. Chuyển sang trạng thái đã thanh toán thành công
-                this.status = AuctionStatus.CANCELED;
+                this.status = AuctionStatus.FINISHED;
                 System.out.println("Trạng thái cuối: " + this.status);
 
             } catch (Exception e) {
