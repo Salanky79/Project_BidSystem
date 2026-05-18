@@ -32,7 +32,7 @@ public class ServerApplication {
         BidTransactionDAO bidTransactionDao = new BidTransactionDAO();
         AuctionSubscriptionRegistry subscriptionRegistry = new AuctionSubscriptionRegistry();
         BidBroadcastService bidBroadcastService = new BidBroadcastService(subscriptionRegistry);
-        AuctionService auctionService = new AuctionService(
+        AuctionService auctionService = new AuctionService( //
                 auctionDao,
                 itemDao,
                 bidTransactionDao,
@@ -40,6 +40,7 @@ public class ServerApplication {
                 bidBroadcastService
         );
         AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionDao, 1000);
+        // REALTIME DEALER
         backgroundExecutor.submit(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
@@ -63,7 +64,7 @@ public class ServerApplication {
             while(!serverSocket.isClosed()){
                 Socket clientSocket = serverSocket.accept();
                 clientExecutor.submit(new AuctionServer(clientSocket, requestHandler, subscriptionRegistry));
-            }
+            } // tao mot thread de xu ly client vua connect
         } catch (IOException e) {
             e.printStackTrace();
         }

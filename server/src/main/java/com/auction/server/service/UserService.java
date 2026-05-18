@@ -16,6 +16,7 @@ import com.auction.share.models.user.User;
 import java.sql.SQLException;
 import java.util.List;
 
+// Controller → Service → DAO → Database
 public class UserService {
     private final UserDAO userDAO;
     private final BidTransactionDAO bidTransactionDAO;
@@ -36,6 +37,7 @@ public class UserService {
         }
 
         user.setPassword(PasswordUtil.hashPassword(user.getPassword()));
+        // dung ham bam de ko luu bang string
         return userDAO.saveUser(user);
     }
 
@@ -50,6 +52,7 @@ public class UserService {
         return user;
     }
 
+    // tim ID trong DATABASE
     public User getById(String id) throws SQLException, ValidationException {
         User user = userDAO.findById(id);
         if (user == null) {
@@ -58,6 +61,8 @@ public class UserService {
         return user;
     }
 
+
+    // cac ham update thong tin nguoi dung
     public boolean updatePassword(String id, String password) throws SQLException {
         String hashedPassword = PasswordUtil.hashPassword(password);
         return userDAO.updateUserPassword(id, hashedPassword);

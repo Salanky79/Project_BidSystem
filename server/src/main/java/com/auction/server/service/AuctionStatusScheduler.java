@@ -23,6 +23,7 @@ public class AuctionStatusScheduler implements Runnable {
     public void run() {
         while (running.get() && !Thread.currentThread().isInterrupted()) {
             try {
+                // cu moi ms kiem tra xem auction nao con chay hay da xog
                 auctionDAO.markOpenAuctionsAsRunning();
                 auctionDAO.markRunningAuctionsAsFinished();
                 Thread.sleep(intervalMillis);

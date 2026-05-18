@@ -12,10 +12,12 @@ import java.util.List;
 public class AuctionController {
     private final AuctionService auctionService;
 
+    // quan li chuc nang dau gia
     public AuctionController(AuctionService auctionService) {
         this.auctionService = auctionService;
     }
 
+    // những thông tin cần cho client ( ket qua thong qua server tra ve)
     public Response<AuctionSummaryDTO> createAuction(CreateAuctionRequest request) throws Exception {
         validateRequiredText(request.getSellerId(), "Seller ID is required.");
         validateRequiredText(request.getItemName(), "Item Name is required.");
