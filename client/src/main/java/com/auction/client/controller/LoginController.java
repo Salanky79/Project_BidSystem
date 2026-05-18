@@ -125,10 +125,7 @@ public class LoginController {
             FXMLLoader frameLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/HomeFrame.fxml"));
             Parent homeFrameRoot = frameLoader.load();
             HomeFrameController frameController = frameLoader.getController();
-
-            FXMLLoader homeLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Home.fxml"));
-            Node homeNode = homeLoader.load();
-            frameController.setView(homeNode);
+            frameController.loadHomePage("All");
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(homeFrameRoot));
