@@ -12,15 +12,37 @@ public class DatabaseConnection {
     public static Dotenv dotenv = loadDotenv();
 
     private static Dotenv loadDotenv() {
-        return Dotenv.load();
+        return Dotenv.configure().ignoreIfMissing().load();
+    }
+
+    private static String getConfigValue(String key) {
+        String systemValue = System.getenv(key);
+        if (systemValue != null && !systemValue.isBlank()) {
+            return systemValue;
+        }
+        return dotenv.get(key);
     }
 
     private DatabaseConnection(){}
 
     static {
-        config.setJdbcUrl(dotenv.get("DB_URL"));
-        config.setUsername(dotenv.get("DB_USER"));
-        config.setPassword(dotenv.get("DB_PASS"));
+        String dbUrl = getConfigValue("DB_URL");
+        String dbUser = getConfigValue("DB_USER");
+        String dbPass = getConfigValue("DB_PASS");
+
+        if (dbUrl == null || dbUrl.isBlank()) {
+            throw new IllegalStateException("DB_URL is missing.");
+        }
+        if (dbUser == null || dbUser.isBlank()) {
+            throw new IllegalStateException("DB_USER is missing.");
+        }
+        if (dbPass == null || dbPass.isBlank()) {
+            throw new IllegalStateException("DB_PASS is missing.");
+        }
+
+        config.setJdbcUrl(dbUrl);
+        config.setUsername(dbUser);
+        config.setPassword(dbPass);
 
         config.setMaximumPoolSize(10); // Tối đa 10 kết nối cùng lúc
         config.addDataSourceProperty("cachePrepStmts", "true");
