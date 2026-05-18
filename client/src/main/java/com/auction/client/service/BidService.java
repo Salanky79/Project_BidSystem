@@ -1,16 +1,17 @@
 package com.auction.client.service;
 
-import com.auction.client.network.BidNetwork;
+import com.auction.client.network.SocketClient;
+import com.auction.share.DTO.PlaceBidRequest;
 import com.auction.share.DTO.Response;
 import com.auction.share.exceptions.ValidationException;
 
 import java.util.function.Consumer;
 
 public class BidService {
-    private final BidNetwork bidNetwork;
+    private final SocketClient socketClient;
 
-    public BidService(BidNetwork bidNetwork) {
-        this.bidNetwork = bidNetwork;
+    public BidService(SocketClient socketClient) {
+        this.socketClient = socketClient;
     }
 
     public void placeBid(String auctionId, String amountStr, double currentPrice, Consumer<Response<?>> onResponse) throws ValidationException {
@@ -28,7 +29,7 @@ public class BidService {
         if (amount <= currentPrice) {
             throw new ValidationException("Giá bid phải cao hơn giá hiện tại: $" + String.format("%.2f", currentPrice));
         }
-
-        bidNetwork.placeBid(auctionId, amount, onResponse);
+        PlaceBidRequest request = new PlaceBidRequest(null, auctionId, amount);
+        socketClient.send(request, onResponse);
     }
 }

@@ -23,7 +23,7 @@ public class BidBroadcastService {
             try {
                 session.send(pushMessage);
             } catch (IOException ignored) {
-                subscriptionRegistry.removeSession(session);
+                subscriptionRegistry.unsubcribe(session);
             }
         }
     }

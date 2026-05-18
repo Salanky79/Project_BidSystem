@@ -2,6 +2,8 @@ package com.auction.server.controller;
 
 import com.auction.server.service.UserService;
 import com.auction.share.DTO.LoginRequest;
+import com.auction.share.DTO.GetProfileRequest;
+import com.auction.share.DTO.ProfileDTO;
 import com.auction.share.DTO.RegisterRequest;
 import com.auction.share.DTO.Response;
 import com.auction.share.DTO.UpdateProfileRequest;
@@ -56,6 +58,14 @@ public class UserController {
 
         User user = userService.getById(request.getUserId());
         return Response.success("Profile updated successfully.", toUserDTO(user));
+    }
+
+    public Response<ProfileDTO> getProfile(GetProfileRequest request) throws Exception {
+        if (request.getUserId() == null || request.getUserId().isBlank()) {
+            return Response.fail("User id is required.");
+        }
+        ProfileDTO profile = userService.getProfile(request.getUserId());
+        return Response.success("Profile loaded successfully.", profile);
     }
 
 
