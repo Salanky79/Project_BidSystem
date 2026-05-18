@@ -22,7 +22,8 @@ import java.util.concurrent.Executors;
 public class ServerApplication {
     private static final ExecutorService clientExecutor = Executors.newVirtualThreadPerTaskExecutor();
     private static final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
-    private static final int port = 8080;
+    private static final int port = Integer.parseInt(
+            System.getenv().getOrDefault("PORT", "9999"));
 
     public static void main(String[] args) {
         UserDAO userDao = new UserDAO();
