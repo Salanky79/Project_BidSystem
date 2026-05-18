@@ -1,20 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<StackPane maxHeight="600.0" maxWidth="950.0" minHeight="600.0" minWidth="950.0" prefHeight="600.0" prefWidth="950.0" style="-fx-background-color: rgba(0,0,0,0.4);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.AuctionDetailController">
+<StackPane maxHeight="600.0" maxWidth="950.0" minHeight="600.0" minWidth="950.0" prefHeight="600.0" prefWidth="950.0" style="-fx-background-color: rgba(0,0,0,0.4);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.AuctionDetailController">
 
     <!-- Main popup card -->
     <VBox prefWidth="1060.0" style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 0;">
@@ -67,26 +59,18 @@
                   <Font name="Arial" size="12.0" />
                </font>
             </Label>
-            <HBox>
-               <children>
-                  <ImageView fitHeight="21.0" fitWidth="20.0" pickOnBounds="true">
-                     <image>
-                        <Image url="@icon%20cộng%20hồng.png" />
-                     </image>
-                  </ImageView>
-                  <Label text="Follow" textFill="#ee006b">
-                     <HBox.margin>
-                        <Insets left="10.0" />
-                     </HBox.margin>
-                     <font>
-                        <Font name="System Bold" size="15.0" />
-                     </font>
-                  </Label>
-               </children>
-               <VBox.margin>
-                  <Insets />
-               </VBox.margin>
-            </HBox>
+                <ToggleButton fx:id="btnFollow" mnemonicParsing="false" onAction="#handleFollowAction" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Follow" textFill="#ee006b">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                    <graphic>
+                        <ImageView fx:id="imgFollowStatus" fitHeight="21.0" fitWidth="21.0" pickOnBounds="true" preserveRatio="true" smooth="true">
+                            <image>
+                                <Image url="@add_Icon.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </ToggleButton>
 
                 <!-- Status + Category badges -->
                 <HBox alignment="CENTER_LEFT" spacing="12.0">

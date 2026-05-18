@@ -7,10 +7,9 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -29,13 +28,16 @@ import java.time.format.DateTimeFormatter;
 public class AuctionDetailController {
     private final BidService bidService = ClientContext.bidService();
 
-    @FXML private Button closeBtn;
+    @FXML private Button     closeBtn;
     @FXML private Button     placeBidBtn;
     @FXML private Button     postCommentBtn;
 
+    @FXML private ToggleButton btnFollow;
+    @FXML private ImageView imgFollowStatus;
+
     @FXML private Label      itemImagePlaceholder;  // icon emoji
     @FXML private Label      listedByLabel;
-    @FXML private Label descriptionLabel;
+    @FXML private Label      descriptionLabel;
 
     @FXML private Label      itemTitleLabel;
     @FXML private Label      statusLabel;
@@ -60,6 +62,8 @@ public class AuctionDetailController {
     private static final DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
+    private final Image plusImage = new Image(getClass().getResourceAsStream("/com/auction/client/view/add_icon.png"));
+    private final Image minusImage = new Image(getClass().getResourceAsStream("/com/auction/client/view/minus_icon.png"));
     // ──────────────────────────────────────────────────────
     //  setData() cơ bản – gọi từ ItemCardController (khớp HomeController)
     // ──────────────────────────────────────────────────────
@@ -241,6 +245,27 @@ public class AuctionDetailController {
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Error: AuctionDetail.fxml file not found.");
+        }
+    }
+    @FXML
+    void handleFollowAction(ActionEvent event) {
+        if (btnFollow.isSelected()) {
+            // Khi người dùng bấm vào hành động THEO DÕI (Chuyển sang trạng thái Unfollow)
+            btnFollow.setText("Unfollow");
+            btnFollow.setStyle("-fx-text-fill: #a8979e; -fx-background-color: transparent; -fx-cursor: hand;");
+            imgFollowStatus.setImage(minusImage);
+
+            // TODO: Thêm logic lưu vào Database (Ví dụ: insert vào bảng Watchlist)
+            System.out.println("Đã thêm sản phẩm này vào Watchlist!");
+
+        } else {
+            // Khi người dùng bấm hủy theo dõi (Chuyển ngược lại về trạng thái Follow)
+            btnFollow.setText("Follow");
+            btnFollow.setStyle("-fx-text-fill: #ee006b; -fx-background-color: transparent; -fx-cursor: hand;");
+            imgFollowStatus.setImage(plusImage);
+
+            // TODO: Thêm logic xóa khỏi Database (Ví dụ: delete khỏi bảng Watchlist)
+            System.out.println("Đã xóa sản phẩm khỏi Watchlist!");
         }
     }
 }
