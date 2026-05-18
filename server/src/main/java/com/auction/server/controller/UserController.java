@@ -2,6 +2,8 @@ package com.auction.server.controller;
 
 import com.auction.server.service.UserService;
 import com.auction.share.DTO.LoginRequest;
+import com.auction.share.DTO.GetProfileRequest;
+import com.auction.share.DTO.ProfileDTO;
 import com.auction.share.DTO.RegisterRequest;
 import com.auction.share.DTO.Response;
 import com.auction.share.DTO.UpdateProfileRequest;
@@ -16,6 +18,8 @@ import com.auction.share.models.user.User;
 public class UserController {
     private final UserService userService;
 
+    // RequestHandler → UserController → UserService → DAO
+    // kiem tra validate login, register
     public UserController(UserService userService) {
         this.userService = userService;
     }
@@ -25,6 +29,8 @@ public class UserController {
         String password = request.getPassword();
         validateRequiredText(username, "Username is required.");
         validateRequiredText(password, "Password is required.");
+
+        // goi service => goi DAO
         User user = userService.login(username, password);
         return Response.success("Login success.", toUserDTO(user));
     }
@@ -58,9 +64,17 @@ public class UserController {
         return Response.success("Profile updated successfully.", toUserDTO(user));
     }
 
+    public Response<ProfileDTO> getProfile(GetProfileRequest request) throws Exception {
+        if (request.getUserId() == null || request.getUserId().isBlank()) {
+            return Response.fail("User id is required.");
+        }
+        ProfileDTO profile = userService.getProfile(request.getUserId());
+        return Response.success("Profile loaded successfully.", profile);
+    }
+
 
     //HELPER
-
+    // Tao object User trong he thong
     private User toUser(RegisterRequest request) {
         Role role = Role.valueOf(request.getRole().trim().toUpperCase());
         return switch (role) {
@@ -89,6 +103,7 @@ public class UserController {
         };
     }
 
+    // map user cua client gui len server voi ca DATABSE
     private UserDTO toUserDTO(User user) {
         String phoneNumber = null;
         String email = null;

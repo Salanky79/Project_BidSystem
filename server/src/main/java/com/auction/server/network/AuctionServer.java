@@ -27,6 +27,7 @@ public class AuctionServer implements Runnable {
     }
 
     @Override
+    // Client <====== socket ======> Server
     public void run() {
         ClientSession session = null;
         try (
@@ -36,14 +37,17 @@ public class AuctionServer implements Runnable {
         ) {
             session = new ClientSession(outputStream);
             while (!socket.isClosed()) {
+                // server doc du lieu
                 Object incoming = inputStream.readObject();
                 if (!(incoming instanceof Request request)) {
                     session.send(Response.fail("Invalid request payload."));
                     continue;
                 }
 
+                // neu dung logic thi goi requesthandler de xu li nghiep vu
                 Response<?> response = requestHandler.handle(request, session);
                 if (response.isSuccess()) {
+                    // neu request la xem dau gia thi: =>
                     if (request instanceof GetAuctionDetailRequest detailRequest) {
                         subscriptionRegistry.subscribe(detailRequest.getAuctionId(), session);
                     }
@@ -56,7 +60,7 @@ public class AuctionServer implements Runnable {
             e.printStackTrace();
         } finally {
             if (session != null) {
-                subscriptionRegistry.removeSession(session);
+                subscriptionRegistry.unsubcribe(session);
             }
         }
     }

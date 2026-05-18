@@ -1,6 +1,8 @@
 package com.auction.client.service;
 
-import com.auction.client.network.AuctionNetwork;
+import com.auction.client.network.SocketClient;
+import com.auction.share.DTO.CreateAuctionRequest;
+import com.auction.share.DTO.ListAuctionRequest;
 import com.auction.share.DTO.Response;
 import com.auction.share.exceptions.ValidationException;
 
@@ -10,11 +12,11 @@ import java.time.format.DateTimeParseException;
 import java.util.function.Consumer;
 
 public class AuctionService {
-    private final AuctionNetwork auctionNetwork;
+    private final SocketClient socketClient;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    public AuctionService(AuctionNetwork auctionNetwork) {
-        this.auctionNetwork = auctionNetwork;
+    public AuctionService(SocketClient socketClient) {
+        this.socketClient = socketClient;
     }
 
     public void createAuction(String itemName, String description, String category, String startingPriceStr, String startTimeStr, String endTimeStr, Consumer<Response<?>> onResponse) throws ValidationException {
@@ -45,10 +47,11 @@ public class AuctionService {
             throw new ValidationException("Định dạng thời gian không hợp lệ (yêu cầu: dd/MM/yyyy HH:mm)!");
         }
 
-        auctionNetwork.createAuction(itemName, description, category, startingPrice, startTimeStr, endTimeStr, onResponse);
+        CreateAuctionRequest request = new CreateAuctionRequest(null, itemName, description, category, startingPrice, startTimeStr, endTimeStr);
+        socketClient.send(request, onResponse);
     }
 
     public void getAuctions(Consumer<Response<?>> onResponse) {
-        auctionNetwork.getAuctions(onResponse);
+        socketClient.send(new ListAuctionRequest(), onResponse);
     }
 }

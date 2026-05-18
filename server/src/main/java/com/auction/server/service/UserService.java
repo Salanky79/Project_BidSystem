@@ -1,6 +1,10 @@
 package com.auction.server.service;
 
 import com.auction.server.dao.UserDAO;
+import com.auction.server.dao.BidTransactionDAO;
+import com.auction.share.DTO.ProfileBidTransactionDTO;
+import com.auction.share.DTO.ProfileDTO;
+import com.auction.share.DTO.UserDTO;
 import com.auction.server.util.PasswordUtil;
 import com.auction.share.exceptions.AuthenticationException;
 import com.auction.share.exceptions.DuplicateResourceException;
@@ -10,12 +14,16 @@ import com.auction.share.models.user.Seller;
 import com.auction.share.models.user.User;
 
 import java.sql.SQLException;
+import java.util.List;
 
+// Controller → Service → DAO → Database
 public class UserService {
     private final UserDAO userDAO;
+    private final BidTransactionDAO bidTransactionDAO;
 
     public UserService(UserDAO userDAO) {
         this.userDAO = userDAO;
+        this.bidTransactionDAO = new BidTransactionDAO();
     }
 
     public boolean register(User user) throws SQLException, ValidationException, DuplicateResourceException {
@@ -29,6 +37,7 @@ public class UserService {
         }
 
         user.setPassword(PasswordUtil.hashPassword(user.getPassword()));
+        // dung ham bam de ko luu bang string
         return userDAO.saveUser(user);
     }
 
@@ -43,6 +52,7 @@ public class UserService {
         return user;
     }
 
+    // tim ID trong DATABASE
     public User getById(String id) throws SQLException, ValidationException {
         User user = userDAO.findById(id);
         if (user == null) {
@@ -51,6 +61,8 @@ public class UserService {
         return user;
     }
 
+
+    // cac ham update thong tin nguoi dung
     public boolean updatePassword(String id, String password) throws SQLException {
         String hashedPassword = PasswordUtil.hashPassword(password);
         return userDAO.updateUserPassword(id, hashedPassword);
@@ -67,8 +79,44 @@ public class UserService {
         return userDAO.updateUserPhoneNumber(id, phoneNumber);
     }
 
+    public ProfileDTO getProfile(String id) throws SQLException, ValidationException {
+        User user = getById(id);
+        UserDTO userDTO = toUserDTO(user);
+        List<ProfileBidTransactionDTO> bidTransactions = bidTransactionDAO.findProfileTransactionsByBidderId(id);
+        return new ProfileDTO(userDTO, bidTransactions);
+    }
 
     //HELPER
+    private UserDTO toUserDTO(User user) {
+        String phoneNumber = null;
+        String email = null;
+        String address = null;
+        double balance = 0.0;
+
+        if (user instanceof Bidder bidder) {
+            phoneNumber = bidder.getPhoneNumber();
+            email = bidder.getEmail();
+            address = bidder.getAddress();
+            balance = bidder.getBalance();
+        } else if (user instanceof Seller seller) {
+            phoneNumber = seller.getPhoneNumber();
+            email = seller.getEmail();
+            address = seller.getAddress();
+            balance = seller.getBalance();
+        }
+
+        return new UserDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getFullName(),
+                user.getRole().name(),
+                phoneNumber,
+                email,
+                address,
+                balance
+        );
+    }
+
     private static String extractEmail(User user) {
         if (user instanceof Bidder bidder) {
             return bidder.getEmail();

@@ -9,11 +9,11 @@ import com.auction.share.DTO.RegisterRequest;
 import com.auction.share.DTO.Request;
 import com.auction.share.DTO.Response;
 import com.auction.share.DTO.UpdateProfileRequest;
+import com.auction.share.DTO.GetProfileRequest;
 import com.auction.share.DTO.CreateAuctionRequest;
 import com.auction.share.DTO.PlaceBidRequest;
 import com.auction.share.DTO.GetAuctionDetailRequest;
 import com.auction.share.DTO.ListAuctionRequest;
-import com.auction.share.DTO.UnsubscribeAuctionRequest;
 import com.auction.server.service.AuctionService;
 
 public class RequestHandler {
@@ -21,13 +21,16 @@ public class RequestHandler {
     private final AuctionController auctionController;
     private final AuctionSubscriptionRegistry subscriptionRegistry;
 
+    // quet dinh xem request se di dau
     public RequestHandler(
             UserService userService,
             AuctionService auctionService,
             AuctionSubscriptionRegistry subscriptionRegistry
     ) {
+        // can service rieng cho tung client
         this.userController = new UserController(userService);
         this.auctionController = new AuctionController(auctionService);
+        // real time dealer
         this.subscriptionRegistry = subscriptionRegistry;
     }
 
@@ -44,11 +47,12 @@ public class RequestHandler {
                 case Action.LOGIN -> userController.login((LoginRequest) request);
                 case Action.REGISTER -> userController.register((RegisterRequest) request);
                 case Action.UPDATE_PROFILE -> userController.updateProfile((UpdateProfileRequest) request);
+                case Action.GET_PROFILE -> userController.getProfile((GetProfileRequest) request);
                 case Action.CREATE_AUCTION -> auctionController.createAuction((CreateAuctionRequest) request);
                 case Action.PLACE_BID -> auctionController.placeBid((PlaceBidRequest) request);
                 case Action.GET_AUCTION_DETAIL -> auctionController.getAuctionDetail((GetAuctionDetailRequest) request);
                 case Action.LIST_AUCTIONS -> auctionController.listAuctions((ListAuctionRequest) request);
-                case Action.UNSUBSCRIBE_AUCTION -> handleUnsubscribe((UnsubscribeAuctionRequest) request, session);
+                case Action.UNSUBSCRIBE_AUCTION -> handleUnsubscribe(session);
                 default -> Response.fail("Unsupported action: " + request.getAction());
             };
         } catch (ClassCastException e) {
@@ -60,11 +64,11 @@ public class RequestHandler {
         return response;
     }
 
-    private Response<Boolean> handleUnsubscribe(UnsubscribeAuctionRequest request, ClientSession session) {
+    private Response<Boolean> handleUnsubscribe(ClientSession session) {
         if (session == null) {
             return Response.fail("Session is required.");
         }
-        subscriptionRegistry.unsubscribe(request.getAuctionId(), session);
+        subscriptionRegistry.unsubcribe(session);
         return Response.success("Unsubscribed from auction.", true);
     }
 }

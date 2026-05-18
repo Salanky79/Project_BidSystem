@@ -14,6 +14,7 @@ public class AuctionSubscriptionRegistry {
             return;
         }
 
+        // lay dsach auction ma client trc day da xem
         String previousAuctionId = auctionBySession.get(session);
         if (previousAuctionId != null && !previousAuctionId.equals(auctionId)) {
             Set<ClientSession> previousSessions = subscribersByAuction.get(previousAuctionId);
@@ -25,9 +26,11 @@ public class AuctionSubscriptionRegistry {
             }
         }
 
+        // Thêm session vào danh sách subscriber của auction
         subscribersByAuction
                 .computeIfAbsent(auctionId, ignored -> new HashSet<>())
                 .add(session);
+        // session này đang xem auction nào
         auctionBySession.put(session, auctionId);
     }
 
@@ -39,15 +42,7 @@ public class AuctionSubscriptionRegistry {
         return new HashSet<>(sessions);
     }
 
-    public synchronized void unsubscribe(String auctionId, ClientSession session) {
-        if (auctionId == null || auctionId.isBlank() || session == null) {
-            return;
-        }
-        removeSessionFromAuction(auctionId, session);
-        auctionBySession.remove(session);
-    }
-
-    public synchronized void removeSession(ClientSession session) {
+    public synchronized void unsubcribe(ClientSession session) {
         if (session == null) {
             return;
         }
@@ -55,10 +50,6 @@ public class AuctionSubscriptionRegistry {
         if (auctionId == null) {
             return;
         }
-        removeSessionFromAuction(auctionId, session);
-    }
-
-    private void removeSessionFromAuction(String auctionId, ClientSession session) {
         Set<ClientSession> sessions = subscribersByAuction.get(auctionId);
         if (sessions == null) {
             return;

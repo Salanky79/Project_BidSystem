@@ -13,8 +13,11 @@ public class ClientSession {
         this.outputStream = outputStream;
     }
 
+    // wrapper gửi dữ liệu an toàn
+    // gui respond tu server ve client
     public void send(Response<?> response) throws IOException {
-        synchronized (outputStream) {
+        // ki thuat khoa block => tranh race condition
+        synchronized (outputStream){
             outputStream.writeObject(response);
             outputStream.flush();
         }

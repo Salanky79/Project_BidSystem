@@ -1,8 +1,9 @@
 package com.auction.client.service;
 
-import com.auction.client.network.UserNetwork;
+import com.auction.client.network.SocketClient;
 import com.auction.client.session.SessionManager;
 import com.auction.share.DTO.LoginRequest;
+import com.auction.share.DTO.GetProfileRequest;
 import com.auction.share.DTO.RegisterRequest;
 import com.auction.share.DTO.Response;
 import com.auction.share.DTO.UserDTO;
@@ -11,11 +12,11 @@ import com.auction.share.exceptions.ValidationException;
 import java.util.function.Consumer;
 
 public class UserService {
-    private final UserNetwork userNetwork;
+    private final SocketClient socketClient;
     private final SessionManager sessionManager;
 
-    public UserService(UserNetwork userNetwork, SessionManager sessionManager) {
-        this.userNetwork = userNetwork;
+    public UserService(SocketClient socketClient, SessionManager sessionManager) {
+        this.socketClient = socketClient;
         this.sessionManager = sessionManager;
     }
 
@@ -28,7 +29,7 @@ public class UserService {
         if (username == null || username.trim().isEmpty() || password == null || password.isEmpty()) {
             throw new ValidationException("Username va Password khong duoc de trong!");
         }
-        userNetwork.login(request, response -> {
+        socketClient.send(request, response -> {
             if (response != null && response.isSuccess() && response.getData() instanceof UserDTO userDTO) {
                 sessionManager.setCurrentUserId(userDTO.getId());
             }
@@ -77,7 +78,7 @@ public class UserService {
             throw new ValidationException("Email khong hop le!");
         }
 
-        userNetwork.signup(request, response -> {
+        socketClient.send(request, response -> {
             if (response != null && response.isSuccess() && response.getData() instanceof UserDTO userDTO) {
                 sessionManager.setCurrentUserId(userDTO.getId());
             }
@@ -86,4 +87,10 @@ public class UserService {
             }
         });
     }
+
+   
+    public void getProfile(Consumer<Response<?>> onResponse) {
+        socketClient.send(new GetProfileRequest(null), onResponse);
+    }
+
 }
