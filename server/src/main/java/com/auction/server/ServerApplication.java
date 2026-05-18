@@ -23,7 +23,7 @@ public class ServerApplication {
     private static final ExecutorService clientExecutor = Executors.newCachedThreadPool();
     private static final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
     private static final int port = Integer.parseInt(
-            System.getenv().getOrDefault("PORT", "9999"));
+            System.getenv().getOrDefault("PORT", "8080"));
 
     public static void main(String[] args) {
         UserDAO userDao = new UserDAO();
