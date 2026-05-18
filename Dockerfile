@@ -6,7 +6,7 @@ COPY . .
 
 RUN mvn clean package -pl server -am -DskipTests
 
-FROM eclipse-temurin:21
+FROM eclipse-temurin:17
 
 WORKDIR /app
 
