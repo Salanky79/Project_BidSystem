@@ -67,7 +67,7 @@ public class SignupController {
             userService.signup(
                     request,
                     response -> Platform.runLater(() -> {
-                        if (response != null && response.isSuccess()) {
+//                        if (response != null && response.isSuccess()) {
                             statusLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #228B22;");
                             statusLabel.setText("Dang ky thanh cong! Chao mung, " + fullName);
 
