@@ -100,6 +100,7 @@ public class SocketClient {
                 }
             } catch (EOFException ignored) {
                 System.err.println("Server closed socket (EOF).");
+                ignored.printStackTrace();
             } catch (IOException | ClassNotFoundException ignored) {
                 System.err.println("Socket listener failed: " + ignored.getMessage());
                 ignored.printStackTrace();
