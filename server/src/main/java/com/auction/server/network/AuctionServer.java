@@ -101,6 +101,8 @@ public class AuctionServer implements Runnable {
 
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.error("Connection handler failed: {}", e.getMessage(), e);
+        } catch (Throwable t) {
+            LOGGER.error("Unexpected fatal error in client handler: {}", t.getMessage(), t);
 
         } finally {
             try {
