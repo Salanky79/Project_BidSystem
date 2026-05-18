@@ -1,6 +1,7 @@
 package com.auction.server.dao;
 
 import com.auction.server.util.DatabaseConnection;
+import com.auction.share.DTO.ProfileBidTransactionDTO;
 import com.auction.share.models.auction.Auction;
 import com.auction.share.models.auction.BidTransaction;
 import com.auction.share.models.user.Bidder;
@@ -12,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +54,36 @@ public class BidTransactionDAO {
                         }
                         list.add(bt);
                     }
+                }
+            }
+        }
+        return list;
+    }
+
+    public List<ProfileBidTransactionDTO> findProfileTransactionsByBidderId(String bidderId) throws SQLException {
+        List<ProfileBidTransactionDTO> list = new ArrayList<>();
+        String sql = """
+                SELECT i.name AS item_name, a.status, bt.amount, bt.timestamp
+                FROM bid_transactions bt
+                JOIN auctions a ON a.id = bt.auction_id
+                JOIN items i ON i.id = a.item_id
+                WHERE bt.bidder_id = ?
+                ORDER BY bt.timestamp DESC
+                """;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, bidderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+                while (rs.next()) {
+                    Timestamp ts = rs.getTimestamp("timestamp");
+                    String timestamp = ts == null ? "" : ts.toLocalDateTime().format(formatter);
+                    list.add(new ProfileBidTransactionDTO(
+                            rs.getString("item_name"),
+                            rs.getString("status"),
+                            rs.getDouble("amount"),
+                            timestamp
+                    ));
                 }
             }
         }

@@ -56,7 +56,7 @@ public class SocketClient {
             outputStream.flush();
         } catch (IOException e) {
             if (onResponse != null) {
-                callbacks.remove(request.getRequestId());
+                callbacks.remove(outboundRequest.getRequestId());
                 onResponse.accept(Response.fail("Failed to send request: " + e.getMessage()));
             }
             closeConnection();
@@ -116,27 +116,28 @@ public class SocketClient {
     }
 
     private void closeConnection() {
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            } catch (IOException ignored) {
+        try {
+            if (inputStream != null) {
+                inputStream.close();
             }
-            try {
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-            } catch (IOException ignored) {
-            }
-            try {
-                if (socket != null) {
-                    socket.close();
-                }
-            } catch (IOException ignored) {
-            inputStream = null;
-            outputStream = null;
-            socket = null;
+        } catch (IOException ignored) {
         }
+        try {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        } catch (IOException ignored) {
+        }
+        try {
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException ignored) {
+        }
+
+        inputStream = null;
+        outputStream = null;
+        socket = null;
     }
 
     private void failCallbacks(String message) {

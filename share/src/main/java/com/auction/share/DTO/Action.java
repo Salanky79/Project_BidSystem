@@ -9,6 +9,7 @@ public final class Action {
     public static final String CREATE_AUCTION = "CREATE_AUCTION";
     public static final String PLACE_BID = "PLACE_BID";
     public static final String UPDATE_PROFILE = "UPDATE_PROFILE";
+    public static final String GET_PROFILE = "GET_PROFILE";
 
     private Action() {
     }

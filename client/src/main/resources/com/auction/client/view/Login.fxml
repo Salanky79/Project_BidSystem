@@ -13,7 +13,7 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Line?>
 
-<HBox maxHeight="600.0" maxWidth="950.0" minHeight="600.0" minWidth="950.0" prefHeight="600.0" prefWidth="950.0" style="-fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.LoginController">
+<HBox maxHeight="600.0" maxWidth="950.0" minHeight="600.0" minWidth="950.0" prefHeight="600.0" prefWidth="950.0" style="-fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.LoginController">
 
     <StackPane prefHeight="600" prefWidth="400" style="-fx-background-color: #0a0a0a;">
 

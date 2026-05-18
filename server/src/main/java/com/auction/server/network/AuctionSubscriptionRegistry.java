@@ -42,15 +42,7 @@ public class AuctionSubscriptionRegistry {
         return new HashSet<>(sessions);
     }
 
-    public synchronized void unsubscribe(String auctionId, ClientSession session) {
-        if (auctionId == null || auctionId.isBlank() || session == null) {
-            return;
-        }
-        removeSessionFromAuction(auctionId, session);
-        auctionBySession.remove(session);
-    }
-
-    public synchronized void removeSession(ClientSession session) {
+    public synchronized void unsubcribe(ClientSession session) {
         if (session == null) {
             return;
         }
@@ -58,10 +50,6 @@ public class AuctionSubscriptionRegistry {
         if (auctionId == null) {
             return;
         }
-        removeSessionFromAuction(auctionId, session);
-    }
-
-    private void removeSessionFromAuction(String auctionId, ClientSession session) {
         Set<ClientSession> sessions = subscribersByAuction.get(auctionId);
         if (sessions == null) {
             return;

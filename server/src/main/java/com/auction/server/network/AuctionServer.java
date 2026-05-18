@@ -60,7 +60,7 @@ public class AuctionServer implements Runnable {
             e.printStackTrace();
         } finally {
             if (session != null) {
-                subscriptionRegistry.removeSession(session);
+                subscriptionRegistry.unsubcribe(session);
             }
         }
     }

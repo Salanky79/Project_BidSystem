@@ -4,6 +4,7 @@ import com.auction.client.ClientContext;
 import com.auction.client.service.UserService;
 import com.auction.share.DTO.LoginRequest;
 import com.auction.share.DTO.Response;
+import com.auction.share.DTO.UserDTO;
 import com.auction.share.exceptions.ValidationException;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -48,7 +49,7 @@ public class LoginController {
     }
 
     @FXML
-    public void togglePassword(ActionEvent event) {
+    public void togglePassword() {
         isPasswordVisible = !isPasswordVisible;
 
         if (isPasswordVisible) {
@@ -64,14 +65,23 @@ public class LoginController {
 
     @FXML
     private void handleLogin(ActionEvent event) {
-        String username = usernameField.getText();
-        String password = passwordField.getText();
+        String username = usernameField.getText() == null ? "" : usernameField.getText().trim();
+        String password = isPasswordVisible ? passwordVisible.getText() : passwordField.getText();
 
         try {
             userService.login(new LoginRequest(username, password), response -> Platform.runLater(() -> {
                 if (response.isSuccess()) {
                     try {
-                        loadHome(event);
+                        String role = null;
+                        if (response.getData() instanceof UserDTO userDTO) {
+                            role = userDTO.getRole();
+                        }
+
+                        if ("seller".equalsIgnoreCase(role)) {
+                            loadSellerDashboard(event);
+                        } else {
+                            loadHome(event);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -122,6 +132,21 @@ public class LoginController {
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(homeFrameRoot));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            errorLabel.setText("Loi giao dien: " + e.getMessage());
+            errorLabel.setVisible(true);
+        }
+    }
+
+    protected void loadSellerDashboard(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/SellerDashboard.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
