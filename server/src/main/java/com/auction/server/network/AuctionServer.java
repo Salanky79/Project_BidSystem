@@ -4,6 +4,8 @@ import com.auction.server.controller.RequestHandler;
 import com.auction.share.DTO.GetAuctionDetailRequest;
 import com.auction.share.DTO.Request;
 import com.auction.share.DTO.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -12,6 +14,8 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class AuctionServer implements Runnable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuctionServer.class);
+
     private final Socket clientSocket;
     private final RequestHandler requestHandler;
     private final AuctionSubscriptionRegistry subscriptionRegistry;
@@ -33,6 +37,8 @@ public class AuctionServer implements Runnable {
         Socket socket = clientSocket;
 
         try {
+            LOGGER.info("Client connected: {}", socket.getRemoteSocketAddress());
+
             ObjectOutputStream outputStream =
                     new ObjectOutputStream(socket.getOutputStream());
 
@@ -48,12 +54,29 @@ public class AuctionServer implements Runnable {
                 Object incoming = inputStream.readObject();
 
                 if (!(incoming instanceof Request request)) {
+                    LOGGER.warn("Received invalid payload type: {}",
+                            incoming == null ? "null" : incoming.getClass().getName());
                     session.send(Response.fail("Invalid request payload."));
                     continue;
                 }
 
+                long startTime = System.currentTimeMillis();
+                LOGGER.info("Received request: requestId={}, action={}, type={}",
+                        request.getRequestId(),
+                        request.getAction(),
+                        request.getClass().getSimpleName()
+                );
+
                 Response<?> response =
                         requestHandler.handle(request, session);
+
+                long elapsedMs = System.currentTimeMillis() - startTime;
+                LOGGER.info("Processed request: requestId={}, action={}, success={}, durationMs={}",
+                        request.getRequestId(),
+                        request.getAction(),
+                        response.isSuccess(),
+                        elapsedMs
+                );
 
                 if (response.isSuccess()) {
                     if (request instanceof GetAuctionDetailRequest detailRequest) {
@@ -65,12 +88,19 @@ public class AuctionServer implements Runnable {
                 }
 
                 session.send(response);
+                LOGGER.info("Sent response: requestId={}, action={}, success={}, message={}",
+                        request.getRequestId(),
+                        request.getAction(),
+                        response.isSuccess(),
+                        response.getMessage()
+                );
             }
 
         } catch (EOFException ignored) {
+            LOGGER.info("Client disconnected gracefully (EOF).");
 
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.error("Connection handler failed: {}", e.getMessage(), e);
 
         } finally {
             try {
@@ -81,6 +111,7 @@ public class AuctionServer implements Runnable {
             if (session != null) {
                 subscriptionRegistry.unsubcribe(session);
             }
+            LOGGER.info("Client session closed.");
         }
     }
 }
