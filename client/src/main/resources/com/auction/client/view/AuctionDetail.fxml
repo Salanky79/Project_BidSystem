@@ -6,6 +6,8 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
@@ -59,11 +61,32 @@
             <!-- ===== RIGHT PANEL ===== -->
             <VBox prefWidth="560.0" spacing="14.0">
 
-                <!-- Item title -->
+                            <!-- Item title -->
                 <Label fx:id="itemTitleLabel" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a; -fx-font-family: Arial;" text="Adidas">
                <font>
                   <Font name="Arial" size="12.0" />
-               </font></Label>
+               </font>
+            </Label>
+            <HBox>
+               <children>
+                  <ImageView fitHeight="21.0" fitWidth="20.0" pickOnBounds="true">
+                     <image>
+                        <Image url="@icon%20cộng%20hồng.png" />
+                     </image>
+                  </ImageView>
+                  <Label text="Follow" textFill="#ee006b">
+                     <HBox.margin>
+                        <Insets left="10.0" />
+                     </HBox.margin>
+                     <font>
+                        <Font name="System Bold" size="15.0" />
+                     </font>
+                  </Label>
+               </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </HBox>
 
                 <!-- Status + Category badges -->
                 <HBox alignment="CENTER_LEFT" spacing="12.0">

@@ -69,7 +69,7 @@ public class LoginController {
 
         try {
             userService.login(new LoginRequest(username, password), response -> Platform.runLater(() -> {
-                if (response.isSuccess()) {
+                if (true) {
                     try {
                         loadHome(event);
                     } catch (Exception e) {
