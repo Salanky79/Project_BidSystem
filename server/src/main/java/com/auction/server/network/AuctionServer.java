@@ -33,6 +33,7 @@ public class AuctionServer implements Runnable {
         try (
                 Socket socket = clientSocket;
                 ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+                outputStream.flush();
                 ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream())
         ) {
             session = new ClientSession(outputStream);
