@@ -1,7 +1,6 @@
 package com.auction.client.network;
 
 import com.auction.client.session.SessionManager;
-import com.auction.share.DTO.LoginRequest;
 import com.auction.share.DTO.Request;
 import com.auction.share.DTO.Response;
 
@@ -90,12 +89,20 @@ public class SocketClient {
                         }
                         Consumer<Response<?>> callback = callbacks.remove(response.getRequestId());
                         if (callback != null) {
-                            callback.accept(response);
+                            try {
+                                callback.accept(response);
+                            } catch (RuntimeException callbackError) {
+                                System.err.println("Callback handling failed: " + callbackError.getMessage());
+                                callbackError.printStackTrace();
+                            }
                         }
                     }
                 }
             } catch (EOFException ignored) {
+                System.err.println("Server closed socket (EOF).");
             } catch (IOException | ClassNotFoundException ignored) {
+                System.err.println("Socket listener failed: " + ignored.getMessage());
+                ignored.printStackTrace();
             } finally {
                 listening = false;
                 closeConnection();
