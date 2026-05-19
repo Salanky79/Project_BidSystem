@@ -8,11 +8,7 @@ public class Item extends Entity {
     private String description = "";
     private double startingPrice;
     private String sellerId;
-    private Category category;
-
-    public Item(String name, String description, double startingPrice, String sellerId) {
-        this(name, description, startingPrice, sellerId, Category.ITEM);
-    }
+    private final Category category;
 
     public Item(String name, String description, double startingPrice, String sellerId, Category category) {
         super();
@@ -40,4 +36,3 @@ public class Item extends Entity {
         return category;
     }
 }
-

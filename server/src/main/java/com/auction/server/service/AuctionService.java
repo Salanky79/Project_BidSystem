@@ -4,10 +4,10 @@ import com.auction.server.dao.AuctionDAO;
 import com.auction.server.dao.BidTransactionDAO;
 import com.auction.server.dao.ItemDAO;
 import com.auction.server.dao.UserDAO;
-import com.auction.server.factory.ItemFactory;
 import com.auction.server.util.DatabaseConnection;
 import com.auction.share.DTO.*;
 import com.auction.share.enums.AuctionStatus;
+import com.auction.share.enums.Category;
 import com.auction.share.exceptions.ValidationException;
 import com.auction.share.models.auction.Auction;
 import com.auction.share.models.auction.BidTransaction;
@@ -58,8 +58,8 @@ public class AuctionService {
             throw new ValidationException("Start time must be before end time.");
         }
 
-        Item item = createItemFromCategory(req);
-        itemDAO.saveItem(item);
+        Category category = Category.valueOf(req.getCategory().trim().toUpperCase());
+        Item item = new Item(req.getItemName(), req.getDescription(), req.getStartingPrice(), req.getSellerId(), category);
 
         Auction auction = new Auction(item, seller, startTime, endTime);
 
@@ -181,23 +181,6 @@ public class AuctionService {
             return LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         } catch (DateTimeParseException e) {
             throw new ValidationException("Invalid date format. Please use ISO format.");
-        }
-    }
-
-    private Item createItemFromCategory(CreateAuctionRequest req) throws ValidationException {
-        String category = req.getCategory();
-
-        try {
-            return ItemFactory.createItem(
-                    category,
-                    req.getItemName(),
-                    req.getDescription(),
-                    req.getStartingPrice(),
-                    req.getSellerId(),
-                    req.getAttributes()
-            );
-        } catch (IllegalArgumentException e) {
-            throw new ValidationException("Unsupported item category: " + category);
         }
     }
 

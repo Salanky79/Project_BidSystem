@@ -2,7 +2,7 @@ package com.auction.server.dao;
 
 import com.auction.server.util.DatabaseConnection;
 import com.auction.server.util.MapAuctionDB;
-import com.auction.share.models.item.*;
+import com.auction.share.models.item.Item;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,26 +36,6 @@ public class ItemDAO {
             ps.setNull(15, Types.VARCHAR); // location
             ps.setNull(16, Types.DOUBLE); // area
             ps.setNull(17, Types.VARCHAR); // fuelType
-            
-            // Bind specific fields based on subclass
-            if (item instanceof Antique antique) {
-                ps.setString(8, antique.getEra());
-                ps.setString(9, antique.getMaterial());
-            } else if (item instanceof Art art) {
-                ps.setString(12, art.getArtist());
-                ps.setInt(13, art.getYear());
-            } else if (item instanceof Electronic electronic) {
-                ps.setString(10, electronic.getBrand());
-                ps.setInt(11, electronic.getWarrantyMonths());
-            } else if (item instanceof Jewelry jewelry) {
-                ps.setString(9, jewelry.getMaterial());
-                ps.setDouble(14, jewelry.getCaratWeight());
-            } else if (item instanceof RealEstate realEstate) {
-                ps.setString(15, realEstate.getLocation());
-                ps.setDouble(16, realEstate.getAreaSquareMeter());
-            } else if (item instanceof Vehicle vehicle) {
-                ps.setString(17, vehicle.getFuelType());
-            }
             
             int row = ps.executeUpdate();
             return row > 0;
