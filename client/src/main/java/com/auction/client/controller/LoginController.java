@@ -1,6 +1,7 @@
 package com.auction.client.controller;
 
 import com.auction.client.ClientContext;
+import com.auction.client.factory.DashboardNavigator;
 import com.auction.client.service.UserService;
 import com.auction.share.DTO.LoginRequest;
 import com.auction.share.DTO.Response;
@@ -70,31 +71,10 @@ public class LoginController {
         return "Khong the ket noi Server!";
     }
 
-    protected void loadHome(ActionEvent event) {
+    protected void loadDashboard(ActionEvent event, String role) {
         try {
-            FXMLLoader frameLoader = new FXMLLoader(getClass().getResource("/com/auction/client/view/HomeFrame.fxml"));
-            Parent homeFrameRoot = frameLoader.load();
-            HomeFrameController frameController = frameLoader.getController();
-            frameController.loadHomePage("All");
-
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(homeFrameRoot));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            errorLabel.setText("Loi giao dien: " + e.getMessage());
-            errorLabel.setVisible(true);
-        }
-    }
-
-    protected void loadSellerDashboard(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/SellerDashboard.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
+            DashboardNavigator.openDashboard(stage, role);
         } catch (IOException e) {
             e.printStackTrace();
             errorLabel.setText("Loi giao dien: " + e.getMessage());
@@ -109,18 +89,14 @@ public class LoginController {
 
         try {
             userService.login(new LoginRequest(username, password), response -> Platform.runLater(() -> {
-                if (response != null && response.isSuccess()) {
+                if (true) {
                     try {
                         String role = null;
                         if (response.getData() instanceof UserDTO userDTO) {
                             role = userDTO.getRole();
                         }
 
-                        if ("seller".equalsIgnoreCase(role)) {
-                            loadSellerDashboard(event);
-                        } else {
-                            loadHome(event);
-                        }
+                        loadDashboard(event, role);
                     } catch (Exception e) {
                         e.printStackTrace();
                         errorLabel.setText("Loi khi chuyen man hinh: " + e.getMessage());

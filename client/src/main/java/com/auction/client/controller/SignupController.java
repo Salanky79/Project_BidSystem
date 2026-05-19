@@ -1,10 +1,7 @@
 package com.auction.client.controller;
 
 import com.auction.client.ClientContext;
-import com.auction.client.factory.BidderUIFactory;
-import com.auction.client.factory.DashboardProduct;
-import com.auction.client.factory.RoleUIFactory;
-import com.auction.client.factory.SellerUIFactory;
+import com.auction.client.factory.DashboardNavigator;
 import com.auction.client.service.UserService;
 import com.auction.share.DTO.RegisterRequest;
 import com.auction.share.exceptions.ValidationException;
@@ -134,21 +131,9 @@ public class SignupController {
         statusLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #228B22;");
         statusLabel.setText("Dang ky thanh cong! Chao mung, " + fullName);
 
-        RoleUIFactory factory;
-        if ("Seller".equals(role)) {
-            factory = new SellerUIFactory();
-        } else {
-            factory = new BidderUIFactory();
-        }
-
         try {
-            DashboardProduct dashboard = factory.createDashboard();
-            Scene scene = dashboard.getScene();
             Stage stage = (Stage) statusLabel.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle(dashboard.getTitle());
-            stage.centerOnScreen();
-            stage.show();
+            DashboardNavigator.openDashboard(stage, role);
         } catch (IOException e) {
             e.printStackTrace();
             statusLabel.setText("Loi khi chuyen man hinh!");
