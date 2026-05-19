@@ -68,6 +68,10 @@ public class UserService {
         return userDAO.updateUserPassword(id, hashedPassword);
     }
 
+    public boolean updateFullName(String id, String fullName) throws SQLException {
+        return userDAO.updateUserFullName(id, fullName);
+    }
+
     public boolean updateEmail(String id, String email) throws SQLException {
         return userDAO.updateUserEmail(id, email);
     }

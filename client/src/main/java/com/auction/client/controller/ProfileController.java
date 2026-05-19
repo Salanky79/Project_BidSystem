@@ -6,6 +6,7 @@ import com.auction.share.DTO.ProfileBidTransactionDTO;
 import com.auction.share.DTO.ProfileDTO;
 import com.auction.share.DTO.Response;
 import com.auction.share.DTO.UserDTO;
+import com.auction.share.exceptions.ValidationException;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -65,15 +66,19 @@ public class ProfileController implements Initializable {
 
         UserDTO user = profileDTO.getUser();
         if (user != null) {
-            nameLabel.setText(user.getFullName());
-            nameField.setText(user.getFullName());
-            usernameField.setText(user.getUsername());
-            emailField.setText(user.getEmail());
-            phoneField.setText(user.getPhoneNumber());
+            bindUser(user);
         }
 
         ObservableList<ProfileBidTransactionDTO> history = FXCollections.observableArrayList(profileDTO.getBidTransactions());
         table.setItems(history);
+    }
+
+    private void bindUser(UserDTO user) {
+        nameLabel.setText(user.getFullName());
+        nameField.setText(user.getFullName());
+        usernameField.setText(user.getUsername());
+        emailField.setText(user.getEmail());
+        phoneField.setText(user.getPhoneNumber());
     }
 
     private void setFieldsEditable(boolean canEdit) {
@@ -91,6 +96,33 @@ public class ProfileController implements Initializable {
         usernameField.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: transparent;");
     }
 
+    private void saveProfileChanges() {
+        try {
+            userService.updateProfile(
+                    nameField.getText(),
+                    phoneField.getText(),
+                    emailField.getText(),
+                    response -> Platform.runLater(() -> {
+                        if (response != null && response.isSuccess() && response.getData() instanceof UserDTO userDTO) {
+                            bindUser(userDTO);
+                            finishEditing();
+                        } else {
+                            System.out.println("Failed to update profile: " + (response != null ? response.getMessage() : "Unknown error"));
+                        }
+                    })
+            );
+        } catch (ValidationException e) {
+            System.out.println("Invalid profile data: " + e.getMessage());
+        }
+    }
+
+    private void finishEditing() {
+        isEditing = false;
+        setFieldsEditable(false);
+        editButton.setText("Edit Profile");
+        editButton.setStyle("-fx-background-color: #1a1a1a; -fx-text-fill: white;");
+    }
+
     private void handleEditAction() {
         if (!isEditing) {
             isEditing = true;
@@ -98,11 +130,7 @@ public class ProfileController implements Initializable {
             editButton.setText("SAVE CHANGES");
             editButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
         } else {
-            nameLabel.setText(nameField.getText());
-            isEditing = false;
-            setFieldsEditable(false);
-            editButton.setText("Edit Profile");
-            editButton.setStyle("-fx-background-color: #1a1a1a; -fx-text-fill: white;");
+            saveProfileChanges();
         }
     }
 }
