@@ -59,4 +59,8 @@ public class HomeFrameController extends FrameController {
 
     public void handleYourListing(ActionEvent actionEvent) {
     }
+
+    public void handleWatchlist(ActionEvent actionEvent) {
+        loadHomePage("Watchlist");
+    }
 }

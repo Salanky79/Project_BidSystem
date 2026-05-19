@@ -9,6 +9,8 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
@@ -18,11 +20,17 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import com.auction.client.service.WatchlistService;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -110,6 +118,69 @@ public class AuctionDetailController {
 
         // Default chart data
         loadChartData("month");
+
+        // Custom cell factory for comments ListView
+        commentsListView.setCellFactory(lv -> new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                    setStyle("-fx-background-color: transparent;");
+                    return;
+                }
+
+                // Format stored as "author|text|time"
+                String[] parts = item.split("\\|", 3);
+                String author    = parts.length > 0 ? parts[0] : "?";
+                String text      = parts.length > 1 ? parts[1] : item;
+                String timestamp = parts.length > 2 ? parts[2] : "";
+
+                // Initials avatar
+                String initials = author.length() >= 2
+                        ? (author.substring(0, 1) + author.substring(author.length() - 1)).toUpperCase()
+                        : author.toUpperCase();
+
+                Label avatarLabel = new Label(initials);
+                avatarLabel.setStyle("-fx-text-fill: #000000; -fx-font-weight: bold; -fx-font-size: 12px;");
+                VBox avatar = new VBox(avatarLabel);
+                avatar.setAlignment(Pos.CENTER);
+                avatar.setStyle("-fx-min-width: 36; -fx-min-height: 36; -fx-max-width: 36; -fx-max-height: 36;"
+                        + " -fx-background-color: #D4AF37; -fx-background-radius: 50;");
+
+                // Author + timestamp row
+                Label authorLabel = new Label(author);
+                authorLabel.setStyle("-fx-text-fill: #D4AF37; -fx-font-weight: bold; -fx-font-size: 13px;");
+                HBox.setHgrow(authorLabel, Priority.ALWAYS);
+
+                Label timeLabel = new Label(timestamp);
+                timeLabel.setStyle("-fx-text-fill: #777777; -fx-font-size: 11px;");
+
+                HBox header = new HBox(authorLabel, timeLabel);
+                header.setAlignment(Pos.CENTER_LEFT);
+                header.setSpacing(8);
+
+                Label textLabel = new Label(text);
+                textLabel.setStyle("-fx-text-fill: #CCCCCC; -fx-font-size: 13px;");
+                textLabel.setWrapText(true);
+
+                VBox content = new VBox(header, textLabel);
+                content.setSpacing(3);
+                HBox.setHgrow(content, Priority.ALWAYS);
+
+                HBox card = new HBox(avatar, content);
+                card.setSpacing(12);
+                card.setAlignment(Pos.TOP_LEFT);
+                card.setPadding(new Insets(12, 14, 12, 14));
+                card.setStyle("-fx-background-color: #161616; -fx-background-radius: 8;"
+                        + " -fx-border-color: #D4AF37 transparent transparent transparent;"
+                        + " -fx-border-width: 0 0 0 3;");
+
+                setGraphic(card);
+                setStyle("-fx-background-color: transparent; -fx-padding: 4 0 4 0;");
+                setPrefWidth(0); // allow wrapping
+            }
+        });
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -149,6 +220,10 @@ public class AuctionDetailController {
             }
         }
         startCountdown();
+        
+        // Sync initial follow state
+        this.isFollowing = WatchlistService.getInstance().isFollowed(this.auctionId);
+        updateFollowButtonStyle();
     }
 
     public void setData(
@@ -186,6 +261,10 @@ public class AuctionDetailController {
             }
         }
         startCountdown();
+        
+        // Sync initial follow state
+        this.isFollowing = WatchlistService.getInstance().isFollowed(this.auctionId);
+        updateFollowButtonStyle();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -226,6 +305,14 @@ public class AuctionDetailController {
     // ─────────────────────────────────────────────────────────────
     private void handleFollowToggle() {
         isFollowing = !isFollowing;
+        WatchlistService.getInstance().toggle(this.auctionId);
+        updateFollowButtonStyle();
+        
+        // Refresh home if we are in Watchlist view? 
+        // Not easily accessible here, but the data is updated.
+    }
+    
+    private void updateFollowButtonStyle() {
         if (isFollowing) {
             followButton.setText("− Unfollow");
             followButton.setStyle(FOLLOW_GRAY_STYLE);
@@ -262,7 +349,11 @@ public class AuctionDetailController {
     private void handlePostComment() {
         String text = commentInputField.getText().trim();
         if (text.isEmpty()) return;
-        commentsListView.getItems().add(0, "You: " + text);
+
+        String timestamp = LocalDateTime.now().format(DISPLAY_FMT);
+        // Store as "author|text|time" for the CellFactory to parse
+        commentsListView.getItems().add(0, "You|" + text + "|" + timestamp);
+        commentsListView.scrollTo(0);
         commentInputField.clear();
     }
 

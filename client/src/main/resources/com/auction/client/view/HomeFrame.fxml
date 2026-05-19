@@ -54,7 +54,7 @@
             </Button>
 
             <!-- Watchlist -->
-            <Button fx:id="btnWatchlist" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;" text="Watchlist">
+            <Button fx:id="btnWatchlist" onAction="#handleWatchlist" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;" text="Watchlist">
                 <VBox.margin><Insets left="20.0" right="20.0" /></VBox.margin>
             </Button>
 

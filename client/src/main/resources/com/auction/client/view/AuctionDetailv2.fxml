@@ -261,52 +261,6 @@
             <ListView fx:id="commentsListView" prefHeight="180"
                       style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;"/>
 
-            <!-- Preview comment items (visible in Scene Builder) -->
-            <VBox spacing="8">
-
-                <!-- Comment #1 — most recent → gold left border -->
-                <HBox spacing="12" alignment="TOP_LEFT"
-                      style="-fx-background-color: #161616; -fx-padding: 12 14 12 14; -fx-background-radius: 8; -fx-border-color: #D4AF37 transparent transparent transparent; -fx-border-width: 0 0 0 3;">
-                    <VBox alignment="CENTER"
-                          style="-fx-min-width: 36; -fx-min-height: 36; -fx-max-width: 36; -fx-max-height: 36; -fx-background-color: #D4AF37; -fx-background-radius: 50;">
-                        <Label text="NS"
-                               style="-fx-text-fill: #000000; -fx-font-weight: bold; -fx-font-size: 12px;"/>
-                    </VBox>
-                    <VBox spacing="3" HBox.hgrow="ALWAYS">
-                        <HBox alignment="CENTER_LEFT">
-                            <Label text="Nguy&#7877;n S&#417;n"
-                                   style="-fx-text-fill: #D4AF37; -fx-font-weight: bold; -fx-font-size: 13px;"
-                                   HBox.hgrow="ALWAYS"/>
-                            <Label text="15/04/2026 00:36"
-                                   style="-fx-text-fill: #777777; -fx-font-size: 11px;"/>
-                        </HBox>
-                        <Label text="Ch&#7845;t vl"
-                               style="-fx-text-fill: #CCCCCC; -fx-font-size: 13px;"/>
-                    </VBox>
-                </HBox>
-
-                <!-- Comment #2 -->
-                <HBox spacing="12" alignment="TOP_LEFT"
-                      style="-fx-background-color: #161616; -fx-padding: 12 14 12 14; -fx-background-radius: 8; -fx-border-color: #333333 transparent transparent transparent; -fx-border-width: 0 0 0 3;">
-                    <VBox alignment="CENTER"
-                          style="-fx-min-width: 36; -fx-min-height: 36; -fx-max-width: 36; -fx-max-height: 36; -fx-background-color: #444444; -fx-background-radius: 50;">
-                        <Label text="HT"
-                               style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 12px;"/>
-                    </VBox>
-                    <VBox spacing="3" HBox.hgrow="ALWAYS">
-                        <HBox alignment="CENTER_LEFT">
-                            <Label text="Ho&#224;ng T&#249;ng"
-                                   style="-fx-text-fill: #D4AF37; -fx-font-weight: bold; -fx-font-size: 13px;"
-                                   HBox.hgrow="ALWAYS"/>
-                            <Label text="15/04/2026 18:36"
-                                   style="-fx-text-fill: #777777; -fx-font-size: 11px;"/>
-                        </HBox>
-                        <Label text="M&#225;y con g&#224; bi&#7871;t g&#236;"
-                               style="-fx-text-fill: #CCCCCC; -fx-font-size: 13px;"/>
-                    </VBox>
-                </HBox>
-
-            </VBox>
 
             <!-- Comment input + POST (same style as Place Bid) -->
             <HBox spacing="8" alignment="CENTER"
