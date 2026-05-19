@@ -3,7 +3,7 @@ package com.auction.server.util;
 import com.auction.share.enums.AuctionStatus;
 import com.auction.share.enums.Category;
 import com.auction.share.models.auction.Auction;
-import com.auction.share.models.item.*;
+import com.auction.share.models.item.Item;
 import com.auction.share.models.user.Bidder;
 import com.auction.share.models.user.Seller;
 import com.auction.share.models.user.User;
@@ -22,44 +22,15 @@ public final class MapAuctionDB {
         String categoryRaw = rs.getString("category");
         double startingPrice = rs.getDouble("starting_price");
         String description = rs.getString("description");
-
-        Item item;
+        
         Category category;
         try {
-            category = categoryRaw == null ? Category.ITEM : Category.valueOf(categoryRaw.trim().toUpperCase());
+            category = Category.valueOf(categoryRaw.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             category = Category.ITEM;
         }
 
-        switch (category) {
-            case ANTIQUE:
-                item = new Antique(name, description, startingPrice, sellerId,
-                        rs.getString("era"), rs.getString("material"));
-                break;
-            case ART:
-                item = new Art(name, description, startingPrice, sellerId,
-                        rs.getString("artist"), rs.getInt("year"));
-                break;
-            case ELECTRONIC:
-                item = new Electronic(name, description, startingPrice, sellerId,
-                        rs.getString("brand"), rs.getInt("warranty_period"));
-                break;
-            case JEWELRY:
-                item = new Jewelry(name, description, startingPrice, sellerId,
-                        rs.getString("material"), rs.getDouble("caratWeight"));
-                break;
-            case REALESTATE:
-                item = new RealEstate(name, description, startingPrice, sellerId,
-                        rs.getString("location"), rs.getDouble("area"));
-                break;
-            case VEHICLE:
-                item = new Vehicle(name, description, startingPrice, sellerId,
-                        rs.getString("fuelType"));
-                break;
-            default:
-                item = new Item(name, description, startingPrice, sellerId);
-                break;
-        }
+        Item item = new Item(name, description, startingPrice, sellerId, category);
         item.setID(id);
         return item;
     }
@@ -68,13 +39,13 @@ public final class MapAuctionDB {
         String id = rs.getString("id");
         Timestamp startTimestamp = rs.getTimestamp("start_time");
         Timestamp endTimestamp = rs.getTimestamp("end_time");
-
+        
         LocalDateTime startTime = startTimestamp != null ? startTimestamp.toLocalDateTime() : null;
         LocalDateTime endTime = endTimestamp != null ? endTimestamp.toLocalDateTime() : null;
-
+        
         Auction auction = new Auction(item, seller, startTime, endTime);
         auction.setID(id);
-
+        
         String statusStr = rs.getString("status");
         if (statusStr != null) {
             switch (AuctionStatus.valueOf(statusStr)) {
@@ -92,12 +63,12 @@ public final class MapAuctionDB {
                     break;
             }
         }
-
+        
         double currentPrice = rs.getDouble("current_price");
         if (highestBidder != null) {
             auction.setHighestBid(highestBidder, currentPrice);
         }
-
+        
         return auction;
     }
 }

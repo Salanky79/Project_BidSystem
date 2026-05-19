@@ -124,7 +124,7 @@ public class AuctionServer implements Runnable {
             }
 
             if (session != null) {
-                subscriptionRegistry.unsubcribe(session);
+                subscriptionRegistry.unsubscribeAll(session);
             }
             LOGGER.info("Client session closed.");
         }

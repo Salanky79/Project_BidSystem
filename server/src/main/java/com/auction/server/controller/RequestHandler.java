@@ -14,6 +14,7 @@ import com.auction.share.DTO.CreateAuctionRequest;
 import com.auction.share.DTO.PlaceBidRequest;
 import com.auction.share.DTO.GetAuctionDetailRequest;
 import com.auction.share.DTO.ListAuctionRequest;
+import com.auction.share.DTO.UnsubscribeAuctionRequest;
 import com.auction.server.service.AuctionService;
 
 public class RequestHandler {
@@ -52,7 +53,7 @@ public class RequestHandler {
                 case Action.PLACE_BID -> auctionController.placeBid((PlaceBidRequest) request);
                 case Action.GET_AUCTION_DETAIL -> auctionController.getAuctionDetail((GetAuctionDetailRequest) request);
                 case Action.LIST_AUCTIONS -> auctionController.listAuctions((ListAuctionRequest) request);
-                case Action.UNSUBSCRIBE_AUCTION -> handleUnsubscribe(session);
+                case Action.UNSUBSCRIBE_AUCTION -> handleUnsubscribe((UnsubscribeAuctionRequest) request, session);
                 default -> Response.fail("Unsupported action: " + request.getAction());
             };
         } catch (ClassCastException e) {
@@ -64,11 +65,18 @@ public class RequestHandler {
         return response;
     }
 
-    private Response<Boolean> handleUnsubscribe(ClientSession session) {
+    private Response<Boolean> handleUnsubscribe(UnsubscribeAuctionRequest request, ClientSession session) {
         if (session == null) {
             return Response.fail("Session is required.");
         }
-        subscriptionRegistry.unsubcribe(session);
-        return Response.success("Unsubscribed from auction.", true);
+
+        String auctionId = request == null ? null : request.getAuctionId();
+        if (auctionId == null || auctionId.isBlank()) {
+            subscriptionRegistry.unsubscribeAll(session);
+            return Response.success("Unsubscribed from all auctions.", true);
+        }
+
+        subscriptionRegistry.unsubscribe(auctionId, session);
+        return Response.success("Unsubscribed from auction: " + auctionId, true);
     }
 }

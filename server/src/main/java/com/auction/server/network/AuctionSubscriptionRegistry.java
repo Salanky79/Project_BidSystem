@@ -1,62 +1,77 @@
 package com.auction.server.network;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AuctionSubscriptionRegistry {
-    private final Map<String, Set<ClientSession>> subscribersByAuction = new HashMap<>();
-    private final Map<ClientSession, String> auctionBySession = new HashMap<>();
+    private final Map<String, Set<ClientSession>> subscribersByAuction = new ConcurrentHashMap<>();
+    private final Map<ClientSession, Set<String>> auctionsBySession = new ConcurrentHashMap<>();
 
-    public synchronized void subscribe(String auctionId, ClientSession session) {
+    public void subscribe(String auctionId, ClientSession session) {
         if (auctionId == null || auctionId.isBlank() || session == null) {
             return;
         }
 
-        // lay dsach auction ma client trc day da xem
-        String previousAuctionId = auctionBySession.get(session);
-        if (previousAuctionId != null && !previousAuctionId.equals(auctionId)) {
-            Set<ClientSession> previousSessions = subscribersByAuction.get(previousAuctionId);
-            if (previousSessions != null) {
-                previousSessions.remove(session);
-                if (previousSessions.isEmpty()) {
-                    subscribersByAuction.remove(previousAuctionId);
-                }
-            }
-        }
-
-        // Thêm session vào danh sách subscriber của auction
         subscribersByAuction
-                .computeIfAbsent(auctionId, ignored -> new HashSet<>())
+                .computeIfAbsent(auctionId, ignored -> ConcurrentHashMap.newKeySet())
                 .add(session);
-        // session này đang xem auction nào
-        auctionBySession.put(session, auctionId);
+
+        auctionsBySession
+                .computeIfAbsent(session, ignored -> ConcurrentHashMap.newKeySet())
+                .add(auctionId);
     }
 
-    public synchronized Set<ClientSession> getSubscribers(String auctionId) {
+    public Set<ClientSession> getSubscribers(String auctionId) {
         Set<ClientSession> sessions = subscribersByAuction.get(auctionId);
         if (sessions == null) {
             return Set.of();
         }
-        return new HashSet<>(sessions);
+        return Set.copyOf(sessions);
     }
 
-    public synchronized void unsubcribe(ClientSession session) {
+    public void unsubscribe(String auctionId, ClientSession session) {
+        if (auctionId == null || auctionId.isBlank() || session == null) {
+            return;
+        }
+
+        Set<ClientSession> sessions = subscribersByAuction.get(auctionId);
+        if (sessions != null) {
+            sessions.remove(session);
+            if (sessions.isEmpty()) {
+                subscribersByAuction.remove(auctionId, sessions);
+            }
+        }
+
+        Set<String> auctionIds = auctionsBySession.get(session);
+        if (auctionIds != null) {
+            auctionIds.remove(auctionId);
+            if (auctionIds.isEmpty()) {
+                auctionsBySession.remove(session, auctionIds);
+            }
+        }
+    }
+
+    public void unsubscribeAll(ClientSession session) {
         if (session == null) {
             return;
         }
-        String auctionId = auctionBySession.remove(session);
-        if (auctionId == null) {
+
+        Set<String> auctionIds = auctionsBySession.remove(session);
+        if (auctionIds == null || auctionIds.isEmpty()) {
             return;
         }
-        Set<ClientSession> sessions = subscribersByAuction.get(auctionId);
-        if (sessions == null) {
-            return;
-        }
-        sessions.remove(session);
-        if (sessions.isEmpty()) {
-            subscribersByAuction.remove(auctionId);
+
+        for (String auctionId : auctionIds) {
+            Set<ClientSession> sessions = subscribersByAuction.get(auctionId);
+            if (sessions == null) {
+                continue;
+            }
+
+            sessions.remove(session);
+            if (sessions.isEmpty()) {
+                subscribersByAuction.remove(auctionId, sessions);
+            }
         }
     }
 }

@@ -10,7 +10,6 @@ public class CreateAuctionRequest extends Request {
     private final double startingPrice;
     private final String startTime;
     private final String endTime;
-    private final String[] attributes;
 
     public CreateAuctionRequest(
             String sellerId,
@@ -19,8 +18,7 @@ public class CreateAuctionRequest extends Request {
             String category,
             double startingPrice,
             String startTime,
-            String endTime,
-            String... attributes
+            String endTime
     ) {
         super(Action.CREATE_AUCTION);
         this.sellerId = sellerId;
@@ -30,7 +28,6 @@ public class CreateAuctionRequest extends Request {
         this.startingPrice = startingPrice;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.attributes = attributes == null ? new String[0] : attributes.clone();
     }
 
     public String getSellerId() {
@@ -61,9 +58,6 @@ public class CreateAuctionRequest extends Request {
         return endTime;
     }
 
-    public String[] getAttributes() {
-        return attributes.clone();
-    }
 
     @Override
     public Request withUserId(String userId) {
@@ -75,8 +69,7 @@ public class CreateAuctionRequest extends Request {
                     category,
                     startingPrice,
                     startTime,
-                    endTime,
-                    attributes
+                    endTime
             );
         }
         return this;
