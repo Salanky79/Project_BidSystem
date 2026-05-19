@@ -50,6 +50,9 @@ public class UserController {
         if(request.getPassword() != null && !request.getPassword().isBlank()){
             userService.updatePassword(request.getUserId(), request.getPassword());
         }
+        if (request.getFullName() != null && !request.getFullName().isBlank()) {
+            userService.updateFullName(request.getUserId(), request.getFullName());
+        }
         if (request.getEmail() != null && !request.getEmail().isBlank()) {
             userService.updateEmail(request.getUserId(), request.getEmail());
         }

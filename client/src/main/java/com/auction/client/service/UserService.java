@@ -6,6 +6,7 @@ import com.auction.share.DTO.LoginRequest;
 import com.auction.share.DTO.GetProfileRequest;
 import com.auction.share.DTO.RegisterRequest;
 import com.auction.share.DTO.Response;
+import com.auction.share.DTO.UpdateProfileRequest;
 import com.auction.share.DTO.UserDTO;
 import com.auction.share.exceptions.ValidationException;
 
@@ -91,6 +92,30 @@ public class UserService {
    
     public void getProfile(Consumer<Response<?>> onResponse) {
         socketClient.send(new GetProfileRequest(null), onResponse);
+    }
+
+    public void updateProfile(String fullName, String phoneNumber, String email, Consumer<Response<?>> onResponse) throws ValidationException {
+        if (fullName == null || fullName.trim().isEmpty()) {
+            throw new ValidationException("Ho ten khong duoc de trong!");
+        }
+        if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+            throw new ValidationException("So dien thoai khong duoc de trong!");
+        }
+        if (email == null || email.trim().isEmpty()) {
+            throw new ValidationException("Email khong duoc de trong!");
+        }
+
+        String normalizedPhone = phoneNumber.trim();
+        if (!normalizedPhone.matches("^0\\d{8,10}$")) {
+            throw new ValidationException("So dien thoai khong hop le!");
+        }
+
+        String normalizedEmail = email.trim();
+        if (!normalizedEmail.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            throw new ValidationException("Email khong hop le!");
+        }
+
+        socketClient.send(new UpdateProfileRequest(null, fullName.trim(), null, normalizedPhone, normalizedEmail, null), onResponse);
     }
 
 }

@@ -91,6 +91,18 @@ public class UserDAO {
         }
     }
 
+    public boolean updateUserFullName(String id, String fullName) throws SQLException {
+        String sql = "UPDATE users SET fullname = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, fullName);
+            ps.setString(2, id);
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+
     public boolean updateUserAddress(String id, String address) throws SQLException {
         String sql = "UPDATE users SET address = ? WHERE id = ?";
         try(Connection conn = DatabaseConnection.getConnection();
