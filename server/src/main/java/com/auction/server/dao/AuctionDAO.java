@@ -201,19 +201,21 @@ public class AuctionDAO {
             try {
                 Timestamp now = Timestamp.valueOf(java.time.LocalDateTime.now());
 
-                finishPs.setString(1, AuctionStatus.FINISHED.name());
-                finishPs.setString(2, AuctionStatus.RUNNING.name());
-                finishPs.setTimestamp(3, now);
-                int finishedRows = finishPs.executeUpdate();
-
-
+                // Bước 1: Trừ tiền bidder trước (dùng status RUNNING vì chưa đổi)
                 deductPs.setString(1, AuctionStatus.RUNNING.name());
                 deductPs.setTimestamp(2, now);
                 deductPs.executeUpdate();
 
+                // Bước 2: Cộng tiền seller trước (dùng status RUNNING vì chưa đổi)
                 creditSellerPs.setString(1, AuctionStatus.RUNNING.name());
                 creditSellerPs.setTimestamp(2, now);
                 creditSellerPs.executeUpdate();
+
+                // Bước 3: Đổi status sang FINISHED sau cùng
+                finishPs.setString(1, AuctionStatus.FINISHED.name());
+                finishPs.setString(2, AuctionStatus.RUNNING.name());
+                finishPs.setTimestamp(3, now);
+                int finishedRows = finishPs.executeUpdate();
 
                 conn.commit();
                 return finishedRows;

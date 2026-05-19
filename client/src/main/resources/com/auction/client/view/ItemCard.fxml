@@ -11,8 +11,9 @@
     </StackPane>
 
     <VBox mouseTransparent="true" spacing="6.0" style="-fx-padding: 14 14 14 14;" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
-        <HBox alignment="TOP_RIGHT">
+        <HBox alignment="TOP_RIGHT" spacing="8">
             <Region mouseTransparent="true" HBox.hgrow="ALWAYS" />
+            <Label fx:id="followStatusLabel" style="-fx-background-color: transparent; -fx-text-fill: #D4AF37; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 3 10 3 10; -fx-border-color: #D4AF37; -fx-border-radius: 20; -fx-background-radius: 20;" text="Followed" visible="false" managed="false"/>
             <Label fx:id="categoryLabel" style="-fx-background-color: #f0a500; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 3 10 3 10; -fx-background-radius: 20;" text="Category" />
         </HBox>
         <Label fx:id="nameLabel" mouseTransparent="true" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a; -fx-wrap-text: true;" text="Item Name" />

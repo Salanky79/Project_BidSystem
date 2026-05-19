@@ -8,9 +8,18 @@ import java.io.ObjectOutputStream;
 
 public class ClientSession {
     private final ObjectOutputStream outputStream;
+    private volatile String userId;
 
     public ClientSession(ObjectOutputStream outputStream) {
         this.outputStream = outputStream;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     // wrapper gửi dữ liệu an toàn

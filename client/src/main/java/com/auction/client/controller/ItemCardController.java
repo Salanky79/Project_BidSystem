@@ -11,6 +11,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import com.auction.client.service.WatchlistService;
 
 public class ItemCardController {
 
@@ -22,6 +23,7 @@ public class ItemCardController {
     @FXML private Label bidsLabel;
     @FXML private Label timeLabel;
     @FXML private Label statusLabel;
+    @FXML private Label followStatusLabel;
 
     private String icon;
     private String category;
@@ -49,6 +51,12 @@ public class ItemCardController {
         this.time = time;
         this.status = status;
         this.auctionId = auctionId;
+        
+        if (followStatusLabel != null) {
+            boolean isFollowed = WatchlistService.getInstance().isFollowed(auctionId);
+            followStatusLabel.setVisible(isFollowed);
+            followStatusLabel.setManaged(isFollowed);
+        }
 
         // Format số tiền cho đẹp (vd: 1000.0 -> "1,000 USD")
         priceLabel.setText(String.format("%,.0f USD", price));

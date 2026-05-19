@@ -1,9 +1,11 @@
 package com.auction.server.network;
 
 import com.auction.server.controller.RequestHandler;
+import com.auction.share.DTO.Action;
 import com.auction.share.DTO.GetAuctionDetailRequest;
 import com.auction.share.DTO.Request;
 import com.auction.share.DTO.Response;
+import com.auction.share.DTO.UserDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +62,11 @@ public class AuctionServer implements Runnable {
                     continue;
                 }
 
+                // Inject userId vào request từ session (hỗ trợ withUserId pattern)
+                Request authedRequest = (session.getUserId() != null)
+                        ? request.withUserId(session.getUserId())
+                        : request;
+
                 long startTime = System.currentTimeMillis();
                 LOGGER.info("Received request: requestId={}, action={}, type={}",
                         request.getRequestId(),
@@ -68,7 +75,13 @@ public class AuctionServer implements Runnable {
                 );
 
                 Response<?> response =
-                        requestHandler.handle(request, session);
+                        requestHandler.handle(authedRequest, session);
+
+                // Sau khi login thành công, lưu userId vào session
+                if (Action.LOGIN.equals(request.getAction()) && response.isSuccess() && response.getData() instanceof UserDTO userDTO) {
+                    session.setUserId(userDTO.getId());
+                    LOGGER.info("Session authenticated for userId={}", userDTO.getId());
+                }
 
                 long elapsedMs = System.currentTimeMillis() - startTime;
                 LOGGER.info("Processed request: requestId={}, action={}, success={}, durationMs={}",

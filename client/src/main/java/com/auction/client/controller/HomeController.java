@@ -13,6 +13,7 @@ import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.util.List;
+import com.auction.client.service.WatchlistService;
 
 public class HomeController extends HomeFrameController {
     private final AuctionService auctionService = ClientContext.auctionService();
@@ -30,7 +31,7 @@ public class HomeController extends HomeFrameController {
         int column = 0;
         int row = 0;
 
-        if (matchesFilter(filterStatus, TEST_CARD_STATUS)) {
+        if (matchesFilter(filterStatus, TEST_CARD_STATUS, "test-auction-id")) {
             try {
                 FXMLLoader loader1 = new FXMLLoader(getClass().getResource("/com/auction/client/view/ItemCard.fxml"));
                 HBox card1 = loader1.load();
@@ -58,7 +59,7 @@ public class HomeController extends HomeFrameController {
 
                 for (Object obj : list) {
                     if (obj instanceof AuctionSummaryDTO dto) {
-                        if (matchesFilter(filterStatus, dto.getStatus())) {
+                        if (matchesFilter(filterStatus, dto.getStatus(), dto.getAuctionId())) {
                             try {
                                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/ItemCard.fxml"));
                                 HBox card = loader.load();
@@ -93,7 +94,10 @@ public class HomeController extends HomeFrameController {
         }));
     }
 
-    private boolean matchesFilter(String filterStatus, String status) {
+    private boolean matchesFilter(String filterStatus, String status, String auctionId) {
+        if ("Watchlist".equalsIgnoreCase(filterStatus)) {
+            return WatchlistService.getInstance().isFollowed(auctionId);
+        }
         return "All".equalsIgnoreCase(filterStatus) || status.equalsIgnoreCase(filterStatus);
     }
 
