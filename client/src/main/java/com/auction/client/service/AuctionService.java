@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 
 public class AuctionService {
     private final SocketClient socketClient;
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     public AuctionService(SocketClient socketClient) {
         this.socketClient = socketClient;
@@ -44,7 +44,7 @@ public class AuctionService {
                 throw new ValidationException("Thời gian kết thúc phải sau thời gian bắt đầu!");
             }
         } catch (DateTimeParseException e) {
-            throw new ValidationException("Định dạng thời gian không hợp lệ (yêu cầu: dd/MM/yyyy HH:mm)!");
+            throw new ValidationException("Định dạng thời gian không hợp lệ!");
         }
 
         CreateAuctionRequest request = new CreateAuctionRequest(null, itemName, description, category, startingPrice, startTimeStr, endTimeStr);

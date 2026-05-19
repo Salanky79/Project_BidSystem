@@ -99,7 +99,7 @@ public class LoginController {
                         loadDashboard(event, role);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        errorLabel.setText("Loi khi chuyen man hinh: " + e.getMessage());
+                        errorLabel.setText("Failed to load screen: " + e.getMessage());
                         errorLabel.setVisible(true);
                     }
                 } else {

@@ -23,33 +23,71 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ResourceBundle;
+import javafx.util.StringConverter;
 
 public class SellController implements Initializable {
     private final AuctionService auctionService = ClientContext.auctionService();
 
-    @FXML private TextField name;
-    @FXML private ComboBox<String> category;
-    @FXML private TextField startingprice;
-    @FXML private DatePicker enddate;
-    @FXML private TextField description;
-    @FXML private Button chooseImageButton;
-    @FXML private Label imageLabel;
-    @FXML private Button addButton;
-    @FXML private Label validationLabel;
-    @FXML private ImageView closeButton;
+    @FXML
+    private TextField name;
+    @FXML
+    private ComboBox<String> category;
+    @FXML
+    private TextField startingprice;
+    @FXML
+    private DatePicker enddate;
+    @FXML
+    private TextField description;
+    @FXML
+    private Button chooseImageButton;
+    @FXML
+    private Label imageLabel;
+    @FXML
+    private Button addButton;
+    @FXML
+    private Label validationLabel;
+    @FXML
+    private ImageView closeButton;
 
     private File selectedImageFile;
 
     private static final ObservableList<String> CATEGORIES = FXCollections.observableArrayList(
-            "Antiques", "Art", "Books", "Clothing", "Collectibles",
-            "Electronics", "Jewelry", "Music", "Sports", "Toys", "Other"
-    );
+            "Antique", "Art", "Electronic", "Jewelry", "RealEstate", "Vehicle");
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         category.setItems(CATEGORIES);
         validationLabel.setVisible(false);
+
+        enddate.setConverter(new StringConverter<LocalDate>() {
+            final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            @Override
+            public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    try {
+                        if (string.contains("T")) {
+                            return LocalDateTime.parse(string, DateTimeFormatter.ISO_LOCAL_DATE_TIME).toLocalDate();
+                        }
+                        return LocalDate.parse(string, dateFormatter);
+                    } catch (DateTimeParseException e) {
+                        return null; // Return null if parsing fails
+                    }
+                }
+                return null;
+            }
+        });
 
         chooseImageButton.setOnAction(e -> handleChooseImage());
         addButton.setOnAction(e -> handleAddListing());
@@ -57,6 +95,10 @@ public class SellController implements Initializable {
     }
 
     private boolean validateInputs() {
+        if (name.getText().trim().isEmpty() || category.getValue() == null ||
+                startingprice.getText().trim().isEmpty() || enddate.getValue() == null) {
+            return false;
+        }
         return true;
     }
 
@@ -86,8 +128,7 @@ public class SellController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Image");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
-        );
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp"));
 
         Stage stage = (Stage) chooseImageButton.getScene().getWindow();
         selectedImageFile = fileChooser.showOpenDialog(stage);
@@ -106,10 +147,13 @@ public class SellController implements Initializable {
         LocalDate listingDate = enddate.getValue();
         String listingDesc = description.getText().trim();
 
-        String startTimeStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-        String endTimeStr = listingDate != null
-                ? listingDate.atTime(23, 59).format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
-                : "";
+        if (!validateInputs()) {
+            showError("Please fill out the entire form.");
+            return;
+        }
+
+        String startTimeStr = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        String endTimeStr = listingDate.atTime(23, 59).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
         try {
             auctionService.createAuction(
@@ -119,10 +163,9 @@ public class SellController implements Initializable {
                             showSuccess("Listing added successfully!");
                             clearFields();
                         } else {
-                            showError(response != null ? response.getMessage() : "Loi ket noi may chu");
+                            showError(response != null ? response.getMessage() : "Server connection failed.");
                         }
-                    })
-            );
+                    }));
         } catch (ValidationException e) {
             showError(e.getMessage());
         }

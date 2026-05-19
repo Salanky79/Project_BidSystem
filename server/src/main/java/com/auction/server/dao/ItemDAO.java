@@ -11,19 +11,19 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 public class ItemDAO {
-    
+
     public boolean saveItem(Item item) throws SQLException {
-        String sql = "INSERT INTO items (id, seller_id, name, category, starting_price, description, condition, era, material, brand, warranty_period, artist, year, caratWeight, location, area, fuelType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO items (id, seller_id, name, category, starting_price, description, `condition`, era, material, brand, warranty_period, artist, `year`, caratWeight, location, area, fuelType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-             
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, item.getId());
             ps.setString(2, item.getSellerId());
             ps.setString(3, item.getName());
             ps.setString(4, item.getCategory().name());
             ps.setDouble(5, item.getStartingPrice());
             ps.setString(6, item.getDescription());
-            
+
             // Default nulls for subclass fields
             ps.setNull(7, Types.VARCHAR); // condition
             ps.setNull(8, Types.VARCHAR); // era
@@ -36,7 +36,7 @@ public class ItemDAO {
             ps.setNull(15, Types.VARCHAR); // location
             ps.setNull(16, Types.DOUBLE); // area
             ps.setNull(17, Types.VARCHAR); // fuelType
-            
+
             // Bind specific fields based on subclass
             if (item instanceof Antique antique) {
                 ps.setString(8, antique.getEra());
@@ -56,7 +56,7 @@ public class ItemDAO {
             } else if (item instanceof Vehicle vehicle) {
                 ps.setString(17, vehicle.getFuelType());
             }
-            
+
             int row = ps.executeUpdate();
             return row > 0;
         }
@@ -65,10 +65,10 @@ public class ItemDAO {
     public Item findById(String id) throws SQLException {
         String sql = "SELECT * FROM items WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-             
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, id);
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return MapAuctionDB.mapItem(rs);
