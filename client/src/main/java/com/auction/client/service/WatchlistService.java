@@ -3,9 +3,6 @@ package com.auction.client.service;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Quản lý danh sách auction đang theo dõi trên client.
- */
 public class WatchlistService {
     private static final WatchlistService instance = new WatchlistService();
     private final Set<String> followedAuctionIds;

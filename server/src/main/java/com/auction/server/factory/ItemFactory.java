@@ -5,9 +5,6 @@ import com.auction.share.models.item.Item;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Factory tạo Item theo category.
- */
 public final class ItemFactory {
     private static final Map<String, ItemCreator> CREATORS = new HashMap<>();
 

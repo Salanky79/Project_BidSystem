@@ -5,9 +5,6 @@ import com.auction.server.dao.AuctionDAO;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * Job cập nhật trạng thái đấu giá theo chu kỳ.
- */
 public class AuctionStatusScheduler implements Runnable {
     private final AuctionDAO auctionDAO;
     private final long intervalMillis;
@@ -26,7 +23,7 @@ public class AuctionStatusScheduler implements Runnable {
     public void run() {
         while (running.get() && !Thread.currentThread().isInterrupted()) {
             try {
-                // Mỗi chu kỳ, cập nhật trạng thái auction.
+                // cu moi ms kiem tra xem auction nao con chay hay da xog
                 auctionDAO.markOpenAuctionsAsRunning();
                 auctionDAO.markRunningAuctionsAsFinished();
                 Thread.sleep(intervalMillis);

@@ -3,9 +3,6 @@ package com.auction.server.factory;
 import com.auction.share.models.item.Antique;
 import com.auction.share.models.item.Item;
 
-/**
- * Factory tạo Item đồ cổ.
- */
 public class AntiqueFactory implements ItemCreator {
     @Override
     public Item createItem(String name, String description, double startingPrice, String sellerID, String... attributes) {

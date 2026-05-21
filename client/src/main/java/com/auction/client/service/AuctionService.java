@@ -11,9 +11,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.function.Consumer;
 
-/**
- * Service đấu giá phía client.
- */
 public class AuctionService {
     private final SocketClient socketClient;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;

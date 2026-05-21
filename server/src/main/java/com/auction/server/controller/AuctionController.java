@@ -9,18 +9,15 @@ import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-/**
- * Xử lý nghiệp vụ đấu giá từ các request.
- */
 public class AuctionController {
     private final AuctionService auctionService;
 
-    // Quản lý các luồng request liên quan đấu giá.
+    // quan li chuc nang dau gia
     public AuctionController(AuctionService auctionService) {
         this.auctionService = auctionService;
     }
 
-    // Trả dữ liệu cần thiết cho client.
+    // những thông tin cần cho client ( ket qua thong qua server tra ve)
     public Response<AuctionSummaryDTO> createAuction(CreateAuctionRequest request) throws Exception {
         validateRequiredText(request.getSellerId(), "Seller ID is required.");
         validateRequiredText(request.getItemName(), "Item Name is required.");
@@ -69,7 +66,7 @@ public class AuctionController {
         return Response.success("Auctions retrieved successfully.", list);
     }
 
-    // Helper.
+    // HELPER
     private static void validateRequiredText(String value, String message) throws ValidationException {
         if (value == null || value.isBlank()) {
             throw new ValidationException(message);

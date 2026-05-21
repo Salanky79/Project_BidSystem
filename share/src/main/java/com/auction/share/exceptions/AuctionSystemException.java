@@ -1,7 +1,8 @@
 package com.auction.share.exceptions;
 
 /**
- * Ngoại lệ gốc của hệ thống đấu giá.
+ * Lớp ngoại lệ gốc cho toàn bộ Hệ thống Đấu giá.
+ * Các ngoại lệ khác sẽ kế thừa từ lớp này.
  */
 public class AuctionSystemException extends Exception {
     public AuctionSystemException(String message) {

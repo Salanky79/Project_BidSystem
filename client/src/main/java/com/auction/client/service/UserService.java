@@ -12,9 +12,6 @@ import com.auction.share.exceptions.ValidationException;
 
 import java.util.function.Consumer;
 
-/**
- * Service người dùng phía client.
- */
 public class UserService {
     private final SocketClient socketClient;
     private final SessionManager sessionManager;

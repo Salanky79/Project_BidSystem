@@ -6,9 +6,6 @@ import com.auction.client.service.AuctionService;
 import com.auction.client.service.BidService;
 import com.auction.client.service.UserService;
 
-/**
- * Cấu hình và truy cập các service phía client.
- */
 public final class ClientContext {
     private static final String SERVER_HOST = "maglev.proxy.rlwy.net";
     private static final int SERVER_PORT = 44658;

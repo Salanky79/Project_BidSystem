@@ -1,8 +1,5 @@
 package com.auction.client.session;
 
-/**
- * Lưu trạng thái phiên đăng nhập trên client.
- */
 public class SessionManager {
     private volatile String currentUserId;
 

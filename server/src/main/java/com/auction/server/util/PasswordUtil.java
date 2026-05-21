@@ -2,9 +2,6 @@ package com.auction.server.util;
 
 import org.mindrot.jbcrypt.BCrypt;
 
-/**
- * Tiện ích băm và kiểm tra mật khẩu.
- */
 public class PasswordUtil {
     public static String hashPassword(String password){
         return BCrypt.hashpw(password, BCrypt.gensalt());

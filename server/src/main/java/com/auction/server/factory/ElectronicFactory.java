@@ -3,9 +3,6 @@ package com.auction.server.factory;
 import com.auction.share.models.item.Electronic;
 import com.auction.share.models.item.Item;
 
-/**
- * Factory tạo Item đồ điện tử.
- */
 public class ElectronicFactory implements ItemCreator {
     @Override
     public Item createItem(String name, String description, double startingPrice, String sellerID, String... attributes) {

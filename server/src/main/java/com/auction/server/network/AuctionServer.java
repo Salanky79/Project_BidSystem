@@ -15,9 +15,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-/**
- * Handler cho một kết nối client qua socket.
- */
 public class AuctionServer implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuctionServer.class);
 
@@ -36,7 +33,7 @@ public class AuctionServer implements Runnable {
     }
 
     @Override
-    // Vòng lặp xử lý request/response của client.
+    // Client <====== socket ======> Server
     public void run() {
         ClientSession session = null;
         Socket socket = clientSocket;
@@ -65,7 +62,7 @@ public class AuctionServer implements Runnable {
                     continue;
                 }
 
-                // Gắn userId theo session (hỗ trợ withUserId).
+                // Inject userId vào request từ session (hỗ trợ withUserId pattern)
                 Request authedRequest = (session.getUserId() != null)
                         ? request.withUserId(session.getUserId())
                         : request;
@@ -80,7 +77,7 @@ public class AuctionServer implements Runnable {
                 Response<?> response =
                         requestHandler.handle(authedRequest, session);
 
-                // Sau login thành công, lưu userId vào session.
+                // Sau khi login thành công, lưu userId vào session
                 if (Action.LOGIN.equals(request.getAction()) && response.isSuccess() && response.getData() instanceof UserDTO userDTO) {
                     session.setUserId(userDTO.getId());
                     LOGGER.info("Session authenticated for userId={}", userDTO.getId());

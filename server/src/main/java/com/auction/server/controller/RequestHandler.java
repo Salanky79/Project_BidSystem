@@ -16,24 +16,21 @@ import com.auction.share.DTO.GetAuctionDetailRequest;
 import com.auction.share.DTO.ListAuctionRequest;
 import com.auction.server.service.AuctionService;
 
-/**
- * Điều phối request vào đúng controller.
- */
 public class RequestHandler {
     private final UserController userController;
     private final AuctionController auctionController;
     private final AuctionSubscriptionRegistry subscriptionRegistry;
 
-    // Điều phối request theo action.
+    // quet dinh xem request se di dau
     public RequestHandler(
             UserService userService,
             AuctionService auctionService,
             AuctionSubscriptionRegistry subscriptionRegistry
     ) {
-        // Dùng chung controller cho các phiên.
+        // can service rieng cho tung client
         this.userController = new UserController(userService);
         this.auctionController = new AuctionController(auctionService);
-        // Registry dùng cho realtime subscription.
+        // real time dealer
         this.subscriptionRegistry = subscriptionRegistry;
     }
 

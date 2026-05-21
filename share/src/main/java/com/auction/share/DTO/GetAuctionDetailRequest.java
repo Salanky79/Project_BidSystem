@@ -1,8 +1,5 @@
 package com.auction.share.DTO;
 
-/**
- * Request lấy chi tiết một phiên đấu giá.
- */
 public class GetAuctionDetailRequest extends Request {
     private static final long serialVersionUID = 1L;
 

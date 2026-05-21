@@ -2,11 +2,7 @@ package com.auction.share.DTO;
 
 import java.io.Serializable;
 
-/**
- * DTO cho một lượt đặt giá.
- */
 public class BidDTO implements Serializable {
-    // serialVersionUID để giữ tương thích khi serialize/deserialize.
     private static final long serialVersionUID = 1L;
 
     private final String bidderName;
@@ -19,7 +15,15 @@ public class BidDTO implements Serializable {
         this.timestamp = timestamp;
     }
 
+    public String getBidderName() {
+        return bidderName;
+    }
+
     public double getAmount() {
         return amount;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
     }
 }

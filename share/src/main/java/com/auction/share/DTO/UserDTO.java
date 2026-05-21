@@ -2,12 +2,7 @@ package com.auction.share.DTO;
 
 import java.io.Serializable;
 
-// DTO chỉ chứa dữ liệu cần hiển thị, không đưa thông tin nhạy cảm.
-/**
- * DTO thông tin người dùng hiển thị trên client.
- */
 public class UserDTO implements Serializable {
-    // serialVersionUID để giữ tương thích khi serialize/deserialize.
     private static final long serialVersionUID = 1L;
 
     private final String id;
@@ -65,5 +60,9 @@ public class UserDTO implements Serializable {
 
     public String getAddress() {
         return address;
+    }
+
+    public double getBalance() {
+        return balance;
     }
 }

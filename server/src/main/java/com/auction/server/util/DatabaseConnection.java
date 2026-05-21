@@ -6,9 +6,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/**
- * Quản lý kết nối database bằng HikariCP.
- */
 public class DatabaseConnection {
     private static final HikariConfig config = new HikariConfig();
     private static final HikariDataSource ds;
@@ -47,7 +44,7 @@ public class DatabaseConnection {
         config.setUsername(dbUser);
         config.setPassword(dbPass);
 
-        config.setMaximumPoolSize(10); // Tối đa 10 kết nối đồng thời.
+        config.setMaximumPoolSize(10); // Tối đa 10 kết nối cùng lúc
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");

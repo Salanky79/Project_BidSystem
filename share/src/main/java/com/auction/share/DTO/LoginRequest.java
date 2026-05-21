@@ -1,10 +1,6 @@
 package com.auction.share.DTO;
 
-/**
- * Request đăng nhập.
- */
 public class LoginRequest extends Request {
-    // serialVersionUID để giữ tương thích khi serialize/deserialize.
     private static final long serialVersionUID = 1L;
 
     private final String username;

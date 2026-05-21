@@ -1,11 +1,6 @@
 package com.auction.share.DTO;
 
-// Server ưu tiên userId từ session, không tin tuyệt đối dữ liệu từ Client.
-/**
- * Request cập nhật hồ sơ người dùng.
- */
 public class UpdateProfileRequest extends Request {
-    // serialVersionUID để giữ tương thích khi serialize/deserialize.
     private static final long serialVersionUID = 1L;
 
     private final String userId;
@@ -51,14 +46,10 @@ public class UpdateProfileRequest extends Request {
     public String getAddress() {
         return address;
     }
-
-    public String getPassword() {
+    public String getPassword(){
         return password;
     }
 
-    /**
-     * Gắn userId theo session nếu request không có sẵn.
-     */
     @Override
     public Request withUserId(String userId) {
         if (this.userId == null || this.userId.isBlank()) {

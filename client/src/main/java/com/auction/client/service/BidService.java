@@ -7,9 +7,6 @@ import com.auction.share.exceptions.ValidationException;
 
 import java.util.function.Consumer;
 
-/**
- * Service đặt giá phía client.
- */
 public class BidService {
     private final SocketClient socketClient;
 

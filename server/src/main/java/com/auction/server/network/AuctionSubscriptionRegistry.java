@@ -5,9 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Quản lý danh sách client đang theo dõi phiên đấu giá.
- */
 public class AuctionSubscriptionRegistry {
     private final Map<String, Set<ClientSession>> subscribersByAuction = new HashMap<>();
     private final Map<ClientSession, String> auctionBySession = new HashMap<>();
@@ -17,7 +14,7 @@ public class AuctionSubscriptionRegistry {
             return;
         }
 
-        // Hủy đăng ký phiên trước nếu đổi sang phiên khác.
+        // lay dsach auction ma client trc day da xem
         String previousAuctionId = auctionBySession.get(session);
         if (previousAuctionId != null && !previousAuctionId.equals(auctionId)) {
             Set<ClientSession> previousSessions = subscribersByAuction.get(previousAuctionId);
@@ -29,11 +26,11 @@ public class AuctionSubscriptionRegistry {
             }
         }
 
-        // Thêm session vào danh sách subscriber của auction.
+        // Thêm session vào danh sách subscriber của auction
         subscribersByAuction
                 .computeIfAbsent(auctionId, ignored -> new HashSet<>())
                 .add(session);
-        // Ghi nhận session đang xem auction nào.
+        // session này đang xem auction nào
         auctionBySession.put(session, auctionId);
     }
 

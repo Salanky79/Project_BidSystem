@@ -24,9 +24,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Xử lý nghiệp vụ đấu giá trên server.
- */
+
 public class AuctionService {
     private final AuctionDAO auctionDAO;
     private final ItemDAO itemDAO;
@@ -101,7 +99,7 @@ public class AuctionService {
 
                 bidTransactionDAO.saveBidTransaction(conn, transaction);
                 conn.commit();
-                // Gửi thông báo có bid mới tới các client đang xem auction.
+                // Gửi thông báo "có bid mới" đến tất cả client đang xem auction đó
                 bidBroadcastService.broadcastBidUpdate(new BidUpdateEvent(
                         BidBroadcastService.BID_UPDATED,
                         auction.getId(),
@@ -110,6 +108,7 @@ public class AuctionService {
                         req.getAmount(),
                         req.getAmount(),
                         transaction.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                        // chuyen datetime thanh chuoi chuan theo format ngay thang
                 ));
                 return true;
             } catch (SQLException | ValidationException e) {
@@ -176,7 +175,7 @@ public class AuctionService {
     }
 
 
-    // Helper.
+    // HELPER
     private LocalDateTime parseDateTime(String dateTimeStr) throws ValidationException {
         try {
             return LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);

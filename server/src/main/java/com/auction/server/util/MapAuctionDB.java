@@ -13,9 +13,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-/**
- * Mapper ResultSet sang model Auction/Item.
- */
 public final class MapAuctionDB {
 
     public static Item mapItem(ResultSet rs) throws SQLException {

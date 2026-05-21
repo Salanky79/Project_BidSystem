@@ -1,10 +1,9 @@
 package com.auction.share.DTO;
 
-/**
- * Request đăng ký tài khoản.
- */
-public class RegisterRequest extends Request {
-    // serialVersionUID để giữ tương thích khi serialize/deserialize.
+public class
+
+
+RegisterRequest extends Request {
     private static final long serialVersionUID = 1L;
 
     private final String username;

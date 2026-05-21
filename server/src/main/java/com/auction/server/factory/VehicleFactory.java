@@ -3,9 +3,6 @@ package com.auction.server.factory;
 import com.auction.share.models.item.Item;
 import com.auction.share.models.item.Vehicle;
 
-/**
- * Factory tạo Item xe cộ.
- */
 public class VehicleFactory implements ItemCreator {
     @Override
     public Item createItem(String name, String description, double startingPrice, String sellerID, String... attributes) {

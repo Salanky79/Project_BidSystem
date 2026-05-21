@@ -3,9 +3,6 @@ package com.auction.share.DTO;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * DTO chi tiết phiên đấu giá dùng cho màn hình xem chi tiết.
- */
 public class AuctionDetailDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -54,6 +51,10 @@ public class AuctionDetailDTO implements Serializable {
         return auctionId;
     }
 
+    public String getItemName() {
+        return itemName;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -62,11 +63,35 @@ public class AuctionDetailDTO implements Serializable {
         return category;
     }
 
+    public String getSellerName() {
+        return sellerName;
+    }
+
     public double getStartingPrice() {
         return startingPrice;
     }
 
+    public double getCurrentPrice() {
+        return currentPrice;
+    }
+
     public String getStatus() {
         return status;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public String getHighestBidderName() {
+        return highestBidderName;
+    }
+
+    public List<BidDTO> getBidHistory() {
+        return bidHistory;
     }
 }
