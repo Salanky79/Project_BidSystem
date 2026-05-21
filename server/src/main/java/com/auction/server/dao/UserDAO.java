@@ -12,8 +12,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * DAO truy cập dữ liệu người dùng.
+ */
 public class UserDAO {
-    // LƯU TÀI KHOẢN MỚI
+    // Lưu tài khoản mới.
     public boolean saveUser(User user) throws SQLException {
         String sql = "INSERT INTO users (id, fullname, username, password, phoneNumber, email, role, balance, address, access_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -31,7 +34,7 @@ public class UserDAO {
         }
     }
 
-    // KIỂM TRA USERNAME ĐÃ TỒN TẠI CHƯA
+    // Kiểm tra username đã tồn tại.
     public boolean isUsernameTaken(String username) throws SQLException{
         String sql = "SELECT username FROM users WHERE username = ?";
         try(Connection conn = DatabaseConnection.getConnection();
@@ -44,7 +47,6 @@ public class UserDAO {
             }
         }
     }
-
 
     public User findById(String id) throws SQLException{
         String sql = "SELECT * FROM users WHERE id = ?";
@@ -61,7 +63,6 @@ public class UserDAO {
         }
         return null;
     }
-
 
     public User findByUsername(String username) throws SQLException{
         String sql = "SELECT * FROM users WHERE username = ?";
@@ -139,9 +140,6 @@ public class UserDAO {
         }
     }
 
-
-
-
     public boolean isEmailTaken(String email) throws SQLException {
         String sql = "SELECT email FROM users WHERE email = ?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -163,9 +161,7 @@ public class UserDAO {
         }
     }
 
-
-
-    //HELPER
+    // Helper.
     private void bindRoleSpecificFields(PreparedStatement ps, User user) throws SQLException {
         if (user instanceof Bidder bidder) {
             ps.setString(5, bidder.getPhoneNumber());

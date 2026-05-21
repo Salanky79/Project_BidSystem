@@ -17,6 +17,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO truy cập dữ liệu phiên đấu giá.
+ */
 public class AuctionDAO {
     private final ItemDAO itemDAO = new ItemDAO();
     private final UserDAO userDAO = new UserDAO();
@@ -245,7 +248,7 @@ public class AuctionDAO {
         }
 
         if (item == null || seller == null) {
-            return null; // Corrupted data
+            return null; // Dữ liệu không hợp lệ.
         }
 
         return MapAuctionDB.mapAuction(rs, item, seller, highestBidder);
