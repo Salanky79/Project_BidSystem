@@ -1,6 +1,7 @@
 package com.auction.server.controller;
 
 import com.auction.server.service.AuctionService;
+import com.auction.server.service.AutoBidService;
 import com.auction.share.DTO.*;
 import com.auction.share.exceptions.ValidationException;
 import com.auction.share.models.auction.Auction;
@@ -11,10 +12,12 @@ import java.util.List;
 
 public class AuctionController {
     private final AuctionService auctionService;
+    private final AutoBidService autoBidService;
 
     // quan li chuc nang dau gia
-    public AuctionController(AuctionService auctionService) {
+    public AuctionController(AuctionService auctionService, AutoBidService autoBidService) {
         this.auctionService = auctionService;
+        this.autoBidService = autoBidService;
     }
 
     // những thông tin cần cho client ( ket qua thong qua server tra ve)
@@ -52,6 +55,30 @@ public class AuctionController {
 
         boolean success = auctionService.placeBid(request);
         return Response.success("Bid placed successfully.", success);
+    }
+
+    public Response<Boolean> registerAutoBid(RegisterAutoBidRequest request) throws Exception {
+        validateRequiredText(request.getAuctionId(), "Auction ID is required.");
+        validateRequiredText(request.getBidderId(), "Bidder ID is required.");
+
+        if (request.getMaxBid() <= 0) {
+            throw new ValidationException("Auto-bid max must be greater than 0.");
+        }
+        if (request.getIncrement() <= 0) {
+            throw new ValidationException("Auto-bid increment must be greater than 0.");
+        }
+
+        boolean success = autoBidService.register(request);
+        return Response.success("Auto-bid configured successfully.", success);
+    }
+
+    public Response<Boolean> cancelAutoBid(CancelAutoBidRequest request) throws Exception {
+        validateRequiredText(request.getAuctionId(), "Auction ID is required.");
+        validateRequiredText(request.getBidderId(), "Bidder ID is required.");
+
+        boolean success = autoBidService.cancel(request);
+        String message = success ? "Auto-bid canceled successfully." : "No active auto-bid found.";
+        return Response.success(message, success);
     }
 
     public Response<AuctionDetailDTO> getAuctionDetail(GetAuctionDetailRequest request) throws Exception {

@@ -68,6 +68,11 @@ public class AuctionDetailController {
     @FXML private TextField bidInputField;
     @FXML private Button    placeBidButton;
     @FXML private Label     minBidLabel;
+    @FXML private TextField autoBidMaxInputField;
+    @FXML private TextField autoBidIncrementInputField;
+    @FXML private Button    enableAutoBidButton;
+    @FXML private Button    cancelAutoBidButton;
+    @FXML private Label     autoBidStatusLabel;
 
     // ── COMMENTS ─────────────────────────────────────────────────
     @FXML private ComboBox<String> commentSortBox;
@@ -82,6 +87,7 @@ public class AuctionDetailController {
     private LocalDateTime endTime;
     private Timeline      countdownTimeline;
     private boolean       isFollowing = false;
+    private boolean       autoBidEnabled = false;
 
     private static final String FOLLOW_GOLD_STYLE =
             "-fx-background-color: transparent; -fx-border-color: #D4AF37; -fx-border-radius: 20; -fx-background-radius: 20; -fx-text-fill: #D4AF37; -fx-font-size: 12px; -fx-padding: 5 16 5 16; -fx-cursor: hand;";
@@ -107,6 +113,8 @@ public class AuctionDetailController {
 
         // Place Bid button
         placeBidButton.setOnAction(e -> handlePlaceBid());
+        enableAutoBidButton.setOnAction(e -> handleEnableAutoBid());
+        cancelAutoBidButton.setOnAction(e -> handleCancelAutoBid());
 
         // Post Comment button
         postCommentButton.setOnAction(e -> handlePostComment());
@@ -208,6 +216,7 @@ public class AuctionDetailController {
         sellerNameLabel.setText("Unknown");
         descriptionLabel.setText("No description provided.");
         minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + 500));
+        resetAutoBidState();
 
         // Parse end time for countdown
         try {
@@ -249,6 +258,7 @@ public class AuctionDetailController {
         sellerNameLabel.setText(listedBy);
         descriptionLabel.setText(description);
         minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + 500));
+        resetAutoBidState();
 
         // Parse end time for countdown
         try {
@@ -346,6 +356,46 @@ public class AuctionDetailController {
         }
     }
 
+    private void handleEnableAutoBid() {
+        try {
+            bidService.setAutoBid(
+                    this.auctionId,
+                    autoBidMaxInputField.getText().trim(),
+                    autoBidIncrementInputField.getText().trim(),
+                    currentPrice,
+                    response -> Platform.runLater(() -> {
+                        if (response != null && response.isSuccess()) {
+                            autoBidEnabled = true;
+                            updateAutoBidControls();
+                            autoBidStatusLabel.setStyle("-fx-text-fill: #D4AF37; -fx-font-size: 11px;");
+                            autoBidStatusLabel.setText("Auto-bid is active");
+                        } else {
+                            showAutoBidError(response != null ? response.getMessage() : "Loi ket noi may chu");
+                        }
+                    })
+            );
+        } catch (ValidationException e) {
+            showAutoBidError(e.getMessage());
+        }
+    }
+
+    private void handleCancelAutoBid() {
+        try {
+            bidService.cancelAutoBid(this.auctionId, response -> Platform.runLater(() -> {
+                if (response != null && response.isSuccess()) {
+                    autoBidEnabled = false;
+                    updateAutoBidControls();
+                    autoBidStatusLabel.setStyle("-fx-text-fill: #888888; -fx-font-size: 11px;");
+                    autoBidStatusLabel.setText("Auto-bid is off");
+                } else {
+                    showAutoBidError(response != null ? response.getMessage() : "Loi ket noi may chu");
+                }
+            }));
+        } catch (ValidationException e) {
+            showAutoBidError(e.getMessage());
+        }
+    }
+
     private void handlePostComment() {
         String text = commentInputField.getText().trim();
         if (text.isEmpty()) return;
@@ -439,5 +489,24 @@ public class AuctionDetailController {
         // Display inline near bid button via minBidLabel (repurposed for error)
         minBidLabel.setStyle("-fx-text-fill: #FF4444; -fx-font-size: 11px;");
         minBidLabel.setText(message);
+    }
+
+    private void showAutoBidError(String message) {
+        autoBidStatusLabel.setStyle("-fx-text-fill: #FF4444; -fx-font-size: 11px;");
+        autoBidStatusLabel.setText(message);
+    }
+
+    private void resetAutoBidState() {
+        autoBidEnabled = false;
+        updateAutoBidControls();
+        autoBidStatusLabel.setStyle("-fx-text-fill: #888888; -fx-font-size: 11px;");
+        autoBidStatusLabel.setText("Auto-bid is off");
+    }
+
+    private void updateAutoBidControls() {
+        enableAutoBidButton.setDisable(autoBidEnabled);
+        cancelAutoBidButton.setDisable(!autoBidEnabled);
+        autoBidMaxInputField.setDisable(autoBidEnabled);
+        autoBidIncrementInputField.setDisable(autoBidEnabled);
     }
 }

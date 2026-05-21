@@ -230,6 +230,37 @@
                            style="-fx-text-fill: #888888; -fx-font-size: 11px;"/>
                 </VBox>
 
+                <Region prefHeight="14"/>
+
+                <!-- AUTO BID CARD -->
+                <VBox spacing="10"
+                      style="-fx-background-color: #111111; -fx-padding: 18; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #2A2A2A; -fx-border-width: 1;">
+
+                    <Label text="Auto Bid"
+                           style="-fx-text-fill: #FFFFFF; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+
+                    <TextField fx:id="autoBidMaxInputField" promptText="Max bid..."
+                               style="-fx-background-color: #1E1E1E; -fx-border-color: #3A3A3A; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #FFFFFF; -fx-prompt-text-fill: #555555; -fx-font-size: 13px; -fx-padding: 10 12 10 12;"/>
+
+                    <TextField fx:id="autoBidIncrementInputField" promptText="Increment..."
+                               style="-fx-background-color: #1E1E1E; -fx-border-color: #3A3A3A; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #FFFFFF; -fx-prompt-text-fill: #555555; -fx-font-size: 13px; -fx-padding: 10 12 10 12;"/>
+
+                    <HBox spacing="8" alignment="CENTER">
+                        <Button fx:id="enableAutoBidButton" text="ENABLE"
+                                HBox.hgrow="ALWAYS"
+                                maxWidth="Infinity"
+                                style="-fx-background-color: #D4AF37; -fx-border-color: #D4AF37; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #000000; -fx-font-weight: bold; -fx-font-size: 13px; -fx-padding: 10 12 10 12; -fx-cursor: hand;"/>
+                        <Button fx:id="cancelAutoBidButton" text="CANCEL"
+                                HBox.hgrow="ALWAYS"
+                                maxWidth="Infinity"
+                                disable="true"
+                                style="-fx-background-color: transparent; -fx-border-color: #666666; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #CCCCCC; -fx-font-weight: bold; -fx-font-size: 13px; -fx-padding: 10 12 10 12; -fx-cursor: hand;"/>
+                    </HBox>
+
+                    <Label fx:id="autoBidStatusLabel" text="Auto-bid is off"
+                           style="-fx-text-fill: #888888; -fx-font-size: 11px;"/>
+                </VBox>
+
             </VBox>
         </HBox>
 
