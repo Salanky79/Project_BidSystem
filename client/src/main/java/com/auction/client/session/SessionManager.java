@@ -10,6 +10,7 @@ public class SessionManager {
     public void setCurrentUserId(String currentUserId) {
         this.currentUserId = currentUserId;
     }
+    // lưu ID
 
     public void clear() {
         this.currentUserId = null;
