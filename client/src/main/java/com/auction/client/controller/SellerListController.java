@@ -12,12 +12,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-/**
- * Controller dùng chung cho 3 tab: Drafts, Active, Sold.
- * Được gọi từ SellerDashboardFrameController sau khi load SellerListView.fxml.
- */
 public class SellerListController {
 
     @FXML private Label titleLabel;
@@ -30,29 +28,14 @@ public class SellerListController {
 
     private final AuctionService auctionService = ClientContext.auctionService();
 
-    // =====================================================================
-    //  Public API
-    // =====================================================================
-
-    /**
-     * Load danh sách auction tương ứng với chế độ được chọn.
-     *
-     * @param mode "Drafts" | "Active" | "Sold"
-     */
     public void loadItems(String mode) {
-        // Cập nhật tiêu đề
         titleLabel.setText(labelFor(mode));
-
-        // Map mode → AuctionStatus string gửi lên server
-        String statusFilter = statusFor(mode);
-
-        // Lấy sellerId từ session
         String sellerId = ClientContext.userService().getSessionManager().getCurrentUserId();
 
         showLoading(true);
         cardList.getChildren().clear();
 
-        auctionService.getSellerAuctions(sellerId, statusFilter, response ->
+        auctionService.getSellerAuctions(sellerId, null, response ->
             Platform.runLater(() -> {
                 showLoading(false);
 
@@ -71,8 +54,10 @@ public class SellerListController {
                 int count = 0;
                 for (Object obj : list) {
                     if (obj instanceof AuctionSummaryDTO dto) {
-                        appendCard(dto);
-                        count++;
+                        if (matchesMode(mode, dto)) {
+                            appendCard(dto);
+                            count++;
+                        }
                     }
                 }
 
@@ -82,11 +67,28 @@ public class SellerListController {
         );
     }
 
-    // =====================================================================
-    //  Private helpers
-    // =====================================================================
+    private boolean matchesMode(String mode, AuctionSummaryDTO dto) {
+        if ("CANCELLED".equals(dto.getStatus()) && !"Sold".equals(mode)) {
+            return false;
+        }
 
-    /** Tạo và thêm một SellerItemCard vào danh sách. */
+        return switch (mode) {
+            case "Drafts" -> "DRAFT".equals(dto.getStatus());
+            case "Active" -> "OPEN".equals(dto.getStatus()) || "RUNNING".equals(dto.getStatus());
+            case "Sold"   -> "FINISHED".equals(dto.getStatus()) || "CANCELLED".equals(dto.getStatus());
+            default       -> true;
+        };
+    }
+
+    private LocalDateTime parseDate(String dateStr) {
+        if (dateStr == null) return null;
+        try {
+            return LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private void appendCard(AuctionSummaryDTO dto) {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -112,43 +114,33 @@ public class SellerListController {
     }
 
     private void showLoading(boolean show) {
-        loadingBox.setVisible(show);
-        loadingBox.setManaged(show);
-        if (show) {
+        if (loadingBox != null) {
+            loadingBox.setVisible(show);
+            loadingBox.setManaged(show);
+        }
+        if (emptyState != null && show) {
             emptyState.setVisible(false);
             emptyState.setManaged(false);
         }
     }
 
     private void showEmpty(String mode, boolean show) {
-        emptyState.setVisible(show);
-        emptyState.setManaged(show);
-        if (show) {
-            countBadge.setText("0");
-            emptyIcon.setText(emptyIconFor(mode));
-            emptyMessage.setText(emptyMsgFor(mode));
+        if (emptyState != null) {
+            emptyState.setVisible(show);
+            emptyState.setManaged(show);
         }
-    }
-
-    // =====================================================================
-    //  Mapping helpers
-    // =====================================================================
-
-    /** Map mode → AuctionStatus string phù hợp với server. */
-    private String statusFor(String mode) {
-        return switch (mode) {
-            case "Drafts" -> "OPEN";
-            case "Active" -> "RUNNING";
-            case "Sold"   -> "FINISHED";
-            default       -> null;  // null = lấy tất cả
-        };
+        if (show) {
+            if (countBadge != null) countBadge.setText("0");
+            if (emptyIcon != null) emptyIcon.setText(emptyIconFor(mode));
+            if (emptyMessage != null) emptyMessage.setText(emptyMsgFor(mode));
+        }
     }
 
     private String labelFor(String mode) {
         return switch (mode) {
-            case "Drafts" -> "Drafts  –  Chờ bắt đầu";
-            case "Active" -> "Active  –  Đang đấu giá";
-            case "Sold"   -> "Sold  –  Đã kết thúc";
+            case "Drafts" -> "Drafts - Saved";
+            case "Active" -> "Active - Ongoing";
+            case "Sold"   -> "Sold - Finished";
             default       -> mode;
         };
     }
@@ -164,10 +156,10 @@ public class SellerListController {
 
     private String emptyMsgFor(String mode) {
         return switch (mode) {
-            case "Drafts" -> "Bạn chưa có phiên đấu giá nào đang chờ.";
-            case "Active" -> "Không có phiên đấu giá nào đang chạy.";
-            case "Sold"   -> "Bạn chưa bán được sản phẩm nào.";
-            default       -> "Không có dữ liệu.";
+            case "Drafts" -> "You have no pending auctions.";
+            case "Active" -> "No active auctions currently.";
+            case "Sold"   -> "You haven't sold any items yet.";
+            default       -> "No data available.";
         };
     }
 

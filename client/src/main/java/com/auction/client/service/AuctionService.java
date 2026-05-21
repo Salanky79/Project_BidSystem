@@ -19,7 +19,7 @@ public class AuctionService {
         this.socketClient = socketClient;
     }
 
-    public void createAuction(String itemName, String description, String category, String startingPriceStr, String startTimeStr, String endTimeStr, Consumer<Response<?>> onResponse) throws ValidationException {
+    public void createAuction(String itemName, String description, String category, String startingPriceStr, String startTimeStr, String endTimeStr, boolean isDraft, Consumer<Response<?>> onResponse) throws ValidationException {
         if (itemName == null || itemName.trim().isEmpty()) {
             throw new ValidationException("Tên sản phẩm không được để trống!");
         }
@@ -47,7 +47,7 @@ public class AuctionService {
             throw new ValidationException("Định dạng thời gian không hợp lệ!");
         }
 
-        CreateAuctionRequest request = new CreateAuctionRequest(null, itemName, description, category, startingPrice, startTimeStr, endTimeStr);
+        CreateAuctionRequest request = new CreateAuctionRequest(null, itemName, description, category, startingPrice, startTimeStr, endTimeStr, isDraft);
         socketClient.send(request, onResponse);
     }
 
@@ -63,5 +63,10 @@ public class AuctionService {
      */
     public void getSellerAuctions(String sellerId, String status, Consumer<Response<?>> onResponse) {
         socketClient.send(new ListAuctionRequest(status, sellerId), onResponse);
+    }
+
+    public void cancelAuction(String auctionId, Consumer<Response<?>> onResponse) {
+        com.auction.share.DTO.CancelAuctionRequest request = new com.auction.share.DTO.CancelAuctionRequest(auctionId);
+        socketClient.send(request, onResponse);
     }
 }

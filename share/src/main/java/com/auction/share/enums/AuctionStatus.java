@@ -5,6 +5,11 @@ package com.auction.share.enums;
  */
 public enum AuctionStatus{
     /**
+     * Phiên đấu giá đang ở dạng bản nháp, chưa công khai.
+     */
+    DRAFT,
+
+    /**
      * Phiên đấu giá đang mở, chờ người tham gia hoặc chờ đủ điều kiện bắt đầu.
      */
     OPEN,

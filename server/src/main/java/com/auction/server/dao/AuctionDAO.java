@@ -45,6 +45,18 @@ public class AuctionDAO {
         }
     }
 
+    public boolean updateStatus(String id, AuctionStatus status) throws SQLException {
+        String sql = "UPDATE auctions SET status = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+             
+            ps.setString(1, status.name());
+            ps.setString(2, id);
+            
+            return ps.executeUpdate() > 0;
+        }
+    }
+
     public Auction findById(String id) throws SQLException {
         String sql = "SELECT * FROM auctions WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();

@@ -84,9 +84,25 @@ public class AuctionService {
         Item item = new Item(req.getItemName(), req.getDescription(), req.getStartingPrice(), req.getSellerId(), category);
         Auction auction = new Auction(item, seller, startTime, endTime);
 
+        if (req.isDraft()) {
+            auction.markDraft();
+        }
+
         itemDAO.saveItem(item);
         auctionDAO.saveAuction(auction);
         return auction;
+    }
+
+    public boolean cancelAuction(String auctionId) throws SQLException, ValidationException {
+        Auction auction = auctionDAO.findById(auctionId);
+        if (auction == null) {
+            throw new ValidationException("Auction not found.");
+        }
+        if (auction.getStatus() == AuctionStatus.FINISHED || auction.getStatus() == AuctionStatus.CANCELLED) {
+            throw new ValidationException("Cannot cancel an auction that is already finished or cancelled.");
+        }
+        
+        return auctionDAO.updateStatus(auctionId, AuctionStatus.CANCELLED);
     }
 
     public boolean placeBid(PlaceBidRequest req) throws SQLException, ValidationException {
@@ -183,6 +199,7 @@ public class AuctionService {
                     auction.getItem().getCategory().name(),
                     auction.getCurrentHighestBid(),
                     auction.getStatus().name(),
+                    auction.getStartTime().format(formatter),
                     auction.getEndTime().format(formatter)
             ));
         }

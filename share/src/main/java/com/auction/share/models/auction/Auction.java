@@ -70,6 +70,13 @@ public class Auction extends Entity {
     }
 
     /**
+     * Đánh dấu phiên đấu giá là bản nháp.
+     */
+    public void markDraft() {
+        this.status = AuctionStatus.DRAFT;
+    }
+
+    /**
      * Đánh dấu phiên đấu giá đang trong quá trình diễn ra.
      */
     public void markRunning() {

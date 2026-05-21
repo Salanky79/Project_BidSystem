@@ -180,7 +180,8 @@ class AuctionServiceTest {
                 "item",
                 100,
                 start.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                end.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                end.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                false
         );
     }
 
