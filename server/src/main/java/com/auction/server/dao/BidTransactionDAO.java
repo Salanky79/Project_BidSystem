@@ -17,6 +17,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO truy cập dữ liệu giao dịch trả giá.
+ */
 public class BidTransactionDAO {
     private final UserDAO userDAO = new UserDAO();
 

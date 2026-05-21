@@ -19,6 +19,9 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Entry point khởi chạy server đấu giá.
+ */
 public class ServerApplication {
     private static final ExecutorService clientExecutor = Executors.newCachedThreadPool();
     private static final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
@@ -41,7 +44,7 @@ public class ServerApplication {
                 bidBroadcastService
         );
         AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionDao, 1000);
-        // REALTIME DEALER
+        // Vòng lặp cập nhật trạng thái đấu giá định kỳ.
         backgroundExecutor.submit(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
@@ -65,7 +68,7 @@ public class ServerApplication {
             while(!serverSocket.isClosed()){
                 Socket clientSocket = serverSocket.accept();
                 clientExecutor.submit(new AuctionServer(clientSocket, requestHandler, subscriptionRegistry));
-            } // tao mot thread de xu ly client vua connect
+            } // Mỗi client một handler riêng.
         } catch (IOException e) {
             e.printStackTrace();
         }

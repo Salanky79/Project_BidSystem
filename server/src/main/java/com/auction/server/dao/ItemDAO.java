@@ -10,6 +10,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+/**
+ * DAO truy cập dữ liệu sản phẩm.
+ */
 public class ItemDAO {
 
     public boolean saveItem(Item item) throws SQLException {
@@ -24,7 +27,7 @@ public class ItemDAO {
             ps.setDouble(5, item.getStartingPrice());
             ps.setString(6, item.getDescription());
 
-            // Default nulls for subclass fields
+            // Thiết lập null mặc định cho các field riêng của subclass.
             ps.setNull(7, Types.VARCHAR); // condition
             ps.setNull(8, Types.VARCHAR); // era
             ps.setNull(9, Types.VARCHAR); // material
@@ -37,7 +40,7 @@ public class ItemDAO {
             ps.setNull(16, Types.DOUBLE); // area
             ps.setNull(17, Types.VARCHAR); // fuelType
 
-            // Bind specific fields based on subclass
+            // Gán field theo subclass cụ thể.
             if (item instanceof Antique antique) {
                 ps.setString(8, antique.getEra());
                 ps.setString(9, antique.getMaterial());

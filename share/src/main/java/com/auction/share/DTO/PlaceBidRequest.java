@@ -1,5 +1,8 @@
 package com.auction.share.DTO;
 
+/**
+ * Request đặt giá cho một phiên đấu giá.
+ */
 public class PlaceBidRequest extends Request {
     private static final long serialVersionUID = 1L;
 
@@ -26,6 +29,7 @@ public class PlaceBidRequest extends Request {
         return amount;
     }
 
+    // Server ưu tiên bidderId từ session nếu request thiếu ID.
     @Override
     public Request withUserId(String userId) {
         if (this.bidderId == null || this.bidderId.isBlank()) {

@@ -2,6 +2,9 @@ package com.auction.share.DTO;
 
 import java.io.Serializable;
 
+/**
+ * Event cập nhật đặt giá gửi real-time tới client.
+ */
 public class BidUpdateEvent implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -31,31 +34,11 @@ public class BidUpdateEvent implements Serializable {
         this.bidTime = bidTime;
     }
 
-    public String getEventType() {
-        return eventType;
-    }
-
     public String getAuctionId() {
         return auctionId;
     }
 
-    public String getBidderId() {
-        return bidderId;
-    }
-
-    public String getBidderName() {
-        return bidderName;
-    }
-
     public double getAmount() {
         return amount;
-    }
-
-    public double getCurrentHighestBid() {
-        return currentHighestBid;
-    }
-
-    public String getBidTime() {
-        return bidTime;
     }
 }
