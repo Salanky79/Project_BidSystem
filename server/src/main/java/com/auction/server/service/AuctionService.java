@@ -60,9 +60,9 @@ public class AuctionService {
 
         Category category = Category.valueOf(req.getCategory().trim().toUpperCase());
         Item item = new Item(req.getItemName(), req.getDescription(), req.getStartingPrice(), req.getSellerId(), category);
-
         Auction auction = new Auction(item, seller, startTime, endTime);
 
+        itemDAO.saveItem(item);
         auctionDAO.saveAuction(auction);
         return auction;
     }
