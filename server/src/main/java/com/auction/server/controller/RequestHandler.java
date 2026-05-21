@@ -57,6 +57,7 @@ public class RequestHandler {
                 case Action.UPDATE_PROFILE -> userController.updateProfile((UpdateProfileRequest) request);
                 case Action.GET_PROFILE -> userController.getProfile((GetProfileRequest) request);
                 case Action.CREATE_AUCTION -> auctionController.createAuction((CreateAuctionRequest) request);
+                case Action.CANCEL_AUCTION -> auctionController.cancelAuction((com.auction.share.DTO.CancelAuctionRequest) request);
                 case Action.PLACE_BID -> auctionController.placeBid((PlaceBidRequest) request);
                 case Action.SET_AUTO_BID -> auctionController.registerAutoBid(toRegisterAutoBidRequest((SetAutoBidRequest) request));
                 case Action.REGISTER_AUTO_BID -> auctionController.registerAutoBid((RegisterAutoBidRequest) request);

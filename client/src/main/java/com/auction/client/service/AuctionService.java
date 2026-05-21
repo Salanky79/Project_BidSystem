@@ -2,10 +2,8 @@ package com.auction.client.service;
 
 import com.auction.client.network.SocketClient;
 import com.auction.share.DTO.CreateAuctionRequest;
-import com.auction.share.DTO.ExtendEndTimeRequest;
 import com.auction.share.DTO.ListAuctionRequest;
 import com.auction.share.DTO.Response;
-import com.auction.share.DTO.SetBidStepRequest;
 import com.auction.share.exceptions.ValidationException;
 
 import java.time.LocalDateTime;
@@ -21,7 +19,7 @@ public class AuctionService {
         this.socketClient = socketClient;
     }
 
-    public void createAuction(String itemName, String description, String category, String startingPriceStr, String startTimeStr, String endTimeStr, Consumer<Response<?>> onResponse) throws ValidationException {
+    public void createAuction(String itemName, String description, String category, String startingPriceStr, String startTimeStr, String endTimeStr, boolean isDraft, Consumer<Response<?>> onResponse) throws ValidationException {
         if (itemName == null || itemName.trim().isEmpty()) {
             throw new ValidationException("Tên sản phẩm không được để trống!");
         }
@@ -49,7 +47,7 @@ public class AuctionService {
             throw new ValidationException("Định dạng thời gian không hợp lệ!");
         }
 
-        CreateAuctionRequest request = new CreateAuctionRequest(null, itemName, description, category, startingPrice, startTimeStr, endTimeStr);
+        CreateAuctionRequest request = new CreateAuctionRequest(null, itemName, description, category, startingPrice, startTimeStr, endTimeStr, isDraft);
         socketClient.send(request, onResponse);
     }
 
@@ -57,25 +55,18 @@ public class AuctionService {
         socketClient.send(new ListAuctionRequest(), onResponse);
     }
 
-    public void setBidStep(String auctionId, double bidStep, Consumer<Response<?>> onResponse) throws ValidationException {
-        if (auctionId == null || auctionId.isBlank()) {
-            throw new ValidationException("Auction ID is required.");
-        }
-        if (bidStep <= 0) {
-            throw new ValidationException("Bid step must be greater than 0.");
-        }
-
-        socketClient.send(new SetBidStepRequest(auctionId, bidStep, null), onResponse);
+    /**
+     * Lấy danh sách auction của một seller cụ thể, có thể lọc thêm theo status.
+     * @param sellerId  ID của seller hiện tại
+     * @param status    Trạng thái auction: "OPEN", "RUNNING", "FINISHED" hoặc null để lấy tất cả
+     * @param onResponse callback nhận kết quả từ server
+     */
+    public void getSellerAuctions(String sellerId, String status, Consumer<Response<?>> onResponse) {
+        socketClient.send(new ListAuctionRequest(status, sellerId), onResponse);
     }
 
-    public void extendEndTime(String auctionId, long minutes, Consumer<Response<?>> onResponse) throws ValidationException {
-        if (auctionId == null || auctionId.isBlank()) {
-            throw new ValidationException("Auction ID is required.");
-        }
-        if (minutes <= 0) {
-            throw new ValidationException("Minutes must be greater than 0.");
-        }
-
-        socketClient.send(new ExtendEndTimeRequest(auctionId, minutes, null), onResponse);
+    public void cancelAuction(String auctionId, Consumer<Response<?>> onResponse) {
+        com.auction.share.DTO.CancelAuctionRequest request = new com.auction.share.DTO.CancelAuctionRequest(auctionId);
+        socketClient.send(request, onResponse);
     }
 }

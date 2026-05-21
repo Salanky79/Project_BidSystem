@@ -5,25 +5,22 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-
-<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.HomeController">
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.HomeController">
    <content>
         <VBox fx:id="Content" spacing="16.0" style="-fx-background-color: #f0f0f0; -fx-padding: 16 20 16 20;">
 
                               <!-- Filter bar -->
-            <HBox alignment="CENTER_LEFT" spacing="10.0">
-                <Button prefHeight="38.0" prefWidth="70.0" style="-fx-background-color: #1a1a1a; -fx-text-fill: white; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="All" />
-                <Button prefHeight="38.0" prefWidth="85.0" style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Jewelry" />
-                <Button prefHeight="38.0" prefWidth="85.0" style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Watches" />
-                <Button prefHeight="38.0" prefWidth="75.0" style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Bags" />
-                <Button prefHeight="38.0" prefWidth="85.0" style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Fine Art" />
-                <Button prefHeight="38.0" prefWidth="70.0" style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Cars" />
-                <Button prefHeight="38.0" prefWidth="80.0" style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Others" />
-                <Region HBox.hgrow="ALWAYS" />
-                <Button prefHeight="38.0" prefWidth="100.0" style="-fx-background-color: #f0a500; -fx-text-fill: #1a1a1a; -fx-font-size: 13px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;" text="Sort By" />
+            <HBox fx:id="filterBar" alignment="CENTER_LEFT" spacing="10.0">
+                <Button fx:id="btnAll"     onAction="#handleFilterAll"     maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="70.0"  style="-fx-background-color: #1a1a1a; -fx-text-fill: white;   -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="All"      HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnJewelry" onAction="#handleFilterJewelry" maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="85.0"  style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Jewelry"  HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnWatches" onAction="#handleFilterWatches" maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="85.0"  style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Watches"  HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnBags"    onAction="#handleFilterBags"    maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="75.0"  style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Bags"     HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnFineArt" onAction="#handleFilterFineArt" maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="85.0"  style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Fine Art" HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnCars"    onAction="#handleFilterCars"    maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="70.0"  style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Cars"     HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnOthers"  onAction="#handleFilterOthers"  maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="80.0"  style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;" text="Others"   HBox.hgrow="ALWAYS" />
+                <Button maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="100.0" style="-fx-background-color: #f0a500; -fx-text-fill: #1a1a1a; -fx-font-size: 13px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;" text="Sort By" HBox.hgrow="ALWAYS" />
             </HBox>
 
                               <!-- ScrollPane with auction grid -->

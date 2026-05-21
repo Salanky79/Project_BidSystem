@@ -122,4 +122,8 @@ public class UserService {
         socketClient.send(new UpdateProfileRequest(null, fullName.trim(), null, normalizedPhone, normalizedEmail, null), onResponse);
     }
 
+    /** Trả về SessionManager để các controller có thể đọc currentUserId. */
+    public SessionManager getSessionManager() {
+        return sessionManager;
+    }
 }

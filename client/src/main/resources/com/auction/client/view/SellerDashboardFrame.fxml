@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="600" prefWidth="950 " style="-fx-background-color: #f0f0f0;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.SellerDashboardController">
+<BorderPane prefHeight="600" prefWidth="950 " style="-fx-background-color: #f0f0f0;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.SellerDashboardFrameController">
 
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="80.0" style="-fx-background-color: #f0f0f0; -fx-padding: 0 24 0 24; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
@@ -32,14 +32,34 @@
                <Insets left="20.0" right="20.0" />
             </VBox.margin>
             <children>
-      
-                  <!-- Active Listings -->
-                  <Button fx:id="btnActiveListings" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;" text="My List" />
-               <Button fx:id="btnDrafts" layoutX="10.0" layoutY="10.0" onAction="#handleDrafts" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 40; -fx-cursor: hand;" text="Drafts" textFill="#c9c9c9" />
-               <Button fx:id="btnActive" layoutX="10.0" layoutY="58.0" onAction="#handleActive" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 40; -fx-cursor: hand;" text="Active" textFill="#c9c9c9" />
-               <Button fx:id="btnSold" layoutX="10.0" layoutY="106.0" onAction="#handleSold" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 40; -fx-cursor: hand;" text="Sold" textFill="#c9c9c9" />
+
+                  <!-- My List label (không phải button) -->
+                  <Label prefHeight="36.0" prefWidth="200.0"
+                         style="-fx-text-fill: #777777; -fx-font-size: 12px;
+                                -fx-font-weight: bold; -fx-padding: 0 0 0 20;"
+                         text="MY LIST" />
+
+               <Button fx:id="btnDrafts" onAction="#handleDrafts"
+                       prefHeight="48.0" prefWidth="200.0"
+                       style="-fx-background-color: transparent; -fx-text-fill: #c9c9c9;
+                              -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8;
+                              -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 40; -fx-cursor: hand;"
+                       text="Drafts" />
+               <Button fx:id="btnActive" onAction="#handleActive"
+                       prefHeight="48.0" prefWidth="200.0"
+                       style="-fx-background-color: transparent; -fx-text-fill: #c9c9c9;
+                              -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8;
+                              -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 40; -fx-cursor: hand;"
+                       text="Active" />
+               <Button fx:id="btnSold" onAction="#handleSold"
+                       prefHeight="48.0" prefWidth="200.0"
+                       style="-fx-background-color: transparent; -fx-text-fill: #c9c9c9;
+                              -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8;
+                              -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 40; -fx-cursor: hand;"
+                       text="Sold" />
             </children>
          </VBox>
+
 
             <Separator style="-fx-background-color: #444444;">
                 <VBox.margin><Insets bottom="10.0" left="20.0" right="20.0" top="10.0" /></VBox.margin>

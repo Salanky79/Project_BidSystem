@@ -15,6 +15,7 @@ public final class Action {
     public static final String EXTEND_END_TIME = "EXTEND_END_TIME";
     public static final String UPDATE_PROFILE = "UPDATE_PROFILE";
     public static final String GET_PROFILE = "GET_PROFILE";
+    public static final String CANCEL_AUCTION = "CANCEL_AUCTION";
 
     private Action() {
     }

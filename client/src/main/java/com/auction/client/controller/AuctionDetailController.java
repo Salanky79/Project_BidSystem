@@ -302,7 +302,7 @@ public class AuctionDetailController {
 
             Stage stage = new Stage();
             stage.setTitle("Auction – " + name);
-            stage.setScene(new Scene(root, 900, 650));
+            stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
