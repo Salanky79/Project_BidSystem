@@ -8,6 +8,8 @@ import com.auction.server.dao.ItemDAO;
 import com.auction.server.network.AuctionSubscriptionRegistry;
 import com.auction.server.network.AuctionServer;
 import com.auction.server.service.AuctionService;
+import com.auction.server.service.AutoBidRegistry;
+import com.auction.server.service.AutoBidService;
 import com.auction.server.service.AuctionStatusScheduler;
 import com.auction.server.service.BidBroadcastService;
 import com.auction.server.service.UserService;
@@ -35,13 +37,17 @@ public class ServerApplication {
         BidTransactionDAO bidTransactionDao = new BidTransactionDAO();
         AuctionSubscriptionRegistry subscriptionRegistry = new AuctionSubscriptionRegistry();
         BidBroadcastService bidBroadcastService = new BidBroadcastService(subscriptionRegistry);
+        AutoBidRegistry autoBidRegistry = new AutoBidRegistry();
         AuctionService auctionService = new AuctionService( //
                 auctionDao,
                 itemDao,
                 bidTransactionDao,
                 userDao,
-                bidBroadcastService
+                bidBroadcastService,
+                null
         );
+        AutoBidService autoBidService = new AutoBidService(autoBidRegistry, auctionService);
+        auctionService.setAutoBidService(autoBidService);
         AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionDao, 1000);
         // REALTIME DEALER
         // vẫn phải check validate cho logic ko chỉ check mỗi status
@@ -62,7 +68,7 @@ public class ServerApplication {
             }
         });
 
-        RequestHandler requestHandler = new RequestHandler(userService, auctionService, subscriptionRegistry);
+        RequestHandler requestHandler = new RequestHandler(userService, auctionService, autoBidService, subscriptionRegistry);
 
         try(ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("Server start on port: " + port);
