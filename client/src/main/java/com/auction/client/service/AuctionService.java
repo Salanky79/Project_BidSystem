@@ -54,4 +54,14 @@ public class AuctionService {
     public void getAuctions(Consumer<Response<?>> onResponse) {
         socketClient.send(new ListAuctionRequest(), onResponse);
     }
+
+    /**
+     * Lấy danh sách auction của một seller cụ thể, có thể lọc thêm theo status.
+     * @param sellerId  ID của seller hiện tại
+     * @param status    Trạng thái auction: "OPEN", "RUNNING", "FINISHED" hoặc null để lấy tất cả
+     * @param onResponse callback nhận kết quả từ server
+     */
+    public void getSellerAuctions(String sellerId, String status, Consumer<Response<?>> onResponse) {
+        socketClient.send(new ListAuctionRequest(status, sellerId), onResponse);
+    }
 }

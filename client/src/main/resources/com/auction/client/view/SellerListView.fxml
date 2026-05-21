@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox spacing="0"
+      style="-fx-background-color: #f0f0f0; -fx-padding: 24 24 24 24;"
+      xmlns="http://javafx.com/javafx/17.0.12"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.auction.client.controller.SellerListController">
+
+    <!-- ===== HEADER ===== -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox.margin><Insets bottom="20"/></VBox.margin>
+        <Label fx:id="titleLabel" text="My Listings"
+               style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a; -fx-font-family: Georgia;"/>
+        <Label fx:id="countBadge" text="0"
+               style="-fx-background-color: #f0a500; -fx-text-fill: white;
+                      -fx-font-size: 12px; -fx-font-weight: bold;
+                      -fx-background-radius: 20; -fx-padding: 2 10 2 10;"/>
+    </HBox>
+
+    <!-- ===== EMPTY STATE ===== -->
+    <VBox fx:id="emptyState" alignment="CENTER" spacing="12"
+          style="-fx-padding: 60 0 60 0;" visible="false" managed="false">
+        <Label fx:id="emptyIcon" text="📭"
+               style="-fx-font-size: 48px;"/>
+        <Label fx:id="emptyMessage" text="Không có mục nào."
+               style="-fx-font-size: 15px; -fx-text-fill: #888888;"/>
+    </VBox>
+
+    <!-- ===== LOADING ===== -->
+    <HBox fx:id="loadingBox" alignment="CENTER" spacing="10"
+          style="-fx-padding: 60 0 60 0;" visible="false" managed="false">
+        <ProgressIndicator prefWidth="28" prefHeight="28"/>
+        <Label text="Đang tải dữ liệu..."
+               style="-fx-font-size: 14px; -fx-text-fill: #888888;"/>
+    </HBox>
+
+    <!-- ===== CARD LIST ===== -->
+    <VBox fx:id="cardList" spacing="12"/>
+
+</VBox>

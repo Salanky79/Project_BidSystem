@@ -82,8 +82,49 @@ public class AuctionDAO {
         String sql = "SELECT * FROM auctions WHERE status = ? ORDER BY start_time DESC";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-             
+
             ps.setString(1, status.name());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Auction auction = extractAuction(rs);
+                    if (auction != null) {
+                        list.add(auction);
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+    /** Lấy tất cả auction của một seller cụ thể */
+    public List<Auction> findBySeller(String sellerId) throws SQLException {
+        List<Auction> list = new ArrayList<>();
+        String sql = "SELECT * FROM auctions WHERE seller_id = ? ORDER BY start_time DESC";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, sellerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Auction auction = extractAuction(rs);
+                    if (auction != null) {
+                        list.add(auction);
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+    /** Lấy auction của seller cụ thể lọc theo status */
+    public List<Auction> findBySellerAndStatus(String sellerId, AuctionStatus status) throws SQLException {
+        List<Auction> list = new ArrayList<>();
+        String sql = "SELECT * FROM auctions WHERE seller_id = ? AND status = ? ORDER BY start_time DESC";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, sellerId);
+            ps.setString(2, status.name());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Auction auction = extractAuction(rs);

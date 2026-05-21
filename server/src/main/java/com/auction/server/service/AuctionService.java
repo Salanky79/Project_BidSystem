@@ -230,14 +230,31 @@ public class AuctionService {
     }
 
     private List<Auction> resolveAuctionsByFilter(ListAuctionRequest req) throws SQLException {
-        if (req == null || req.getStatus() == null || req.getStatus().isBlank()) {
+        if (req == null) {
             return auctionDAO.findAll();
         }
 
-        try {
-            AuctionStatus status = AuctionStatus.valueOf(req.getStatus().trim().toUpperCase());
+        String sellerId = req.getSellerId();
+        String statusStr = req.getStatus();
+        boolean hasSeller = sellerId != null && !sellerId.isBlank();
+        boolean hasStatus = statusStr != null && !statusStr.isBlank();
+
+        AuctionStatus status = null;
+        if (hasStatus) {
+            try {
+                status = AuctionStatus.valueOf(statusStr.trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                hasStatus = false;
+            }
+        }
+
+        if (hasSeller && hasStatus) {
+            return auctionDAO.findBySellerAndStatus(sellerId, status);
+        } else if (hasSeller) {
+            return auctionDAO.findBySeller(sellerId);
+        } else if (hasStatus) {
             return auctionDAO.findByStatus(status);
-        } catch (IllegalArgumentException e) {
+        } else {
             return auctionDAO.findAll();
         }
     }
