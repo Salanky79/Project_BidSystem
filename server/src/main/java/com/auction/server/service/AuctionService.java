@@ -12,6 +12,8 @@ import com.auction.share.DTO.BidUpdateEvent;
 import com.auction.share.DTO.CreateAuctionRequest;
 import com.auction.share.DTO.ListAuctionRequest;
 import com.auction.share.DTO.PlaceBidRequest;
+import com.auction.share.DTO.SetBidStepRequest;
+import com.auction.share.DTO.ExtendEndTimeRequest;
 import com.auction.share.enums.AuctionStatus;
 import com.auction.share.enums.Category;
 import com.auction.share.exceptions.ValidationException;
@@ -103,6 +105,9 @@ public class AuctionService {
         if (req.getAmount() <= auction.getCurrentHighestBid()) {
             throw new ValidationException("Bid amount must be higher than current highest bid.");
         }
+        if (req.getAmount() < auction.getCurrentHighestBid() + auction.getBidStep()) {
+            throw new ValidationException("Bid amount must be at least current price + bid step.");
+        }
 
         placeBidAndBroadcast(auction, bidder, req.getAmount());
         if (triggerAutoBid && autoBidService != null) {
@@ -163,6 +168,7 @@ public class AuctionService {
                 auction.getSeller().getFullName(),
                 auction.getItem().getStartingPrice(),
                 auction.getCurrentHighestBid(),
+                auction.getBidStep(),
                 auction.getStatus().name(),
                 auction.getStartTime().format(formatter),
                 auction.getEndTime().format(formatter),
@@ -187,6 +193,36 @@ public class AuctionService {
             ));
         }
         return summaries;
+    }
+
+    public boolean setBidStep(SetBidStepRequest req) throws SQLException, ValidationException {
+        Auction auction = auctionDAO.findById(req.getAuctionId());
+        if (auction == null) {
+            throw new ValidationException("Auction not found.");
+        }
+        if (!auction.getSeller().getId().equals(req.getSellerId())) {
+            throw new ValidationException("You are not allowed to update this auction.");
+        }
+        if (req.getBidStep() <= 0) {
+            throw new ValidationException("Bid step must be greater than 0.");
+        }
+        return auctionDAO.updateBidStep(req.getAuctionId(), req.getBidStep());
+    }
+
+    public boolean extendEndTime(ExtendEndTimeRequest req) throws SQLException, ValidationException {
+        Auction auction = auctionDAO.findById(req.getAuctionId());
+        if (auction == null) {
+            throw new ValidationException("Auction not found.");
+        }
+        if (!auction.getSeller().getId().equals(req.getSellerId())) {
+            throw new ValidationException("You are not allowed to update this auction.");
+        }
+        if (req.getMinutes() <= 0) {
+            throw new ValidationException("Minutes must be greater than 0.");
+        }
+
+        LocalDateTime newEndTime = auction.getEndTime().plusMinutes(req.getMinutes());
+        return auctionDAO.updateEndTime(req.getAuctionId(), newEndTime);
     }
 
     private void placeBidAndBroadcast(Auction auction, Bidder bidder, double amount) throws SQLException, ValidationException {

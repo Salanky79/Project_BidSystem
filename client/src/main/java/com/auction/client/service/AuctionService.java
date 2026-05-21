@@ -2,8 +2,10 @@ package com.auction.client.service;
 
 import com.auction.client.network.SocketClient;
 import com.auction.share.DTO.CreateAuctionRequest;
+import com.auction.share.DTO.ExtendEndTimeRequest;
 import com.auction.share.DTO.ListAuctionRequest;
 import com.auction.share.DTO.Response;
+import com.auction.share.DTO.SetBidStepRequest;
 import com.auction.share.exceptions.ValidationException;
 
 import java.time.LocalDateTime;
@@ -53,5 +55,27 @@ public class AuctionService {
 
     public void getAuctions(Consumer<Response<?>> onResponse) {
         socketClient.send(new ListAuctionRequest(), onResponse);
+    }
+
+    public void setBidStep(String auctionId, double bidStep, Consumer<Response<?>> onResponse) throws ValidationException {
+        if (auctionId == null || auctionId.isBlank()) {
+            throw new ValidationException("Auction ID is required.");
+        }
+        if (bidStep <= 0) {
+            throw new ValidationException("Bid step must be greater than 0.");
+        }
+
+        socketClient.send(new SetBidStepRequest(auctionId, bidStep, null), onResponse);
+    }
+
+    public void extendEndTime(String auctionId, long minutes, Consumer<Response<?>> onResponse) throws ValidationException {
+        if (auctionId == null || auctionId.isBlank()) {
+            throw new ValidationException("Auction ID is required.");
+        }
+        if (minutes <= 0) {
+            throw new ValidationException("Minutes must be greater than 0.");
+        }
+
+        socketClient.send(new ExtendEndTimeRequest(auctionId, minutes, null), onResponse);
     }
 }

@@ -16,6 +16,8 @@ import com.auction.share.DTO.CreateAuctionRequest;
 import com.auction.share.DTO.PlaceBidRequest;
 import com.auction.share.DTO.RegisterAutoBidRequest;
 import com.auction.share.DTO.SetAutoBidRequest;
+import com.auction.share.DTO.SetBidStepRequest;
+import com.auction.share.DTO.ExtendEndTimeRequest;
 import com.auction.share.DTO.GetAuctionDetailRequest;
 import com.auction.share.DTO.ListAuctionRequest;
 import com.auction.share.DTO.UnsubscribeAuctionRequest;
@@ -61,6 +63,8 @@ public class RequestHandler {
                 case Action.CANCEL_AUTO_BID -> auctionController.cancelAutoBid((CancelAutoBidRequest) request);
                 case Action.GET_AUCTION_DETAIL -> auctionController.getAuctionDetail((GetAuctionDetailRequest) request);
                 case Action.LIST_AUCTIONS -> auctionController.listAuctions((ListAuctionRequest) request);
+                case Action.SET_BID_STEP -> auctionController.setBidStep((SetBidStepRequest) request);
+                case Action.EXTEND_END_TIME -> auctionController.extendEndTime((ExtendEndTimeRequest) request);
                 case Action.UNSUBSCRIBE_AUCTION -> handleUnsubscribe((UnsubscribeAuctionRequest) request, session);
                 default -> Response.fail("Unsupported action: " + request.getAction());
             };
