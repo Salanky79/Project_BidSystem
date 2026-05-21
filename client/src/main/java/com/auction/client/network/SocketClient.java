@@ -19,6 +19,8 @@ public class SocketClient {
     private final String host;
     private final int port;
     private final ExecutorService executorService;
+    // requestId → callback
+    // nhiều request gửi cùng lúc => Cần ID
     private final Map<String, Consumer<Response<?>>> callbacks;
     private final SessionManager sessionManager;
 
@@ -31,10 +33,14 @@ public class SocketClient {
         this.host = host;
         this.port = port;
         this.sessionManager = sessionManager;
+        // mỗi task một virtual thread riêng
         this.executorService = Executors.newVirtualThreadPerTaskExecutor();
         this.callbacks = new ConcurrentHashMap<>();
     }
 
+
+    // gửi request lên server
+    // khi có response => chạy callback onResponse
     public void send(Request request, Consumer<Response<?>> onResponse) {
         try {
             ensureConnected();
@@ -50,6 +56,7 @@ public class SocketClient {
             callbacks.put(outboundRequest.getRequestId(), onResponse);
         }
 
+        // serialization Object để truyền qua sever
         try {
             outputStream.writeObject(outboundRequest);
             outputStream.flush();
@@ -74,6 +81,8 @@ public class SocketClient {
     }
 
     private void startListening() {
+        // chỉ 1 thread ngồi chờ sever trả giữ liệu
+        // nhiều rq nhưng 1 thread đợi kết quả
         if (listening) {
             return;
         }
@@ -84,7 +93,6 @@ public class SocketClient {
                     Object incoming = inputStream.readObject();
                     if (incoming instanceof Response<?> response) {
                         if (response.getRequestId() == null) {
-                            // xu li broadcast
                             continue;
                         }
                         Consumer<Response<?>> callback = callbacks.remove(response.getRequestId());

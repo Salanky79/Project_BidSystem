@@ -21,6 +21,13 @@ public class UserService {
         this.sessionManager = sessionManager;
     }
 
+    // Consumer cho phép nhận vào biến chứa hàm (lambda ->///)
+    // onResponse =
+    // response -> {
+    //    System.out.println(response);
+    //}
+    // onResponse là callback chạy từ login controller
+    // async + callback => tránh tình trạng UI bị đơ
     public void login(LoginRequest request, Consumer<Response<?>> onResponse) throws ValidationException {
         if (request == null) {
             throw new ValidationException("Request is required.");
@@ -30,11 +37,15 @@ public class UserService {
         if (username == null || username.trim().isEmpty() || password == null || password.isEmpty()) {
             throw new ValidationException("Username va Password khong duoc de trong!");
         }
+
+        // ngay sau khi server trả kết quả thì hàm này sẽ chạy ( đợi kết quả )
         socketClient.send(request, response -> {
             if (response != null && response.isSuccess() && response.getData() instanceof UserDTO userDTO) {
                 sessionManager.setCurrentUserId(userDTO.getId());
             }
             if (onResponse != null) {
+                // gọi cái hàm ( biến chứa hàm ) // chính là Platform.runlater
+                // thực thi callback đang nằm trong Consumer
                 onResponse.accept(response);
             }
         });

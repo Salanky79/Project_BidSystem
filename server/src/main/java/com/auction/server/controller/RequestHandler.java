@@ -28,7 +28,7 @@ public class RequestHandler {
             AuctionService auctionService,
             AuctionSubscriptionRegistry subscriptionRegistry
     ) {
-        // can service rieng cho tung client
+        // can service riêng cho từng client
         this.userController = new UserController(userService);
         this.auctionController = new AuctionController(auctionService);
         // real time dealer

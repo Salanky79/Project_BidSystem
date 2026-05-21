@@ -121,6 +121,8 @@ public class AuctionDAO {
                     END
                   )
              """;
+        // USER có thể đấu giá nhiều bid cùng lúc nên phải lấy balance - tổng các auc khác
+        // UPDATE WHERE => ATOMIC UPDATE
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, bidderId);
             ps.setDouble(2, amount);
