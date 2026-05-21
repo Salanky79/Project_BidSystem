@@ -97,7 +97,7 @@ public class LoginController {
             // gọi userService
             // chạy Background Thread ( ko chạy trên JavaFX Application Thread => bị đơ)
             userService.login(new LoginRequest(username, password), response -> Platform.runLater(() -> {
-                if (true) {
+                if (response.isSuccess()) {
                     try {
                         String role = null;
                         if (response.getData() instanceof UserDTO userDTO) {
