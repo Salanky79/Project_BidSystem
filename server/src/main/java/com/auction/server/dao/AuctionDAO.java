@@ -100,7 +100,14 @@ public class AuctionDAO {
         String sql = """
                 UPDATE auctions a
                 JOIN users u ON u.id = ?
-                SET a.current_price = ?, a.highest_bidder_id = ?
+                SET a.current_price = ?,
+                    a.highest_bidder_id = ?,
+                    a.end_time = CASE
+                        WHEN TIMESTAMPDIFF(SECOND, ?, a.end_time) <= 10
+                             AND TIMESTAMPDIFF(SECOND, ?, a.end_time) >= 0
+                        THEN DATE_ADD(a.end_time, INTERVAL 30 SECOND)
+                        ELSE a.end_time
+                    END
                 WHERE a.id = ?
                   AND a.status = ?
                   AND a.start_time <= ?
@@ -121,21 +128,25 @@ public class AuctionDAO {
                     END
                   )
              """;
+        // USER có thể đấu giá nhiều bid cùng lúc nên phải lấy balance - tổng các auc khác
+        // UPDATE WHERE => ATOMIC UPDATE
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, bidderId);
             ps.setDouble(2, amount);
             ps.setString(3, bidderId);
-            ps.setString(4, id);
-            ps.setString(5, AuctionStatus.RUNNING.name());
             Timestamp now = Timestamp.valueOf(java.time.LocalDateTime.now());
-            ps.setTimestamp(6, now);
-            ps.setTimestamp(7, now);
-            ps.setDouble(8, amount);
-            ps.setString(9, AuctionStatus.RUNNING.name());
-            ps.setString(10, bidderId);
-            ps.setString(11, bidderId);
-            ps.setDouble(12, amount);
-            ps.setDouble(13, amount);
+            ps.setTimestamp(4, now);
+            ps.setTimestamp(5, now);
+            ps.setString(6, id);
+            ps.setString(7, AuctionStatus.RUNNING.name());
+            ps.setTimestamp(8, now);
+            ps.setTimestamp(9, now);
+            ps.setDouble(10, amount);
+            ps.setString(11, AuctionStatus.RUNNING.name());
+            ps.setString(12, bidderId);
+            ps.setString(13, bidderId);
+            ps.setDouble(14, amount);
+            ps.setDouble(15, amount);
             return ps.executeUpdate() > 0;
         }
     }

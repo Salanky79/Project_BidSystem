@@ -26,6 +26,7 @@ public class BidBroadcastService {
                     try {
                         session.send(pushMessage);
                     } catch (IOException ignored) {
+                        // xoá client đó khỏi tất cả auction subscription
                         subscriptionRegistry.unsubscribeAll(session);
                     }
                 });
