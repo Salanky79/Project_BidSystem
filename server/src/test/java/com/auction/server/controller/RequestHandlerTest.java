@@ -3,6 +3,7 @@ package com.auction.server.controller;
 import com.auction.server.network.AuctionSubscriptionRegistry;
 import com.auction.server.network.ClientSession;
 import com.auction.server.service.AuctionService;
+import com.auction.server.service.AutoBidService;
 import com.auction.server.service.UserService;
 import com.auction.share.DTO.Action;
 import com.auction.share.DTO.LoginRequest;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 
@@ -34,17 +36,16 @@ class RequestHandlerTest {
     private AuctionService auctionService;
 
     @Mock
-    private AuctionSubscriptionRegistry subscriptionRegistry;
+    private AutoBidService autoBidService;
 
     @Mock
-    private ObjectOutputStream outputStream;
+    private AuctionSubscriptionRegistry subscriptionRegistry;
 
     @Test
     void handle_nullAction_returnsFailResponse() {
-        RequestHandler handler = new RequestHandler(userService, auctionService, subscriptionRegistry);
-        Request request = new RawRequest(null);
+        RequestHandler handler = new RequestHandler(userService, auctionService, autoBidService, subscriptionRegistry);
 
-        Response<?> response = handler.handle(request, null);
+        Response<?> response = handler.handle(new RawRequest(null), null);
 
         assertFalse(response.isSuccess());
         assertEquals("Action is required.", response.getMessage());
@@ -52,9 +53,11 @@ class RequestHandlerTest {
 
     @Test
     void handle_requestIdPropagated() throws Exception {
-        RequestHandler handler = new RequestHandler(userService, auctionService, subscriptionRegistry);
+        RequestHandler handler = new RequestHandler(userService, auctionService, autoBidService, subscriptionRegistry);
         Bidder bidder = new Bidder("alice", "pwd", "Alice", "090", "alice@mail.com", "HCM");
+        bidder.setID("u-1");
         when(userService.login("alice", "pwd")).thenReturn(bidder);
+
         LoginRequest request = new LoginRequest("alice", "pwd");
         setRequestId(request, "req-123");
 
@@ -65,10 +68,9 @@ class RequestHandlerTest {
 
     @Test
     void handle_classCastException_returnsFailResponse() {
-        RequestHandler handler = new RequestHandler(userService, auctionService, subscriptionRegistry);
-        Request wrongType = new RawRequest(Action.LOGIN);
+        RequestHandler handler = new RequestHandler(userService, auctionService, autoBidService, subscriptionRegistry);
 
-        Response<?> response = handler.handle(wrongType, null);
+        Response<?> response = handler.handle(new RawRequest(Action.LOGIN), null);
 
         assertFalse(response.isSuccess());
         assertEquals("Request type does not match action.", response.getMessage());
@@ -76,8 +78,9 @@ class RequestHandlerTest {
 
     @Test
     void handle_login_routesToUserController() throws Exception {
-        RequestHandler handler = new RequestHandler(userService, auctionService, subscriptionRegistry);
+        RequestHandler handler = new RequestHandler(userService, auctionService, autoBidService, subscriptionRegistry);
         Bidder bidder = new Bidder("alice", "pwd", "Alice", "090", "alice@mail.com", "HCM");
+        bidder.setID("u-1");
         when(userService.login("alice", "pwd")).thenReturn(bidder);
 
         Response<?> response = handler.handle(new LoginRequest("alice", "pwd"), null);
@@ -87,9 +90,9 @@ class RequestHandlerTest {
     }
 
     @Test
-    void handle_unsubscribe_nullAuctionId_unsubscribeAll() {
-        RequestHandler handler = new RequestHandler(userService, auctionService, subscriptionRegistry);
-        ClientSession session = new ClientSession(outputStream);
+    void handle_unsubscribe_nullAuctionId_unsubscribeAll() throws Exception {
+        RequestHandler handler = new RequestHandler(userService, auctionService, autoBidService, subscriptionRegistry);
+        ClientSession session = new ClientSession(new ObjectOutputStream(new ByteArrayOutputStream()));
 
         Response<?> response = handler.handle(new UnsubscribeAuctionRequest(null), session);
 
@@ -104,9 +107,8 @@ class RequestHandlerTest {
     }
 
     private static class RawRequest extends Request {
-        protected RawRequest(String action) {
+        private RawRequest(String action) {
             super(action);
         }
     }
 }
-
