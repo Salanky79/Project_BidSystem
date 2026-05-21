@@ -3,8 +3,8 @@ package com.auction.client.service;
 import com.auction.client.network.SocketClient;
 import com.auction.share.DTO.CancelAutoBidRequest;
 import com.auction.share.DTO.PlaceBidRequest;
+import com.auction.share.DTO.RegisterAutoBidRequest;
 import com.auction.share.DTO.Response;
-import com.auction.share.DTO.SetAutoBidRequest;
 import com.auction.share.exceptions.ValidationException;
 
 import java.util.function.Consumer;
@@ -35,7 +35,7 @@ public class BidService {
         socketClient.send(request, onResponse);
     }
 
-    public void setAutoBid(
+    public void registerAutoBid(
             String auctionId,
             String maxBidStr,
             String incrementStr,
@@ -65,8 +65,18 @@ public class BidService {
             throw new ValidationException("Buoc nhay auto-bid phai lon hon 0.");
         }
 
-        SetAutoBidRequest request = new SetAutoBidRequest(auctionId, null, maxBid, increment);
+        RegisterAutoBidRequest request = new RegisterAutoBidRequest(auctionId, maxBid, increment, null);
         socketClient.send(request, onResponse);
+    }
+
+    public void setAutoBid(
+            String auctionId,
+            String maxBidStr,
+            String incrementStr,
+            double currentPrice,
+            Consumer<Response<?>> onResponse
+    ) throws ValidationException {
+        registerAutoBid(auctionId, maxBidStr, incrementStr, currentPrice, onResponse);
     }
 
     public void cancelAutoBid(String auctionId, Consumer<Response<?>> onResponse) throws ValidationException {
