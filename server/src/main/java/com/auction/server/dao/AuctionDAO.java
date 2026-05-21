@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.List;
 
 public class AuctionDAO {
@@ -95,6 +96,37 @@ public class AuctionDAO {
         return list;
     }
 
+    public double sumRunningWinningBidsByBidder(String bidderId, Set<String> excludedAuctionIds) throws SQLException {
+        StringBuilder sql = new StringBuilder("""
+                SELECT COALESCE(SUM(current_price), 0) AS total_amount
+                FROM auctions
+                WHERE status = ?
+                  AND highest_bidder_id = ?
+                """);
+
+        if (excludedAuctionIds != null && !excludedAuctionIds.isEmpty()) {
+            sql.append(" AND id NOT IN (");
+            sql.append("?,".repeat(excludedAuctionIds.size()));
+            sql.setLength(sql.length() - 1);
+            sql.append(")");
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int index = 1;
+            ps.setString(index++, AuctionStatus.RUNNING.name());
+            ps.setString(index++, bidderId);
+            if (excludedAuctionIds != null) {
+                for (String auctionId : excludedAuctionIds) {
+                    ps.setString(index++, auctionId);
+                }
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getDouble("total_amount") : 0.0;
+            }
+        }
+    }
+
 
     public boolean updateHighestBidIfHigher(Connection conn, String id, String bidderId, double amount) throws SQLException {
         String sql = """
@@ -105,6 +137,7 @@ public class AuctionDAO {
                     a.end_time = CASE
                         WHEN TIMESTAMPDIFF(SECOND, ?, a.end_time) <= 10
                              AND TIMESTAMPDIFF(SECOND, ?, a.end_time) >= 0
+                             AND (a.highest_bidder_id IS NULL OR a.highest_bidder_id <> ?)
                         THEN DATE_ADD(a.end_time, INTERVAL 30 SECOND)
                         ELSE a.end_time
                     END
@@ -129,7 +162,12 @@ public class AuctionDAO {
                   )
              """;
         // USER có thể đấu giá nhiều bid cùng lúc nên phải lấy balance - tổng các auc khác
+        // Where đúng => chạy SET
+        // check nếu chưa có người bid or xem người bid phải khác nhau mới được bid
+        // <> : khác
+        // vẫn dùng cas >= 0 vì có thể TIMESTAMPDIFF sẽ làm tròn xuống (logic status đã được check trước ở Where rồi)
         // UPDATE WHERE => ATOMIC UPDATE
+        // a.end_time - now (tg còn lại)
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, bidderId);
             ps.setDouble(2, amount);
@@ -137,16 +175,17 @@ public class AuctionDAO {
             Timestamp now = Timestamp.valueOf(java.time.LocalDateTime.now());
             ps.setTimestamp(4, now);
             ps.setTimestamp(5, now);
-            ps.setString(6, id);
-            ps.setString(7, AuctionStatus.RUNNING.name());
-            ps.setTimestamp(8, now);
+            ps.setString(6, bidderId);
+            ps.setString(7, id);
+            ps.setString(8, AuctionStatus.RUNNING.name());
             ps.setTimestamp(9, now);
-            ps.setDouble(10, amount);
-            ps.setString(11, AuctionStatus.RUNNING.name());
-            ps.setString(12, bidderId);
+            ps.setTimestamp(10, now);
+            ps.setDouble(11, amount);
+            ps.setString(12, AuctionStatus.RUNNING.name());
             ps.setString(13, bidderId);
-            ps.setDouble(14, amount);
+            ps.setString(14, bidderId);
             ps.setDouble(15, amount);
+            ps.setDouble(16, amount);
             return ps.executeUpdate() > 0;
         }
     }

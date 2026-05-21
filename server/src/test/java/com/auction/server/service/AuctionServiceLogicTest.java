@@ -124,8 +124,9 @@ class AuctionServiceLogicTest {
         FakeUserDAO userDAO = new FakeUserDAO();
         userDAO.findByIdResult = null;
 
+        FakeItemDAO itemDAO = new FakeItemDAO();
         AuctionService service = new TestableAuctionService(
-                auctionDAO, new ItemDAO(), new FakeBidTransactionDAO(), userDAO, new FakeBidBroadcastService(), fakeConnection()
+                auctionDAO, itemDAO, new FakeBidTransactionDAO(), userDAO, new FakeBidBroadcastService(), fakeConnection()
         );
 
         ValidationException ex = assertThrows(
@@ -187,11 +188,12 @@ class AuctionServiceLogicTest {
         seller.setID("seller-1");
 
         FakeAuctionDAO auctionDAO = new FakeAuctionDAO();
+        FakeItemDAO itemDAO = new FakeItemDAO();
         FakeUserDAO userDAO = new FakeUserDAO();
         userDAO.findByIdResult = seller;
 
         AuctionService service = new TestableAuctionService(
-                auctionDAO, new ItemDAO(), new FakeBidTransactionDAO(), userDAO, new FakeBidBroadcastService(), fakeConnection()
+                auctionDAO, itemDAO, new FakeBidTransactionDAO(), userDAO, new FakeBidBroadcastService(), fakeConnection()
         );
 
         LocalDateTime start = LocalDateTime.now().plusMinutes(5);
@@ -204,6 +206,7 @@ class AuctionServiceLogicTest {
 
         Auction created = service.createAuction(okReq);
         assertNotNull(created);
+        assertTrue(itemDAO.saveCalled);
         assertTrue(auctionDAO.saveCalled);
 
         CreateAuctionRequest badTimeReq = new CreateAuctionRequest(
@@ -302,6 +305,7 @@ class AuctionServiceLogicTest {
     private static Bidder buildBidder(String id, String name) {
         Bidder bidder = new Bidder("bidder", "pwd", name, "090", "b@mail.com", "HN");
         bidder.setID(id);
+        bidder.setBalance(1_000_000);
         return bidder;
     }
 
@@ -371,6 +375,11 @@ class AuctionServiceLogicTest {
         }
 
         @Override
+        public double sumRunningWinningBidsByBidder(String bidderId, java.util.Set<String> excludedAuctionIds) {
+            return 0;
+        }
+
+        @Override
         public List<Auction> findByStatus(AuctionStatus status) {
             findByStatusCalled = true;
             return findByStatusResult;
@@ -400,6 +409,16 @@ class AuctionServiceLogicTest {
         @Override
         public List<BidTransaction> findByAuction(Auction auction) {
             return findByAuctionResult;
+        }
+    }
+
+    private static class FakeItemDAO extends ItemDAO {
+        private boolean saveCalled;
+
+        @Override
+        public boolean saveItem(Item item) {
+            saveCalled = true;
+            return true;
         }
     }
 

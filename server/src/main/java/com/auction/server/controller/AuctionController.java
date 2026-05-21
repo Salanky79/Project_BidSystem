@@ -54,6 +54,30 @@ public class AuctionController {
         return Response.success("Bid placed successfully.", success);
     }
 
+    public Response<Boolean> setAutoBid(SetAutoBidRequest request) throws Exception {
+        validateRequiredText(request.getAuctionId(), "Auction ID is required.");
+        validateRequiredText(request.getBidderId(), "Bidder ID is required.");
+
+        if (request.getMaxBid() <= 0) {
+            throw new ValidationException("Auto-bid max must be greater than 0.");
+        }
+        if (request.getIncrement() <= 0) {
+            throw new ValidationException("Auto-bid increment must be greater than 0.");
+        }
+
+        boolean success = auctionService.setAutoBid(request);
+        return Response.success("Auto-bid configured successfully.", success);
+    }
+
+    public Response<Boolean> cancelAutoBid(CancelAutoBidRequest request) throws Exception {
+        validateRequiredText(request.getAuctionId(), "Auction ID is required.");
+        validateRequiredText(request.getBidderId(), "Bidder ID is required.");
+
+        boolean success = auctionService.cancelAutoBid(request.getAuctionId(), request.getBidderId());
+        String message = success ? "Auto-bid canceled successfully." : "No active auto-bid found.";
+        return Response.success(message, success);
+    }
+
     public Response<AuctionDetailDTO> getAuctionDetail(GetAuctionDetailRequest request) throws Exception {
         validateRequiredText(request.getAuctionId(), "Auction ID is required.");
         
