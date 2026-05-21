@@ -17,13 +17,14 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.List;
+import java.time.LocalDateTime;
 
 public class AuctionDAO {
     private final ItemDAO itemDAO = new ItemDAO();
     private final UserDAO userDAO = new UserDAO();
 
     public boolean saveAuction(Auction auction) throws SQLException {
-        String sql = "INSERT INTO auctions (id, item_id, seller_id, current_price, highest_bidder_id, start_time, end_time, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO auctions (id, item_id, seller_id, current_price, highest_bidder_id, start_time, end_time, bid_step, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
              
@@ -38,7 +39,8 @@ public class AuctionDAO {
             }
             ps.setTimestamp(6, Timestamp.valueOf(auction.getStartTime()));
             ps.setTimestamp(7, Timestamp.valueOf(auction.getEndTime()));
-            ps.setString(8, auction.getStatus().name());
+            ps.setDouble(8, auction.getBidStep());
+            ps.setString(9, auction.getStatus().name());
             
             int row = ps.executeUpdate();
             return row > 0;
@@ -198,7 +200,7 @@ public class AuctionDAO {
                   AND a.status = ?
                   AND a.start_time <= ?
                   AND a.end_time > ?
-                  AND a.current_price < ?
+                  AND ? >= (a.current_price + a.bid_step)
                   AND (
                     u.balance - (
                       SELECT COALESCE(SUM(other.current_price), 0)
@@ -239,6 +241,26 @@ public class AuctionDAO {
             ps.setString(14, bidderId);
             ps.setDouble(15, amount);
             ps.setDouble(16, amount);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    public boolean updateBidStep(String auctionId, double step) throws SQLException {
+        String sql = "UPDATE auctions SET bid_step = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, step);
+            ps.setString(2, auctionId);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    public boolean updateEndTime(String auctionId, LocalDateTime newEndTime) throws SQLException {
+        String sql = "UPDATE auctions SET end_time = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setTimestamp(1, Timestamp.valueOf(newEndTime));
+            ps.setString(2, auctionId);
             return ps.executeUpdate() > 0;
         }
     }

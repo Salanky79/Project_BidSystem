@@ -11,6 +11,8 @@ public final class Action {
     public static final String REGISTER_AUTO_BID = "REGISTER_AUTO_BID";
     public static final String CANCEL_AUTO_BID = "CANCEL_AUTO_BID";
     public static final String SET_AUTO_BID = "SET_AUTO_BID";
+    public static final String SET_BID_STEP = "SET_BID_STEP";
+    public static final String EXTEND_END_TIME = "EXTEND_END_TIME";
     public static final String UPDATE_PROFILE = "UPDATE_PROFILE";
     public static final String GET_PROFILE = "GET_PROFILE";
     public static final String CANCEL_AUCTION = "CANCEL_AUCTION";

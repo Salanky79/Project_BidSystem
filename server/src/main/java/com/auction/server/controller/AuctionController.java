@@ -100,6 +100,28 @@ public class AuctionController {
         return Response.success("Auctions retrieved successfully.", list);
     }
 
+    public Response<Boolean> setBidStep(SetBidStepRequest request) throws Exception {
+        validateRequiredText(request.getAuctionId(), "Auction ID is required.");
+        validateRequiredText(request.getSellerId(), "Seller ID is required.");
+        if (request.getBidStep() <= 0) {
+            throw new ValidationException("Bid step must be greater than 0.");
+        }
+
+        boolean success = auctionService.setBidStep(request);
+        return Response.success("Bid step updated successfully.", success);
+    }
+
+    public Response<Boolean> extendEndTime(ExtendEndTimeRequest request) throws Exception {
+        validateRequiredText(request.getAuctionId(), "Auction ID is required.");
+        validateRequiredText(request.getSellerId(), "Seller ID is required.");
+        if (request.getMinutes() <= 0) {
+            throw new ValidationException("Minutes must be greater than 0.");
+        }
+
+        boolean success = auctionService.extendEndTime(request);
+        return Response.success("Auction end time extended successfully.", success);
+    }
+
     // HELPER
     private static void validateRequiredText(String value, String message) throws ValidationException {
         if (value == null || value.isBlank()) {

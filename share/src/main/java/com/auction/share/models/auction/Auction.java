@@ -43,6 +43,7 @@ public class Auction extends Entity {
      * Người trả giá (Bidder) đang giữ mức giá cao nhất.
      */
     private Bidder highestBidder;
+    private double bidStep;
 
     /**
      * Trạng thái hiện tại của phiên đấu giá (OPEN, RUNNING, FINISHED, CANCELED).
@@ -66,6 +67,7 @@ public class Auction extends Entity {
         this.endTime = endTime;
         this.currentHighestBid = item.getStartingPrice();
         this.highestBidder = null;
+        this.bidStep = 1.0d;
         this.status = AuctionStatus.OPEN;
     }
 
@@ -122,7 +124,10 @@ public class Auction extends Entity {
     public AuctionStatus getStatus() { return status; }
     public double getCurrentHighestBid() { return currentHighestBid; }
     public Bidder getHighestBidder() { return highestBidder; }
+    public double getBidStep() { return bidStep; }
     public Item getItem() { return item; }
     public LocalDateTime getStartTime() { return startTime; }
     public LocalDateTime getEndTime() { return endTime; }
+
+    public void setBidStep(double bidStep) { this.bidStep = bidStep; }
 }
