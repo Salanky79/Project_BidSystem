@@ -34,7 +34,7 @@ public class SocketClient {
         this.port = port;
         this.sessionManager = sessionManager;
         // mỗi task một virtual thread riêng
-        this.executorService = Executors.newVirtualThreadPerTaskExecutor();
+        this.executorService = Executors.newCachedThreadPool();
         this.callbacks = new ConcurrentHashMap<>();
     }
 
