@@ -100,11 +100,11 @@ public class AuctionService {
         if (auction == null) {
             throw new ValidationException("Auction not found.");
         }
-        if (auction.getStatus() == AuctionStatus.FINISHED || auction.getStatus() == AuctionStatus.CANCELLED) {
+        if (auction.getStatus() == AuctionStatus.FINISHED || auction.getStatus() == AuctionStatus.CANCELED) {
             throw new ValidationException("Cannot cancel an auction that is already finished or cancelled.");
         }
         
-        return auctionDAO.updateStatus(auctionId, AuctionStatus.CANCELLED);
+        return auctionDAO.updateStatus(auctionId, AuctionStatus.CANCELED);
     }
 
     public boolean placeBid(PlaceBidRequest req) throws SQLException, ValidationException {
