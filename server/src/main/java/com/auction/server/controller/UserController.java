@@ -15,11 +15,14 @@ import com.auction.share.models.user.Bidder;
 import com.auction.share.models.user.Seller;
 import com.auction.share.models.user.User;
 
+/**
+ * Xử lý nghiệp vụ người dùng từ các request.
+ */
 public class UserController {
     private final UserService userService;
 
     // RequestHandler → UserController → UserService → DAO
-    // kiem tra validate login, register
+    // Kiểm tra dữ liệu trước khi gọi service.
     public UserController(UserService userService) {
         this.userService = userService;
     }
@@ -30,7 +33,7 @@ public class UserController {
         validateRequiredText(username, "Username is required.");
         validateRequiredText(password, "Password is required.");
 
-        // goi service => goi DAO
+        // Gọi service để xử lý nghiệp vụ.
         User user = userService.login(username, password);
         return Response.success("Login success.", toUserDTO(user));
     }
@@ -76,8 +79,8 @@ public class UserController {
     }
 
 
-    //HELPER
-    // Tao object User trong he thong
+    // Helper.
+    // Tạo đối tượng User theo role.
     private User toUser(RegisterRequest request) {
         Role role = Role.valueOf(request.getRole().trim().toUpperCase());
         return switch (role) {
@@ -106,7 +109,7 @@ public class UserController {
         };
     }
 
-    // map user cua client gui len server voi ca DATABSE
+    // Map User sang DTO cho client.
     private UserDTO toUserDTO(User user) {
         String phoneNumber = null;
         String email = null;

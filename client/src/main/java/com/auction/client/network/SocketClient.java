@@ -15,6 +15,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
+/**
+ * Client socket giao tiếp với server.
+ */
 public class SocketClient {
     private final String host;
     private final int port;
@@ -84,7 +87,7 @@ public class SocketClient {
                     Object incoming = inputStream.readObject();
                     if (incoming instanceof Response<?> response) {
                         if (response.getRequestId() == null) {
-                            // xu li broadcast
+                            // Bỏ qua response broadcast không gắn requestId.
                             continue;
                         }
                         Consumer<Response<?>> callback = callbacks.remove(response.getRequestId());

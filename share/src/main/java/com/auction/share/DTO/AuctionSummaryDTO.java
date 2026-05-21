@@ -2,6 +2,9 @@ package com.auction.share.DTO;
 
 import java.io.Serializable;
 
+/**
+ * DTO tóm tắt phiên đấu giá cho danh sách hiển thị.
+ */
 public class AuctionSummaryDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
