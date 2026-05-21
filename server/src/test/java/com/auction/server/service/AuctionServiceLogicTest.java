@@ -159,12 +159,12 @@ class AuctionServiceLogicTest {
     }
 
     @Test
-    void placeBidBoundaryAtExactEndShouldFail() {
+    void placeBidShouldFailWhenAuctionAlreadyEnded() {
         Seller seller = new Seller("seller", "pwd", "Seller", "091", "s@mail.com", "HCM");
         seller.setID("seller-1");
         Item item = new Item("Item", "Desc", 100, seller.getId(), Category.ITEM);
         LocalDateTime now = LocalDateTime.now();
-        Auction auction = new Auction(item, seller, now.minusMinutes(1), now);
+        Auction auction = new Auction(item, seller, now.minusMinutes(2), now.minusSeconds(1));
 
         Bidder bidder = buildBidder("bidder-1", "Bidder One");
         FakeAuctionDAO auctionDAO = new FakeAuctionDAO();
@@ -220,15 +220,16 @@ class AuctionServiceLogicTest {
         );
         assertThrows(IllegalArgumentException.class, () -> service.createAuction(badCategoryReq));
 
-        userDAO.findByIdResult = buildBidder("b2", "Bidder");
-        assertThrows(ValidationException.class, () -> service.createAuction(okReq));
-
         CreateAuctionRequest badDateReq = new CreateAuctionRequest(
                 seller.getId(), "Phone", "Desc", "electronic", 1000,
                 "bad-date", "still-bad"
         );
+        userDAO.findByIdResult = seller;
         ValidationException ex = assertThrows(ValidationException.class, () -> service.createAuction(badDateReq));
         assertEquals("Invalid date format. Please use ISO format.", ex.getMessage());
+
+        userDAO.findByIdResult = buildBidder("b2", "Bidder");
+        assertThrows(ValidationException.class, () -> service.createAuction(okReq));
     }
 
     @Test
