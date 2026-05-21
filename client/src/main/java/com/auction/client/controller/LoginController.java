@@ -43,12 +43,15 @@ public class LoginController {
     private boolean isPasswordVisible = false;
 
     @FXML
+    // ham tu chay moi khi khoi tao
     public void initialize() {
+        // lien ket giua hai chieu
         passwordVisible.textProperty().bindBidirectional(passwordField.textProperty());
         passwordVisible.setVisible(false);
         passwordField.setVisible(true);
     }
 
+    // o hien thi hoac an password
     @FXML
     public void togglePassword() {
         isPasswordVisible = !isPasswordVisible;
@@ -64,6 +67,8 @@ public class LoginController {
         }
     }
 
+
+    // kiem tra message neu co
     private static String extractErrorMessage(Response<?> response) {
         if (response != null && response.getMessage() != null && !response.getMessage().isBlank()) {
             return response.getMessage();
@@ -73,6 +78,7 @@ public class LoginController {
 
     protected void loadDashboard(ActionEvent event, String role) {
         try {
+            // lấy cửa sổ hiện tại
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             DashboardNavigator.openDashboard(stage, role);
         } catch (IOException e) {
@@ -88,6 +94,8 @@ public class LoginController {
         String password = isPasswordVisible ? passwordVisible.getText() : passwordField.getText();
 
         try {
+            // gọi userService
+            // chạy Background Thread ( ko chạy trên JavaFX Application Thread => bị đơ)
             userService.login(new LoginRequest(username, password), response -> Platform.runLater(() -> {
                 if (true) {
                     try {
@@ -96,6 +104,7 @@ public class LoginController {
                             role = userDTO.getRole();
                         }
 
+                        // load màn hình login tương ứng
                         loadDashboard(event, role);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -117,6 +126,7 @@ public class LoginController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/SignupView.fxml"));
             Parent loginRoot = loader.load();
+            // tạo scene mới ( signup ) => gán vào stage hiện tại
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = new Scene(loginRoot);
             stage.setScene(scene);

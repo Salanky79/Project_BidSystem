@@ -86,14 +86,19 @@ public class AuctionService {
             throw new ValidationException("Bid amount must be higher than current highest bid.");
         }
 
+        // mới chỉ tạo Object ram chưa lưu
         BidTransaction transaction = new BidTransaction(auction, bidder, req.getAmount());
 
-        try (Connection conn = DatabaseConnection.getConnection()) {
+        // lấy connection tới DB
+
+        try (Connection conn = getConnection()) {
+            // tắt auto commit => nhiều query cùng một lúc (update Highest, save, ...)
             conn.setAutoCommit(false);
             try {
+                // atomic update
                 boolean updated = auctionDAO.updateHighestBidIfHigher(conn, auction.getId(), bidder.getId(), req.getAmount());
                 if (!updated) {
-                    conn.rollback();
+                    conn.rollback(); // hủy quay lại ban đầu setAutoCommit
                     throw new ValidationException("Bid rejected: auction is not running, already ended, insufficient balance, or current price changed.");
                 }
 
@@ -120,6 +125,11 @@ public class AuctionService {
         }
     }
 
+    protected Connection getConnection() throws SQLException {
+        return DatabaseConnection.getConnection();
+    }
+
+    // trả về full page của một auction
     public AuctionDetailDTO getAuctionDetail(String auctionId) throws SQLException, ValidationException {
         Auction auction = auctionDAO.findById(auctionId);
         if (auction == null) {
@@ -138,6 +148,7 @@ public class AuctionService {
             ));
         }
 
+        // lấy tên người cao nhất nếu chưa có thì để null
         String highestBidderName = auction.getHighestBidder() != null ? auction.getHighestBidder().getFullName() : null;
 
         return new AuctionDetailDTO(
@@ -156,6 +167,7 @@ public class AuctionService {
         );
     }
 
+    // danh sách tóm tắt các auction
     public List<AuctionSummaryDTO> listAuctions(ListAuctionRequest req) throws SQLException {
         List<Auction> auctions = resolveAuctionsByFilter(req);
         List<AuctionSummaryDTO> summaries = new ArrayList<>();

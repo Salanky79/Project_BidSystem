@@ -13,6 +13,8 @@ public class AuctionSubscriptionRegistry {
             return;
         }
 
+        // check nếu chưa có thì tạo hashmap mới
+        // dùng ConcurrentHashMap => tránh race condition => atomic
         subscribersByAuction
                 .computeIfAbsent(auctionId, ignored -> ConcurrentHashMap.newKeySet())
                 .add(session);

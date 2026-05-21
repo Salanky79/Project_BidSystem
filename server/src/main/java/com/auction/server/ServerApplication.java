@@ -20,7 +20,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ServerApplication {
+    //tự tạo thread nếu thiếu + tái sử dụng thread cũ
     private static final ExecutorService clientExecutor = Executors.newCachedThreadPool();
+    // thread nề => scheduler
     private static final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
     private static final int port = Integer.parseInt(
             System.getenv().getOrDefault("PORT", "8080"));
@@ -42,6 +44,8 @@ public class ServerApplication {
         );
         AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionDao, 1000);
         // REALTIME DEALER
+        // vẫn phải check validate cho logic ko chỉ check mỗi status
+        // status quan trọn cho nhiều business states
         backgroundExecutor.submit(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
