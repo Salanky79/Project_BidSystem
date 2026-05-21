@@ -1,6 +1,9 @@
 package com.auction.share.DTO;
 
-public class RegisterRequest extends Request {
+public class
+
+
+RegisterRequest extends Request {
     private static final long serialVersionUID = 1L;
 
     private final String username;
