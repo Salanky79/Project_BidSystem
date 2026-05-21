@@ -1,5 +1,8 @@
 package com.auction.share.DTO;
 
+/**
+ * Request tạo phiên đấu giá mới.
+ */
 public class CreateAuctionRequest extends Request {
     private static final long serialVersionUID = 1L;
 
@@ -65,6 +68,7 @@ public class CreateAuctionRequest extends Request {
         return attributes.clone();
     }
 
+    // Server ưu tiên sellerId từ session nếu request thiếu ID.
     @Override
     public Request withUserId(String userId) {
         if (this.sellerId == null || this.sellerId.isBlank()) {

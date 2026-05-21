@@ -5,6 +5,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import java.io.IOException;
 
+/**
+ * Dashboard mặc định cho seller.
+ */
 public class SellerDashboardProduct implements DashboardProduct {
     @Override
     public Scene getScene() throws IOException {

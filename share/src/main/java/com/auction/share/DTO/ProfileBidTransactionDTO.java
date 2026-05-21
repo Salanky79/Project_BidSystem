@@ -2,12 +2,17 @@ package com.auction.share.DTO;
 
 import java.io.Serializable;
 
+/**
+ * DTO tóm tắt lịch sử đặt giá trong profile.
+ */
 public class ProfileBidTransactionDTO implements Serializable {
+    // serialVersionUID để giữ tương thích khi serialize/deserialize.
     private static final long serialVersionUID = 1L;
 
     private final String itemName;
     private final String status;
     private final double bidAmount;
+    // Dùng String để tránh sai lệch múi giờ khi parse ở client.
     private final String timestamp;
 
     public ProfileBidTransactionDTO(String itemName, String status, double bidAmount, String timestamp) {
@@ -17,19 +22,7 @@ public class ProfileBidTransactionDTO implements Serializable {
         this.timestamp = timestamp;
     }
 
-    public String getItemName() {
-        return itemName;
-    }
-
     public String getStatus() {
         return status;
-    }
-
-    public double getBidAmount() {
-        return bidAmount;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
     }
 }

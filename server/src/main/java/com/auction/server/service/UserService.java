@@ -17,6 +17,9 @@ import java.sql.SQLException;
 import java.util.List;
 
 // Controller → Service → DAO → Database
+/**
+ * Xử lý nghiệp vụ người dùng trên server.
+ */
 public class UserService {
     private final UserDAO userDAO;
     private final BidTransactionDAO bidTransactionDAO;
@@ -37,7 +40,7 @@ public class UserService {
         }
 
         user.setPassword(PasswordUtil.hashPassword(user.getPassword()));
-        // dung ham bam de ko luu bang string
+        // Lưu mật khẩu dạng hash.
         return userDAO.saveUser(user);
     }
 
@@ -52,7 +55,7 @@ public class UserService {
         return user;
     }
 
-    // tim ID trong DATABASE
+    // Lấy user theo ID từ database.
     public User getById(String id) throws SQLException, ValidationException {
         User user = userDAO.findById(id);
         if (user == null) {
@@ -62,7 +65,7 @@ public class UserService {
     }
 
 
-    // cac ham update thong tin nguoi dung
+    // Các hàm cập nhật thông tin người dùng.
     public boolean updatePassword(String id, String password) throws SQLException {
         String hashedPassword = PasswordUtil.hashPassword(password);
         return userDAO.updateUserPassword(id, hashedPassword);
@@ -90,7 +93,7 @@ public class UserService {
         return new ProfileDTO(userDTO, bidTransactions);
     }
 
-    //HELPER
+    // Helper.
     private UserDTO toUserDTO(User user) {
         String phoneNumber = null;
         String email = null;

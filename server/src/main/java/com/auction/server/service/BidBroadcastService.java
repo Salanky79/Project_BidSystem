@@ -7,6 +7,9 @@ import com.auction.share.DTO.Response;
 
 import java.io.IOException;
 
+/**
+ * Phát thông báo bid realtime tới các client đang theo dõi.
+ */
 public class BidBroadcastService {
     public static final String BID_UPDATED = "BID_UPDATED";
 
@@ -16,7 +19,7 @@ public class BidBroadcastService {
         this.subscriptionRegistry = subscriptionRegistry;
     }
 
-    // Gửi thông báo "có bid mới" đến tất cả client đang xem auction đó
+    // Gửi thông báo có bid mới tới tất cả client đang xem auction.
     public void broadcastBidUpdate(BidUpdateEvent event) {
         Response<BidUpdateEvent> pushMessage = Response.success(BID_UPDATED, event);
 

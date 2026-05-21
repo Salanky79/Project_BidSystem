@@ -3,6 +3,9 @@ package com.auction.server.factory;
 import com.auction.share.models.item.Item;
 import com.auction.share.models.item.RealEstate;
 
+/**
+ * Factory tạo Item bất động sản.
+ */
 public class RealEstateFactory implements ItemCreator {
     @Override
     public Item createItem(String name, String description, double startingPrice, String sellerID, String... attributes) {

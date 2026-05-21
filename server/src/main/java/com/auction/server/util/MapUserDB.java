@@ -8,6 +8,9 @@ import com.auction.share.models.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Mapper ResultSet sang model User.
+ */
 public final class MapUserDB {
     private MapUserDB() {
     }
