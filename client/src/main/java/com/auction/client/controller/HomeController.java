@@ -10,7 +10,6 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ public class HomeController extends HomeFrameController {
 
     // ── FXML bindings ──────────────────────────────────────────────────────────
     @FXML private GridPane auctionGrid;
-    @FXML private VBox Content;
 
     // Category filter buttons
     @FXML private Button btnAll;

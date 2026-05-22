@@ -26,7 +26,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -129,7 +128,7 @@ public class AuctionDetailController {
         loadChartData("month");
 
         // Custom cell factory for comments ListView
-        commentsListView.setCellFactory(lv -> new ListCell<String>() {
+        commentsListView.setCellFactory(lv -> new ListCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);

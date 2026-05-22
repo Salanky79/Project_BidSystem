@@ -1,15 +1,18 @@
 package com.auction.client.controller;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-
+import javafx.geometry.Insets;
+import javafx.fxml.FXMLLoader;
+import javafx.application.Platform;
+import com.auction.client.ClientContext;
+import com.auction.share.DTO.AuctionSummaryDTO;
 import java.io.IOException;
+import java.util.List;
+
 
 /**
  * Controller cho SellerDashboard.fxml
@@ -43,72 +46,109 @@ public class SellerDashboardController {
     // ===== FILTER HANDLERS =====
 
     @FXML
-    public void handleFilterAll(ActionEvent event) {
+    public void handleFilterAll() {
         setStatusFilter("All");
         loadAuctionCards("All");
     }
 
     @FXML
-    public void handleFilterActive(ActionEvent event) {
+    public void handleFilterActive() {
         setStatusFilter("Active");
         loadAuctionCards("Active");
     }
 
     @FXML
-    public void handleFilterEnded(ActionEvent event) {
+    public void handleFilterEnded() {
         setStatusFilter("Ended");
         loadAuctionCards("Ended");
     }
 
     @FXML
-    public void handleDateMonth(ActionEvent event) {
+    public void handleDateMonth() {
         setDateFilter("Month");
     }
 
     @FXML
-    public void handleDate7Days(ActionEvent event) {
+    public void handleDate7Days() {
         setDateFilter("7Days");
     }
 
     @FXML
-    public void handleManage(ActionEvent event) {
+    public void handleManage() {
         System.out.println("Open manage panel.");
     }
 
     // ===== LOAD CARDS =====
 
     private void loadAuctionCards(String filterStatus) {
-        auctionGrid.getChildren().clear();
-
-        int col = 0, row = 0;
-
-        // TODO: Thay bằng dữ liệu thật từ service
-        // Ví dụ gọi: auctionService.getSellerAuctions(response -> { ... })
-        // Dưới đây là placeholder để test layout
-
-        /* Ví dụ khi có data:
-        for (AuctionSummaryDTO dto : dtoList) {
-            if (!matchesFilter(filterStatus, dto.getStatus())) continue;
-            try {
-                FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/com/auction/client/view/SellerItemCard.fxml")
-                );
-                HBox card = loader.load();
-                SellerItemCardController ctrl = loader.getController();
-                ctrl.setData(dto);
-
-                auctionGrid.add(card, col++, row);
-                GridPane.setMargin(card, new Insets(0));
-                if (col == 2) { col = 0; row++; }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        String sellerId = ClientContext.userService().getSessionManager().getCurrentUserId();
+        if (sellerId == null) {
+            System.out.println("User not logged in, cannot load seller auctions.");
+            return;
         }
-        */
+
+        ClientContext.auctionService().getSellerAuctions(sellerId, null, response -> {
+            Platform.runLater(() -> {
+                auctionGrid.getChildren().clear();
+                if (response != null && response.isSuccess() && response.getData() instanceof List<?> list) {
+                    int col = 0, row = 0;
+                    for (Object obj : list) {
+                        if (obj instanceof AuctionSummaryDTO dto) {
+                            if (!matchesFilter(filterStatus, dto.getStatus())) continue;
+                            try {
+                                FXMLLoader loader = new FXMLLoader(
+                                    getClass().getResource("/com/auction/client/view/SellerItemCard.fxml")
+                                );
+                                HBox card = loader.load();
+                                SellerItemCardController ctrl = loader.getController();
+                                
+                                ctrl.setData(
+                                    iconForCategory(dto.getCategory()), 
+                                    dto.getCategory(), 
+                                    dto.getItemName(), 
+                                    dto.getCurrentPrice(), 
+                                    0, // bids 
+                                    dto.getEndTime(), 
+                                    dto.getStatus(), 
+                                    dto.getAuctionId()
+                                );
+
+                                auctionGrid.add(card, col++, row);
+                                GridPane.setMargin(card, new Insets(10));
+                                if (col == 2) { col = 0; row++; }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                } else {
+                    System.out.println("Failed to load seller auctions.");
+                }
+            });
+        });
     }
 
     private boolean matchesFilter(String filter, String status) {
+        if ("Active".equalsIgnoreCase(filter) && ("Active".equalsIgnoreCase(status) || "RUNNING".equalsIgnoreCase(status) || "OPEN".equalsIgnoreCase(status) || "In Queue".equalsIgnoreCase(status))) {
+            return true;
+        }
+        if ("Ended".equalsIgnoreCase(filter) && ("End".equalsIgnoreCase(status) || "FINISHED".equalsIgnoreCase(status))) {
+            return true;
+        }
         return "All".equalsIgnoreCase(filter) || status.equalsIgnoreCase(filter);
+    }
+
+    private String iconForCategory(String category) {
+        if (category == null) return "📦";
+        return switch (category) {
+            case "Electronic" -> "📱";
+            case "Watch"      -> "⌚";
+            case "Hand Bag", "Clothing" -> "👜";
+            case "Car"        -> "🚗";
+            case "Art"        -> "🖼";
+            case "Jewelry"    -> "💍";
+            default           -> "📦";
+        };
     }
 
     // ===== STYLE HELPERS =====

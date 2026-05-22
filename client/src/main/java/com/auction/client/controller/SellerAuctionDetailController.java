@@ -4,16 +4,13 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -38,8 +35,6 @@ public class SellerAuctionDetailController {
     @FXML private Button btnWeek;
     @FXML private Button btnMonth;
     @FXML private LineChart<String, Number> priceHistoryChart;
-    @FXML private CategoryAxis chartXAxis;
-    @FXML private NumberAxis chartYAxis;
 
     // ── STATS ───────────────────────────────────────────────────
     @FXML private Label currentHighBidLabel;
@@ -66,7 +61,6 @@ public class SellerAuctionDetailController {
 
     private String auctionId;
     private double currentPrice;
-    private int totalBids;
     private LocalDateTime endTime;
     private Timeline countdownTimeline;
     private boolean isPaused = false;
@@ -108,20 +102,18 @@ public class SellerAuctionDetailController {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to cancel this auction?", ButtonType.YES, ButtonType.NO);
                 alert.showAndWait().ifPresent(res -> {
                     if (res == ButtonType.YES) {
-                        com.auction.client.ClientContext.auctionService().cancelAuction(auctionId, response -> {
-                            Platform.runLater(() -> {
-                                if (response != null && response.isSuccess()) {
-                                    cancelAuctionButton.setText("Cancelled");
-                                    cancelAuctionButton.setDisable(true);
-                                    if (pauseAuctionButton != null) pauseAuctionButton.setDisable(true);
-                                    if (endsInLabel != null) endsInLabel.setText("Cancelled");
-                                    if (countdownTimeline != null) countdownTimeline.stop();
-                                } else {
-                                    Alert error = new Alert(Alert.AlertType.ERROR, "Failed to cancel auction: " + (response != null ? response.getMessage() : "Unknown error"));
-                                    error.show();
-                                }
-                            });
-                        });
+                        com.auction.client.ClientContext.auctionService().cancelAuction(auctionId, response -> Platform.runLater(() -> {
+                            if (response != null && response.isSuccess()) {
+                                cancelAuctionButton.setText("Cancelled");
+                                cancelAuctionButton.setDisable(true);
+                                if (pauseAuctionButton != null) pauseAuctionButton.setDisable(true);
+                                if (endsInLabel != null) endsInLabel.setText("Cancelled");
+                                if (countdownTimeline != null) countdownTimeline.stop();
+                            } else {
+                                Alert error = new Alert(Alert.AlertType.ERROR, "Failed to cancel auction: " + (response != null ? response.getMessage() : "Unknown error"));
+                                error.show();
+                            }
+                        }));
                     }
                 });
             });
@@ -154,7 +146,7 @@ public class SellerAuctionDetailController {
             "User D|4.2|Confirmed"
         );
 
-        bidderListView.setCellFactory(lv -> new ListCell<String>() {
+        bidderListView.setCellFactory(lv -> new ListCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -206,7 +198,7 @@ public class SellerAuctionDetailController {
             "User A|Is it authentic?|12/04/2026 10:15"
         );
 
-        commentsListView.setCellFactory(lv -> new ListCell<String>() {
+        commentsListView.setCellFactory(lv -> new ListCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -222,7 +214,7 @@ public class SellerAuctionDetailController {
                 String timestamp = parts.length > 2 ? parts[2] : "";
 
                 String initials = author.length() >= 2
-                        ? (author.substring(0, 1) + author.substring(author.length() - 1)).toUpperCase()
+                        ? (author.charAt(0) + author.substring(author.length() - 1)).toUpperCase()
                         : author.toUpperCase();
 
                 Label avatarLabel = new Label(initials);
@@ -275,18 +267,16 @@ public class SellerAuctionDetailController {
         if (bidStepField == null || bidStepField.getText().trim().isEmpty()) return;
         try {
             double step = Double.parseDouble(bidStepField.getText().trim());
-            com.auction.client.ClientContext.auctionService().setBidStep(auctionId, step, response -> {
-                Platform.runLater(() -> {
-                    if (response != null && response.isSuccess()) {
-                        Alert success = new Alert(Alert.AlertType.INFORMATION, "Bid step updated to " + step);
-                        success.show();
-                        bidStepField.clear();
-                    } else {
-                        Alert error = new Alert(Alert.AlertType.ERROR, "Failed to update bid step: " + (response != null ? response.getMessage() : "Unknown error"));
-                        error.show();
-                    }
-                });
-            });
+            com.auction.client.ClientContext.auctionService().setBidStep(auctionId, step, response -> Platform.runLater(() -> {
+                if (response != null && response.isSuccess()) {
+                    Alert success = new Alert(Alert.AlertType.INFORMATION, "Bid step updated to " + step);
+                    success.show();
+                    bidStepField.clear();
+                } else {
+                    Alert error = new Alert(Alert.AlertType.ERROR, "Failed to update bid step: " + (response != null ? response.getMessage() : "Unknown error"));
+                    error.show();
+                }
+            }));
         } catch (NumberFormatException e) {
             new Alert(Alert.AlertType.ERROR, "Invalid bid step value!").show();
         }
@@ -296,23 +286,21 @@ public class SellerAuctionDetailController {
         if (extendEndTimeField == null || extendEndTimeField.getText().trim().isEmpty()) return;
         try {
             long minutes = Long.parseLong(extendEndTimeField.getText().trim());
-            com.auction.client.ClientContext.auctionService().extendEndTime(auctionId, minutes, response -> {
-                Platform.runLater(() -> {
-                    if (response != null && response.isSuccess()) {
-                        Alert success = new Alert(Alert.AlertType.INFORMATION, "Extended end time by " + minutes + " minutes");
-                        success.show();
-                        extendEndTimeField.clear();
-                        if (endTime != null) {
-                            endTime = endTime.plusMinutes(minutes);
-                            if (endTimeLabel != null) endTimeLabel.setText(endTime.format(DISPLAY_FMT));
-                            updateCountdown();
-                        }
-                    } else {
-                        Alert error = new Alert(Alert.AlertType.ERROR, "Failed to extend time: " + (response != null ? response.getMessage() : "Unknown error"));
-                        error.show();
+            com.auction.client.ClientContext.auctionService().extendEndTime(auctionId, minutes, response -> Platform.runLater(() -> {
+                if (response != null && response.isSuccess()) {
+                    Alert success = new Alert(Alert.AlertType.INFORMATION, "Extended end time by " + minutes + " minutes");
+                    success.show();
+                    extendEndTimeField.clear();
+                    if (endTime != null) {
+                        endTime = endTime.plusMinutes(minutes);
+                        if (endTimeLabel != null) endTimeLabel.setText(endTime.format(DISPLAY_FMT));
+                        updateCountdown();
                     }
-                });
-            });
+                } else {
+                    Alert error = new Alert(Alert.AlertType.ERROR, "Failed to extend time: " + (response != null ? response.getMessage() : "Unknown error"));
+                    error.show();
+                }
+            }));
         } catch (NumberFormatException e) {
             new Alert(Alert.AlertType.ERROR, "Invalid minutes value!").show();
         }
@@ -321,7 +309,6 @@ public class SellerAuctionDetailController {
     public void setData(String icon, String category, String name, double price, int bids, String time, String status, String auctionId) {
         this.auctionId = auctionId;
         this.currentPrice = price;
-        this.totalBids = bids;
 
         if (productTitleLabel != null) productTitleLabel.setText(name);
         if (currentHighBidLabel != null) currentHighBidLabel.setText(String.format("%,.0f VND", price));
