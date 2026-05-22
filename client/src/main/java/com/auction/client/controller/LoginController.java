@@ -22,6 +22,9 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * Controller xử lý logic giao diện Đăng nhập (Login).
+ */
 public class LoginController {
     private final UserService userService = ClientContext.userService();
 
@@ -94,8 +97,7 @@ public class LoginController {
         String password = isPasswordVisible ? passwordVisible.getText() : passwordField.getText();
 
         try {
-            // gọi userService
-            // chạy Background Thread ( ko chạy trên JavaFX Application Thread => bị đơ)
+            // Platform.runLater đẩy code xử lý giao diện về luồng chính JavaFX
             userService.login(new LoginRequest(username, password), response -> Platform.runLater(() -> {
                 if (response.isSuccess()) {
                     try {

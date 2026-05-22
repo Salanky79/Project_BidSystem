@@ -6,6 +6,9 @@ import javafx.scene.Node;
 
 import java.io.IOException;
 
+/**
+ * Controller quản lý khung giao diện trang chủ dành cho người đấu giá (Bidder).
+ */
 public class HomeFrameController extends FrameController {
 
     protected HomeController currentHomeController;
