@@ -1,5 +1,8 @@
 package com.auction.share.DTO;
 
+/**
+ * Chứa các hằng số định nghĩa hành động trong hệ thống đấu giá.
+ */
 public final class Action {
     public static final String LOGIN = "LOGIN";
     public static final String REGISTER = "REGISTER";

@@ -2,6 +2,9 @@ package com.auction.share.DTO;
 
 import java.io.Serializable;
 
+/**
+ * DTO chứa thông tin cơ bản của người dùng.
+ */
 public class UserDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 

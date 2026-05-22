@@ -1,5 +1,8 @@
 package com.auction.share.DTO;
 
+/**
+ * Yêu cầu thiết lập bước giá (bid step) cho một phiên đấu giá.
+ */
 public class SetBidStepRequest extends Request {
     private static final long serialVersionUID = 1L;
 

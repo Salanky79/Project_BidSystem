@@ -2,6 +2,10 @@ package com.auction.share.DTO;
 
 import java.io.Serializable;
 
+/**
+ * Lớp bọc (wrapper) chung cho các phản hồi (response) trả về từ hệ thống.
+ * Cú pháp <T> (Generic) cho phép lớp này chứa dữ liệu thuộc nhiều kiểu khác nhau.
+ */
 public class Response<T> implements Serializable {
     private String resquestId;
 

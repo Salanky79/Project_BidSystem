@@ -1,5 +1,8 @@
 package com.auction.share.DTO;
 
+/**
+ * Yêu cầu gia hạn thời gian kết thúc của phiên đấu giá.
+ */
 public class ExtendEndTimeRequest extends Request {
     private static final long serialVersionUID = 1L;
 

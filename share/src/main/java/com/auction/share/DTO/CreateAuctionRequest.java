@@ -1,5 +1,8 @@
 package com.auction.share.DTO;
 
+/**
+ * Yêu cầu tạo mới một phiên đấu giá.
+ */
 public class CreateAuctionRequest extends Request {
     private static final long serialVersionUID = 1L;
 

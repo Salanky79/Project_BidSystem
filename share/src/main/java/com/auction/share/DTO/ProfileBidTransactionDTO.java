@@ -2,6 +2,9 @@ package com.auction.share.DTO;
 
 import java.io.Serializable;
 
+/**
+ * DTO chứa thông tin giao dịch trả giá trong hồ sơ người dùng.
+ */
 public class ProfileBidTransactionDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 

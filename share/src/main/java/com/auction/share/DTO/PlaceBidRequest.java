@@ -1,5 +1,8 @@
 package com.auction.share.DTO;
 
+/**
+ * Yêu cầu thực hiện trả giá (đặt cược) cho một phiên đấu giá.
+ */
 public class PlaceBidRequest extends Request {
     private static final long serialVersionUID = 1L;
 
