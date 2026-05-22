@@ -65,7 +65,7 @@ public class SellerItemCardController {
         if (status.equals("In Queue")) {
             statusLabel.setStyle("-fx-background-color: #4C8CE4; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px; -fx-padding: 2 5 2 5;");
         }
-        if (status.equals("Cacelled")) { // Keep matching original logic
+        if (status.equals("CANCELED")) { // Keep matching original logic
             statusLabel.setStyle("-fx-background-color: #605B51; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px; -fx-padding: 2 5 2 5;");
         }
     }

@@ -82,6 +82,7 @@ public class AuctionDetailController {
 
     // ── State ────────────────────────────────────────────────────
     private double        currentPrice;
+    private double        bidStep;
     private int           totalBids;
     private String        auctionId;
     private LocalDateTime endTime;
@@ -199,12 +200,14 @@ public class AuctionDetailController {
             String category,
             String name,
             double price,
+            double bidStep,
             int    bids,
             String time,
             String status,
             String auctionId
     ) {
         this.currentPrice = price;
+        this.bidStep      = bidStep;
         this.totalBids    = bids;
         this.auctionId    = auctionId;
 
@@ -215,7 +218,7 @@ public class AuctionDetailController {
         startTimeLabel.setText(LocalDateTime.now().format(DISPLAY_FMT));
         sellerNameLabel.setText("Unknown");
         descriptionLabel.setText("No description provided.");
-        minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + 500));
+        minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + bidStep));
         resetAutoBidState();
 
         // Parse end time for countdown
@@ -233,6 +236,23 @@ public class AuctionDetailController {
         // Sync initial follow state
         this.isFollowing = WatchlistService.getInstance().isFollowed(this.auctionId);
         updateFollowButtonStyle();
+
+        // Fetch latest data from server
+        com.auction.client.ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> {
+            javafx.application.Platform.runLater(() -> {
+                if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
+                    this.currentPrice = detail.getCurrentPrice();
+                    this.bidStep = detail.getBidStep();
+                    this.totalBids = detail.getBidHistory() != null ? detail.getBidHistory().size() : this.totalBids;
+                    
+                    this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));
+                    this.totalBidsLabel.setText(String.valueOf(this.totalBids));
+                    this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
+                    this.sellerNameLabel.setText(detail.getSellerName());
+                    this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description provided.");
+                }
+            });
+        });
     }
 
     public void setData(
@@ -257,7 +277,7 @@ public class AuctionDetailController {
         endTimeLabel.setText(endDate);
         sellerNameLabel.setText(listedBy);
         descriptionLabel.setText(description);
-        minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + 500));
+        minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + bidStep));
         resetAutoBidState();
 
         // Parse end time for countdown
@@ -285,6 +305,7 @@ public class AuctionDetailController {
             String category,
             String name,
             double price,
+            double bidStep,
             int    bids,
             String time,
             String status,
@@ -298,7 +319,7 @@ public class AuctionDetailController {
             Parent root = loader.load();
 
             AuctionDetailController ctrl = loader.getController();
-            ctrl.setData(icon, category, name, price, bids, time, status, auctionId);
+            ctrl.setData(icon, category, name, price, bidStep, bids, time, status, auctionId);
 
             Stage stage = new Stage();
             stage.setTitle("Auction – " + name);
@@ -344,7 +365,7 @@ public class AuctionDetailController {
                         totalBids++;
                         currentPriceLabel.setText(String.format("%.0f VND", currentPrice));
                         totalBidsLabel.setText(String.valueOf(totalBids));
-                        minBidLabel.setText(String.format("Minimum bid: %.0f VND", currentPrice + 500));
+                        minBidLabel.setText(String.format("Minimum bid: %.0f VND", currentPrice + bidStep));
                         bidInputField.clear();
                     } else {
                         showBidError(response != null ? response.getMessage() : "Lỗi kết nối máy chủ");

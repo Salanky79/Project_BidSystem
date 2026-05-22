@@ -204,6 +204,7 @@ public class AuctionService {
                     auction.getItem().getName(),
                     auction.getItem().getCategory().name(),
                     auction.getCurrentHighestBid(),
+                    auction.getBidStep(),
                     auction.getStatus().name(),
                     auction.getStartTime().format(formatter),
                     auction.getEndTime().format(formatter)

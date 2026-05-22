@@ -38,6 +38,7 @@ public class AuctionController {
                 auction.getItem().getName(),
                 auction.getItem().getCategory().name(),
                 auction.getCurrentHighestBid(),
+                auction.getBidStep(),
                 auction.getStatus().name(),
                 auction.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 auction.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)

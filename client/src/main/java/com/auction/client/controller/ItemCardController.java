@@ -30,6 +30,7 @@ public class ItemCardController {
     private String name;
     private String status;
     private double price;
+    private double bidStep;
     private int bids;
     private String time;
     private String auctionId;
@@ -37,7 +38,7 @@ public class ItemCardController {
 
 
     // Hàm này sẽ được HomeController gọi để truyền dữ liệu vào
-    public void setData(String icon, String category, String name, double price, int bids, String time, String status, String auctionId) {
+    public void setData(String icon, String category, String name, double price, double bidStep, int bids, String time, String status, String auctionId) {
         statusLabel.setText(status);
         iconLabel.setText(icon);
         categoryLabel.setText(category);
@@ -47,6 +48,7 @@ public class ItemCardController {
         this.category = category;
         this.name     = name;
         this.price    = price;
+        this.bidStep  = bidStep;
         this.bids     = bids;
         this.time = time;
         this.status = status;
@@ -78,7 +80,7 @@ public class ItemCardController {
         if (status.equals("In Queue")) {
             statusLabel.setStyle("-fx-background-color: #4C8CE4; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px; -fx-padding: 2 5 2 5;");
         }
-        if (status.equals("Cacelled")) {
+        if (status.equals("CANCELED")) {
             statusLabel.setStyle("-fx-background-color: #605B51; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px; -fx-padding: 2 5 2 5;");
         }
 
@@ -86,6 +88,6 @@ public class ItemCardController {
 
     @FXML
     private void handleCardClick() {
-        AuctionDetailController.open(icon, category, name, price, bids, time, status, auctionId);
+        AuctionDetailController.open(icon, category, name, price, bidStep, bids, time, status, auctionId);
     }
 }

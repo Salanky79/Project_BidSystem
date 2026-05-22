@@ -124,6 +124,7 @@ public class HomeController extends HomeFrameController {
                         dto.getCategory(),
                         dto.getItemName(),
                         dto.getCurrentPrice(),
+                        dto.getBidStep(),
                         0,
                         dto.getEndTime(),
                         dto.getStatus(),
@@ -145,6 +146,9 @@ public class HomeController extends HomeFrameController {
     private boolean matchesStatusFilter(String filterStatus, String status, String auctionId) {
         if ("Watchlist".equalsIgnoreCase(filterStatus)) {
             return WatchlistService.getInstance().isFollowed(auctionId);
+        }
+        if ("DRAFT".equalsIgnoreCase(status) || "CANCELED".equalsIgnoreCase(status)) {
+            return false;
         }
         return "All".equalsIgnoreCase(filterStatus) || status.equalsIgnoreCase(filterStatus);
     }
