@@ -109,24 +109,21 @@ public class UserService {
         if (fullName == null || fullName.trim().isEmpty()) {
             throw new ValidationException("Ho ten khong duoc de trong!");
         }
-        if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
-            throw new ValidationException("So dien thoai khong duoc de trong!");
-        }
-        if (email == null || email.trim().isEmpty()) {
-            throw new ValidationException("Email khong duoc de trong!");
-        }
-
-        String normalizedPhone = phoneNumber.trim();
-        if (!normalizedPhone.matches("^0\\d{8,10}$")) {
+        String normalizedPhone = (phoneNumber == null || phoneNumber.trim().isEmpty()) ? null : phoneNumber.trim();
+        if (normalizedPhone != null && !normalizedPhone.matches("^0\\d{8,10}$")) {
             throw new ValidationException("So dien thoai khong hop le!");
         }
 
-        String normalizedEmail = email.trim();
-        if (!normalizedEmail.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+        String normalizedEmail = (email == null || email.trim().isEmpty()) ? null : email.trim();
+        if (normalizedEmail != null && !normalizedEmail.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
             throw new ValidationException("Email khong hop le!");
         }
 
         socketClient.send(new UpdateProfileRequest(null, fullName.trim(), null, normalizedPhone, normalizedEmail, null), onResponse);
     }
 
+    /** Trả về SessionManager để các controller có thể đọc currentUserId. */
+    public SessionManager getSessionManager() {
+        return sessionManager;
+    }
 }

@@ -58,6 +58,9 @@ public final class MapAuctionDB {
                 case CANCELED:
                     auction.markCanceled();
                     break;
+                case DRAFT:
+                    auction.markDraft();
+                    break;
                 case OPEN:
                 default:
                     break;
@@ -65,6 +68,8 @@ public final class MapAuctionDB {
         }
         
         double currentPrice = rs.getDouble("current_price");
+        double bidStep = rs.getDouble("bid_step");
+        auction.setBidStep(bidStep);
         if (highestBidder != null) {
             auction.setHighestBid(highestBidder, currentPrice);
         }

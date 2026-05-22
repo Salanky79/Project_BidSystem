@@ -15,14 +15,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.List;
+import java.time.LocalDateTime;
 
 public class AuctionDAO {
     private final ItemDAO itemDAO = new ItemDAO();
     private final UserDAO userDAO = new UserDAO();
 
     public boolean saveAuction(Auction auction) throws SQLException {
-        String sql = "INSERT INTO auctions (id, item_id, seller_id, current_price, highest_bidder_id, start_time, end_time, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO auctions (id, item_id, seller_id, current_price, highest_bidder_id, start_time, end_time, bid_step, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
              
@@ -37,10 +39,23 @@ public class AuctionDAO {
             }
             ps.setTimestamp(6, Timestamp.valueOf(auction.getStartTime()));
             ps.setTimestamp(7, Timestamp.valueOf(auction.getEndTime()));
-            ps.setString(8, auction.getStatus().name());
+            ps.setDouble(8, auction.getBidStep());
+            ps.setString(9, auction.getStatus().name());
             
             int row = ps.executeUpdate();
             return row > 0;
+        }
+    }
+
+    public boolean updateStatus(String id, AuctionStatus status) throws SQLException {
+        String sql = "UPDATE auctions SET status = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+             
+            ps.setString(1, status.name());
+            ps.setString(2, id);
+            
+            return ps.executeUpdate() > 0;
         }
     }
 
@@ -81,7 +96,7 @@ public class AuctionDAO {
         String sql = "SELECT * FROM auctions WHERE status = ? ORDER BY start_time DESC";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-             
+
             ps.setString(1, status.name());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -95,6 +110,78 @@ public class AuctionDAO {
         return list;
     }
 
+    /** Lấy tất cả auction của một seller cụ thể */
+    public List<Auction> findBySeller(String sellerId) throws SQLException {
+        List<Auction> list = new ArrayList<>();
+        String sql = "SELECT * FROM auctions WHERE seller_id = ? ORDER BY start_time DESC";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, sellerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Auction auction = extractAuction(rs);
+                    if (auction != null) {
+                        list.add(auction);
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+    /** Lấy auction của seller cụ thể lọc theo status */
+    public List<Auction> findBySellerAndStatus(String sellerId, AuctionStatus status) throws SQLException {
+        List<Auction> list = new ArrayList<>();
+        String sql = "SELECT * FROM auctions WHERE seller_id = ? AND status = ? ORDER BY start_time DESC";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, sellerId);
+            ps.setString(2, status.name());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Auction auction = extractAuction(rs);
+                    if (auction != null) {
+                        list.add(auction);
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+    public double sumRunningWinningBidsByBidder(String bidderId, Set<String> excludedAuctionIds) throws SQLException {
+        StringBuilder sql = new StringBuilder("""
+                SELECT COALESCE(SUM(current_price), 0) AS total_amount
+                FROM auctions
+                WHERE status = ?
+                  AND highest_bidder_id = ?
+                """);
+
+        if (excludedAuctionIds != null && !excludedAuctionIds.isEmpty()) {
+            sql.append(" AND id NOT IN (");
+            sql.append("?,".repeat(excludedAuctionIds.size()));
+            sql.setLength(sql.length() - 1);
+            sql.append(")");
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int index = 1;
+            ps.setString(index++, AuctionStatus.RUNNING.name());
+            ps.setString(index++, bidderId);
+            if (excludedAuctionIds != null) {
+                for (String auctionId : excludedAuctionIds) {
+                    ps.setString(index++, auctionId);
+                }
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getDouble("total_amount") : 0.0;
+            }
+        }
+    }
+
 
     public boolean updateHighestBidIfHigher(Connection conn, String id, String bidderId, double amount) throws SQLException {
         String sql = """
@@ -105,6 +192,7 @@ public class AuctionDAO {
                     a.end_time = CASE
                         WHEN TIMESTAMPDIFF(SECOND, ?, a.end_time) <= 10
                              AND TIMESTAMPDIFF(SECOND, ?, a.end_time) >= 0
+                             AND (a.highest_bidder_id IS NULL OR a.highest_bidder_id <> ?)
                         THEN DATE_ADD(a.end_time, INTERVAL 30 SECOND)
                         ELSE a.end_time
                     END
@@ -112,14 +200,17 @@ public class AuctionDAO {
                   AND a.status = ?
                   AND a.start_time <= ?
                   AND a.end_time > ?
-                  AND a.current_price < ?
+                  AND ? >= (a.current_price + a.bid_step)
                   AND (
                     u.balance - (
                       SELECT COALESCE(SUM(other.current_price), 0)
-                      FROM auctions other
-                      WHERE other.status = ?
-                        AND other.highest_bidder_id = ?
-                        AND other.id <> a.id
+                      FROM (
+                          SELECT current_price
+                          FROM auctions
+                          WHERE status = ?
+                            AND highest_bidder_id = ?
+                            AND id <> ?
+                      ) other
                     )
                   ) >= (
                     CASE
@@ -129,7 +220,12 @@ public class AuctionDAO {
                   )
              """;
         // USER có thể đấu giá nhiều bid cùng lúc nên phải lấy balance - tổng các auc khác
+        // Where đúng => chạy SET
+        // check nếu chưa có người bid or xem người bid phải khác nhau mới được bid
+        // <> : khác
+        // vẫn dùng cas >= 0 vì có thể TIMESTAMPDIFF sẽ làm tròn xuống (logic status đã được check trước ở Where rồi)
         // UPDATE WHERE => ATOMIC UPDATE
+        // a.end_time - now (tg còn lại)
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, bidderId);
             ps.setDouble(2, amount);
@@ -137,16 +233,38 @@ public class AuctionDAO {
             Timestamp now = Timestamp.valueOf(java.time.LocalDateTime.now());
             ps.setTimestamp(4, now);
             ps.setTimestamp(5, now);
-            ps.setString(6, id);
-            ps.setString(7, AuctionStatus.RUNNING.name());
-            ps.setTimestamp(8, now);
+            ps.setString(6, bidderId);
+            ps.setString(7, id);
+            ps.setString(8, AuctionStatus.RUNNING.name());
             ps.setTimestamp(9, now);
-            ps.setDouble(10, amount);
-            ps.setString(11, AuctionStatus.RUNNING.name());
-            ps.setString(12, bidderId);
+            ps.setTimestamp(10, now);
+            ps.setDouble(11, amount);
+            ps.setString(12, AuctionStatus.RUNNING.name());
             ps.setString(13, bidderId);
-            ps.setDouble(14, amount);
-            ps.setDouble(15, amount);
+            ps.setString(14, id);
+            ps.setString(15, bidderId);
+            ps.setDouble(16, amount);
+            ps.setDouble(17, amount);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    public boolean updateBidStep(String auctionId, double step) throws SQLException {
+        String sql = "UPDATE auctions SET bid_step = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, step);
+            ps.setString(2, auctionId);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    public boolean updateEndTime(String auctionId, LocalDateTime newEndTime) throws SQLException {
+        String sql = "UPDATE auctions SET end_time = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setTimestamp(1, Timestamp.valueOf(newEndTime));
+            ps.setString(2, auctionId);
             return ps.executeUpdate() > 0;
         }
     }
