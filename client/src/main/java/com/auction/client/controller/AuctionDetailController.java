@@ -49,7 +49,6 @@ public class AuctionDetailController {
     @FXML private LineChart<String, Number> priceHistoryChart;
 
     @FXML private Label sellerNameLabel;
-    @FXML private Label ratingLabel;
     @FXML private Label descriptionLabel;
 
     // ── RIGHT COLUMN ─────────────────────────────────────────────
@@ -83,6 +82,8 @@ public class AuctionDetailController {
     private Timeline      countdownTimeline;
     private boolean       isFollowing = false;
     private boolean       autoBidEnabled = false;
+    private java.util.List<com.auction.share.DTO.BidDTO> bidHistory = new java.util.ArrayList<>();
+    private double        startingPrice = 0;
 
     private static final String FOLLOW_GOLD_STYLE =
             "-fx-background-color: transparent; -fx-border-color: #D4AF37; -fx-border-radius: 20; -fx-background-radius: 20; -fx-text-fill: #D4AF37; -fx-font-size: 12px; -fx-padding: 5 16 5 16; -fx-cursor: hand;";
@@ -141,7 +142,7 @@ public class AuctionDetailController {
 
                 // Initials avatar
                 String initials = author.length() >= 2
-                        ? (author.substring(0, 1) + author.substring(author.length() - 1)).toUpperCase()
+                        ? (author.charAt(0) + author.substring(author.length() - 1)).toUpperCase()
                         : author.toUpperCase();
 
                 Label avatarLabel = new Label(initials);
@@ -246,6 +247,14 @@ public class AuctionDetailController {
                 this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
                 this.sellerNameLabel.setText(detail.getSellerName());
                 this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description provided.");
+                
+                this.bidHistory = detail.getBidHistory() != null ? detail.getBidHistory() : new java.util.ArrayList<>();
+                this.startingPrice = detail.getStartingPrice();
+                
+                String currentRange = "month";
+                if (btnDay.getStyle().contains("#FFD700")) currentRange = "day";
+                else if (btnWeek.getStyle().contains("#FFD700")) currentRange = "week";
+                loadChartData(currentRange);
             }
         }));
     }
@@ -322,6 +331,13 @@ public class AuctionDetailController {
                         totalBidsLabel.setText(String.valueOf(totalBids));
                         minBidLabel.setText(String.format("Minimum bid: %.0f VND", currentPrice + bidStep));
                         bidInputField.clear();
+                        
+                        String username = ClientContext.userService().getSessionManager().getCurrentUserId();
+                        bidHistory.add(new com.auction.share.DTO.BidDTO(username != null ? username : "You", currentPrice, LocalDateTime.now().format(ISO_FMT)));
+                        String currentRange = "month";
+                        if (btnDay.getStyle().contains("#FFD700")) currentRange = "day";
+                        else if (btnWeek.getStyle().contains("#FFD700")) currentRange = "week";
+                        loadChartData(currentRange);
                     } else {
                         showBidError(response != null ? response.getMessage() : "Lỗi kết nối máy chủ");
                     }
@@ -390,33 +406,55 @@ public class AuctionDetailController {
         priceHistoryChart.getData().clear();
         XYChart.Series<String, Number> series = new XYChart.Series<>();
 
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime filterTime;
+        DateTimeFormatter formatter;
+
         switch (range) {
             case "day" -> {
-                series.getData().add(new XYChart.Data<>("08:00", currentPrice * 0.90));
-                series.getData().add(new XYChart.Data<>("10:00", currentPrice * 0.93));
-                series.getData().add(new XYChart.Data<>("12:00", currentPrice * 0.95));
-                series.getData().add(new XYChart.Data<>("14:00", currentPrice * 0.97));
-                series.getData().add(new XYChart.Data<>("16:00", currentPrice * 0.99));
-                series.getData().add(new XYChart.Data<>("Now",   currentPrice));
+                filterTime = now.minusDays(1);
+                formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
             }
             case "week" -> {
-                series.getData().add(new XYChart.Data<>("Mon", currentPrice * 0.75));
-                series.getData().add(new XYChart.Data<>("Tue", currentPrice * 0.80));
-                series.getData().add(new XYChart.Data<>("Wed", currentPrice * 0.85));
-                series.getData().add(new XYChart.Data<>("Thu", currentPrice * 0.88));
-                series.getData().add(new XYChart.Data<>("Fri", currentPrice * 0.92));
-                series.getData().add(new XYChart.Data<>("Sat", currentPrice * 0.97));
-                series.getData().add(new XYChart.Data<>("Now", currentPrice));
+                filterTime = now.minusWeeks(1);
+                formatter = DateTimeFormatter.ofPattern("EEE HH:mm");
             }
-            default -> {  // month
-                series.getData().add(new XYChart.Data<>("W1", currentPrice * 0.60));
-                series.getData().add(new XYChart.Data<>("W2", currentPrice * 0.72));
-                series.getData().add(new XYChart.Data<>("W3", currentPrice * 0.85));
-                series.getData().add(new XYChart.Data<>("W4", currentPrice * 0.94));
-                series.getData().add(new XYChart.Data<>("Now", currentPrice));
+            default -> { // month
+                filterTime = now.minusMonths(1);
+                formatter = DateTimeFormatter.ofPattern("dd/MM HH:mm");
             }
         }
 
+        if (bidHistory == null || bidHistory.isEmpty()) {
+            series.getData().add(new XYChart.Data<>("Start", startingPrice > 0 ? startingPrice : currentPrice));
+        } else {
+            // Sort bids chronologically (oldest first) so time goes forward on the X-axis
+            java.util.List<com.auction.share.DTO.BidDTO> sortedBids = new java.util.ArrayList<>(bidHistory);
+            sortedBids.sort((b1, b2) -> {
+                try {
+                    LocalDateTime t1 = LocalDateTime.parse(b1.getTimestamp(), ISO_FMT);
+                    LocalDateTime t2 = LocalDateTime.parse(b2.getTimestamp(), ISO_FMT);
+                    return t1.compareTo(t2);
+                } catch (Exception e) {
+                    return 0;
+                }
+            });
+
+            for (com.auction.share.DTO.BidDTO bid : sortedBids) {
+                LocalDateTime bidTime;
+                try {
+                    bidTime = LocalDateTime.parse(bid.getTimestamp(), ISO_FMT);
+                } catch (Exception e) {
+                    continue; 
+                }
+
+                if (bidTime.isAfter(filterTime) || bidTime.isEqual(filterTime)) {
+                    series.getData().add(new XYChart.Data<>(bidTime.format(formatter), bid.getAmount()));
+                }
+            }
+        }
+
+        series.getData().add(new XYChart.Data<>("Now", currentPrice));
         priceHistoryChart.getData().add(series);
         highlightActiveFilter(range);
     }
