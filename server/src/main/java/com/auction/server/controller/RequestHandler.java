@@ -22,8 +22,12 @@ import com.auction.share.DTO.GetAuctionDetailRequest;
 import com.auction.share.DTO.ListAuctionRequest;
 import com.auction.share.DTO.UnsubscribeAuctionRequest;
 import com.auction.server.service.AuctionService;
+import com.auction.share.exceptions.ValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
     private final UserController userController;
     private final AuctionController auctionController;
     private final AuctionSubscriptionRegistry subscriptionRegistry;
@@ -71,8 +75,11 @@ public class RequestHandler {
             };
         } catch (ClassCastException e) {
             response = Response.fail("Request type does not match action.");
-        } catch (Exception e) {
+        } catch (ValidationException e) {
             response = Response.fail(e.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("Unhandled request processing error for action={}", request.getAction(), e);
+            response = Response.fail("An internal error occurred.");
         }
         response.setRequestId(request.getRequestId());
         return response;

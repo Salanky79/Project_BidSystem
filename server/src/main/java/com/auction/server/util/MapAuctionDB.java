@@ -58,9 +58,6 @@ public final class MapAuctionDB {
                 case CANCELED:
                     auction.markCanceled();
                     break;
-                case DRAFT:
-                    auction.markDraft();
-                    break;
                 case OPEN:
                 default:
                     break;

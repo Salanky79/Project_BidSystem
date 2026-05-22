@@ -13,10 +13,6 @@ public class HomeFrameController extends FrameController {
 
     protected HomeController currentHomeController;
 
-    public void loadHomePage() {
-        loadHomePage("All");
-    }
-
     public void loadHomePage(String filterStatus) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Home.fxml"));
@@ -48,22 +44,18 @@ public class HomeFrameController extends FrameController {
         changeView("/com/auction/client/view/profile.fxml");
     }
 
-    public void handleSell() {
-        changeView("/com/auction/client/view/Sell.fxml");
-    }
-
     public void handleActiveListings() {
         loadHomePage("RUNNING");
     }
 
-    public void handleHome(ActionEvent actionEvent) {
+    public void handleHome() {
         loadHomePage("All");
     }
 
-    public void handleYourListing(ActionEvent actionEvent) {
+    public void handleYourListing() {
     }
 
-    public void handleWatchlist(ActionEvent actionEvent) {
+    public void handleWatchlist() {
         loadHomePage("Watchlist");
     }
 }

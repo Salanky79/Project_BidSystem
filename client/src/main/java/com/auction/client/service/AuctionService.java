@@ -26,8 +26,7 @@ public class AuctionService {
     /**
      * Tạo một phiên đấu giá mới.
      */
-    // Consumer nhận callback lambda để xử lý bất đồng bộ
-    public void createAuction(String itemName, String description, String category, String startingPriceStr, String startTimeStr, String endTimeStr, boolean isDraft, Consumer<Response<?>> onResponse) throws ValidationException {
+    public void createAuction(String itemName, String description, String category, String startingPriceStr, String startTimeStr, String endTimeStr, Consumer<Response<?>> onResponse) throws ValidationException {
         if (itemName == null || itemName.trim().isEmpty()) {
             throw new ValidationException("Tên sản phẩm không được để trống!");
         }
@@ -55,7 +54,7 @@ public class AuctionService {
             throw new ValidationException("Định dạng thời gian không hợp lệ!");
         }
 
-        CreateAuctionRequest request = new CreateAuctionRequest(null, itemName, description, category, startingPrice, startTimeStr, endTimeStr, isDraft);
+        CreateAuctionRequest request = new CreateAuctionRequest(null, itemName, description, category, startingPrice, startTimeStr, endTimeStr);
         socketClient.send(request, onResponse);
     }
 

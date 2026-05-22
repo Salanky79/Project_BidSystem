@@ -6,7 +6,6 @@ import com.auction.share.exceptions.ValidationException;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -73,7 +72,7 @@ public class SellController implements Initializable {
         startMinute.setItems(minutes);
         startMinute.setValue(String.format("%02d", LocalDateTime.now().getMinute()));
 
-        StringConverter<LocalDate> dateConverter = new StringConverter<LocalDate>() {
+        StringConverter<LocalDate> dateConverter = new StringConverter<>() {
             final DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
             @Override
@@ -105,7 +104,7 @@ public class SellController implements Initializable {
             }
         };
 
-        enddate.setConverter(new StringConverter<LocalDate>() {
+        enddate.setConverter(new StringConverter<>() {
             @Override
             public String toString(LocalDate date) {
                 if (date != null) {
@@ -121,7 +120,7 @@ public class SellController implements Initializable {
             }
         });
 
-        startdate.setConverter(new StringConverter<LocalDate>() {
+        startdate.setConverter(new StringConverter<>() {
             @Override
             public String toString(LocalDate date) {
                 if (date != null) {
@@ -157,11 +156,8 @@ public class SellController implements Initializable {
     }
 
     private boolean validateInputs() {
-        if (name.getText().trim().isEmpty() || category.getValue() == null ||
-                startingprice.getText().trim().isEmpty() || enddate.getValue() == null || startdate.getValue() == null) {
-            return false;
-        }
-        return true;
+        return !name.getText().trim().isEmpty() && category.getValue() != null &&
+                !startingprice.getText().trim().isEmpty() && enddate.getValue() != null && startdate.getValue() != null;
     }
 
     private void showError(String message) {
@@ -170,10 +166,10 @@ public class SellController implements Initializable {
         validationLabel.setText(message);
     }
 
-    private void showSuccess(String message) {
+    private void showSuccess() {
         validationLabel.setVisible(true);
         validationLabel.setStyle("-fx-text-fill: green;");
-        validationLabel.setText(message);
+        validationLabel.setText("Listing added successfully!");
     }
 
     private void clearFields() {
@@ -208,10 +204,10 @@ public class SellController implements Initializable {
     }
 
     private void handleAddListing() {
-        submitAuction(false);
+        submitAuction();
     }
 
-    private void submitAuction(boolean isDraft) {
+    private void submitAuction() {
         String listingName = name.getText().trim();
         String listingCategory = category.getValue();
         String listingPrice = startingprice.getText().trim();
@@ -236,10 +232,10 @@ public class SellController implements Initializable {
 
         try {
             auctionService.createAuction(
-                    listingName, listingDesc, listingCategory, listingPrice, startTimeStr, endTimeStr, isDraft,
+                    listingName, listingDesc, listingCategory, listingPrice, startTimeStr, endTimeStr,
                     response -> Platform.runLater(() -> {
                         if (response != null && response.isSuccess()) {
-                            showSuccess(isDraft ? "Draft saved successfully!" : "Listing added successfully!");
+                            showSuccess();
                             clearFields();
                         } else {
                             showError(response != null ? response.getMessage() : "Server connection failed.");
@@ -253,9 +249,5 @@ public class SellController implements Initializable {
     private void handleClose() {
         Stage stage = (Stage) closeButton.getScene().getWindow();
         stage.close();
-    }
-
-    public void handleSaveDraft(ActionEvent actionEvent) {
-        submitAuction(true);
     }
 }

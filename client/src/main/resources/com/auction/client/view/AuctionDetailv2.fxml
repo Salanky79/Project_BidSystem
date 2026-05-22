@@ -158,12 +158,8 @@
                 <Region prefHeight="14" />
 
                 <!-- PRODUCT IMAGE (gold 2px border, shadow via background) -->
-                <VBox alignment="CENTER" spacing="0" style="-fx-background-color: #111111; -fx-padding: 14; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #D4AF37; -fx-border-width: 2;">
-                    <ImageView fx:id="productImageView" fitHeight="300" fitWidth="300" preserveRatio="true" smooth="true">
-                        <image>
-                            <Image backgroundLoading="true" url="@add_Icon.png" />
-                        </image>
-                    </ImageView>
+                <VBox alignment="CENTER" spacing="0" style="-fx-background-color: #111111; -fx-padding: 14; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #D4AF37; -fx-border-width: 2; -fx-min-height: 320; -fx-min-width: 320;">
+                    <Label fx:id="productIconLabel" style="-fx-font-size: 150px;" text="📦" />
                 </VBox>
 
                 <Region prefHeight="14" />

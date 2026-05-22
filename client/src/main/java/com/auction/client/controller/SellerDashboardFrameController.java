@@ -20,11 +20,9 @@ public class SellerDashboardFrameController extends FrameController {
 
     // Sidebar buttons – cần fx:id để highlight
     @FXML private Button btnHome;
-    @FXML private Button btnDrafts;
     @FXML private Button btnActive;
     @FXML private Button btnSold;
     @FXML private Button btnProfile;
-    @FXML private Button btnSell;
 
     // ── Styles ──────────────────────────────────────────────────────────────
     private static final String STYLE_SIDEBAR_ACTIVE =
@@ -67,37 +65,31 @@ public class SellerDashboardFrameController extends FrameController {
     // ===== SIDEBAR NAVIGATION =====
 
     @FXML
-    public void handleHome(ActionEvent event) {
+    public void handleHome() {
         loadView("/com/auction/client/view/SellerDashboard.fxml");
         highlightButton("Home");
     }
 
     @FXML
-    public void handleDrafts(ActionEvent event) {
-        loadSellerList("Drafts");
-        highlightButton("Drafts");
-    }
-
-    @FXML
-    public void handleActive(ActionEvent event) {
+    public void handleActive() {
         loadSellerList("Active");
         highlightButton("Active");
     }
 
     @FXML
-    public void handleSold(ActionEvent event) {
+    public void handleSold() {
         loadSellerList("Sold");
         highlightButton("Sold");
     }
 
     @FXML
-    public void handleProfile(ActionEvent event) {
+    public void handleProfile() {
         changeView("/com/auction/client/view/profile.fxml");
         highlightButton("Profile");
     }
 
     @FXML
-    public void handleSell(ActionEvent event) {
+    public void handleSell() {
         changeView("/com/auction/client/view/Sell.fxml");
     }
 
@@ -105,7 +97,7 @@ public class SellerDashboardFrameController extends FrameController {
 
     /**
      * Load SellerListView.fxml vào scrollContent rồi gọi loadItems(mode)
-     * để fetch đúng tab (Drafts / Active / Sold).
+     * để fetch đúng tab (Active / Sold).
      */
     private void loadSellerList(String mode) {
         try {
@@ -144,7 +136,6 @@ public class SellerDashboardFrameController extends FrameController {
         if (btnProfile != null) btnProfile.setStyle("Profile".equals(active) ? STYLE_SIDEBAR_ACTIVE    : STYLE_SIDEBAR_INACTIVE);
 
         // Indented sub-buttons
-        if (btnDrafts  != null) btnDrafts.setStyle( "Drafts".equals(active)  ? STYLE_SIDEBAR_ACTIVE_INDENT : STYLE_SIDEBAR_INACTIVE_INDENT);
         if (btnActive  != null) btnActive.setStyle( "Active".equals(active)  ? STYLE_SIDEBAR_ACTIVE_INDENT : STYLE_SIDEBAR_INACTIVE_INDENT);
         if (btnSold    != null) btnSold.setStyle(   "Sold".equals(active)    ? STYLE_SIDEBAR_ACTIVE_INDENT : STYLE_SIDEBAR_INACTIVE_INDENT);
     }

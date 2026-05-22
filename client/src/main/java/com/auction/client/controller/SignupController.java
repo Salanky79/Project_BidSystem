@@ -17,7 +17,6 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -158,7 +157,7 @@ public class SignupController {
         String role = roleCombo != null ? roleCombo.getValue() : null;
 
         try {
-            if (confirmPassword == null || password == null || !confirmPassword.equals(password)) {
+            if (confirmPassword == null || !confirmPassword.equals(password)) {
                 throw new ValidationException("Mat khau xac nhan khong khop!");
             }
 
@@ -167,11 +166,11 @@ public class SignupController {
                     request,
                     // Platform.runLater đưa việc xử lý kết quả đăng ký về luồng chính JavaFX
                     response -> Platform.runLater(() -> {
-                        if (true) {
+                        if (response.isSuccess()) {
                             openDashboard(role, fullName);
                         } else {
                             statusLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #cc3333;");
-                            statusLabel.setText(response != null ? response.getMessage() : "Loi ket noi may chu");
+                            statusLabel.setText(response.getMessage());
                         }
                     })
             );
@@ -194,13 +193,13 @@ public class SignupController {
         }
     }
 
-    public void selectSeller(MouseEvent mouseEvent) {
+    public void selectSeller() {
         if (sellerCard != null) sellerCard.setStyle(selectedStyle);
         if (bidderCard != null) bidderCard.setStyle(defaultStyle);
         if (roleCombo != null) roleCombo.setValue("Seller");
     }
 
-    public void selectBidder(MouseEvent mouseEvent) {
+    public void selectBidder() {
         if (bidderCard != null) bidderCard.setStyle(selectedStyle);
         if (sellerCard != null) sellerCard.setStyle(defaultStyle);
         if (roleCombo != null) roleCombo.setValue("Bidder");

@@ -16,7 +16,7 @@ public class BidderDashboard implements DashboardProduct {
         
         com.auction.client.controller.HomeFrameController controller = loader.getController();
         if (controller != null) {
-            controller.handleHome(null); // Load Home.fxml inside HomeFrame and fetch auctions
+            controller.handleHome(); // Load Home.fxml inside HomeFrame and fetch auctions
         }
         
         return new Scene(root);
