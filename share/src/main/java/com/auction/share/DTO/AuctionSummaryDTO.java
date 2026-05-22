@@ -12,6 +12,7 @@ public class AuctionSummaryDTO implements Serializable {
     private final String status;
     private final String startTime;
     private final String endTime;
+    private final double bidstep;
 
     public AuctionSummaryDTO(
             String auctionId,
@@ -20,7 +21,8 @@ public class AuctionSummaryDTO implements Serializable {
             double currentPrice,
             String status,
             String startTime,
-            String endTime
+            String endTime,
+            double bidstep
     ) {
         this.auctionId = auctionId;
         this.itemName = itemName;
@@ -29,6 +31,7 @@ public class AuctionSummaryDTO implements Serializable {
         this.status = status;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.bidstep = bidstep;
     }
 
     public String getAuctionId() {
@@ -57,5 +60,9 @@ public class AuctionSummaryDTO implements Serializable {
 
     public String getEndTime() {
         return endTime;
+    }
+
+    public double getBidStep() {
+        return bidstep;
     }
 }

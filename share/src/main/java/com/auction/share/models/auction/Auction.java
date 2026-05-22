@@ -67,7 +67,7 @@ public class Auction extends Entity {
         this.endTime = endTime;
         this.currentHighestBid = item.getStartingPrice();
         this.highestBidder = null;
-        this.bidStep = 1.0d;
+        this.bidStep = 0.0d;
         this.status = AuctionStatus.OPEN;
     }
 

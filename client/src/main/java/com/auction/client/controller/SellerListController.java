@@ -68,14 +68,14 @@ public class SellerListController {
     }
 
     private boolean matchesMode(String mode, AuctionSummaryDTO dto) {
-        if ("CANCELLED".equals(dto.getStatus()) && !"Sold".equals(mode)) {
+        if ("CANCELED".equals(dto.getStatus()) && !"Sold".equals(mode)) {
             return false;
         }
 
         return switch (mode) {
             case "Drafts" -> "DRAFT".equals(dto.getStatus());
             case "Active" -> "OPEN".equals(dto.getStatus()) || "RUNNING".equals(dto.getStatus());
-            case "Sold"   -> "FINISHED".equals(dto.getStatus()) || "CANCELLED".equals(dto.getStatus());
+            case "Sold"   -> "FINISHED".equals(dto.getStatus()) || "CANCELED".equals(dto.getStatus());
             default       -> true;
         };
     }

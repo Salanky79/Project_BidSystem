@@ -37,6 +37,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
+import static com.auction.client.ClientContext.auctionService;
+
 public class AuctionDetailController {
 
     private final BidService bidService = ClientContext.bidService();
@@ -82,6 +84,7 @@ public class AuctionDetailController {
 
     // ── State ────────────────────────────────────────────────────
     private double        currentPrice;
+    private double        bidStep;
     private int           totalBids;
     private String        auctionId;
     private LocalDateTime endTime;
@@ -199,32 +202,34 @@ public class AuctionDetailController {
             String category,
             String name,
             double price,
+            double bidStep,
             int    bids,
             String startTime,
-            String time,
+            String endTime,
             String status,
             String auctionId
     ) {
         this.currentPrice = price;
+        this.bidStep      = bidStep;
         this.totalBids    = bids;
         this.auctionId    = auctionId;
 
         productTitleLabel.setText(name);
         currentPriceLabel.setText(String.format("%.0f VND", price));
         totalBidsLabel.setText(String.valueOf(bids));
-        endTimeLabel.setText(time);
-        startTimeLabel.setText(startTime);
+        startTimeLabel.setText(formatDateTimeForDisplay(startTime));
+        endTimeLabel.setText(formatDateTimeForDisplay(endTime));
         sellerNameLabel.setText("Unknown");
         descriptionLabel.setText("No description provided.");
-        minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + 500));
+        minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + bidStep));
         resetAutoBidState();
 
         // Parse end time for countdown
         try {
-            this.endTime = LocalDateTime.parse(time, DISPLAY_FMT);
+            this.endTime = LocalDateTime.parse(endTime, DISPLAY_FMT);
         } catch (Exception ex) {
             try {
-                this.endTime = LocalDateTime.parse(time, DISPLAY_FMT);
+                this.endTime = LocalDateTime.parse(endTime, DISPLAY_FMT);
             } catch (Exception ignored) {
                 this.endTime = null;
             }
@@ -234,48 +239,24 @@ public class AuctionDetailController {
         // Sync initial follow state
         this.isFollowing = WatchlistService.getInstance().isFollowed(this.auctionId);
         updateFollowButtonStyle();
-    }
 
-    public void setData(
-            String icon,
-            String category,
-            String name,
-            double price,
-            int    bids,
-            String startDate,
-            String endDate,
-            String listedBy,
-            String description,
-            String status
-    ) {
-        this.currentPrice = price;
-        this.totalBids    = bids;
 
-        productTitleLabel.setText(name);
-        currentPriceLabel.setText(String.format("%.0f VND", price));
-        totalBidsLabel.setText(String.valueOf(bids));
-        startTimeLabel.setText(startDate);
-        endTimeLabel.setText(endDate);
-        sellerNameLabel.setText(listedBy);
-        descriptionLabel.setText(description);
-        minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + 500));
-        resetAutoBidState();
+        // Fetch latest data from server
+        ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> {
+            javafx.application.Platform.runLater(() -> {
+                if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
+                    this.currentPrice = detail.getCurrentPrice();
+                    this.bidStep = detail.getBidStep();
+                    this.totalBids = detail.getBidHistory() != null ? detail.getBidHistory().size() : this.totalBids;
 
-        // Parse end time for countdown
-        try {
-            this.endTime = LocalDateTime.parse(endDate, ISO_FMT);
-        } catch (Exception ex) {
-            try {
-                this.endTime = LocalDateTime.parse(endDate, DISPLAY_FMT);
-            } catch (Exception ignored) {
-                this.endTime = null;
-            }
-        }
-        startCountdown();
-        
-        // Sync initial follow state
-        this.isFollowing = WatchlistService.getInstance().isFollowed(this.auctionId);
-        updateFollowButtonStyle();
+                    this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));
+                    this.totalBidsLabel.setText(String.valueOf(this.totalBids));
+                    this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
+                    this.sellerNameLabel.setText(detail.getSellerName());
+                    this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description provided.");
+                }
+            });
+        });
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -286,9 +267,10 @@ public class AuctionDetailController {
             String category,
             String name,
             double price,
+            double bidStep,
             int    bids,
             String startTime,
-            String time,
+            String endTime,
             String status,
             String auctionId
     ) {
@@ -300,7 +282,7 @@ public class AuctionDetailController {
             Parent root = loader.load();
 
             AuctionDetailController ctrl = loader.getController();
-            ctrl.setData(icon, category, name, price, bids, startTime, time, status, auctionId);
+            ctrl.setData(icon, category, name, price, bidStep, bids, startTime, endTime, status, auctionId);
 
             Stage stage = new Stage();
             stage.setTitle("Auction – " + name);
@@ -346,7 +328,7 @@ public class AuctionDetailController {
                         totalBids++;
                         currentPriceLabel.setText(String.format("%.0f VND", currentPrice));
                         totalBidsLabel.setText(String.valueOf(totalBids));
-                        minBidLabel.setText(String.format("Minimum bid: %.0f VND", currentPrice + 500));
+                        minBidLabel.setText(String.format("Minimum bid: %.0f VND", currentPrice + bidStep));
                         bidInputField.clear();
                     } else {
                         showBidError(response != null ? response.getMessage() : "Lỗi kết nối máy chủ");
@@ -510,5 +492,18 @@ public class AuctionDetailController {
         cancelAutoBidButton.setDisable(!autoBidEnabled);
         autoBidMaxInputField.setDisable(autoBidEnabled);
         autoBidIncrementInputField.setDisable(autoBidEnabled);
+    }
+
+    private String formatDateTimeForDisplay(String value) {
+        if (value == null || value.isBlank()) return "N/A";
+        try {
+            return LocalDateTime.parse(value, ISO_FMT).format(DISPLAY_FMT);
+        } catch (Exception ex) {
+            try {
+                return LocalDateTime.parse(value, DISPLAY_FMT).format(DISPLAY_FMT);
+            } catch (Exception ignored) {
+                return value;
+            }
+        }
     }
 }

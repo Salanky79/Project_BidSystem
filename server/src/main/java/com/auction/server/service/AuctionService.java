@@ -171,7 +171,8 @@ public class AuctionService {
                     auction.getCurrentHighestBid(),
                     auction.getStatus().name(),
                     auction.getStartTime().format(formatter),
-                    auction.getEndTime().format(formatter)
+                    auction.getEndTime().format(formatter),
+                    auction.getBidStep()
             ));
         }
         return summaries;

@@ -69,4 +69,19 @@ public class AuctionService {
         com.auction.share.DTO.CancelAuctionRequest request = new com.auction.share.DTO.CancelAuctionRequest(auctionId);
         socketClient.send(request, onResponse);
     }
+
+    public void setBidStep(String auctionId, double bidStep, Consumer<Response<?>> onResponse) {
+        com.auction.share.DTO.SetBidStepRequest request = new com.auction.share.DTO.SetBidStepRequest(auctionId, bidStep, null);
+        socketClient.send(request, onResponse);
+    }
+
+    public void extendEndTime(String auctionId, long minutes, Consumer<Response<?>> onResponse) {
+        com.auction.share.DTO.ExtendEndTimeRequest request = new com.auction.share.DTO.ExtendEndTimeRequest(auctionId, minutes, null);
+        socketClient.send(request, onResponse);
+    }
+
+    public void getAuctionDetail(String auctionId, Consumer<Response<?>> onResponse) {
+        com.auction.share.DTO.GetAuctionDetailRequest request = new com.auction.share.DTO.GetAuctionDetailRequest(auctionId);
+        socketClient.send(request, onResponse);
+    }
 }

@@ -51,6 +51,10 @@ public class SellerAuctionDetailController {
     // ── CONTROLS ────────────────────────────────────────────────
     @FXML private Button pauseAuctionButton;
     @FXML private Button cancelAuctionButton;
+    @FXML private TextField bidStepField;
+    @FXML private Button saveBidStepButton;
+    @FXML private TextField extendEndTimeField;
+    @FXML private Button saveExtendTimeButton;
 
     // ── BIDDERS ─────────────────────────────────────────────────
     @FXML private ListView<String> bidderListView;
@@ -126,6 +130,14 @@ public class SellerAuctionDetailController {
         // Post Comment
         if (postCommentButton != null) {
             postCommentButton.setOnAction(e -> handlePostComment());
+        }
+
+        if (saveBidStepButton != null) {
+            saveBidStepButton.setOnAction(e -> handleSetBidStep());
+        }
+
+        if (saveExtendTimeButton != null) {
+            saveExtendTimeButton.setOnAction(e -> handleExtendEndTime());
         }
 
         setupBidderList();
@@ -257,6 +269,53 @@ public class SellerAuctionDetailController {
         commentsListView.getItems().add(0, "Seller|" + text + "|" + timestamp);
         commentsListView.scrollTo(0);
         commentInputField.clear();
+    }
+
+    private void handleSetBidStep() {
+        if (bidStepField == null || bidStepField.getText().trim().isEmpty()) return;
+        try {
+            double step = Double.parseDouble(bidStepField.getText().trim());
+            com.auction.client.ClientContext.auctionService().setBidStep(auctionId, step, response -> {
+                Platform.runLater(() -> {
+                    if (response != null && response.isSuccess()) {
+                        Alert success = new Alert(Alert.AlertType.INFORMATION, "Bid step updated to " + step);
+                        success.show();
+                        bidStepField.clear();
+                    } else {
+                        Alert error = new Alert(Alert.AlertType.ERROR, "Failed to update bid step: " + (response != null ? response.getMessage() : "Unknown error"));
+                        error.show();
+                    }
+                });
+            });
+        } catch (NumberFormatException e) {
+            new Alert(Alert.AlertType.ERROR, "Invalid bid step value!").show();
+        }
+    }
+
+    private void handleExtendEndTime() {
+        if (extendEndTimeField == null || extendEndTimeField.getText().trim().isEmpty()) return;
+        try {
+            long minutes = Long.parseLong(extendEndTimeField.getText().trim());
+            com.auction.client.ClientContext.auctionService().extendEndTime(auctionId, minutes, response -> {
+                Platform.runLater(() -> {
+                    if (response != null && response.isSuccess()) {
+                        Alert success = new Alert(Alert.AlertType.INFORMATION, "Extended end time by " + minutes + " minutes");
+                        success.show();
+                        extendEndTimeField.clear();
+                        if (endTime != null) {
+                            endTime = endTime.plusMinutes(minutes);
+                            if (endTimeLabel != null) endTimeLabel.setText(endTime.format(DISPLAY_FMT));
+                            updateCountdown();
+                        }
+                    } else {
+                        Alert error = new Alert(Alert.AlertType.ERROR, "Failed to extend time: " + (response != null ? response.getMessage() : "Unknown error"));
+                        error.show();
+                    }
+                });
+            });
+        } catch (NumberFormatException e) {
+            new Alert(Alert.AlertType.ERROR, "Invalid minutes value!").show();
+        }
     }
 
     public void setData(String icon, String category, String name, double price, int bids, String time, String status, String auctionId) {
