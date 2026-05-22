@@ -10,6 +10,34 @@ public class HomeFrameController extends FrameController {
 
     protected HomeController currentHomeController;
 
+    @javafx.fxml.FXML
+    private javafx.scene.control.Label budgetLabel;
+
+    private double currentBudget = 0.0;
+
+    @javafx.fxml.FXML
+    public void handleTopUp(ActionEvent event) {
+        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog("0");
+        dialog.setTitle("Nạp tiền");
+        dialog.setHeaderText("Nạp tiền vào tài khoản");
+        dialog.setContentText("Nhập số tiền muốn nạp:");
+
+        java.util.Optional<String> result = dialog.showAndWait();
+        result.ifPresent(amountStr -> {
+            try {
+                double amount = Double.parseDouble(amountStr);
+                if (amount > 0) {
+                    currentBudget += amount;
+                    if (budgetLabel != null) {
+                        budgetLabel.setText(String.format("%.1f", currentBudget));
+                    }
+                }
+            } catch (NumberFormatException e) {
+                // Ignore invalid input
+            }
+        });
+    }
+
     public void loadHomePage(String filterStatus) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Home.fxml"));
