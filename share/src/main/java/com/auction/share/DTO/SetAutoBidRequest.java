@@ -1,5 +1,8 @@
 package com.auction.share.DTO;
 
+/**
+ * Yêu cầu thiết lập hoặc cấu hình tính năng tự động trả giá (auto-bid).
+ */
 public class SetAutoBidRequest extends Request {
     private static final long serialVersionUID = 1L;
 

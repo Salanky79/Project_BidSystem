@@ -1,5 +1,8 @@
 package com.auction.share.DTO;
 
+/**
+ * Yêu cầu đăng nhập vào hệ thống.
+ */
 public class LoginRequest extends Request {
     private static final long serialVersionUID = 1L;
 

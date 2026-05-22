@@ -1,5 +1,8 @@
 package com.auction.share.DTO;
 
+/**
+ * Yêu cầu hủy bỏ tính năng tự động trả giá (auto-bid).
+ */
 public class CancelAutoBidRequest extends Request {
     private static final long serialVersionUID = 1L;
 

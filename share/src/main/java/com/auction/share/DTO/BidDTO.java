@@ -2,6 +2,9 @@ package com.auction.share.DTO;
 
 import java.io.Serializable;
 
+/**
+ * Đối tượng truyền dữ liệu (DTO) chứa thông tin của một lượt trả giá.
+ */
 public class BidDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 

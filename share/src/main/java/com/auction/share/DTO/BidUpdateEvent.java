@@ -2,6 +2,9 @@ package com.auction.share.DTO;
 
 import java.io.Serializable;
 
+/**
+ * Sự kiện cập nhật thông tin trả giá mới nhất.
+ */
 public class BidUpdateEvent implements Serializable {
     private static final long serialVersionUID = 1L;
 

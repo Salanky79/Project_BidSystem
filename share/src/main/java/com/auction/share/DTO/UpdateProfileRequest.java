@@ -1,5 +1,8 @@
 package com.auction.share.DTO;
 
+/**
+ * Yêu cầu cập nhật thông tin hồ sơ (profile) của người dùng.
+ */
 public class UpdateProfileRequest extends Request {
     private static final long serialVersionUID = 1L;
 
