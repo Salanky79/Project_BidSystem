@@ -73,7 +73,6 @@ public class SellerListController {
         }
 
         return switch (mode) {
-            case "Drafts" -> "DRAFT".equals(dto.getStatus());
             case "Active" -> "OPEN".equals(dto.getStatus()) || "RUNNING".equals(dto.getStatus());
             case "Sold"   -> "FINISHED".equals(dto.getStatus()) || "CANCELED".equals(dto.getStatus());
             default       -> true;
@@ -138,7 +137,6 @@ public class SellerListController {
 
     private String labelFor(String mode) {
         return switch (mode) {
-            case "Drafts" -> "Drafts - Saved";
             case "Active" -> "Active - Ongoing";
             case "Sold"   -> "Sold - Finished";
             default       -> mode;
@@ -147,7 +145,6 @@ public class SellerListController {
 
     private String emptyIconFor(String mode) {
         return switch (mode) {
-            case "Drafts" -> "📝";
             case "Active" -> "🔕";
             case "Sold"   -> "📦";
             default       -> "📭";
@@ -156,7 +153,6 @@ public class SellerListController {
 
     private String emptyMsgFor(String mode) {
         return switch (mode) {
-            case "Drafts" -> "You have no pending auctions.";
             case "Active" -> "No active auctions currently.";
             case "Sold"   -> "You haven't sold any items yet.";
             default       -> "No data available.";

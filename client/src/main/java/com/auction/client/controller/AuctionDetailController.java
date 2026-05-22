@@ -64,7 +64,7 @@ public class AuctionDetailController {
     @FXML private Label     startTimeLabel;
     @FXML private Label     endTimeLabel;
     @FXML private Label     endsInLabel;
-    @FXML private ImageView productImageView;
+    @FXML private Label     productIconLabel;
     @FXML private TextField bidInputField;
     @FXML private Button    placeBidButton;
     @FXML private Label     minBidLabel;
@@ -217,7 +217,10 @@ public class AuctionDetailController {
         endTimeLabel.setText(time);
         startTimeLabel.setText(LocalDateTime.now().format(DISPLAY_FMT));
         sellerNameLabel.setText("Unknown");
-        descriptionLabel.setText("No description provided.");
+        descriptionLabel.setText("Loading description...");
+        if (productIconLabel != null && icon != null) {
+            productIconLabel.setText(icon);
+        }
         minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + bidStep));
         resetAutoBidState();
 
@@ -276,7 +279,10 @@ public class AuctionDetailController {
         startTimeLabel.setText(startDate);
         endTimeLabel.setText(endDate);
         sellerNameLabel.setText(listedBy);
-        descriptionLabel.setText(description);
+        descriptionLabel.setText(description != null && !description.isEmpty() ? description : "No description provided.");
+        if (productIconLabel != null && icon != null) {
+            productIconLabel.setText(icon);
+        }
         minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + bidStep));
         resetAutoBidState();
 

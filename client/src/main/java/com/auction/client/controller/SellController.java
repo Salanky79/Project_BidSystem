@@ -205,10 +205,10 @@ public class SellController implements Initializable {
     }
 
     private void handleAddListing() {
-        submitAuction(false);
+        submitAuction();
     }
 
-    private void submitAuction(boolean isDraft) {
+    private void submitAuction() {
         String listingName = name.getText().trim();
         String listingCategory = category.getValue();
         String listingPrice = startingprice.getText().trim();
@@ -233,10 +233,10 @@ public class SellController implements Initializable {
 
         try {
             auctionService.createAuction(
-                    listingName, listingDesc, listingCategory, listingPrice, startTimeStr, endTimeStr, isDraft,
+                    listingName, listingDesc, listingCategory, listingPrice, startTimeStr, endTimeStr,
                     response -> Platform.runLater(() -> {
                         if (response != null && response.isSuccess()) {
-                            showSuccess(isDraft ? "Draft saved successfully!" : "Listing added successfully!");
+                            showSuccess("Listing added successfully!");
                             clearFields();
                         } else {
                             showError(response != null ? response.getMessage() : "Server connection failed.");
@@ -250,9 +250,5 @@ public class SellController implements Initializable {
     private void handleClose() {
         Stage stage = (Stage) closeButton.getScene().getWindow();
         stage.close();
-    }
-
-    public void handleSaveDraft(ActionEvent actionEvent) {
-        submitAuction(true);
     }
 }

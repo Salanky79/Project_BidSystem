@@ -39,12 +39,6 @@
                                 -fx-font-weight: bold; -fx-padding: 0 0 0 20;"
                          text="MY LIST" />
 
-               <Button fx:id="btnDrafts" onAction="#handleDrafts"
-                       prefHeight="48.0" prefWidth="200.0"
-                       style="-fx-background-color: transparent; -fx-text-fill: #c9c9c9;
-                              -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8;
-                              -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 40; -fx-cursor: hand;"
-                       text="Drafts" />
                <Button fx:id="btnActive" onAction="#handleActive"
                        prefHeight="48.0" prefWidth="200.0"
                        style="-fx-background-color: transparent; -fx-text-fill: #c9c9c9;

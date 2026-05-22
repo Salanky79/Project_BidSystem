@@ -17,7 +17,6 @@ public class SellerDashboardFrameController extends FrameController {
 
     // Sidebar buttons – cần fx:id để highlight
     @FXML private Button btnHome;
-    @FXML private Button btnDrafts;
     @FXML private Button btnActive;
     @FXML private Button btnSold;
     @FXML private Button btnProfile;
@@ -70,12 +69,6 @@ public class SellerDashboardFrameController extends FrameController {
     }
 
     @FXML
-    public void handleDrafts(ActionEvent event) {
-        loadSellerList("Drafts");
-        highlightButton("Drafts");
-    }
-
-    @FXML
     public void handleActive(ActionEvent event) {
         loadSellerList("Active");
         highlightButton("Active");
@@ -102,7 +95,7 @@ public class SellerDashboardFrameController extends FrameController {
 
     /**
      * Load SellerListView.fxml vào scrollContent rồi gọi loadItems(mode)
-     * để fetch đúng tab (Drafts / Active / Sold).
+     * để fetch đúng tab (Active / Sold).
      */
     private void loadSellerList(String mode) {
         try {
@@ -141,7 +134,6 @@ public class SellerDashboardFrameController extends FrameController {
         if (btnProfile != null) btnProfile.setStyle("Profile".equals(active) ? STYLE_SIDEBAR_ACTIVE    : STYLE_SIDEBAR_INACTIVE);
 
         // Indented sub-buttons
-        if (btnDrafts  != null) btnDrafts.setStyle( "Drafts".equals(active)  ? STYLE_SIDEBAR_ACTIVE_INDENT : STYLE_SIDEBAR_INACTIVE_INDENT);
         if (btnActive  != null) btnActive.setStyle( "Active".equals(active)  ? STYLE_SIDEBAR_ACTIVE_INDENT : STYLE_SIDEBAR_INACTIVE_INDENT);
         if (btnSold    != null) btnSold.setStyle(   "Sold".equals(active)    ? STYLE_SIDEBAR_ACTIVE_INDENT : STYLE_SIDEBAR_INACTIVE_INDENT);
     }
