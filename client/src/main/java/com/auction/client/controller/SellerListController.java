@@ -2,7 +2,6 @@ package com.auction.client.controller;
 
 import com.auction.client.ClientContext;
 import com.auction.client.service.AuctionService;
-import com.auction.client.session.SessionManager;
 import com.auction.share.DTO.AuctionSummaryDTO;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -12,8 +11,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class SellerListController {
@@ -79,14 +76,6 @@ public class SellerListController {
         };
     }
 
-    private LocalDateTime parseDate(String dateStr) {
-        if (dateStr == null) return null;
-        try {
-            return LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        } catch (Exception e) {
-            return null;
-        }
-    }
 
     private void appendCard(AuctionSummaryDTO dto) {
         try {

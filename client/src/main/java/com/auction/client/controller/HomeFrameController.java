@@ -49,7 +49,7 @@ public class HomeFrameController extends FrameController {
         loadHomePage("All");
     }
 
-    public void handleYourListing(ActionEvent actionEvent) {
+    public void handleYourListing() {
     }
 
     public void handleWatchlist() {

@@ -20,7 +20,6 @@ public class SellerDashboardFrameController extends FrameController {
     @FXML private Button btnActive;
     @FXML private Button btnSold;
     @FXML private Button btnProfile;
-    @FXML private Button btnSell;
 
     // ── Styles ──────────────────────────────────────────────────────────────
     private static final String STYLE_SIDEBAR_ACTIVE =
@@ -63,31 +62,31 @@ public class SellerDashboardFrameController extends FrameController {
     // ===== SIDEBAR NAVIGATION =====
 
     @FXML
-    public void handleHome(ActionEvent event) {
+    public void handleHome() {
         loadView("/com/auction/client/view/SellerDashboard.fxml");
         highlightButton("Home");
     }
 
     @FXML
-    public void handleActive(ActionEvent event) {
+    public void handleActive() {
         loadSellerList("Active");
         highlightButton("Active");
     }
 
     @FXML
-    public void handleSold(ActionEvent event) {
+    public void handleSold() {
         loadSellerList("Sold");
         highlightButton("Sold");
     }
 
     @FXML
-    public void handleProfile(ActionEvent event) {
+    public void handleProfile() {
         changeView("/com/auction/client/view/profile.fxml");
         highlightButton("Profile");
     }
 
     @FXML
-    public void handleSell(ActionEvent event) {
+    public void handleSell() {
         changeView("/com/auction/client/view/Sell.fxml");
     }
 
