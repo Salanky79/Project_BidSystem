@@ -11,6 +11,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.function.Consumer;
 
+/**
+ * Dịch vụ xử lý các nghiệp vụ liên quan đến phiên đấu giá phía Client.
+ * Giao tiếp với Server thông qua SocketClient.
+ */
 public class AuctionService {
     private final SocketClient socketClient;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -19,6 +23,9 @@ public class AuctionService {
         this.socketClient = socketClient;
     }
 
+    /**
+     * Tạo một phiên đấu giá mới.
+     */
     public void createAuction(String itemName, String description, String category, String startingPriceStr, String startTimeStr, String endTimeStr, Consumer<Response<?>> onResponse) throws ValidationException {
         if (itemName == null || itemName.trim().isEmpty()) {
             throw new ValidationException("Tên sản phẩm không được để trống!");
