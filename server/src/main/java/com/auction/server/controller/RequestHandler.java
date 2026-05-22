@@ -1,6 +1,6 @@
 package com.auction.server.controller;
 
-import com.auction.server.network.AuctionSubscriptionRegistry;
+import com.auction.server.service.AuctionSubscriptionRegistry;
 import com.auction.server.service.AutoBidService;
 import com.auction.server.network.ClientSession;
 import com.auction.server.service.UserService;

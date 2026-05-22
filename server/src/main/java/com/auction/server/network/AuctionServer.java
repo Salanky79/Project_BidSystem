@@ -1,6 +1,7 @@
 package com.auction.server.network;
 
 import com.auction.server.controller.RequestHandler;
+import com.auction.server.service.AuctionSubscriptionRegistry;
 import com.auction.share.DTO.Action;
 import com.auction.share.DTO.GetAuctionDetailRequest;
 import com.auction.share.DTO.Request;

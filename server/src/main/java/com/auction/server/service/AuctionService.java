@@ -56,16 +56,6 @@ public class AuctionService {
         this.autoBidService = autoBidService;
     }
 
-    public AuctionService(
-            AuctionDAO auctionDAO,
-            ItemDAO itemDAO,
-            BidTransactionDAO bidTransactionDAO,
-            UserDAO userDAO,
-            BidBroadcastService bidBroadcastService
-    ) {
-        this(auctionDAO, itemDAO, bidTransactionDAO, userDAO, bidBroadcastService, null);
-    }
-
     public void setAutoBidService(AutoBidService autoBidService) {
         this.autoBidService = autoBidService;
     }
@@ -131,31 +121,6 @@ public class AuctionService {
         }
         return true;
     }
-
-    protected Connection getConnection() throws SQLException {
-        return DatabaseConnection.getConnection();
-    }
-
-    public Auction getAuctionById(String auctionId) throws SQLException {
-        return auctionDAO.findById(auctionId);
-    }
-
-    public boolean isAuctionRunning(Auction auction) {
-        if (auction == null) {
-            return false;
-        }
-        LocalDateTime now = LocalDateTime.now();
-        return !(now.isAfter(auction.getEndTime()) || now.isBefore(auction.getStartTime()));
-    }
-
-    public Bidder requireBidder(String bidderId) throws SQLException, ValidationException {
-        User bidderUser = userDAO.findById(bidderId);
-        if (!(bidderUser instanceof Bidder bidder)) {
-            throw new ValidationException("User is not a bidder.");
-        }
-        return bidder;
-    }
-
     public AuctionDetailDTO getAuctionDetail(String auctionId) throws SQLException, ValidationException {
         Auction auction = auctionDAO.findById(auctionId);
         if (auction == null) {
@@ -240,6 +205,26 @@ public class AuctionService {
 
         LocalDateTime newEndTime = auction.getEndTime().plusMinutes(req.getMinutes());
         return auctionDAO.updateEndTime(req.getAuctionId(), newEndTime);
+    }
+
+    public Bidder requireBidder(String bidderId) throws SQLException, ValidationException {
+        User bidderUser = userDAO.findById(bidderId);
+        if (!(bidderUser instanceof Bidder bidder)) {
+            throw new ValidationException("User is not a bidder.");
+        }
+        return bidder;
+    }
+
+    public boolean isAuctionRunning(Auction auction) {
+        if (auction == null) {
+            return false;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        return !(now.isAfter(auction.getEndTime()) || now.isBefore(auction.getStartTime()));
+    }
+
+    protected Connection getConnection() throws SQLException {
+        return DatabaseConnection.getConnection();
     }
 
     private void placeBidAndBroadcast(Auction auction, Bidder bidder, double amount) throws SQLException, ValidationException {

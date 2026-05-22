@@ -200,6 +200,7 @@ public class AuctionDetailController {
             String name,
             double price,
             int    bids,
+            String startTime,
             String time,
             String status,
             String auctionId
@@ -212,7 +213,7 @@ public class AuctionDetailController {
         currentPriceLabel.setText(String.format("%.0f VND", price));
         totalBidsLabel.setText(String.valueOf(bids));
         endTimeLabel.setText(time);
-        startTimeLabel.setText(LocalDateTime.now().format(DISPLAY_FMT));
+        startTimeLabel.setText(startTime);
         sellerNameLabel.setText("Unknown");
         descriptionLabel.setText("No description provided.");
         minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + 500));
@@ -220,7 +221,7 @@ public class AuctionDetailController {
 
         // Parse end time for countdown
         try {
-            this.endTime = LocalDateTime.parse(time, ISO_FMT);
+            this.endTime = LocalDateTime.parse(time, DISPLAY_FMT);
         } catch (Exception ex) {
             try {
                 this.endTime = LocalDateTime.parse(time, DISPLAY_FMT);
@@ -286,6 +287,7 @@ public class AuctionDetailController {
             String name,
             double price,
             int    bids,
+            String startTime,
             String time,
             String status,
             String auctionId
@@ -298,7 +300,7 @@ public class AuctionDetailController {
             Parent root = loader.load();
 
             AuctionDetailController ctrl = loader.getController();
-            ctrl.setData(icon, category, name, price, bids, time, status, auctionId);
+            ctrl.setData(icon, category, name, price, bids, startTime, time, status, auctionId);
 
             Stage stage = new Stage();
             stage.setTitle("Auction – " + name);

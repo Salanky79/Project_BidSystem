@@ -5,7 +5,7 @@ import com.auction.server.controller.RequestHandler;
 import com.auction.server.dao.AuctionDAO;
 import com.auction.server.dao.BidTransactionDAO;
 import com.auction.server.dao.ItemDAO;
-import com.auction.server.network.AuctionSubscriptionRegistry;
+import com.auction.server.service.AuctionSubscriptionRegistry;
 import com.auction.server.network.AuctionServer;
 import com.auction.server.service.AuctionService;
 import com.auction.server.service.AutoBidRegistry;
@@ -46,7 +46,7 @@ public class ServerApplication {
                 bidBroadcastService,
                 null
         );
-        AutoBidService autoBidService = new AutoBidService(autoBidRegistry, auctionService);
+        AutoBidService autoBidService = new AutoBidService(autoBidRegistry, auctionDao, auctionService);
         auctionService.setAutoBidService(autoBidService);
         AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionDao, 1000);
         // REALTIME DEALER

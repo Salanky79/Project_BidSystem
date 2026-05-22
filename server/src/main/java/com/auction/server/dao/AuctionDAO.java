@@ -204,7 +204,10 @@ public class AuctionDAO {
                   AND (
                     u.balance - (
                       SELECT COALESCE(SUM(other.current_price), 0)
-                      FROM auctions other
+                      FROM (
+                          SELECT *
+                          FROM auctions
+                      ) other
                       WHERE other.status = ?
                         AND other.highest_bidder_id = ?
                         AND other.id <> a.id

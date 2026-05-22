@@ -1,4 +1,6 @@
-package com.auction.server.network;
+package com.auction.server.service;
+
+import com.auction.server.network.ClientSession;
 
 import java.util.Map;
 import java.util.Set;

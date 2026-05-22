@@ -1,7 +1,5 @@
 package com.auction.server.service;
 
-import com.auction.server.network.AuctionSubscriptionRegistry;
-import com.auction.server.network.ClientSession;
 import com.auction.share.DTO.BidUpdateEvent;
 import com.auction.share.DTO.Response;
 

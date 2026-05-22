@@ -31,13 +31,14 @@ public class ItemCardController {
     private String status;
     private double price;
     private int bids;
+    private String startTime;
     private String time;
     private String auctionId;
 
 
 
     // Hàm này sẽ được HomeController gọi để truyền dữ liệu vào
-    public void setData(String icon, String category, String name, double price, int bids, String time, String status, String auctionId) {
+    public void setData(String icon, String category, String name, double price, int bids, String startTime, String time, String status, String auctionId) {
         statusLabel.setText(status);
         iconLabel.setText(icon);
         categoryLabel.setText(category);
@@ -48,6 +49,7 @@ public class ItemCardController {
         this.name     = name;
         this.price    = price;
         this.bids     = bids;
+        this.startTime = startTime;
         this.time = time;
         this.status = status;
         this.auctionId = auctionId;
@@ -86,6 +88,6 @@ public class ItemCardController {
 
     @FXML
     private void handleCardClick() {
-        AuctionDetailController.open(icon, category, name, price, bids, time, status, auctionId);
+        AuctionDetailController.open(icon, category, name, price, bids, startTime, time, status, auctionId);
     }
 }

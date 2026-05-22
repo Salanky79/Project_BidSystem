@@ -1,5 +1,6 @@
 package com.auction.server.service;
 
+import com.auction.server.dao.AuctionDAO;
 import com.auction.server.model.AutoBidConfig;
 import com.auction.share.DTO.CancelAutoBidRequest;
 import com.auction.share.DTO.PlaceBidRequest;
@@ -20,12 +21,14 @@ public class AutoBidService {
     private static final int MAX_STEPS_PER_TRIGGER = 200;
 
     private final AutoBidRegistry registry;
+    private final AuctionDAO auctionDAO;
     private final AuctionService auctionService;
     private final ExecutorService executor;
     private final Set<String> processingAuctions = ConcurrentHashMap.newKeySet();
 
-    public AutoBidService(AutoBidRegistry registry, AuctionService auctionService) {
+    public AutoBidService(AutoBidRegistry registry, AuctionDAO auctionDAO, AuctionService auctionService) {
         this.registry = registry;
+        this.auctionDAO = auctionDAO;
         this.auctionService = auctionService;
         executor = Executors.newSingleThreadExecutor();
     }
@@ -33,7 +36,7 @@ public class AutoBidService {
     public boolean register(RegisterAutoBidRequest request) throws SQLException, ValidationException {
         validateConfig(request.getMaxBid(), request.getIncrement());
 
-        Auction auction = auctionService.getAuctionById(request.getAuctionId());
+        Auction auction = auctionDAO.findById(request.getAuctionId());
         if (!auctionService.isAuctionRunning(auction)) {
             throw new ValidationException("Auction is not running.");
         }
@@ -78,7 +81,7 @@ public class AutoBidService {
         while (steps++ < MAX_STEPS_PER_TRIGGER) {
             Auction auction;
             try {
-                auction = auctionService.getAuctionById(auctionId);
+                auction = auctionDAO.findById(auctionId);
             } catch (SQLException e) {
                 return;
             }

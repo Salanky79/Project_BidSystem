@@ -125,6 +125,7 @@ public class HomeController extends HomeFrameController {
                         dto.getItemName(),
                         dto.getCurrentPrice(),
                         0,
+                        dto.getStartTime(),
                         dto.getEndTime(),
                         dto.getStatus(),
                         dto.getAuctionId());
