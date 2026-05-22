@@ -15,6 +15,9 @@ import java.io.IOException;
  * Controller cho SellerDashboard.fxml
  * Quản lý: stat boxes, filter bar, auction card grid
  */
+/**
+ * Controller xử lý logic giao diện bảng điều khiển chính (Dashboard) của người bán.
+ */
 public class SellerDashboardController {
 
     // ===== STAT LABELS =====

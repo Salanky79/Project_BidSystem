@@ -17,6 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import com.auction.client.service.WatchlistService;
 
+/**
+ * Controller xử lý logic giao diện trang chủ, hiển thị danh sách các phiên đấu giá.
+ */
 public class HomeController extends HomeFrameController {
 
     private final AuctionService auctionService = ClientContext.auctionService();
@@ -72,6 +75,7 @@ public class HomeController extends HomeFrameController {
         allAuctions.clear();
         auctionGrid.getChildren().clear();
 
+        // Platform.runLater() đưa việc render UI về luồng chính JavaFX
         auctionService.getAuctions(response -> Platform.runLater(() -> {
             if (response != null && response.isSuccess() && response.getData() instanceof List<?> list) {
                 for (Object obj : list) {
@@ -160,6 +164,7 @@ public class HomeController extends HomeFrameController {
     private boolean matchesCategoryFilter(String categoryFilter, String category) {
         if (category == null) category = "";
         String finalCategory = category;
+        // switch expression: trả về trực tiếp kết quả
         return switch (categoryFilter) {
             case "Jewelry"  -> "Jewelry".equalsIgnoreCase(category);
             case "Watches"  -> "Watch".equalsIgnoreCase(category);
@@ -198,4 +203,3 @@ public class HomeController extends HomeFrameController {
         };
     }
 }
-

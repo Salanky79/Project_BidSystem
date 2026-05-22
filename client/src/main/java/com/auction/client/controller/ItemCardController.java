@@ -13,6 +13,9 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import com.auction.client.service.WatchlistService;
 
+/**
+ * Controller xử lý logic hiển thị thẻ sản phẩm (Item Card) trong danh sách đấu giá.
+ */
 public class ItemCardController {
 
     @FXML private HBox cardRoot;

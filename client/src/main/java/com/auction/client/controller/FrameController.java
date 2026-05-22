@@ -12,6 +12,9 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * Controller cơ sở (Base Controller) quản lý khung giao diện chung.
+ */
 public class FrameController {
 
     @FXML

@@ -27,6 +27,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
+/**
+ * Controller xử lý logic hiển thị chi tiết phiên đấu giá dành riêng cho người bán.
+ */
 public class SellerAuctionDetailController {
 
     // ── HEADER ──────────────────────────────────────────────────
