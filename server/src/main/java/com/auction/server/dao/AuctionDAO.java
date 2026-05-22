@@ -205,12 +205,12 @@ public class AuctionDAO {
                     u.balance - (
                       SELECT COALESCE(SUM(other.current_price), 0)
                       FROM (
-                          SELECT *
-                          FROM auctions
+                        SELECT current_price
+                        FROM auctions
+                        WHERE status = ?
+                          AND highest_bidder_id = ?
+                          AND id <> ?
                       ) other
-                      WHERE other.status = ?
-                        AND other.highest_bidder_id = ?
-                        AND other.id <> a.id
                     )
                   ) >= (
                     CASE
@@ -241,9 +241,10 @@ public class AuctionDAO {
             ps.setDouble(11, amount);
             ps.setString(12, AuctionStatus.RUNNING.name());
             ps.setString(13, bidderId);
-            ps.setString(14, bidderId);
-            ps.setDouble(15, amount);
+            ps.setString(14, id);
+            ps.setString(15, bidderId);
             ps.setDouble(16, amount);
+            ps.setDouble(17, amount);
             return ps.executeUpdate() > 0;
         }
     }
