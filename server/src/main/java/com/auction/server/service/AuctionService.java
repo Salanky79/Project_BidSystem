@@ -275,6 +275,165 @@ public class AuctionService {
         }
     }
 
+    // AUTO-BID ENGINE
+    private void processAutoBids(String auctionId) throws SQLException, ValidationException {
+        // continue auto-bidding until no challenger can outbid anymore
+        int steps = 0;
+        while (steps++ < MAX_AUTO_BID_STEPS_PER_TRIGGER) {
+            Auction auction = auctionDAO.findById(auctionId);
+            try {
+                validateAuctionRunning(auction);
+            } catch (ValidationException e) {
+                return;
+            }
+
+            AutoBidOrder nextOrder;
+            synchronized (autoBidLock) {
+                nextOrder = findBestChallenger(auction);
+            }
+            if (nextOrder == null) {
+                return;
+            }
+
+            double previousPrice = auction.getCurrentHighestBid();
+            double nextAmount = Math.min(nextOrder.getMaxBid(), previousPrice + nextOrder.getIncrement());
+            if (nextAmount <= previousPrice) {
+                synchronized (autoBidLock) {
+                    deactivateAutoBidOrder(nextOrder);
+                }
+                continue;
+            }
+
+            try {
+                placeBidAndBroadcast(auction, nextOrder.getBidder(), nextAmount);
+                Auction refreshedAuction = auctionDAO.findById(auctionId);
+                if (refreshedAuction == null || refreshedAuction.getCurrentHighestBid() <= previousPrice) {
+                    synchronized (autoBidLock) {
+                        deactivateAutoBidOrder(nextOrder);
+                    }
+                    return;
+                }
+            } catch (ValidationException e) {
+                synchronized (autoBidLock) {
+                    deactivateAutoBidOrder(nextOrder);
+                }
+            }
+        }
+    }
+
+    private void deactivateAutoBidOrder(AutoBidOrder order) {
+        order.deactivate();
+        autoBidByAuctionAndBidder.remove(autoBidKey(order.getAuctionId(), order.getBidder().getId()));
+    }
+
+    // Chặn user đặt bid/auto-bid quá khả năng tài chính
+    private void validateBidBudget(
+            String auctionId,
+            String bidderId,
+            double balance,
+            double requestedAmount,
+            boolean replacingCurrentAuctionAutoBid
+    )
+            throws SQLException, ValidationException {
+        double activeAutoBidCommitment = 0;
+        double currentAuctionAutoBidCommitment = 0;
+        Set<String> autoBidAuctionIds = new HashSet<>();
+        synchronized (autoBidLock) {
+            for (AutoBidOrder order : autoBidByAuctionAndBidder.values()) {
+                if (!order.isActive()) {
+                    continue;
+                }
+                if (!order.getBidder().getId().equals(bidderId)) {
+                    continue;
+                }
+                if (order.getAuctionId().equals(auctionId)) {
+                    if (!replacingCurrentAuctionAutoBid) {
+                        currentAuctionAutoBidCommitment = Math.max(currentAuctionAutoBidCommitment, order.getMaxBid());
+                    }
+                    continue;
+                }
+                activeAutoBidCommitment += order.getMaxBid();
+                autoBidAuctionIds.add(order.getAuctionId());
+            }
+        }
+
+        Set<String> excludedAuctionIds = new HashSet<>(autoBidAuctionIds);
+        excludedAuctionIds.add(auctionId);
+        double winningBidCommitment = auctionDAO.sumRunningWinningBidsByBidder(bidderId, excludedAuctionIds);
+
+
+        double currentAuctionCommitment = Math.max(requestedAmount, currentAuctionAutoBidCommitment);
+        double required = currentAuctionCommitment + activeAutoBidCommitment + winningBidCommitment;
+        if (required > balance) {
+            throw new ValidationException("Bid rejected: amount exceeds available balance after active commitments.");
+        }
+    }
+
+    // tìm auto-bidder mạnh nhất có thể outbid current winner
+    private AutoBidOrder findBestChallenger(Auction auction) {
+        PriorityBlockingQueue<AutoBidOrder> queue = autoBidQueues.get(auction.getId());
+        if (queue == null) {
+            return null;
+        }
+
+        // poll() sẽ remove order nên cần lưu tạm vào skipped
+        List<AutoBidOrder> skipped = new ArrayList<>();
+        AutoBidOrder selected = null;
+        String highestBidderId = auction.getHighestBidder() == null ? null : auction.getHighestBidder().getId();
+
+        while (!queue.isEmpty()) {
+            AutoBidOrder order = queue.poll();
+            if (!order.isActive()) {
+                continue;
+            }
+            // nếu mà giá maxBid hiện tại bé hơn giá max hiện tại => hủy autoBid
+            if (order.getMaxBid() <= auction.getCurrentHighestBid()) {
+                deactivateAutoBidOrder(order);
+                continue;
+            }
+            if (order.getBidder().getId().equals(highestBidderId)) {
+                skipped.add(order);
+                continue;
+            }
+            // nếu gặp người hợp lệ thì chọn luôn
+            selected = order;
+            break;
+        }
+
+        for (AutoBidOrder order : skipped) {
+            queue.offer(order);
+        }
+        if (selected != null) {
+            queue.offer(selected);
+        }
+        return selected;
+    }
+
+    private PriorityBlockingQueue<AutoBidOrder> newAutoBidQueue() {
+        return new PriorityBlockingQueue<>(
+                11,
+                Comparator.<AutoBidOrder>comparingDouble(AutoBidOrder::getMaxBid)
+                        .reversed()
+                        .thenComparing(Comparator.comparingDouble(AutoBidOrder::getIncrement).reversed())
+                        .thenComparingLong(AutoBidOrder::getSequence)
+        );
+    }
+
+    private void validateAuctionRunning(Auction auction) throws ValidationException {
+        if (auction == null) {
+            throw new ValidationException("Auction not found.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isAfter(auction.getEndTime()) || now.isBefore(auction.getStartTime())) {
+            throw new ValidationException("Auction is not running.");
+        }
+    }
+
+    private String autoBidKey(String auctionId, String bidderId) {
+        return auctionId + ":" + bidderId;
+    }
+
     private LocalDateTime parseDateTime(String dateTimeStr) throws ValidationException {
         try {
             return LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -313,3 +472,4 @@ public class AuctionService {
         }
     }
 }
+

@@ -3,6 +3,7 @@ package com.auction.server.dao;
 import com.auction.server.util.DatabaseConnection;
 import com.auction.server.util.MapAuctionDB;
 import com.auction.share.enums.AuctionStatus;
+import com.auction.share.enums.Category;
 import com.auction.share.models.auction.Auction;
 import com.auction.share.models.item.Item;
 import com.auction.share.models.user.Bidder;
@@ -20,6 +21,42 @@ import java.util.List;
 import java.time.LocalDateTime;
 
 public class AuctionDAO {
+    private static final String LIST_AUCTIONS_SELECT = """
+            SELECT
+              a.id AS auction_id,
+              a.current_price AS auction_current_price,
+              a.highest_bidder_id AS auction_highest_bidder_id,
+              a.start_time AS auction_start_time,
+              a.end_time AS auction_end_time,
+              a.status AS auction_status,
+              i.id AS item_id,
+              i.seller_id AS item_seller_id,
+              i.name AS item_name,
+              i.category AS item_category,
+              i.starting_price AS item_starting_price,
+              i.description AS item_description,
+              s.id AS seller_id,
+              s.fullname AS seller_fullname,
+              s.username AS seller_username,
+              s.password AS seller_password,
+              s.phoneNumber AS seller_phone,
+              s.email AS seller_email,
+              s.address AS seller_address,
+              s.balance AS seller_balance,
+              h.id AS bidder_id,
+              h.fullname AS bidder_fullname,
+              h.username AS bidder_username,
+              h.password AS bidder_password,
+              h.phoneNumber AS bidder_phone,
+              h.email AS bidder_email,
+              h.address AS bidder_address,
+              h.balance AS bidder_balance
+            FROM auctions a
+            JOIN items i ON i.id = a.item_id
+            JOIN users s ON s.id = a.seller_id
+            LEFT JOIN users h ON h.id = a.highest_bidder_id
+            """;
+
     private final ItemDAO itemDAO = new ItemDAO();
     private final UserDAO userDAO = new UserDAO();
 
@@ -76,13 +113,13 @@ public class AuctionDAO {
 
     public List<Auction> findAll() throws SQLException {
         List<Auction> list = new ArrayList<>();
-        String sql = "SELECT * FROM auctions ORDER BY start_time DESC";
+        String sql = LIST_AUCTIONS_SELECT + " ORDER BY a.start_time DESC";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
              
             while (rs.next()) {
-                Auction auction = extractAuction(rs);
+                Auction auction = extractAuctionFromJoin(rs);
                 if (auction != null) {
                     list.add(auction);
                 }
@@ -93,14 +130,14 @@ public class AuctionDAO {
 
     public List<Auction> findByStatus(AuctionStatus status) throws SQLException {
         List<Auction> list = new ArrayList<>();
-        String sql = "SELECT * FROM auctions WHERE status = ? ORDER BY start_time DESC";
+        String sql = LIST_AUCTIONS_SELECT + " WHERE a.status = ? ORDER BY a.start_time DESC";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, status.name());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Auction auction = extractAuction(rs);
+                    Auction auction = extractAuctionFromJoin(rs);
                     if (auction != null) {
                         list.add(auction);
                     }
@@ -378,5 +415,93 @@ public class AuctionDAO {
         }
 
         return MapAuctionDB.mapAuction(rs, item, seller, highestBidder);
+    }
+
+    private Auction extractAuctionFromJoin(ResultSet rs) throws SQLException {
+        Item item = mapJoinedItem(rs);
+        Seller seller = mapJoinedSeller(rs);
+        Bidder highestBidder = mapJoinedHighestBidder(rs);
+        if (item == null || seller == null) {
+            return null;
+        }
+
+        Timestamp startTimestamp = rs.getTimestamp("auction_start_time");
+        Timestamp endTimestamp = rs.getTimestamp("auction_end_time");
+        Auction auction = new Auction(
+                item,
+                seller,
+                startTimestamp != null ? startTimestamp.toLocalDateTime() : null,
+                endTimestamp != null ? endTimestamp.toLocalDateTime() : null
+        );
+        auction.setID(rs.getString("auction_id"));
+
+        String status = rs.getString("auction_status");
+        if (status != null) {
+            switch (AuctionStatus.valueOf(status)) {
+                case RUNNING -> auction.markRunning();
+                case FINISHED -> auction.markFinished();
+                case CANCELED -> auction.markCanceled();
+                case OPEN -> {
+                }
+            }
+        }
+
+        if (highestBidder != null) {
+            auction.setHighestBid(highestBidder, rs.getDouble("auction_current_price"));
+        }
+        return auction;
+    }
+
+    private Item mapJoinedItem(ResultSet rs) throws SQLException {
+        String categoryRaw = rs.getString("item_category");
+        Category category;
+        try {
+            category = Category.valueOf(categoryRaw.trim().toUpperCase());
+        } catch (IllegalArgumentException | NullPointerException e) {
+            category = Category.ITEM;
+        }
+
+        Item item = new Item(
+                rs.getString("item_name"),
+                rs.getString("item_description"),
+                rs.getDouble("item_starting_price"),
+                rs.getString("item_seller_id"),
+                category
+        );
+        item.setID(rs.getString("item_id"));
+        return item;
+    }
+
+    private Seller mapJoinedSeller(ResultSet rs) throws SQLException {
+        Seller seller = new Seller(
+                rs.getString("seller_username"),
+                rs.getString("seller_password"),
+                rs.getString("seller_fullname"),
+                rs.getString("seller_phone"),
+                rs.getString("seller_email"),
+                rs.getString("seller_address")
+        );
+        seller.setBalance(rs.getDouble("seller_balance"));
+        seller.setID(rs.getString("seller_id"));
+        return seller;
+    }
+
+    private Bidder mapJoinedHighestBidder(ResultSet rs) throws SQLException {
+        String bidderId = rs.getString("bidder_id");
+        if (bidderId == null) {
+            return null;
+        }
+
+        Bidder bidder = new Bidder(
+                rs.getString("bidder_username"),
+                rs.getString("bidder_password"),
+                rs.getString("bidder_fullname"),
+                rs.getString("bidder_phone"),
+                rs.getString("bidder_email"),
+                rs.getString("bidder_address")
+        );
+        bidder.setBalance(rs.getDouble("bidder_balance"));
+        bidder.setID(bidderId);
+        return bidder;
     }
 }
