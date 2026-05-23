@@ -3,105 +3,102 @@ package com.auction.share.DTO;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * Đối tượng truyền dữ liệu (DTO) chứa thông tin chi tiết của một phiên đấu giá.
- */
+/** Đối tượng truyền dữ liệu (DTO) chứa thông tin chi tiết của một phiên đấu giá. */
 public class AuctionDetailDTO implements Serializable {
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    private final String auctionId;
-    private final String itemName;
-    private final String description;
-    private final String category;
-    private final String sellerName;
-    private final double startingPrice;
-    private final double currentPrice;
-    private final double bidStep;
-    private final String status;
-    private final String startTime;
-    private final String endTime;
-    private final String highestBidderName;
-    private final List<BidDTO> bidHistory;
+  private final String auctionId;
+  private final String itemName;
+  private final String description;
+  private final String category;
+  private final String sellerName;
+  private final double startingPrice;
+  private final double currentPrice;
+  private final double bidStep;
+  private final String status;
+  private final String startTime;
+  private final String endTime;
+  private final String highestBidderName;
+  private final List<BidDTO> bidHistory;
 
-    public AuctionDetailDTO(
-            String auctionId,
-            String itemName,
-            String description,
-            String category,
-            String sellerName,
-            double startingPrice,
-            double currentPrice,
-            double bidStep,
-            String status,
-            String startTime,
-            String endTime,
-            String highestBidderName,
-            List<BidDTO> bidHistory
-    ) {
-        this.auctionId = auctionId;
-        this.itemName = itemName;
-        this.description = description;
-        this.category = category;
-        this.sellerName = sellerName;
-        this.startingPrice = startingPrice;
-        this.currentPrice = currentPrice;
-        this.bidStep = bidStep;
-        this.status = status;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.highestBidderName = highestBidderName;
-        this.bidHistory = bidHistory;
-    }
+  public AuctionDetailDTO(
+      String auctionId,
+      String itemName,
+      String description,
+      String category,
+      String sellerName,
+      double startingPrice,
+      double currentPrice,
+      double bidStep,
+      String status,
+      String startTime,
+      String endTime,
+      String highestBidderName,
+      List<BidDTO> bidHistory) {
+    this.auctionId = auctionId;
+    this.itemName = itemName;
+    this.description = description;
+    this.category = category;
+    this.sellerName = sellerName;
+    this.startingPrice = startingPrice;
+    this.currentPrice = currentPrice;
+    this.bidStep = bidStep;
+    this.status = status;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.highestBidderName = highestBidderName;
+    this.bidHistory = bidHistory;
+  }
 
-    public String getAuctionId() {
-        return auctionId;
-    }
+  public String getAuctionId() {
+    return auctionId;
+  }
 
-    public String getItemName() {
-        return itemName;
-    }
+  public String getItemName() {
+    return itemName;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public String getCategory() {
-        return category;
-    }
+  public String getCategory() {
+    return category;
+  }
 
-    public String getSellerName() {
-        return sellerName;
-    }
+  public String getSellerName() {
+    return sellerName;
+  }
 
-    public double getStartingPrice() {
-        return startingPrice;
-    }
+  public double getStartingPrice() {
+    return startingPrice;
+  }
 
-    public double getCurrentPrice() {
-        return currentPrice;
-    }
+  public double getCurrentPrice() {
+    return currentPrice;
+  }
 
-    public double getBidStep() {
-        return bidStep;
-    }
+  public double getBidStep() {
+    return bidStep;
+  }
 
-    public String getStatus() {
-        return status;
-    }
+  public String getStatus() {
+    return status;
+  }
 
-    public String getStartTime() {
-        return startTime;
-    }
+  public String getStartTime() {
+    return startTime;
+  }
 
-    public String getEndTime() {
-        return endTime;
-    }
+  public String getEndTime() {
+    return endTime;
+  }
 
-    public String getHighestBidderName() {
-        return highestBidderName;
-    }
+  public String getHighestBidderName() {
+    return highestBidderName;
+  }
 
-    public List<BidDTO> getBidHistory() {
-        return bidHistory;
-    }
+  public List<BidDTO> getBidHistory() {
+    return bidHistory;
+  }
 }
