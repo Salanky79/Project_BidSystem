@@ -2,6 +2,9 @@ package com.auction.server.model;
 
 import java.time.LocalDateTime;
 
+/**
+ * Lớp mô hình (Model) lưu trữ thông tin cấu hình đặt giá tự động (Auto-bid) của một người dùng.
+ */
 public class AutoBidConfig {
     private final String bidderId;
     private final String auctionId;

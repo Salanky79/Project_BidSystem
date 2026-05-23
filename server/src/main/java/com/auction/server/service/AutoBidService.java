@@ -16,6 +16,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Dịch vụ xử lý logic đặt giá tự động (Auto-bid), tự động ra giá thay người dùng.
+ */
 public class AutoBidService {
     private static final int MAX_STEPS_PER_TRIGGER = 200;
 

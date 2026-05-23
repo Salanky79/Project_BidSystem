@@ -13,6 +13,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
+/**
+ * Tiện ích hỗ trợ ánh xạ (mapping) dữ liệu từ ResultSet (Database) thành đối tượng Item, Auction.
+ */
 public final class MapAuctionDB {
 
     public static Item mapItem(ResultSet rs) throws SQLException {

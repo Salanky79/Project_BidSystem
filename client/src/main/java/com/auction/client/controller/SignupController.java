@@ -23,9 +23,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-/**
- * Controller xử lý logic giao diện Đăng ký tài khoản (Signup).
- */
 public class SignupController {
     private final UserService userService = ClientContext.userService();
 
@@ -165,7 +162,6 @@ public class SignupController {
             RegisterRequest request = new RegisterRequest(username, password, fullName, role, phoneNumber, email, address);
             userService.signup(
                     request,
-                    // Platform.runLater đưa việc xử lý kết quả đăng ký về luồng chính JavaFX
                     response -> Platform.runLater(() -> {
                         if (true) {
                             openDashboard(role, fullName);

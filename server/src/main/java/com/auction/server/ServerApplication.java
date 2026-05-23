@@ -21,10 +21,14 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Lớp khởi chạy hệ thống Server, cấu hình các service, thread pool và socket lắng nghe.
+ */
 public class ServerApplication {
-    //tự tạo thread nếu thiếu + tái sử dụng thread cũ
+    // thread pool tự tạo thêm luồng khi cần và tái sử dụng luồng nhàn rỗi cho Client
+
     private static final ExecutorService clientExecutor = Executors.newCachedThreadPool();
-    // thread nề => scheduler
+    // thread nền duy nhất dành cho việc chạy vòng lặp Scheduler
     private static final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
     private static final int port = Integer.parseInt(
             System.getenv().getOrDefault("PORT", "8080"));
@@ -49,9 +53,7 @@ public class ServerApplication {
         AutoBidService autoBidService = new AutoBidService(autoBidRegistry, auctionService);
         auctionService.setAutoBidService(autoBidService);
         AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionDao, 1000);
-        // REALTIME DEALER
-        // vẫn phải check validate cho logic ko chỉ check mỗi status
-        // status quan trọn cho nhiều business states
+        // chạy ngầm bộ đếm thời gian đấu giá (cập nhật trạng thái liên tục)
         backgroundExecutor.submit(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
@@ -75,7 +77,7 @@ public class ServerApplication {
             while(!serverSocket.isClosed()){
                 Socket clientSocket = serverSocket.accept();
                 clientExecutor.submit(new AuctionServer(clientSocket, requestHandler, subscriptionRegistry));
-            } // tao mot thread de xu ly client vua connect
+            } // giao việc xử lý client socket cho một thread độc lập trong pool
         } catch (IOException e) {
             e.printStackTrace();
         }

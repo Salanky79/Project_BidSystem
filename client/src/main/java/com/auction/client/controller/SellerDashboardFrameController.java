@@ -10,9 +10,6 @@ import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 
-/**
- * Controller quản lý khung giao diện chung dành riêng cho người bán (Seller).
- */
 public class SellerDashboardFrameController extends FrameController {
 
     @FXML private Label  usernameLabel;

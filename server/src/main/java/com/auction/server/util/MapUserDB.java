@@ -8,6 +8,9 @@ import com.auction.share.models.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Tiện ích hỗ trợ ánh xạ (mapping) dữ liệu từ ResultSet (Database) thành đối tượng User theo từng Role cụ thể.
+ */
 public final class MapUserDB {
     private MapUserDB() {
     }

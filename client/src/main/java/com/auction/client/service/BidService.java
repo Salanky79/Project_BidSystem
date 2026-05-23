@@ -9,10 +9,6 @@ import com.auction.share.exceptions.ValidationException;
 
 import java.util.function.Consumer;
 
-/**
- * Dịch vụ xử lý các nghiệp vụ liên quan đến việc đặt cược và tự động trả giá (auto-bid) phía Client.
- * Giao tiếp với Server thông qua SocketClient.
- */
 public class BidService {
     private final SocketClient socketClient;
 

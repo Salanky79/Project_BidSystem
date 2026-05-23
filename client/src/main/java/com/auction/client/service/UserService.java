@@ -12,10 +12,6 @@ import com.auction.share.exceptions.ValidationException;
 
 import java.util.function.Consumer;
 
-/**
- * Dịch vụ xử lý các nghiệp vụ liên quan đến người dùng (đăng nhập, đăng ký, hồ sơ) phía Client.
- * Giao tiếp với Server thông qua SocketClient.
- */
 public class UserService {
     private final SocketClient socketClient;
     private final SessionManager sessionManager;
@@ -25,10 +21,13 @@ public class UserService {
         this.sessionManager = sessionManager;
     }
 
-    /**
-     * Thực hiện đăng nhập.
-     */
-    // dùng callback async (Consumer) để UI không bị đơ
+    // Consumer cho phép nhận vào biến chứa hàm (lambda ->///)
+    // onResponse =
+    // response -> {
+    //    System.out.println(response);
+    //}
+    // onResponse là callback chạy từ login controller
+    // async + callback => tránh tình trạng UI bị đơ
     public void login(LoginRequest request, Consumer<Response<?>> onResponse) throws ValidationException {
         if (request == null) {
             throw new ValidationException("Request is required.");
@@ -45,11 +44,13 @@ public class UserService {
                 sessionManager.setCurrentUserId(userDTO.getId());
             }
             if (onResponse != null) {
-                // gọi callback (thường chứa Platform.runLater để update UI)
+                // gọi cái hàm ( biến chứa hàm ) // chính là Platform.runlater
+                // thực thi callback đang nằm trong Consumer
                 onResponse.accept(response);
             }
         });
     }
+
 
     public void signup(RegisterRequest request, Consumer<Response<?>> onResponse) throws ValidationException {
         if (request == null) {
@@ -121,9 +122,7 @@ public class UserService {
         socketClient.send(new UpdateProfileRequest(null, fullName.trim(), null, normalizedPhone, normalizedEmail, null), onResponse);
     }
 
-    /**
-     * Trả về SessionManager để các controller có thể đọc currentUserId.
-     * */
+    /** Trả về SessionManager để các controller có thể đọc currentUserId. */
     public SessionManager getSessionManager() {
         return sessionManager;
     }

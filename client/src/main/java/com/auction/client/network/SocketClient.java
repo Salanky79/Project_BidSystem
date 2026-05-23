@@ -15,10 +15,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-/**
- * Quản lý kết nối mạng (Socket) giữa Client và Server.
- * Xử lý việc gửi yêu cầu (Request) và nhận phản hồi (Response) bất đồng bộ.
- */
 public class SocketClient {
     private final String host;
     private final int port;
@@ -37,7 +33,7 @@ public class SocketClient {
         this.host = host;
         this.port = port;
         this.sessionManager = sessionManager;
-        // tự động tạo luồng mới hoặc tái sử dụng luồng nhàn rỗi
+        // mỗi task một virtual thread riêng
         this.executorService = Executors.newCachedThreadPool();
         this.callbacks = new ConcurrentHashMap<>();
     }
@@ -95,7 +91,6 @@ public class SocketClient {
             try {
                 while (socket != null && !socket.isClosed()) {
                     Object incoming = inputStream.readObject();
-                    // pattern matching (Java 16): tự động ép kiểu incoming thành response
                     if (incoming instanceof Response<?> response) {
                         if (response.getRequestId() == null) {
                             continue;

@@ -5,6 +5,9 @@ import com.auction.server.dao.AuctionDAO;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Luồng chạy ngầm để quét và cập nhật trạng thái của các phiên đấu giá (Mở -> Đang chạy -> Kết thúc).
+ */
 public class AuctionStatusScheduler implements Runnable {
     private final AuctionDAO auctionDAO;
     private final long intervalMillis;
@@ -23,7 +26,7 @@ public class AuctionStatusScheduler implements Runnable {
     public void run() {
         while (running.get() && !Thread.currentThread().isInterrupted()) {
             try {
-                // cu moi ms kiem tra xem auction nao con chay hay da xog
+                // mỗi chu kỳ (interval) kiểm tra trạng thái các phiên đấu giá
                 auctionDAO.markOpenAuctionsAsRunning();
                 auctionDAO.markRunningAuctionsAsFinished();
                 Thread.sleep(intervalMillis);
