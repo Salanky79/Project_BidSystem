@@ -10,11 +10,12 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
+
 import com.auction.client.service.WatchlistService;
 
 public class HomeController extends HomeFrameController {
@@ -23,7 +24,6 @@ public class HomeController extends HomeFrameController {
 
     // ── FXML bindings ──────────────────────────────────────────────────────────
     @FXML private GridPane auctionGrid;
-    @FXML private VBox Content;
 
     // Category filter buttons
     @FXML private Button btnAll;
@@ -147,7 +147,7 @@ public class HomeController extends HomeFrameController {
         if ("Watchlist".equalsIgnoreCase(filterStatus)) {
             return WatchlistService.getInstance().isFollowed(auctionId);
         }
-        if ("DRAFT".equalsIgnoreCase(status) || "CANCELED".equalsIgnoreCase(status)) {
+        if ("CANCELED".equalsIgnoreCase(status)) {
             return false;
         }
         return "All".equalsIgnoreCase(filterStatus) || status.equalsIgnoreCase(filterStatus);
@@ -166,8 +166,7 @@ public class HomeController extends HomeFrameController {
             case "Bags"     -> "Hand Bag".equalsIgnoreCase(category) || "Clothing".equalsIgnoreCase(category);
             case "Fine Art" -> "Art".equalsIgnoreCase(category);
             case "Cars"     -> "Car".equalsIgnoreCase(category);
-            case "Others"   -> !List.of("Jewelry", "Watch", "Hand Bag", "Clothing", "Art", "Car")
-                                    .stream().anyMatch(c -> c.equalsIgnoreCase(finalCategory));
+            case "Others"   -> Stream.of("Jewelry", "Watch", "Hand Bag", "Clothing", "Art", "Car").noneMatch(c -> c.equalsIgnoreCase(finalCategory));
             default         -> true;   // "All" or unknown → show everything
         };
     }

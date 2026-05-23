@@ -36,10 +36,6 @@ public class Auction extends Entity {
         this.status = AuctionStatus.OPEN;
     }
 
-    public void markDraft() {
-        this.status = AuctionStatus.DRAFT;
-    }
-
     public void markRunning() {
         this.status = AuctionStatus.RUNNING;
     }

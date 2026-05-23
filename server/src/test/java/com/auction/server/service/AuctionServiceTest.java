@@ -178,10 +178,9 @@ class AuctionServiceTest {
                 "Phone",
                 "Desc",
                 "item",
-                100,
+                100.0,
                 start.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                end.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                false
+                end.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         );
     }
 

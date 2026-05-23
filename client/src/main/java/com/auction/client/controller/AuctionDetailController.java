@@ -13,9 +13,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -23,10 +21,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -51,8 +47,6 @@ public class AuctionDetailController {
     @FXML private Button         btnWeek;
     @FXML private Button         btnMonth;
     @FXML private LineChart<String, Number> priceHistoryChart;
-    @FXML private CategoryAxis   chartXAxis;
-    @FXML private NumberAxis     chartYAxis;
 
     @FXML private Label sellerNameLabel;
     @FXML private Label ratingLabel;
@@ -64,7 +58,7 @@ public class AuctionDetailController {
     @FXML private Label     startTimeLabel;
     @FXML private Label     endTimeLabel;
     @FXML private Label     endsInLabel;
-    @FXML private ImageView productImageView;
+    @FXML private Label     productIconLabel;
     @FXML private TextField bidInputField;
     @FXML private Button    placeBidButton;
     @FXML private Label     minBidLabel;
@@ -129,7 +123,7 @@ public class AuctionDetailController {
         loadChartData("month");
 
         // Custom cell factory for comments ListView
-        commentsListView.setCellFactory(lv -> new ListCell<String>() {
+        commentsListView.setCellFactory(lv -> new ListCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -217,7 +211,10 @@ public class AuctionDetailController {
         endTimeLabel.setText(time);
         startTimeLabel.setText(LocalDateTime.now().format(DISPLAY_FMT));
         sellerNameLabel.setText("Unknown");
-        descriptionLabel.setText("No description provided.");
+        descriptionLabel.setText("Loading description...");
+        if (productIconLabel != null && icon != null) {
+            productIconLabel.setText(icon);
+        }
         minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + bidStep));
         resetAutoBidState();
 
@@ -238,64 +235,22 @@ public class AuctionDetailController {
         updateFollowButtonStyle();
 
         // Fetch latest data from server
-        com.auction.client.ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> {
-            javafx.application.Platform.runLater(() -> {
-                if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
-                    this.currentPrice = detail.getCurrentPrice();
-                    this.bidStep = detail.getBidStep();
-                    this.totalBids = detail.getBidHistory() != null ? detail.getBidHistory().size() : this.totalBids;
-                    
-                    this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));
-                    this.totalBidsLabel.setText(String.valueOf(this.totalBids));
-                    this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
-                    this.sellerNameLabel.setText(detail.getSellerName());
-                    this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description provided.");
-                }
-            });
-        });
-    }
+        com.auction.client.ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
+            if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
+                this.currentPrice = detail.getCurrentPrice();
+                this.bidStep = detail.getBidStep();
+                this.totalBids = detail.getBidHistory() != null ? detail.getBidHistory().size() : this.totalBids;
 
-    public void setData(
-            String icon,
-            String category,
-            String name,
-            double price,
-            int    bids,
-            String startDate,
-            String endDate,
-            String listedBy,
-            String description,
-            String status
-    ) {
-        this.currentPrice = price;
-        this.totalBids    = bids;
-
-        productTitleLabel.setText(name);
-        currentPriceLabel.setText(String.format("%.0f VND", price));
-        totalBidsLabel.setText(String.valueOf(bids));
-        startTimeLabel.setText(startDate);
-        endTimeLabel.setText(endDate);
-        sellerNameLabel.setText(listedBy);
-        descriptionLabel.setText(description);
-        minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + bidStep));
-        resetAutoBidState();
-
-        // Parse end time for countdown
-        try {
-            this.endTime = LocalDateTime.parse(endDate, ISO_FMT);
-        } catch (Exception ex) {
-            try {
-                this.endTime = LocalDateTime.parse(endDate, DISPLAY_FMT);
-            } catch (Exception ignored) {
-                this.endTime = null;
+                this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));
+                this.totalBidsLabel.setText(String.valueOf(this.totalBids));
+                this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
+                this.sellerNameLabel.setText(detail.getSellerName());
+                this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description provided.");
             }
-        }
-        startCountdown();
-        
-        // Sync initial follow state
-        this.isFollowing = WatchlistService.getInstance().isFollowed(this.auctionId);
-        updateFollowButtonStyle();
+        }));
     }
+
+
 
     // ─────────────────────────────────────────────────────────────
     // Static factory – opens a new Stage with AuctionDetailv2.fxml
