@@ -20,13 +20,15 @@ public class BidBroadcastService {
     public void broadcastBidUpdate(BidUpdateEvent event) {
         Response<BidUpdateEvent> pushMessage = Response.success(BID_UPDATED, event);
 
-        for (ClientSession session : subscriptionRegistry.getSubscribers(event.getAuctionId())) {
-            try {
-                session.send(pushMessage);
-            } catch (IOException ignored) {
-                // xoá client đó khỏi tất cả auction subscription
-                subscriptionRegistry.unsubscribeAll(session);
-            }
-        }
+        subscriptionRegistry.getSubscribers(event.getAuctionId())
+                .parallelStream()
+                .forEach(session -> {
+                    try {
+                        session.send(pushMessage);
+                    } catch (IOException ignored) {
+                        // xoá client đó khỏi tất cả auction subscription
+                        subscriptionRegistry.unsubscribeAll(session);
+                    }
+                });
     }
 }

@@ -25,9 +25,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import javafx.util.StringConverter;
 
-/**
- * Controller xử lý logic giao diện tạo mới phiên đấu giá.
- */
 public class SellController implements Initializable {
     private final AuctionService auctionService = ClientContext.auctionService();
 

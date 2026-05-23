@@ -22,9 +22,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-/**
- * Controller xử lý logic giao diện hồ sơ người dùng (Profile).
- */
 public class ProfileController implements Initializable {
     private final UserService userService = ClientContext.userService();
 

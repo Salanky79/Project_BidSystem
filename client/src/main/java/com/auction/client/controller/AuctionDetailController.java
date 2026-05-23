@@ -33,9 +33,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
-/**
- * Controller xử lý logic giao diện hiển thị chi tiết phiên đấu giá.
- */
 public class AuctionDetailController {
 
     private final BidService bidService = ClientContext.bidService();

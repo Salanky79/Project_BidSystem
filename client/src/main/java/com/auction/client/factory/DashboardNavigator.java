@@ -5,9 +5,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-/**
- * Lớp tiện ích (Utility class) để điều hướng (navigate) giữa các màn hình Dashboard.
- */
 public final class DashboardNavigator {
 
     private DashboardNavigator() {
@@ -23,7 +20,6 @@ public final class DashboardNavigator {
         stage.show();
     }
 
-    // áp dụng Factory Method pattern: tạo dashboard tương ứng dựa trên role (vai trò)
     private static DashboardProduct createDashboard(String role) {
         RoleUIFactory factory;
         if ("Seller".equalsIgnoreCase(role)) {

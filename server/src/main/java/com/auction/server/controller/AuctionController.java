@@ -10,17 +10,20 @@ import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * Controller xử lý các yêu cầu liên quan đến phiên đấu giá (tạo mới, hủy, đặt giá, tự động đấu giá).
+ */
 public class AuctionController {
     private final AuctionService auctionService;
     private final AutoBidService autoBidService;
 
-    // quan li chuc nang dau gia
+    // khởi tạo controller với các service tương ứng
     public AuctionController(AuctionService auctionService, AutoBidService autoBidService) {
         this.auctionService = auctionService;
         this.autoBidService = autoBidService;
     }
 
-    // những thông tin cần cho client ( ket qua thong qua server tra ve)
+    // xử lý logic tạo phiên đấu giá và chuẩn bị DTO trả về cho client
     public Response<AuctionSummaryDTO> createAuction(CreateAuctionRequest request) throws Exception {
         validateRequiredText(request.getSellerId(), "Seller ID is required.");
         validateRequiredText(request.getItemName(), "Item Name is required.");

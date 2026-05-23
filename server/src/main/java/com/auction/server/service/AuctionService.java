@@ -32,6 +32,9 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Dịch vụ xử lý nghiệp vụ cốt lõi của các phiên đấu giá (tạo, hủy, đặt giá, kiểm tra trạng thái).
+ */
 public class AuctionService {
     private final AuctionDAO auctionDAO;
     private final ItemDAO itemDAO;

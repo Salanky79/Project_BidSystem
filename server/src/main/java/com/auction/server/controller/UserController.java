@@ -15,11 +15,13 @@ import com.auction.share.models.user.Bidder;
 import com.auction.share.models.user.Seller;
 import com.auction.share.models.user.User;
 
+/**
+ * Controller xử lý các yêu cầu liên quan đến tài khoản người dùng (đăng nhập, đăng ký, cập nhật hồ sơ).
+ */
 public class UserController {
     private final UserService userService;
 
-    // RequestHandler → UserController → UserService → DAO
-    // kiem tra validate login, register
+    // luồng xử lý: RequestHandler → UserController → UserService → DAO
     public UserController(UserService userService) {
         this.userService = userService;
     }
@@ -30,7 +32,7 @@ public class UserController {
         validateRequiredText(username, "Username is required.");
         validateRequiredText(password, "Password is required.");
 
-        // goi service => goi DAO
+        // gọi hàm logic nghiệp vụ từ service
         User user = userService.login(username, password);
         return Response.success("Login success.", toUserDTO(user));
     }
@@ -76,10 +78,10 @@ public class UserController {
     }
 
 
-    //HELPER
-    // Tao object User trong he thong
+    // HELPER: mapping request DTO thành entity User trong hệ thống
     private User toUser(RegisterRequest request) {
         Role role = Role.valueOf(request.getRole().trim().toUpperCase());
+        // switch expression khởi tạo đối tượng tương ứng theo enum Role
         return switch (role) {
             case BIDDER -> new Bidder(
                     request.getUsername(),
@@ -106,7 +108,7 @@ public class UserController {
         };
     }
 
-    // map user cua client gui len server voi ca DATABSE
+    // HELPER: mapping entity User thành profile DTO để trả về cho client
     private UserDTO toUserDTO(User user) {
         String phoneNumber = null;
         String email = null;

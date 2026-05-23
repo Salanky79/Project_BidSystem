@@ -26,23 +26,26 @@ import com.auction.share.exceptions.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Bộ định tuyến (Router) nhận Request từ Client và điều hướng tới đúng Controller xử lý.
+ */
 public class RequestHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
     private final UserController userController;
     private final AuctionController auctionController;
     private final AuctionSubscriptionRegistry subscriptionRegistry;
 
-    // quet dinh xem request se di dau
+    // khởi tạo handler với các dependency nội bộ
     public RequestHandler(
             UserService userService,
             AuctionService auctionService,
             AutoBidService autoBidService,
             AuctionSubscriptionRegistry subscriptionRegistry
     ) {
-        // can service riêng cho từng client
+        // sử dụng chung các controller nhưng session sẽ được cấp vào từng request riêng
         this.userController = new UserController(userService);
         this.auctionController = new AuctionController(auctionService, autoBidService);
-        // real time dealer
+        // quản lý danh sách đăng ký theo dõi realtime
         this.subscriptionRegistry = subscriptionRegistry;
     }
 
@@ -55,6 +58,7 @@ public class RequestHandler {
         }
 
         try {
+            // switch expression phân tích hành động và chuyển tiếp yêu cầu
             response = switch (request.getAction()) {
                 case Action.LOGIN -> userController.login((LoginRequest) request);
                 case Action.REGISTER -> userController.register((RegisterRequest) request);

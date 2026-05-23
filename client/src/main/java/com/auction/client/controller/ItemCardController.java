@@ -5,9 +5,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import com.auction.client.service.WatchlistService;
 
-/**
- * Controller xử lý logic hiển thị thẻ sản phẩm (Item Card) trong danh sách đấu giá.
- */
 public class ItemCardController {
 
     @FXML private HBox cardRoot;

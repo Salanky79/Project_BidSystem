@@ -13,9 +13,6 @@ import javafx.scene.layout.VBox;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Controller quản lý danh sách các phiên đấu giá do người bán đã tạo.
- */
 public class SellerListController {
 
     @FXML private Label titleLabel;

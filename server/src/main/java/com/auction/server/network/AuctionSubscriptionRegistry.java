@@ -4,6 +4,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Sổ đăng ký (Registry) quản lý các phiên bản Client đang theo dõi realtime từng phiên đấu giá.
+ */
 public class AuctionSubscriptionRegistry {
     private final Map<String, Set<ClientSession>> subscribersByAuction = new ConcurrentHashMap<>();
     private final Map<ClientSession, Set<String>> auctionsBySession = new ConcurrentHashMap<>();
@@ -13,8 +16,7 @@ public class AuctionSubscriptionRegistry {
             return;
         }
 
-        // check nếu chưa có thì tạo hashmap mới
-        // dùng ConcurrentHashMap => tránh race condition => atomic
+        // dùng ConcurrentHashMap.newKeySet() để tránh race condition khi thêm session mới
         subscribersByAuction
                 .computeIfAbsent(auctionId, ignored -> ConcurrentHashMap.newKeySet())
                 .add(session);
