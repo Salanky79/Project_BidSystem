@@ -4,44 +4,46 @@ import java.io.Serializable;
 
 /**
  * Lớp bọc (wrapper) chung cho các phản hồi (response) trả về từ hệ thống.
- * Cú pháp <T> (Generic) cho phép lớp này chứa dữ liệu thuộc nhiều kiểu khác nhau.
+ * Cú pháp {@code <T>} (Generic) cho phép lớp này chứa dữ liệu thuộc nhiều kiểu khác nhau.
  */
 public class Response<T> implements Serializable {
-    private String resquestId;
+  private String resquestId;
 
-    private final boolean success;
-    private final String message;
-    private final T data;
+  private final boolean success;
+  private final String message;
+  private final T data;
 
-    public Response(boolean success, String message, T data) {
-        this.success = success;
-        this.message = message;
-        this.data = data;
-    }
+  public Response(boolean success, String message, T data) {
+    this.success = success;
+    this.message = message;
+    this.data = data;
+  }
 
-    public boolean isSuccess() {
-        return success;
-    }
+  public boolean isSuccess() {
+    return success;
+  }
 
-    public void setRequestId(String resquestId){
-        this.resquestId = resquestId;
-    }
-    public String getRequestId(){
-        return resquestId;
-    }
-    public String getMessage() {
-        return message;
-    }
+  public void setRequestId(String resquestId) {
+    this.resquestId = resquestId;
+  }
 
-    public T getData() {
-        return data;
-    }
+  public String getRequestId() {
+    return resquestId;
+  }
 
-    public static <T> Response<T> success(String message, T data) {
-        return new Response<>(true, message, data);
-    }
+  public String getMessage() {
+    return message;
+  }
 
-    public static <T> Response<T> fail(String message) {
-        return new Response<>(false, message, null);
-    }
+  public T getData() {
+    return data;
+  }
+
+  public static <T> Response<T> success(String message, T data) {
+    return new Response<>(true, message, data);
+  }
+
+  public static <T> Response<T> fail(String message) {
+    return new Response<>(false, message, null);
+  }
 }
