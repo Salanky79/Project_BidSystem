@@ -44,11 +44,6 @@ public class SellerAuctionDetailController {
   @FXML private Button cancelAuctionButton;
   @FXML private TextField bidStepField;
   @FXML private Button saveBidStepButton;
-  @FXML private TextField extendEndTimeField;
-  @FXML private Button saveExtendTimeButton;
-
-  // ── BIDDERS ─────────────────────────────────────────────────
-  @FXML private ListView<String> bidderListView;
 
 
 
@@ -78,13 +73,11 @@ public class SellerAuctionDetailController {
           });
     }
 
-    // Chart filters
     if (priceHistoryChart != null) {
       NumberAxis yAxis = (NumberAxis) priceHistoryChart.getYAxis();
       yAxis.setAutoRanging(true);
       yAxis.setForceZeroInRange(false);
       priceHistoryChart.getData().add(chartSeries);
-      // will be populated after setData() sets currentPrice
     }
 
     if (cancelAuctionButton != null) {
@@ -129,90 +122,10 @@ public class SellerAuctionDetailController {
           });
     }
 
-
-
     if (saveBidStepButton != null) {
       saveBidStepButton.setOnAction(e -> handleSetBidStep());
     }
-
-    if (saveExtendTimeButton != null) {
-      saveExtendTimeButton.setOnAction(e -> handleExtendEndTime());
-    }
-
-    setupBidderList();
   }
-
-  private void setupBidderList() {
-    if (bidderListView == null) return;
-
-    bidderListView
-        .getItems()
-        .addAll(
-            "User A|4.5|Contacted",
-            "User B|3.0|Flagged",
-            "User C|4.8|Pending",
-            "User D|4.2|Confirmed");
-
-    bidderListView.setCellFactory(
-        lv ->
-            new ListCell<>() {
-              @Override
-              protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                  setGraphic(null);
-                  setStyle("-fx-background-color: transparent;");
-                  return;
-                }
-
-                String[] parts = item.split("\\|", 3);
-                String name = parts.length > 0 ? parts[0] : "Unknown";
-                String rating = parts.length > 1 ? parts[1] : "0.0";
-                String status = parts.length > 2 ? parts[2] : "Pending";
-
-                Label iconLabel = new Label("👤");
-                iconLabel.setStyle("-fx-text-fill: #D4AF37; -fx-font-size: 16px;");
-
-                Label nameLabel = new Label(name + " (" + rating + "★)");
-                nameLabel.setStyle(
-                    "-fx-text-fill: #FFFFFF; -fx-font-size: 12px; -fx-font-weight: bold;");
-
-                Label statusLabel = new Label(status);
-                String statusColor =
-                    status.equals("Flagged")
-                        ? "#E57373"
-                        : (status.equals("Pending") ? "#FFD700" : "#4CAF50");
-                statusLabel.setStyle("-fx-text-fill: " + statusColor + "; -fx-font-size: 10px;");
-
-                VBox infoBox = new VBox(1, nameLabel, statusLabel);
-                HBox.setHgrow(infoBox, Priority.ALWAYS);
-
-                Button profileBtn = new Button("👁 Profile");
-                profileBtn.setStyle(
-                    "-fx-background-color: transparent; -fx-border-color: #D4AF37;"
-                        + " -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;"
-                        + " -fx-text-fill: #D4AF37; -fx-font-size: 10px; -fx-padding: 4 8 4 8;"
-                        + " -fx-cursor: hand;");
-
-                Button banBtn = new Button("Ban");
-                banBtn.setStyle(
-                    "-fx-background-color: #B32626; -fx-border-color: #B32626; -fx-border-radius:"
-                        + " 4; -fx-background-radius: 4; -fx-text-fill: #FFFFFF; -fx-font-size:"
-                        + " 10px; -fx-font-weight: bold; -fx-padding: 4 8 4 8; -fx-cursor: hand;");
-
-                HBox row = new HBox(8, iconLabel, infoBox, profileBtn, banBtn);
-                row.setAlignment(Pos.CENTER_LEFT);
-                row.setStyle(
-                    "-fx-background-color: #1A1A1A; -fx-padding: 8 10 8 10; -fx-background-radius:"
-                        + " 6;");
-
-                setGraphic(row);
-                setStyle("-fx-background-color: transparent; -fx-padding: 4 0 4 0;");
-              }
-            });
-  }
-
-
 
   private void handleSetBidStep() {
     if (bidStepField == null || bidStepField.getText().trim().isEmpty()) return;
@@ -246,45 +159,6 @@ public class SellerAuctionDetailController {
     }
   }
 
-  private void handleExtendEndTime() {
-    if (extendEndTimeField == null || extendEndTimeField.getText().trim().isEmpty()) return;
-    try {
-      long minutes = Long.parseLong(extendEndTimeField.getText().trim());
-      com.auction.client.ClientContext.auctionService()
-          .extendEndTime(
-              auctionId,
-              minutes,
-              response ->
-                  Platform.runLater(
-                      () -> {
-                        if (response != null && response.isSuccess()) {
-                          Alert success =
-                              new Alert(
-                                  Alert.AlertType.INFORMATION,
-                                  "Extended end time by " + minutes + " minutes");
-                          success.show();
-                          extendEndTimeField.clear();
-                          if (endTime != null) {
-                            endTime = endTime.plusMinutes(minutes);
-                            if (endTimeLabel != null)
-                              endTimeLabel.setText(endTime.format(DISPLAY_FMT));
-                            updateCountdown();
-                          }
-                        } else {
-                          Alert error =
-                              new Alert(
-                                  Alert.AlertType.ERROR,
-                                  "Failed to extend time: "
-                                      + (response != null
-                                          ? response.getMessage()
-                                          : "Unknown error"));
-                          error.show();
-                        }
-                      }));
-    } catch (NumberFormatException e) {
-      new Alert(Alert.AlertType.ERROR, "Invalid minutes value!").show();
-    }
-  }
 
   public void setData(
       String icon,
