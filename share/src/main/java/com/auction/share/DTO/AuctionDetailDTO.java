@@ -18,7 +18,8 @@ public class AuctionDetailDTO implements Serializable {
   private final String status;
   private final String startTime;
   private final String endTime;
-  private final String highestBidderName;
+   private final String highestBidderName;
+  private final String highestBidderUsername;
   private final List<BidDTO> bidHistory;
 
   public AuctionDetailDTO(
@@ -34,6 +35,7 @@ public class AuctionDetailDTO implements Serializable {
       String startTime,
       String endTime,
       String highestBidderName,
+      String highestBidderUsername,
       List<BidDTO> bidHistory) {
     this.auctionId = auctionId;
     this.itemName = itemName;
@@ -47,6 +49,7 @@ public class AuctionDetailDTO implements Serializable {
     this.startTime = startTime;
     this.endTime = endTime;
     this.highestBidderName = highestBidderName;
+    this.highestBidderUsername = highestBidderUsername;
     this.bidHistory = bidHistory;
   }
 
@@ -96,6 +99,10 @@ public class AuctionDetailDTO implements Serializable {
 
   public String getHighestBidderName() {
     return highestBidderName;
+  }
+
+  public String getHighestBidderUsername() {
+    return highestBidderUsername;
   }
 
   public List<BidDTO> getBidHistory() {

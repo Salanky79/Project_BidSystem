@@ -29,6 +29,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -56,6 +57,9 @@ public class AuctionDetailController {
     @FXML private Label sellerNameLabel;
     @FXML private Label ratingLabel;
     @FXML private Label descriptionLabel;
+    @FXML private VBox winnerCard;
+    @FXML private Region winnerSpacer;
+    @FXML private Label winnerNameLabel;
 
     // ── RIGHT COLUMN ─────────────────────────────────────────────
     @FXML private Label     currentPriceLabel;
@@ -372,6 +376,14 @@ public class AuctionDetailController {
         if (now.isAfter(endTime)) {
             endsInLabel.setText("Ended");
             if (countdownTimeline != null) countdownTimeline.stop();
+            // Fetch final details from server to populate winner
+            com.auction.client.ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
+                if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
+                    showWinnerInfo(detail);
+                } else {
+                    showWinnerInfo(null);
+                }
+            }));
             return;
         }
         long days    = ChronoUnit.DAYS.between(now, endTime);
@@ -447,6 +459,10 @@ public class AuctionDetailController {
                 }
 
                 loadChartData();
+
+                if ("FINISHED".equals(detail.getStatus()) || (this.endTime != null && LocalDateTime.now().isAfter(this.endTime))) {
+                    showWinnerInfo(detail);
+                }
             }
         }));
     }
@@ -456,5 +472,19 @@ public class AuctionDetailController {
         cancelAutoBidButton.setDisable(!autoBidEnabled);
         autoBidMaxInputField.setDisable(autoBidEnabled);
         autoBidIncrementInputField.setDisable(autoBidEnabled);
+    }
+
+    private void showWinnerInfo(com.auction.share.DTO.AuctionDetailDTO detail) {
+        if (winnerCard != null && winnerSpacer != null && winnerNameLabel != null) {
+            winnerSpacer.setVisible(true);
+            winnerSpacer.setManaged(true);
+            winnerCard.setVisible(true);
+            winnerCard.setManaged(true);
+            if (detail != null && detail.getHighestBidderName() != null && !detail.getHighestBidderName().trim().isEmpty()) {
+                winnerNameLabel.setText(detail.getHighestBidderName());
+            } else {
+                winnerNameLabel.setText("No winner identified (No bids)");
+            }
+        }
     }
 }

@@ -39,6 +39,7 @@ public class SellerAuctionDetailController {
   @FXML private Label startTimeLabel;
   @FXML private Label endTimeLabel;
   @FXML private Label endsInLabel;
+  @FXML private Label winnerIdLabel;
 
   // ── CONTROLS ────────────────────────────────────────────────
   @FXML private Button cancelAuctionButton;
@@ -213,6 +214,18 @@ public class SellerAuctionDetailController {
           try {
             this.endTime = LocalDateTime.parse(detail.getEndTime(), ISO_FMT);
           } catch (Exception ignored) {}
+        }
+
+        if (winnerIdLabel != null) {
+          if (detail.getHighestBidderName() != null && !detail.getHighestBidderName().isEmpty()) {
+            String winnerText = detail.getHighestBidderName();
+            if (detail.getHighestBidderUsername() != null && !detail.getHighestBidderUsername().isEmpty()) {
+              winnerText += " (" + detail.getHighestBidderUsername() + ")";
+            }
+            winnerIdLabel.setText(winnerText);
+          } else {
+            winnerIdLabel.setText("No winner identified (No bids)");
+          }
         }
 
         if (priceHistoryChart != null) {

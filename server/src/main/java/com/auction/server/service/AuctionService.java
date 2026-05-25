@@ -181,6 +181,8 @@ public class AuctionService {
 
     String highestBidderName =
         auction.getHighestBidder() != null ? auction.getHighestBidder().getFullName() : null;
+    String highestBidderUsername =
+        auction.getHighestBidder() != null ? auction.getHighestBidder().getUsername() : null;
 
     return new AuctionDetailDTO(
         auction.getId(),
@@ -195,6 +197,7 @@ public class AuctionService {
         auction.getStartTime().format(formatter),
         auction.getEndTime().format(formatter),
         highestBidderName,
+        highestBidderUsername,
         bidHistory);
   }
 
