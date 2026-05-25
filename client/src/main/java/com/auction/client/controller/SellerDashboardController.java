@@ -150,6 +150,9 @@ public class SellerDashboardController {
         && ("End".equalsIgnoreCase(status) || "FINISHED".equalsIgnoreCase(status))) {
       return true;
     }
+    if ("Draft".equalsIgnoreCase(status) || "CANCELED".equalsIgnoreCase(status)) {
+      return false;
+    }
     return "All".equalsIgnoreCase(filter) || status.equalsIgnoreCase(filter);
   }
 

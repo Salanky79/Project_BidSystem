@@ -179,7 +179,7 @@ public class HomeController extends HomeFrameController {
     if ("Watchlist".equalsIgnoreCase(filterStatus)) {
       return WatchlistService.getInstance().isFollowed(auctionId);
     }
-    if ("CANCELED".equalsIgnoreCase(status)) {
+    if ("CANCELED".equalsIgnoreCase(status) || "Draft".equalsIgnoreCase(status)) {
       return false;
     }
     return "All".equalsIgnoreCase(filterStatus) || status.equalsIgnoreCase(filterStatus);
