@@ -31,9 +31,6 @@ public class SellerAuctionDetailController {
   @FXML private Label productTitleLabel;
 
   // ── CHART ───────────────────────────────────────────────────
-  @FXML private Button btnDay;
-  @FXML private Button btnWeek;
-  @FXML private Button btnMonth;
   @FXML private LineChart<String, Number> priceHistoryChart;
 
   // ── STATS ───────────────────────────────────────────────────
@@ -87,9 +84,6 @@ public class SellerAuctionDetailController {
     }
 
     // Chart filters
-    if (btnDay != null) btnDay.setOnAction(e -> loadChartData("day"));
-    if (btnWeek != null) btnWeek.setOnAction(e -> loadChartData("week"));
-    if (btnMonth != null) btnMonth.setOnAction(e -> loadChartData("month"));
     if (priceHistoryChart != null) {
       NumberAxis yAxis = (NumberAxis) priceHistoryChart.getYAxis();
       yAxis.setAutoRanging(true);
@@ -463,40 +457,23 @@ public class SellerAuctionDetailController {
         }
 
         if (priceHistoryChart != null) {
-          loadChartData("month");
+          loadChartData();
         }
       } else {
         // Fallback: load chart with what we have
         if (priceHistoryChart != null) {
-          loadChartData("month");
+          loadChartData();
         }
       }
     }));
   }
 
-  private void loadChartData(String range) {
+  private void loadChartData() {
     if (priceHistoryChart == null) return;
 
     chartSeries.getData().clear();
 
-    LocalDateTime now = LocalDateTime.now();
-    LocalDateTime filterTime;
-    DateTimeFormatter formatter;
-
-    switch (range) {
-      case "day" -> {
-        filterTime = now.minusDays(1);
-        formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-      }
-      case "week" -> {
-        filterTime = now.minusWeeks(1);
-        formatter = DateTimeFormatter.ofPattern("EEE HH:mm");
-      }
-      default -> { // month
-        filterTime = now.minusMonths(1);
-        formatter = DateTimeFormatter.ofPattern("dd/MM HH:mm");
-      }
-    }
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM HH:mm");
 
     // Collect qualifying bids sorted oldest-first
     java.util.List<XYChart.Data<String, Number>> points = new java.util.ArrayList<>();
@@ -513,9 +490,7 @@ public class SellerAuctionDetailController {
       for (com.auction.share.DTO.BidDTO bid : sortedBids) {
         try {
           LocalDateTime bidTime = LocalDateTime.parse(bid.getTimestamp(), ISO_FMT);
-          if (!bidTime.isBefore(filterTime)) {
-            points.add(new XYChart.Data<>(bidTime.format(formatter), bid.getAmount()));
-          }
+          points.add(new XYChart.Data<>(bidTime.format(formatter), bid.getAmount()));
         } catch (Exception ignored) {}
       }
     }
@@ -534,22 +509,6 @@ public class SellerAuctionDetailController {
     // Keep only the last MAX_CHART_POINTS entries
     int from = Math.max(0, points.size() - MAX_CHART_POINTS);
     chartSeries.getData().addAll(points.subList(from, points.size()));
-
-    highlightActiveFilter(range);
-  }
-
-  private void highlightActiveFilter(String active) {
-    String gold =
-        "-fx-background-color: #FFD700; -fx-border-color: #FFD700; -fx-border-radius: 6;"
-            + " -fx-background-radius: 6; -fx-text-fill: #000000; -fx-font-size: 11px;"
-            + " -fx-font-weight: bold; -fx-padding: 5 14 5 14; -fx-cursor: hand;";
-    String normal =
-        "-fx-background-color: #222222; -fx-border-color: #3A3A3A; -fx-border-radius: 6;"
-            + " -fx-background-radius: 6; -fx-text-fill: #AAAAAA; -fx-font-size: 11px; -fx-padding:"
-            + " 5 14 5 14; -fx-cursor: hand;";
-    if (btnDay != null) btnDay.setStyle(active.equals("day") ? gold : normal);
-    if (btnWeek != null) btnWeek.setStyle(active.equals("week") ? gold : normal);
-    if (btnMonth != null) btnMonth.setStyle(active.equals("month") ? gold : normal);
   }
 
   private void startCountdown() {

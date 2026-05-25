@@ -44,9 +44,6 @@ public class AuctionDetailController {
     @FXML private Button followButton;
 
     // ── LEFT COLUMN ─────────────────────────────────────────────
-    @FXML private Button         btnDay;
-    @FXML private Button         btnWeek;
-    @FXML private Button         btnMonth;
     @FXML private LineChart<String, Number> priceHistoryChart;
 
     @FXML private Label sellerNameLabel;
@@ -88,7 +85,7 @@ public class AuctionDetailController {
     private double        startingPrice = 0;
     private static final int  MAX_CHART_POINTS = 5;
     private static final DateTimeFormatter CHART_FMT =
-            DateTimeFormatter.ofPattern("HH:mm:ss");
+            DateTimeFormatter.ofPattern("dd/MM HH:mm");
     // Persistent series – never replaced, only data points are added/removed
     private final XYChart.Series<String, Number> chartSeries = new XYChart.Series<>();
     private String startTimeISO; // real start time from server (ISO format)
@@ -133,13 +130,8 @@ public class AuctionDetailController {
             priceHistoryChart.getData().add(chartSeries);
         }
 
-        // Price-history filter buttons (filter only affects initial load, not live appends)
-        btnDay.setOnAction(e   -> loadChartData("day"));
-        btnWeek.setOnAction(e  -> loadChartData("week"));
-        btnMonth.setOnAction(e -> loadChartData("month"));
-
         // Default chart data – populated after setData() provides bidHistory
-        loadChartData("month");
+        loadChartData();
 
         // Custom cell factory for comments ListView
         commentsListView.setCellFactory(lv -> new ListCell<>() {
@@ -282,10 +274,7 @@ public class AuctionDetailController {
                     } catch (Exception ignored) {}
                 }
 
-                String currentRange = "month";
-                if (btnDay.getStyle().contains("#FFD700")) currentRange = "day";
-                else if (btnWeek.getStyle().contains("#FFD700")) currentRange = "week";
-                loadChartData(currentRange);
+                loadChartData();
             }
         }));
     }
@@ -433,30 +422,13 @@ public class AuctionDetailController {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * (Re)builds the chart from bidHistory on filter button change.
+     * (Re)builds the chart from bidHistory.
      * Always keeps at most MAX_CHART_POINTS points.
      */
-    private void loadChartData(String range) {
+    private void loadChartData() {
         chartSeries.getData().clear();
 
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime filterTime;
-        DateTimeFormatter formatter;
-
-        switch (range) {
-            case "day" -> {
-                filterTime = now.minusDays(1);
-                formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-            }
-            case "week" -> {
-                filterTime = now.minusWeeks(1);
-                formatter = DateTimeFormatter.ofPattern("EEE HH:mm");
-            }
-            default -> { // month
-                filterTime = now.minusMonths(1);
-                formatter = DateTimeFormatter.ofPattern("dd/MM HH:mm");
-            }
-        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM HH:mm");
 
         // Collect qualifying bids sorted oldest-first
         java.util.List<XYChart.Data<String, Number>> points = new java.util.ArrayList<>();
@@ -473,9 +445,7 @@ public class AuctionDetailController {
             for (com.auction.share.DTO.BidDTO bid : sortedBids) {
                 try {
                     LocalDateTime bidTime = LocalDateTime.parse(bid.getTimestamp(), ISO_FMT);
-                    if (!bidTime.isBefore(filterTime)) {
-                        points.add(new XYChart.Data<>(bidTime.format(formatter), bid.getAmount()));
-                    }
+                    points.add(new XYChart.Data<>(bidTime.format(formatter), bid.getAmount()));
                 } catch (Exception ignored) {}
             }
         }
@@ -494,8 +464,6 @@ public class AuctionDetailController {
         // Keep only the last MAX_CHART_POINTS entries
         int from = Math.max(0, points.size() - MAX_CHART_POINTS);
         chartSeries.getData().addAll(points.subList(from, points.size()));
-
-        highlightActiveFilter(range);
     }
 
     /**
@@ -508,14 +476,6 @@ public class AuctionDetailController {
         while (chartSeries.getData().size() > MAX_CHART_POINTS) {
             chartSeries.getData().remove(0);
         }
-    }
-
-    private void highlightActiveFilter(String active) {
-        String gold   = "-fx-background-color: #FFD700; -fx-border-color: #FFD700; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #000000; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 5 14 5 14; -fx-cursor: hand;";
-        String normal = "-fx-background-color: #222222; -fx-border-color: #3A3A3A; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #AAAAAA; -fx-font-size: 11px; -fx-padding: 5 14 5 14; -fx-cursor: hand;";
-        btnDay.setStyle(active.equals("day")   ? gold : normal);
-        btnWeek.setStyle(active.equals("week") ? gold : normal);
-        btnMonth.setStyle(active.equals("month") ? gold : normal);
     }
 
     // ─────────────────────────────────────────────────────────────

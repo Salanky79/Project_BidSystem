@@ -56,12 +56,6 @@
 
                     <HBox alignment="CENTER_LEFT">
                         <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;" text="PRICE HISTORY" HBox.hgrow="ALWAYS" />
-                        <!-- Day/Week/Month toggle; Month = active (gold) -->
-                        <HBox spacing="4">
-                            <Button fx:id="btnDay" style="-fx-background-color: #222222; -fx-border-color: #3A3A3A; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #AAAAAA; -fx-font-size: 11px; -fx-padding: 5 14 5 14; -fx-cursor: hand;" text="Day" />
-                            <Button fx:id="btnWeek" style="-fx-background-color: #222222; -fx-border-color: #3A3A3A; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #AAAAAA; -fx-font-size: 11px; -fx-padding: 5 14 5 14; -fx-cursor: hand;" text="Week" />
-                            <Button fx:id="btnMonth" style="-fx-background-color: #FFD700; -fx-border-color: #FFD700; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #000000; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 5 14 5 14; -fx-cursor: hand;" text="Month" />
-                        </HBox>
                     </HBox>
 
                     <!-- LineChart: axes labelled with VND unit -->
