@@ -31,4 +31,8 @@ public final class ClientContext {
   public static BidService bidService() {
     return BID_SERVICE;
   }
+
+  public static SocketClient socketClient() {
+    return SOCKET_CLIENT;
+  }
 }

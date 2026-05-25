@@ -14,6 +14,7 @@ import com.auction.share.models.user.Admin;
 import com.auction.share.models.user.Bidder;
 import com.auction.share.models.user.Seller;
 import com.auction.share.models.user.User;
+import java.sql.SQLException;
 
 /**
  * Controller xử lý các yêu cầu liên quan đến tài khoản người dùng (đăng nhập, đăng ký, cập nhật hồ
@@ -105,7 +106,7 @@ public class UserController {
   }
 
   // HELPER: mapping entity User thành profile DTO để trả về cho client
-  private UserDTO toUserDTO(User user) {
+  private UserDTO toUserDTO(User user) throws SQLException {
     String phoneNumber = null;
     String email = null;
     String address = null;
@@ -122,6 +123,7 @@ public class UserController {
       address = seller.getAddress();
       balance = seller.getBalance();
     }
+    double availableBalance = balance;
 
     return new UserDTO(
         user.getId(),
@@ -131,7 +133,8 @@ public class UserController {
         phoneNumber,
         email,
         address,
-        balance);
+        balance,
+        availableBalance);
   }
 
   private static void validateUserForRegister(User user) throws ValidationException {

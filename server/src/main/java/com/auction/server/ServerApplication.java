@@ -17,6 +17,7 @@ import com.auction.server.util.DatabaseConnection;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -29,7 +30,7 @@ public class ServerApplication {
   private static final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
   private static final int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "8080"));
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws SQLException {
     UserDAO userDao = new UserDAO();
     UserService userService = new UserService(userDao);
     ItemDAO itemDao = new ItemDAO();

@@ -2,6 +2,10 @@ package com.auction.client.controller;
 
 import com.auction.client.ClientContext;
 import com.auction.client.service.BidService;
+import com.auction.share.DTO.AuctionDetailDTO;
+import com.auction.share.DTO.BidDTO;
+import com.auction.share.DTO.BidUpdateEvent;
+import com.auction.share.DTO.Response;
 import com.auction.share.exceptions.ValidationException;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -32,6 +36,11 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+import static com.auction.client.ClientContext.socketClient;
 
 public class AuctionDetailController {
 
@@ -74,7 +83,7 @@ public class AuctionDetailController {
     private LocalDateTime endTime;
     private Timeline      countdownTimeline;
     private boolean       autoBidEnabled = false;
-    private java.util.List<com.auction.share.DTO.BidDTO> bidHistory = new java.util.ArrayList<>();
+    private List<BidDTO> bidHistory = new ArrayList<>();
     private double        startingPrice = 0;
     private static final int  MAX_CHART_POINTS = 5;
     private static final DateTimeFormatter CHART_FMT =
@@ -82,6 +91,7 @@ public class AuctionDetailController {
     // Persistent series – never replaced, only data points are added/removed
     private final XYChart.Series<String, Number> chartSeries = new XYChart.Series<>();
     private String startTimeISO; // real start time from server (ISO format)
+    private Consumer<Response<?>> bidPushListener;
 
     private static final DateTimeFormatter DISPLAY_FMT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -93,6 +103,9 @@ public class AuctionDetailController {
     public void initialize() {
         // Close button
         closeButton.setOnAction(e -> {
+            if (bidPushListener != null) {
+                socketClient().removePushListener(bidPushListener);
+            }
             Stage stage = (Stage) closeButton.getScene().getWindow();
             stage.close();
         });
@@ -154,7 +167,7 @@ public class AuctionDetailController {
 
         // Parse end time for countdown
         try {
-            this.endTime = LocalDateTime.parse(time, ISO_FMT);
+            this.endTime = LocalDateTime.parse(time, DISPLAY_FMT);
         } catch (Exception ex) {
             try {
                 this.endTime = LocalDateTime.parse(time, DISPLAY_FMT);
@@ -164,38 +177,8 @@ public class AuctionDetailController {
         }
         startCountdown();
 
-        // Fetch latest data from server
-        com.auction.client.ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
-            if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
-                this.currentPrice = detail.getCurrentPrice();
-                this.bidStep = detail.getBidStep();
-                this.totalBids = detail.getBidHistory() != null ? detail.getBidHistory().size() : this.totalBids;
-
-                this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));
-                this.totalBidsLabel.setText(String.valueOf(this.totalBids));
-                this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
-                this.sellerNameLabel.setText(detail.getSellerName());
-                this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description provided.");
-                
-                this.bidHistory = detail.getBidHistory() != null ? detail.getBidHistory() : new java.util.ArrayList<>();
-                this.startingPrice = detail.getStartingPrice();
-
-                // Update start/end time labels with real data from server (ISO format)
-                this.startTimeISO = detail.getStartTime();
-                if (detail.getStartTime() != null) {
-                    this.startTimeLabel.setText(detail.getStartTime());
-                }
-                if (detail.getEndTime() != null) {
-                    this.endTimeLabel.setText(detail.getEndTime());
-                    // Re-parse endTime in case server has a different value
-                    try {
-                        this.endTime = LocalDateTime.parse(detail.getEndTime(), ISO_FMT);
-                    } catch (Exception ignored) {}
-                }
-
-                loadChartData();
-            }
-        }));
+        refreshAuctionDetail();
+        registerBidPushRefresh();
     }
 
 
@@ -417,6 +400,55 @@ public class AuctionDetailController {
         updateAutoBidControls();
         autoBidStatusLabel.setStyle("-fx-text-fill: #888888; -fx-font-size: 11px;");
         autoBidStatusLabel.setText("Auto-bid is off");
+    }
+
+    private void registerBidPushRefresh() {
+        if (bidPushListener != null) {
+            socketClient().removePushListener(bidPushListener);
+        }
+        bidPushListener = response -> {
+            if (response != null
+                    && response.isSuccess()
+                    && "BID_UPDATED".equals(response.getMessage())
+                    && response.getData() instanceof BidUpdateEvent event
+                    && auctionId != null
+                    && auctionId.equals(event.getAuctionId())) {
+                Platform.runLater(this::refreshAuctionDetail);
+            }
+        };
+        socketClient().addPushListener(bidPushListener);
+    }
+
+    private void refreshAuctionDetail() {
+        ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
+            if (response != null && response.isSuccess() && response.getData() instanceof AuctionDetailDTO detail) {
+                this.currentPrice = detail.getCurrentPrice();
+                this.bidStep = detail.getBidStep();
+                this.totalBids = detail.getBidHistory() != null ? detail.getBidHistory().size() : this.totalBids;
+
+                this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));
+                this.totalBidsLabel.setText(String.valueOf(this.totalBids));
+                this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
+                this.sellerNameLabel.setText(detail.getSellerName());
+                this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description provided.");
+
+                this.bidHistory = detail.getBidHistory() != null ? detail.getBidHistory() : new java.util.ArrayList<>();
+                this.startingPrice = detail.getStartingPrice();
+
+                this.startTimeISO = detail.getStartTime();
+                if (detail.getStartTime() != null) {
+                    this.startTimeLabel.setText(detail.getStartTime());
+                }
+                if (detail.getEndTime() != null) {
+                    this.endTimeLabel.setText(detail.getEndTime());
+                    try {
+                        this.endTime = LocalDateTime.parse(detail.getEndTime(), DISPLAY_FMT);
+                    } catch (Exception ignored) {}
+                }
+
+                loadChartData();
+            }
+        }));
     }
 
     private void updateAutoBidControls() {

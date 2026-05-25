@@ -14,6 +14,7 @@ public class UserDTO implements Serializable {
   private final String email;
   private final String address;
   private final double balance;
+  private final double availableBalance;
 
   public UserDTO(
       String id,
@@ -23,7 +24,8 @@ public class UserDTO implements Serializable {
       String phoneNumber,
       String email,
       String address,
-      double balance) {
+      double balance,
+      double availableBalance) {
     this.id = id;
     this.username = username;
     this.fullName = fullName;
@@ -32,6 +34,7 @@ public class UserDTO implements Serializable {
     this.email = email;
     this.address = address;
     this.balance = balance;
+    this.availableBalance = availableBalance;
   }
 
   public String getId() {
@@ -64,5 +67,9 @@ public class UserDTO implements Serializable {
 
   public double getBalance() {
     return balance;
+  }
+
+  public double getAvailableBalance() {
+    return availableBalance;
   }
 }

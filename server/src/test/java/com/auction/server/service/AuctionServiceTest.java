@@ -111,6 +111,7 @@ class AuctionServiceTest {
         Auction auction = runningAuction(100);
         Bidder bidder = new Bidder("b", "p", "Bidder", "090", "b@mail.com", "HN");
         bidder.setID("b-1");
+        bidder.setBalance(1000);
         when(auctionDAO.findById("a-1")).thenReturn(auction);
         when(userDAO.findById("b-1")).thenReturn(bidder);
         AuctionService service = testableService();
@@ -134,6 +135,7 @@ class AuctionServiceTest {
         Auction auction = runningAuction(100);
         Bidder bidder = new Bidder("b", "p", "Bidder", "090", "b@mail.com", "HN");
         bidder.setID("b-1");
+        bidder.setBalance(1000);
         when(auctionDAO.findById("a-1")).thenReturn(auction);
         when(userDAO.findById("b-1")).thenReturn(bidder);
         when(auctionDAO.updateHighestBidIfHigher(any(Connection.class), eq(auction.getId()), eq("b-1"), eq(150.0))).thenReturn(true);

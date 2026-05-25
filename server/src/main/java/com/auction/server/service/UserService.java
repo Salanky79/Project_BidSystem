@@ -1,6 +1,7 @@
 package com.auction.server.service;
 
 import com.auction.server.dao.BidTransactionDAO;
+import com.auction.server.dao.AuctionDAO;
 import com.auction.server.dao.UserDAO;
 import com.auction.server.util.PasswordUtil;
 import com.auction.share.DTO.ProfileBidTransactionDTO;
@@ -13,6 +14,7 @@ import com.auction.share.models.user.Bidder;
 import com.auction.share.models.user.Seller;
 import com.auction.share.models.user.User;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 
 // luồng xử lý: Controller → Service → DAO → Database
@@ -21,10 +23,12 @@ import java.util.List;
 public class UserService {
   private final UserDAO userDAO;
   private final BidTransactionDAO bidTransactionDAO;
+  private final AuctionDAO auctionDAO;
 
   public UserService(UserDAO userDAO) {
     this.userDAO = userDAO;
     this.bidTransactionDAO = new BidTransactionDAO();
+    this.auctionDAO = new AuctionDAO();
   }
 
   public boolean register(User user)
@@ -88,7 +92,21 @@ public class UserService {
 
   public ProfileDTO getProfile(String id) throws SQLException, ValidationException {
     User user = getById(id);
-    UserDTO userDTO = toUserDTO(user);
+    UserDTO baseUserDTO = toUserDTO(user);
+    double availableBalance =
+        baseUserDTO.getBalance()
+            - auctionDAO.sumRunningWinningBidsByBidder(user.getId(), Collections.emptySet());
+    UserDTO userDTO =
+        new UserDTO(
+            baseUserDTO.getId(),
+            baseUserDTO.getUsername(),
+            baseUserDTO.getFullName(),
+            baseUserDTO.getRole(),
+            baseUserDTO.getPhoneNumber(),
+            baseUserDTO.getEmail(),
+            baseUserDTO.getAddress(),
+            baseUserDTO.getBalance(),
+            availableBalance);
     List<ProfileBidTransactionDTO> bidTransactions =
         bidTransactionDAO.findProfileTransactionsByBidderId(id);
     return new ProfileDTO(userDTO, bidTransactions);
@@ -112,7 +130,6 @@ public class UserService {
       address = seller.getAddress();
       balance = seller.getBalance();
     }
-
     return new UserDTO(
         user.getId(),
         user.getUsername(),
@@ -121,6 +138,7 @@ public class UserService {
         phoneNumber,
         email,
         address,
+        balance,
         balance);
   }
 

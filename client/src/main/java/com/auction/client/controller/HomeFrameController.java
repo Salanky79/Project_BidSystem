@@ -1,6 +1,12 @@
 package com.auction.client.controller;
 
+import com.auction.client.ClientContext;
+import com.auction.share.DTO.BidUpdateEvent;
+import com.auction.share.DTO.ProfileDTO;
+import com.auction.share.DTO.Response;
+import java.util.function.Consumer;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 
@@ -10,12 +16,26 @@ public class HomeFrameController extends FrameController {
 
     protected HomeController currentHomeController;
 
-    @javafx.fxml.FXML
+    @FXML
     private javafx.scene.control.Label budgetLabel;
 
-    private double currentBudget = 0.0;
+    private Consumer<Response<?>> bidPushListener;
 
-    @javafx.fxml.FXML
+    @FXML
+    public void initialize() {
+        refreshCurrentBudget();
+        bidPushListener = response -> {
+            if (response != null
+                    && response.isSuccess()
+                    && response.getData() instanceof BidUpdateEvent
+                    && "BID_UPDATED".equals(response.getMessage())) {
+                refreshCurrentBudget();
+            }
+        };
+        ClientContext.socketClient().addPushListener(bidPushListener);
+    }
+
+    @FXML
     public void handleTopUp(ActionEvent event) {
         javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog("0");
         dialog.setTitle("Nạp tiền");
@@ -27,10 +47,7 @@ public class HomeFrameController extends FrameController {
             try {
                 double amount = Double.parseDouble(amountStr);
                 if (amount > 0) {
-                    currentBudget += amount;
-                    if (budgetLabel != null) {
-                        budgetLabel.setText(String.format("%.1f", currentBudget));
-                    }
+                    refreshCurrentBudget();
                 }
             } catch (NumberFormatException e) {
                 // Ignore invalid input
@@ -79,4 +96,21 @@ public class HomeFrameController extends FrameController {
 
 
 
+    public void handleWatchlist() {
+        loadHomePage("Watchlist");
+    }
+
+    private void refreshCurrentBudget() {
+        ClientContext.userService().getProfile(response ->
+                javafx.application.Platform.runLater(() -> {
+                    if (response != null
+                            && response.isSuccess()
+                            && response.getData() instanceof ProfileDTO profileDTO
+                            && profileDTO.getUser() != null
+                            && budgetLabel != null) {
+                        budgetLabel.setText(String.format("%.1f", profileDTO.getUser().getAvailableBalance()));
+                    }
+                })
+        );
+    }
 }
