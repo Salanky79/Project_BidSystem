@@ -2,6 +2,8 @@ package com.auction.client.controller;
 
 import com.auction.client.service.DeletedAuctionsStore;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -30,6 +32,13 @@ public class SellerItemCardController {
   private int bids;
   private String time;
   private String auctionId;
+
+  private static final DateTimeFormatter DISPLAY_FMT =
+      DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+  private static final DateTimeFormatter ISO_FMT =
+      DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+  private static final DateTimeFormatter ALT_DB_FMT =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
   private Runnable refreshCallback;
 
@@ -65,7 +74,7 @@ public class SellerItemCardController {
     priceLabel.setText(String.format("%,.0f VND", price));
 
     bidsLabel.setText(bids + (bids <= 1 ? " bid" : " bids"));
-    timeLabel.setText("Ending In : " + time);
+    timeLabel.setText("Ending In : " + formatDateTimeForDisplay(time));
 
     // Fetch actual bid count asynchronously
     com.auction.client.ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> {
@@ -140,6 +149,25 @@ public class SellerItemCardController {
   @FXML
   private void handleCardClick() {
     SellerAuctionDetailController.open(icon, category, name, price, bids, time, status, auctionId);
+  }
+
+  private static LocalDateTime parseDateTime(String raw) {
+    if (raw == null) return null;
+    String s = raw.trim();
+    if (s.isEmpty()) return null;
+
+    try { return LocalDateTime.parse(s, ISO_FMT); } catch (Exception ignored) {}
+    try { return LocalDateTime.parse(s, DISPLAY_FMT); } catch (Exception ignored) {}
+    try { return LocalDateTime.parse(s, ALT_DB_FMT); } catch (Exception ignored) {}
+    try { return LocalDateTime.parse(s.replace(' ', 'T'), ISO_FMT); } catch (Exception ignored) {}
+
+    return null;
+  }
+
+  private static String formatDateTimeForDisplay(String raw) {
+    LocalDateTime dt = parseDateTime(raw);
+    if (dt == null) return raw == null ? "N/A" : raw;
+    return dt.format(DISPLAY_FMT);
   }
 }
 
