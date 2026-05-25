@@ -97,6 +97,8 @@ public class AuctionDetailController {
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final DateTimeFormatter ISO_FMT =
             DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private static final DateTimeFormatter ALT_DB_FMT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     // ─────────────────────────────────────────────────────────────
     @FXML
@@ -155,7 +157,9 @@ public class AuctionDetailController {
         productTitleLabel.setText(name);
         currentPriceLabel.setText(String.format("%.0f VND", price));
         totalBidsLabel.setText(String.valueOf(bids));
-        endTimeLabel.setText(time);
+        // "time" may come as display format, ISO, or DB-like timestamp; normalize for UI + countdown.
+        LocalDateTime parsedEnd = parseDateTime(time);
+        endTimeLabel.setText(formatDateTimeForDisplay(time));
         startTimeLabel.setText("Loading...");
         sellerNameLabel.setText("Unknown");
         descriptionLabel.setText("Loading description...");
@@ -166,15 +170,7 @@ public class AuctionDetailController {
         resetAutoBidState();
 
         // Parse end time for countdown
-        try {
-            this.endTime = LocalDateTime.parse(time, DISPLAY_FMT);
-        } catch (Exception ex) {
-            try {
-                this.endTime = LocalDateTime.parse(time, DISPLAY_FMT);
-            } catch (Exception ignored) {
-                this.endTime = null;
-            }
-        }
+        this.endTime = parsedEnd;
         startCountdown();
 
         refreshAuctionDetail();
@@ -437,18 +433,42 @@ public class AuctionDetailController {
 
                 this.startTimeISO = detail.getStartTime();
                 if (detail.getStartTime() != null) {
-                    this.startTimeLabel.setText(detail.getStartTime());
+                    this.startTimeLabel.setText(formatDateTimeForDisplay(detail.getStartTime()));
                 }
                 if (detail.getEndTime() != null) {
-                    this.endTimeLabel.setText(detail.getEndTime());
-                    try {
-                        this.endTime = LocalDateTime.parse(detail.getEndTime(), DISPLAY_FMT);
-                    } catch (Exception ignored) {}
+                    this.endTimeLabel.setText(formatDateTimeForDisplay(detail.getEndTime()));
+                    LocalDateTime parsedEnd = parseDateTime(detail.getEndTime());
+                    if (parsedEnd != null) {
+                        this.endTime = parsedEnd;
+                        startCountdown(); // refresh countdown if we successfully parsed an updated end time
+                    }
                 }
 
                 loadChartData();
             }
         }));
+    }
+
+    private static LocalDateTime parseDateTime(String raw) {
+        if (raw == null) return null;
+        String s = raw.trim();
+        if (s.isEmpty()) return null;
+
+        // Try a few known formats; server/client are inconsistent across endpoints.
+        try { return LocalDateTime.parse(s, ISO_FMT); } catch (Exception ignored) {}
+        try { return LocalDateTime.parse(s, DISPLAY_FMT); } catch (Exception ignored) {}
+        try { return LocalDateTime.parse(s, ALT_DB_FMT); } catch (Exception ignored) {}
+
+        // Some servers send ISO-like without 'T'
+        try { return LocalDateTime.parse(s.replace(' ', 'T'), ISO_FMT); } catch (Exception ignored) {}
+
+        return null;
+    }
+
+    private static String formatDateTimeForDisplay(String raw) {
+        LocalDateTime dt = parseDateTime(raw);
+        if (dt == null) return raw == null ? "N/A" : raw;
+        return dt.format(DISPLAY_FMT);
     }
 
     private void updateAutoBidControls() {
