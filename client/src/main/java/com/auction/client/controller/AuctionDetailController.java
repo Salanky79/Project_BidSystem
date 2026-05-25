@@ -49,6 +49,7 @@ public class AuctionDetailController {
     @FXML private LineChart<String, Number> priceHistoryChart;
 
     @FXML private Label sellerNameLabel;
+    @FXML private Label ratingLabel;
     @FXML private Label descriptionLabel;
 
     // ── RIGHT COLUMN ─────────────────────────────────────────────
