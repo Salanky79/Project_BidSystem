@@ -86,8 +86,7 @@
                     <HBox alignment="CENTER_LEFT" spacing="10">
                         <Label style="-fx-text-fill: #D4AF37; -fx-font-size: 15px;" text="★★★★☆" />
                         <Label fx:id="ratingLabel" style="-fx-text-fill: #CCCCCC; -fx-font-size: 13px;" text="4.6" />
-                        <Label style="-fx-text-fill: #333333; -fx-font-size: 13px;" text="|" />
-                        <Button style="-fx-background-color: transparent; -fx-border-color: #D4AF37; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #D4AF37; -fx-font-size: 12px; -fx-padding: 4 12 4 12; -fx-cursor: hand;" text="✉  Contact" />
+
                     </HBox>
 
                     <Separator style="-fx-background-color: #2A2A2A; -fx-opacity: 1;" />

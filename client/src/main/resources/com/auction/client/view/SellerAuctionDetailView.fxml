@@ -132,23 +132,6 @@
 
 
 
-                    <Separator style="-fx-background-color: #2A2A2A; -fx-opacity: 1;" />
-
-                    <!-- Action Buttons -->
-                    <HBox alignment="CENTER_RIGHT" spacing="10">
-                        <Button fx:id="contactWinnerButton"
-                                style="-fx-background-color: transparent; -fx-border-color: #D4AF37;
-                                       -fx-border-radius: 6; -fx-background-radius: 6;
-                                       -fx-text-fill: #D4AF37; -fx-font-weight: bold;
-                                       -fx-font-size: 12px; -fx-padding: 9 18 9 18; -fx-cursor: hand;"
-                                text="✉  CONTACT WINNER" />
-                        <Button fx:id="generateInvoiceButton"
-                                style="-fx-background-color: #D4AF37; -fx-border-color: #D4AF37;
-                                       -fx-border-radius: 6; -fx-background-radius: 6;
-                                       -fx-text-fill: #000000; -fx-font-weight: bold;
-                                       -fx-font-size: 12px; -fx-padding: 9 18 9 18; -fx-cursor: hand;"
-                                text="🧾  GENERATE INVOICE" />
-                    </HBox>
 
                 </VBox>
 

@@ -69,13 +69,6 @@
         <!-- Spacer -->
         <Region HBox.hgrow="ALWAYS"/>
 
-        <!-- Manage button -->
-        <Button fx:id="btnManage" text="Manage"
-                onAction="#handleManage"
-                style="-fx-background-color: #1a1a1a; -fx-text-fill: white;
-                       -fx-font-size: 13px; -fx-font-weight: bold;
-                       -fx-border-radius: 8; -fx-background-radius: 8;
-                       -fx-padding: 8 20 8 20; -fx-cursor: hand;"/>
     </HBox>
 
     <!-- ===== AUCTION CARD GRID ===== -->

@@ -28,7 +28,7 @@ public class SellerDashboardController {
   @FXML private Button btnFilterEnded;
   @FXML private Button btnDateMonth;
   @FXML private Button btnDate7Days;
-  @FXML private Button btnManage;
+
 
   // ===== CARD GRID =====
   @FXML private GridPane auctionGrid;
@@ -69,10 +69,7 @@ public class SellerDashboardController {
     setDateFilter("7Days");
   }
 
-  @FXML
-  public void handleManage() {
-    System.out.println("Open manage panel.");
-  }
+
 
   // ===== LOAD CARDS =====
 
