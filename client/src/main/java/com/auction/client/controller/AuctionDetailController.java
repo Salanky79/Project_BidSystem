@@ -91,6 +91,7 @@ public class AuctionDetailController {
             DateTimeFormatter.ofPattern("HH:mm:ss");
     // Persistent series – never replaced, only data points are added/removed
     private final XYChart.Series<String, Number> chartSeries = new XYChart.Series<>();
+    private String startTimeISO; // real start time from server (ISO format)
 
     private static final String FOLLOW_GOLD_STYLE =
             "-fx-background-color: transparent; -fx-border-color: #D4AF37; -fx-border-radius: 20; -fx-background-radius: 20; -fx-text-fill: #D4AF37; -fx-font-size: 12px; -fx-padding: 5 16 5 16; -fx-cursor: hand;";
@@ -227,7 +228,7 @@ public class AuctionDetailController {
         currentPriceLabel.setText(String.format("%.0f VND", price));
         totalBidsLabel.setText(String.valueOf(bids));
         endTimeLabel.setText(time);
-        startTimeLabel.setText(LocalDateTime.now().format(DISPLAY_FMT));
+        startTimeLabel.setText("Loading...");
         sellerNameLabel.setText("Unknown");
         descriptionLabel.setText("Loading description...");
         if (productIconLabel != null && icon != null) {
@@ -267,7 +268,20 @@ public class AuctionDetailController {
                 
                 this.bidHistory = detail.getBidHistory() != null ? detail.getBidHistory() : new java.util.ArrayList<>();
                 this.startingPrice = detail.getStartingPrice();
-                
+
+                // Update start/end time labels with real data from server (ISO format)
+                this.startTimeISO = detail.getStartTime();
+                if (detail.getStartTime() != null) {
+                    this.startTimeLabel.setText(detail.getStartTime());
+                }
+                if (detail.getEndTime() != null) {
+                    this.endTimeLabel.setText(detail.getEndTime());
+                    // Re-parse endTime in case server has a different value
+                    try {
+                        this.endTime = LocalDateTime.parse(detail.getEndTime(), ISO_FMT);
+                    } catch (Exception ignored) {}
+                }
+
                 String currentRange = "month";
                 if (btnDay.getStyle().contains("#FFD700")) currentRange = "day";
                 else if (btnWeek.getStyle().contains("#FFD700")) currentRange = "week";
@@ -468,11 +482,14 @@ public class AuctionDetailController {
 
         // Always ensure at least a starting anchor
         if (points.isEmpty()) {
-            points.add(new XYChart.Data<>("Start", startingPrice > 0 ? startingPrice : currentPrice));
+            String startLabel = "Start";
+            if (startTimeISO != null) {
+                try {
+                    startLabel = LocalDateTime.parse(startTimeISO, ISO_FMT).format(formatter);
+                } catch (Exception ignored) {}
+            }
+            points.add(new XYChart.Data<>(startLabel, startingPrice > 0 ? startingPrice : currentPrice));
         }
-
-        // Add a "Now" point representing the latest known price
-        points.add(new XYChart.Data<>("Now", currentPrice));
 
         // Keep only the last MAX_CHART_POINTS entries
         int from = Math.max(0, points.size() - MAX_CHART_POINTS);

@@ -68,6 +68,9 @@ public class SellerAuctionDetailController {
   private static final int MAX_CHART_POINTS = 5;
   // Persistent series – never replaced, only data points are added/removed
   private final XYChart.Series<String, Number> chartSeries = new XYChart.Series<>();
+  private String startTimeISO; // real start time from server (ISO format)
+  private String endTimeISO;   // real end time from server (ISO format)
+  private java.util.List<com.auction.share.DTO.BidDTO> bidHistory = new java.util.ArrayList<>();
 
   private static final DateTimeFormatter DISPLAY_FMT =
       DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -416,13 +419,14 @@ public class SellerAuctionDetailController {
     this.auctionId = auctionId;
     this.currentPrice = price;
     this.startingPrice = price; // will be overridden if we later get real starting price
+    this.endTimeISO = time;
 
     if (productTitleLabel != null) productTitleLabel.setText(name);
     if (currentHighBidLabel != null) currentHighBidLabel.setText(String.format("%,.0f VND", price));
     if (totalBidsLabel != null) totalBidsLabel.setText(String.valueOf(bids));
 
     if (endTimeLabel != null) endTimeLabel.setText(time);
-    if (startTimeLabel != null) startTimeLabel.setText(LocalDateTime.now().format(DISPLAY_FMT));
+    if (startTimeLabel != null) startTimeLabel.setText("Loading...");
 
     try {
       this.endTime = LocalDateTime.parse(time, ISO_FMT);
@@ -435,9 +439,39 @@ public class SellerAuctionDetailController {
     }
     startCountdown();
 
-    if (priceHistoryChart != null) {
-      loadChartData("month");
-    }
+    // Fetch real detail from server to get startTime, bidHistory, etc.
+    com.auction.client.ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
+      if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
+        this.currentPrice = detail.getCurrentPrice();
+        this.startingPrice = detail.getStartingPrice();
+        this.bidHistory = detail.getBidHistory() != null ? detail.getBidHistory() : new java.util.ArrayList<>();
+
+        if (currentHighBidLabel != null) currentHighBidLabel.setText(String.format("%,.0f VND", this.currentPrice));
+        if (totalBidsLabel != null) totalBidsLabel.setText(String.valueOf(this.bidHistory.size()));
+
+        // Update start/end time labels with real data from server (ISO format)
+        this.startTimeISO = detail.getStartTime();
+        if (detail.getStartTime() != null && startTimeLabel != null) {
+          startTimeLabel.setText(detail.getStartTime());
+        }
+        if (detail.getEndTime() != null) {
+          this.endTimeISO = detail.getEndTime();
+          if (endTimeLabel != null) endTimeLabel.setText(detail.getEndTime());
+          try {
+            this.endTime = LocalDateTime.parse(detail.getEndTime(), ISO_FMT);
+          } catch (Exception ignored) {}
+        }
+
+        if (priceHistoryChart != null) {
+          loadChartData("month");
+        }
+      } else {
+        // Fallback: load chart with what we have
+        if (priceHistoryChart != null) {
+          loadChartData("month");
+        }
+      }
+    }));
   }
 
   private void loadChartData(String range) {
@@ -445,50 +479,59 @@ public class SellerAuctionDetailController {
 
     chartSeries.getData().clear();
 
-    // Build up to MAX_CHART_POINTS data points using real price values.
-    // Since the seller view has no bid history list, we create meaningful
-    // reference points based on the known starting and current prices.
-    java.util.List<XYChart.Data<String, Number>> points = new java.util.ArrayList<>();
-
-    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm");
     LocalDateTime now = LocalDateTime.now();
+    LocalDateTime filterTime;
+    DateTimeFormatter formatter;
 
     switch (range) {
       case "day" -> {
-        // Simulate up to 4 reference snapshots over the past 24h
-        points.add(new XYChart.Data<>(now.minusHours(20).format(fmt), startingPrice));
-        points.add(new XYChart.Data<>(now.minusHours(14).format(fmt),
-            startingPrice + (currentPrice - startingPrice) * 0.33));
-        points.add(new XYChart.Data<>(now.minusHours(8).format(fmt),
-            startingPrice + (currentPrice - startingPrice) * 0.66));
-        points.add(new XYChart.Data<>(now.minusHours(2).format(fmt),
-            startingPrice + (currentPrice - startingPrice) * 0.90));
+        filterTime = now.minusDays(1);
+        formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
       }
       case "week" -> {
-        DateTimeFormatter dayFmt = DateTimeFormatter.ofPattern("EEE");
-        points.add(new XYChart.Data<>(now.minusDays(6).format(dayFmt), startingPrice));
-        points.add(new XYChart.Data<>(now.minusDays(4).format(dayFmt),
-            startingPrice + (currentPrice - startingPrice) * 0.33));
-        points.add(new XYChart.Data<>(now.minusDays(2).format(dayFmt),
-            startingPrice + (currentPrice - startingPrice) * 0.66));
-        points.add(new XYChart.Data<>(now.minusDays(1).format(dayFmt),
-            startingPrice + (currentPrice - startingPrice) * 0.90));
+        filterTime = now.minusWeeks(1);
+        formatter = DateTimeFormatter.ofPattern("EEE HH:mm");
       }
       default -> { // month
-        DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("dd/MM");
-        points.add(new XYChart.Data<>(now.minusWeeks(3).format(dateFmt), startingPrice));
-        points.add(new XYChart.Data<>(now.minusWeeks(2).format(dateFmt),
-            startingPrice + (currentPrice - startingPrice) * 0.33));
-        points.add(new XYChart.Data<>(now.minusWeeks(1).format(dateFmt),
-            startingPrice + (currentPrice - startingPrice) * 0.66));
-        points.add(new XYChart.Data<>(now.minusDays(2).format(dateFmt),
-            startingPrice + (currentPrice - startingPrice) * 0.90));
+        filterTime = now.minusMonths(1);
+        formatter = DateTimeFormatter.ofPattern("dd/MM HH:mm");
       }
     }
 
-    // Always cap with the real current price as the last point
-    points.add(new XYChart.Data<>("Now", currentPrice));
+    // Collect qualifying bids sorted oldest-first
+    java.util.List<XYChart.Data<String, Number>> points = new java.util.ArrayList<>();
 
+    if (bidHistory != null && !bidHistory.isEmpty()) {
+      java.util.List<com.auction.share.DTO.BidDTO> sortedBids = new java.util.ArrayList<>(bidHistory);
+      sortedBids.sort((b1, b2) -> {
+        try {
+          return LocalDateTime.parse(b1.getTimestamp(), ISO_FMT)
+                             .compareTo(LocalDateTime.parse(b2.getTimestamp(), ISO_FMT));
+        } catch (Exception e) { return 0; }
+      });
+
+      for (com.auction.share.DTO.BidDTO bid : sortedBids) {
+        try {
+          LocalDateTime bidTime = LocalDateTime.parse(bid.getTimestamp(), ISO_FMT);
+          if (!bidTime.isBefore(filterTime)) {
+            points.add(new XYChart.Data<>(bidTime.format(formatter), bid.getAmount()));
+          }
+        } catch (Exception ignored) {}
+      }
+    }
+
+    // Always ensure at least a starting anchor
+    if (points.isEmpty()) {
+      String startLabel = "Start";
+      if (startTimeISO != null) {
+        try {
+          startLabel = LocalDateTime.parse(startTimeISO, ISO_FMT).format(formatter);
+        } catch (Exception ignored) {}
+      }
+      points.add(new XYChart.Data<>(startLabel, startingPrice > 0 ? startingPrice : currentPrice));
+    }
+
+    // Keep only the last MAX_CHART_POINTS entries
     int from = Math.max(0, points.size() - MAX_CHART_POINTS);
     chartSeries.getData().addAll(points.subList(from, points.size()));
 
