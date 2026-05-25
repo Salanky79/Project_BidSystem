@@ -60,7 +60,7 @@ public class ItemCardController {
     }
 
     // Format số tiền cho đẹp (vd: 1000.0 -> "1,000 USD")
-    priceLabel.setText(String.format("%,.0f USD", price));
+    priceLabel.setText(String.format("%,.0f VND", price));
 
     // Xử lý chữ "bid" hay "bids"
     bidsLabel.setText(bids + (bids <= 1 ? " bid" : " bids"));

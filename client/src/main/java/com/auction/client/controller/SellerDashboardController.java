@@ -1,6 +1,7 @@
 package com.auction.client.controller;
 
 import com.auction.client.ClientContext;
+import com.auction.client.service.DeletedAuctionsStore;
 import com.auction.share.DTO.AuctionSummaryDTO;
 import java.io.IOException;
 import java.util.List;
@@ -99,7 +100,8 @@ public class SellerDashboardController {
                         && response.getData() instanceof List<?> list) {
                       int col = 0, row = 0;
                       for (Object obj : list) {
-                        if (obj instanceof AuctionSummaryDTO dto) {
+                      if (obj instanceof AuctionSummaryDTO dto) {
+                          if (DeletedAuctionsStore.getInstance().isDeleted(dto.getAuctionId())) continue;
                           if (!matchesFilter(filterStatus, dto.getStatus())) continue;
                           try {
                             FXMLLoader loader =

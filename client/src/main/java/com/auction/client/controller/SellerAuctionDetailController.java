@@ -15,6 +15,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -60,9 +61,13 @@ public class SellerAuctionDetailController {
 
   private String auctionId;
   private double currentPrice;
+  private double startingPrice = 0;
   private LocalDateTime endTime;
   private Timeline countdownTimeline;
   private boolean isPaused = false;
+  private static final int MAX_CHART_POINTS = 5;
+  // Persistent series – never replaced, only data points are added/removed
+  private final XYChart.Series<String, Number> chartSeries = new XYChart.Series<>();
 
   private static final DateTimeFormatter DISPLAY_FMT =
       DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -82,7 +87,13 @@ public class SellerAuctionDetailController {
     if (btnDay != null) btnDay.setOnAction(e -> loadChartData("day"));
     if (btnWeek != null) btnWeek.setOnAction(e -> loadChartData("week"));
     if (btnMonth != null) btnMonth.setOnAction(e -> loadChartData("month"));
-    if (priceHistoryChart != null) loadChartData("month");
+    if (priceHistoryChart != null) {
+      NumberAxis yAxis = (NumberAxis) priceHistoryChart.getYAxis();
+      yAxis.setAutoRanging(true);
+      yAxis.setForceZeroInRange(false);
+      priceHistoryChart.getData().add(chartSeries);
+      // will be populated after setData() sets currentPrice
+    }
 
     // Action Buttons
     if (pauseAuctionButton != null) {
@@ -404,6 +415,7 @@ public class SellerAuctionDetailController {
       String auctionId) {
     this.auctionId = auctionId;
     this.currentPrice = price;
+    this.startingPrice = price; // will be overridden if we later get real starting price
 
     if (productTitleLabel != null) productTitleLabel.setText(name);
     if (currentHighBidLabel != null) currentHighBidLabel.setText(String.format("%,.0f VND", price));
@@ -431,37 +443,55 @@ public class SellerAuctionDetailController {
   private void loadChartData(String range) {
     if (priceHistoryChart == null) return;
 
-    priceHistoryChart.getData().clear();
-    XYChart.Series<String, Number> series = new XYChart.Series<>();
+    chartSeries.getData().clear();
+
+    // Build up to MAX_CHART_POINTS data points using real price values.
+    // Since the seller view has no bid history list, we create meaningful
+    // reference points based on the known starting and current prices.
+    java.util.List<XYChart.Data<String, Number>> points = new java.util.ArrayList<>();
+
+    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm");
+    LocalDateTime now = LocalDateTime.now();
 
     switch (range) {
       case "day" -> {
-        series.getData().add(new XYChart.Data<>("08:00", currentPrice * 0.90));
-        series.getData().add(new XYChart.Data<>("10:00", currentPrice * 0.93));
-        series.getData().add(new XYChart.Data<>("12:00", currentPrice * 0.95));
-        series.getData().add(new XYChart.Data<>("14:00", currentPrice * 0.97));
-        series.getData().add(new XYChart.Data<>("16:00", currentPrice * 0.99));
-        series.getData().add(new XYChart.Data<>("Now", currentPrice));
+        // Simulate up to 4 reference snapshots over the past 24h
+        points.add(new XYChart.Data<>(now.minusHours(20).format(fmt), startingPrice));
+        points.add(new XYChart.Data<>(now.minusHours(14).format(fmt),
+            startingPrice + (currentPrice - startingPrice) * 0.33));
+        points.add(new XYChart.Data<>(now.minusHours(8).format(fmt),
+            startingPrice + (currentPrice - startingPrice) * 0.66));
+        points.add(new XYChart.Data<>(now.minusHours(2).format(fmt),
+            startingPrice + (currentPrice - startingPrice) * 0.90));
       }
       case "week" -> {
-        series.getData().add(new XYChart.Data<>("Mon", currentPrice * 0.75));
-        series.getData().add(new XYChart.Data<>("Tue", currentPrice * 0.80));
-        series.getData().add(new XYChart.Data<>("Wed", currentPrice * 0.85));
-        series.getData().add(new XYChart.Data<>("Thu", currentPrice * 0.88));
-        series.getData().add(new XYChart.Data<>("Fri", currentPrice * 0.92));
-        series.getData().add(new XYChart.Data<>("Sat", currentPrice * 0.97));
-        series.getData().add(new XYChart.Data<>("Now", currentPrice));
+        DateTimeFormatter dayFmt = DateTimeFormatter.ofPattern("EEE");
+        points.add(new XYChart.Data<>(now.minusDays(6).format(dayFmt), startingPrice));
+        points.add(new XYChart.Data<>(now.minusDays(4).format(dayFmt),
+            startingPrice + (currentPrice - startingPrice) * 0.33));
+        points.add(new XYChart.Data<>(now.minusDays(2).format(dayFmt),
+            startingPrice + (currentPrice - startingPrice) * 0.66));
+        points.add(new XYChart.Data<>(now.minusDays(1).format(dayFmt),
+            startingPrice + (currentPrice - startingPrice) * 0.90));
       }
       default -> { // month
-        series.getData().add(new XYChart.Data<>("W1", currentPrice * 0.60));
-        series.getData().add(new XYChart.Data<>("W2", currentPrice * 0.72));
-        series.getData().add(new XYChart.Data<>("W3", currentPrice * 0.85));
-        series.getData().add(new XYChart.Data<>("W4", currentPrice * 0.94));
-        series.getData().add(new XYChart.Data<>("Now", currentPrice));
+        DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("dd/MM");
+        points.add(new XYChart.Data<>(now.minusWeeks(3).format(dateFmt), startingPrice));
+        points.add(new XYChart.Data<>(now.minusWeeks(2).format(dateFmt),
+            startingPrice + (currentPrice - startingPrice) * 0.33));
+        points.add(new XYChart.Data<>(now.minusWeeks(1).format(dateFmt),
+            startingPrice + (currentPrice - startingPrice) * 0.66));
+        points.add(new XYChart.Data<>(now.minusDays(2).format(dateFmt),
+            startingPrice + (currentPrice - startingPrice) * 0.90));
       }
     }
 
-    priceHistoryChart.getData().add(series);
+    // Always cap with the real current price as the last point
+    points.add(new XYChart.Data<>("Now", currentPrice));
+
+    int from = Math.max(0, points.size() - MAX_CHART_POINTS);
+    chartSeries.getData().addAll(points.subList(from, points.size()));
+
     highlightActiveFilter(range);
   }
 

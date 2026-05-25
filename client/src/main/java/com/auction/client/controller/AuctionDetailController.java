@@ -14,6 +14,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -85,6 +86,11 @@ public class AuctionDetailController {
     private boolean       autoBidEnabled = false;
     private java.util.List<com.auction.share.DTO.BidDTO> bidHistory = new java.util.ArrayList<>();
     private double        startingPrice = 0;
+    private static final int  MAX_CHART_POINTS = 5;
+    private static final DateTimeFormatter CHART_FMT =
+            DateTimeFormatter.ofPattern("HH:mm:ss");
+    // Persistent series – never replaced, only data points are added/removed
+    private final XYChart.Series<String, Number> chartSeries = new XYChart.Series<>();
 
     private static final String FOLLOW_GOLD_STYLE =
             "-fx-background-color: transparent; -fx-border-color: #D4AF37; -fx-border-radius: 20; -fx-background-radius: 20; -fx-text-fill: #D4AF37; -fx-font-size: 12px; -fx-padding: 5 16 5 16; -fx-cursor: hand;";
@@ -116,12 +122,22 @@ public class AuctionDetailController {
         // Post Comment button
         postCommentButton.setOnAction(e -> handlePostComment());
 
-        // Price-history filter buttons
+        // Configure Y-axis: auto-range without forcing zero so the chart
+        // zooms in near the actual bid prices instead of compressing them.
+        if (priceHistoryChart != null) {
+            NumberAxis yAxis = (NumberAxis) priceHistoryChart.getYAxis();
+            yAxis.setAutoRanging(true);
+            yAxis.setForceZeroInRange(false);
+            // Attach the persistent series once
+            priceHistoryChart.getData().add(chartSeries);
+        }
+
+        // Price-history filter buttons (filter only affects initial load, not live appends)
         btnDay.setOnAction(e   -> loadChartData("day"));
         btnWeek.setOnAction(e  -> loadChartData("week"));
         btnMonth.setOnAction(e -> loadChartData("month"));
 
-        // Default chart data
+        // Default chart data – populated after setData() provides bidHistory
         loadChartData("month");
 
         // Custom cell factory for comments ListView
@@ -332,13 +348,11 @@ public class AuctionDetailController {
                         totalBidsLabel.setText(String.valueOf(totalBids));
                         minBidLabel.setText(String.format("Minimum bid: %.0f VND", currentPrice + bidStep));
                         bidInputField.clear();
-                        
+
                         String username = ClientContext.userService().getSessionManager().getCurrentUserId();
                         bidHistory.add(new com.auction.share.DTO.BidDTO(username != null ? username : "You", currentPrice, LocalDateTime.now().format(ISO_FMT)));
-                        String currentRange = "month";
-                        if (btnDay.getStyle().contains("#FFD700")) currentRange = "day";
-                        else if (btnWeek.getStyle().contains("#FFD700")) currentRange = "week";
-                        loadChartData(currentRange);
+                        // Append a live point to the chart without clearing existing data
+                        appendChartPoint(currentPrice);
                     } else {
                         showBidError(response != null ? response.getMessage() : "Lỗi kết nối máy chủ");
                     }
@@ -403,9 +417,13 @@ public class AuctionDetailController {
     // ─────────────────────────────────────────────────────────────
     // Price-history chart
     // ─────────────────────────────────────────────────────────────
+
+    /**
+     * (Re)builds the chart from bidHistory on filter button change.
+     * Always keeps at most MAX_CHART_POINTS points.
+     */
     private void loadChartData(String range) {
-        priceHistoryChart.getData().clear();
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        chartSeries.getData().clear();
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime filterTime;
@@ -426,38 +444,53 @@ public class AuctionDetailController {
             }
         }
 
-        if (bidHistory == null || bidHistory.isEmpty()) {
-            series.getData().add(new XYChart.Data<>("Start", startingPrice > 0 ? startingPrice : currentPrice));
-        } else {
-            // Sort bids chronologically (oldest first) so time goes forward on the X-axis
+        // Collect qualifying bids sorted oldest-first
+        java.util.List<XYChart.Data<String, Number>> points = new java.util.ArrayList<>();
+
+        if (bidHistory != null && !bidHistory.isEmpty()) {
             java.util.List<com.auction.share.DTO.BidDTO> sortedBids = new java.util.ArrayList<>(bidHistory);
             sortedBids.sort((b1, b2) -> {
                 try {
-                    LocalDateTime t1 = LocalDateTime.parse(b1.getTimestamp(), ISO_FMT);
-                    LocalDateTime t2 = LocalDateTime.parse(b2.getTimestamp(), ISO_FMT);
-                    return t1.compareTo(t2);
-                } catch (Exception e) {
-                    return 0;
-                }
+                    return LocalDateTime.parse(b1.getTimestamp(), ISO_FMT)
+                                       .compareTo(LocalDateTime.parse(b2.getTimestamp(), ISO_FMT));
+                } catch (Exception e) { return 0; }
             });
 
             for (com.auction.share.DTO.BidDTO bid : sortedBids) {
-                LocalDateTime bidTime;
                 try {
-                    bidTime = LocalDateTime.parse(bid.getTimestamp(), ISO_FMT);
-                } catch (Exception e) {
-                    continue; 
-                }
-
-                if (bidTime.isAfter(filterTime) || bidTime.isEqual(filterTime)) {
-                    series.getData().add(new XYChart.Data<>(bidTime.format(formatter), bid.getAmount()));
-                }
+                    LocalDateTime bidTime = LocalDateTime.parse(bid.getTimestamp(), ISO_FMT);
+                    if (!bidTime.isBefore(filterTime)) {
+                        points.add(new XYChart.Data<>(bidTime.format(formatter), bid.getAmount()));
+                    }
+                } catch (Exception ignored) {}
             }
         }
 
-        series.getData().add(new XYChart.Data<>("Now", currentPrice));
-        priceHistoryChart.getData().add(series);
+        // Always ensure at least a starting anchor
+        if (points.isEmpty()) {
+            points.add(new XYChart.Data<>("Start", startingPrice > 0 ? startingPrice : currentPrice));
+        }
+
+        // Add a "Now" point representing the latest known price
+        points.add(new XYChart.Data<>("Now", currentPrice));
+
+        // Keep only the last MAX_CHART_POINTS entries
+        int from = Math.max(0, points.size() - MAX_CHART_POINTS);
+        chartSeries.getData().addAll(points.subList(from, points.size()));
+
         highlightActiveFilter(range);
+    }
+
+    /**
+     * Appends a single live price point captured at the moment currentPrice changes.
+     * Automatically trims the oldest point when the count exceeds MAX_CHART_POINTS.
+     */
+    private void appendChartPoint(double price) {
+        String label = LocalDateTime.now().format(CHART_FMT);
+        chartSeries.getData().add(new XYChart.Data<>(label, price));
+        while (chartSeries.getData().size() > MAX_CHART_POINTS) {
+            chartSeries.getData().remove(0);
+        }
     }
 
     private void highlightActiveFilter(String active) {

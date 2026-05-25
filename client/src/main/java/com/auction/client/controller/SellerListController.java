@@ -2,6 +2,7 @@ package com.auction.client.controller;
 
 import com.auction.client.ClientContext;
 import com.auction.client.service.AuctionService;
+import com.auction.client.service.DeletedAuctionsStore;
 import com.auction.share.DTO.AuctionSummaryDTO;
 import java.io.IOException;
 import java.util.List;
@@ -55,8 +56,9 @@ public class SellerListController {
                   int count = 0;
                   for (Object obj : list) {
                     if (obj instanceof AuctionSummaryDTO dto) {
+                      if (DeletedAuctionsStore.getInstance().isDeleted(dto.getAuctionId())) continue;
                       if (matchesMode(mode, dto)) {
-                        appendCard(dto);
+                        appendCard(dto, () -> loadItems(mode));
                         count++;
                       }
                     }
@@ -79,13 +81,14 @@ public class SellerListController {
     };
   }
 
-  private void appendCard(AuctionSummaryDTO dto) {
+  private void appendCard(AuctionSummaryDTO dto, Runnable refreshCallback) {
     try {
       FXMLLoader loader =
           new FXMLLoader(getClass().getResource("/com/auction/client/view/SellerItemCard.fxml"));
       HBox card = loader.load();
 
       SellerItemCardController ctrl = loader.getController();
+      ctrl.setRefreshCallback(refreshCallback);
       ctrl.setData(
           iconForCategory(dto.getCategory()),
           dto.getCategory(),

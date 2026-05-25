@@ -1,7 +1,12 @@
 package com.auction.client.controller;
 
+import com.auction.client.service.DeletedAuctionsStore;
 import com.auction.client.service.WatchlistService;
+import java.util.Optional;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
@@ -16,6 +21,7 @@ public class SellerItemCardController {
   @FXML private Label timeLabel;
   @FXML private Label statusLabel;
   @FXML private Label followStatusLabel;
+  @FXML private Button deleteButton;
 
   private String icon;
   private String category;
@@ -25,6 +31,12 @@ public class SellerItemCardController {
   private int bids;
   private String time;
   private String auctionId;
+
+  private Runnable refreshCallback;
+
+  public void setRefreshCallback(Runnable refreshCallback) {
+    this.refreshCallback = refreshCallback;
+  }
 
   public void setData(
       String icon,
@@ -55,13 +67,29 @@ public class SellerItemCardController {
       followStatusLabel.setManaged(isFollowed);
     }
 
-    priceLabel.setText(String.format("%,.0f USD", price));
+    priceLabel.setText(String.format("%,.0f VND", price));
 
     bidsLabel.setText(bids + (bids <= 1 ? " bid" : " bids"));
     timeLabel.setText("Ending In : " + time);
 
     if (cardRoot != null) {
       cardRoot.setOnMouseClicked(event -> handleCardClick());
+    }
+
+    // ── Delete button: only visible for CANCELED auctions ──
+    if (deleteButton != null) {
+      if ("CANCELED".equals(status)) {
+        deleteButton.setVisible(true);
+        deleteButton.setManaged(true);
+        deleteButton.setOnAction(
+            event -> {
+              event.consume(); // prevent click from bubbling to cardRoot
+              handleDelete();
+            });
+      } else {
+        deleteButton.setVisible(false);
+        deleteButton.setManaged(false);
+      }
     }
 
     if (status.equals("Active")) {
@@ -86,8 +114,24 @@ public class SellerItemCardController {
     }
   }
 
+  private void handleDelete() {
+    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+    alert.setTitle("Delete Auction");
+    alert.setHeaderText("Delete \"" + name + "\"?");
+    alert.setContentText("This auction will be removed from the listing. This action cannot be undone during this session.");
+
+    Optional<ButtonType> result = alert.showAndWait();
+    if (result.isPresent() && result.get() == ButtonType.OK) {
+      DeletedAuctionsStore.getInstance().delete(auctionId);
+      if (refreshCallback != null) {
+        refreshCallback.run();
+      }
+    }
+  }
+
   @FXML
   private void handleCardClick() {
     SellerAuctionDetailController.open(icon, category, name, price, bids, time, status, auctionId);
   }
 }
+

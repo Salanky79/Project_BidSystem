@@ -31,7 +31,7 @@ public class BidService {
 
     if (amount <= currentPrice) {
       throw new ValidationException(
-          "Giá bid phải cao hơn giá hiện tại: $" + String.format("%.2f", currentPrice));
+          "Giá bid phải cao hơn giá hiện tại: " + String.format("%,.0f VND", currentPrice));
     }
     PlaceBidRequest request = new PlaceBidRequest(auctionId, null, amount);
     socketClient.send(request, onResponse);
