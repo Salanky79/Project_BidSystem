@@ -20,11 +20,7 @@ import javafx.scene.layout.HBox;
  */
 public class SellerDashboardController {
 
-  // ===== STAT LABELS =====
-  @FXML private Label labelRevenue;
-  @FXML private Label labelActive;
-  @FXML private Label labelCompleted;
-  @FXML private Label labelShipment;
+
 
   // ===== FILTER BUTTONS =====
   @FXML private Button btnFilterAll;

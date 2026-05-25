@@ -17,59 +17,7 @@
         <VBox.margin><Insets bottom="16"/></VBox.margin>
     </Label>
 
-    <!-- ===== 4 STAT BOXES ===== -->
-    <HBox spacing="16" fillHeight="true">
-        <VBox.margin><Insets bottom="24"/></VBox.margin>
 
-        <!-- Total Revenue -->
-        <VBox fx:id="boxRevenue" spacing="8"
-              style="-fx-background-color: white; -fx-border-radius: 12; -fx-background-radius: 12;
-                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 8, 0, 0, 2);
-                     -fx-padding: 20 24 20 24;"
-              HBox.hgrow="ALWAYS">
-            <Label text="Total Revenue"
-                   style="-fx-font-size: 13px; -fx-text-fill: #888888;"/>
-            <Label fx:id="labelRevenue"
-                   style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
-        </VBox>
-
-        <!-- Active Auctions -->
-        <VBox fx:id="boxActive" spacing="8"
-              style="-fx-background-color: white; -fx-border-radius: 12; -fx-background-radius: 12;
-                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 8, 0, 0, 2);
-                     -fx-padding: 20 24 20 24;"
-              HBox.hgrow="ALWAYS">
-            <Label text="Active Auctions"
-                   style="-fx-font-size: 13px; -fx-text-fill: #888888;"/>
-            <Label fx:id="labelActive" text="0"
-                   style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
-        </VBox>
-
-        <!-- Completed Sales -->
-        <VBox fx:id="boxCompleted" spacing="8"
-              style="-fx-background-color: white; -fx-border-radius: 12; -fx-background-radius: 12;
-                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 8, 0, 0, 2);
-                     -fx-padding: 20 24 20 24;"
-              HBox.hgrow="ALWAYS">
-            <Label text="Completed Sales"
-                   style="-fx-font-size: 13px; -fx-text-fill: #888888;"/>
-            <Label fx:id="labelCompleted" text="0"
-                   style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
-        </VBox>
-
-        <!-- Awaiting Shipment -->
-        <VBox fx:id="boxShipment" spacing="8"
-              style="-fx-background-color: white; -fx-border-radius: 12; -fx-background-radius: 12;
-                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 8, 0, 0, 2);
-                     -fx-padding: 20 24 20 24;"
-              HBox.hgrow="ALWAYS">
-            <Label text="Awaiting Shipment"
-                   style="-fx-font-size: 13px; -fx-text-fill: #888888;"/>
-            <Label fx:id="labelShipment" text="0"
-                   style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
-        </VBox>
-
-    </HBox>
 
     <!-- ===== FILTER BAR + MANAGE BUTTON ===== -->
     <HBox alignment="CENTER_LEFT" spacing="16">

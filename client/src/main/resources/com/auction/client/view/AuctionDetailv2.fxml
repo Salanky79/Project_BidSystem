@@ -205,37 +205,7 @@
             </VBox>
         </HBox>
 
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- COMMENTS SECTION                                -->
-        <!-- ═══════════════════════════════════════════════ -->
-        <VBox spacing="14" style="-fx-background-color: #0D0D0D; -fx-padding: 20 20 24 20; -fx-border-color: #222222; -fx-border-width: 1 0 0 0;">
 
-            <!-- Header: label + Newest/Oldest sort -->
-            <HBox alignment="CENTER_LEFT">
-                <Label style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;" text="COMMENTS" HBox.hgrow="ALWAYS" />
-                <ComboBox fx:id="commentSortBox" style="-fx-background-color: #1E1E1E; -fx-border-color: #3A3A3A; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #CCCCCC; -fx-font-size: 12px;" value="Newest">
-                    <items>
-                        <FXCollections fx:factory="observableArrayList">
-                            <String fx:value="Newest" />
-                            <String fx:value="Oldest" />
-                        </FXCollections>
-                    </items>
-                </ComboBox>
-            </HBox>
-
-            <Separator style="-fx-background-color: #252525; -fx-opacity: 1;" />
-
-            <!-- Dynamic ListView (filled by controller) -->
-            <ListView fx:id="commentsListView" prefHeight="180" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;" />
-
-
-            <!-- Comment input + POST (same style as Place Bid) -->
-            <HBox alignment="CENTER" spacing="8" style="-fx-padding: 4 0 0 0;">
-                <TextField fx:id="commentInputField" promptText="Write a comment..." style="-fx-background-color: #1E1E1E; -fx-border-color: #3A3A3A; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #FFFFFF; -fx-prompt-text-fill: #555555; -fx-font-size: 13px; -fx-padding: 10 12 10 12;" HBox.hgrow="ALWAYS" />
-                <Button fx:id="postCommentButton" style="-fx-background-color: #D4AF37; -fx-border-color: #D4AF37; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #000000; -fx-font-weight: bold; -fx-font-size: 13px; -fx-padding: 10 20 10 20; -fx-cursor: hand;" text="POST" />
-            </HBox>
-
-        </VBox>
 
     </VBox>
 </ScrollPane>

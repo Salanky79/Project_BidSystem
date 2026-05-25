@@ -66,11 +66,7 @@ public class AuctionDetailController {
     @FXML private Button    cancelAutoBidButton;
     @FXML private Label     autoBidStatusLabel;
 
-    // ── COMMENTS ─────────────────────────────────────────────────
-    @FXML private ComboBox<String> commentSortBox;
-    @FXML private ListView<String> commentsListView;
-    @FXML private TextField        commentInputField;
-    @FXML private Button           postCommentButton;
+
 
     // ── State ────────────────────────────────────────────────────
     private double        currentPrice;
@@ -117,8 +113,7 @@ public class AuctionDetailController {
         enableAutoBidButton.setOnAction(e -> handleEnableAutoBid());
         cancelAutoBidButton.setOnAction(e -> handleCancelAutoBid());
 
-        // Post Comment button
-        postCommentButton.setOnAction(e -> handlePostComment());
+
 
         // Configure Y-axis: auto-range without forcing zero so the chart
         // zooms in near the actual bid prices instead of compressing them.
@@ -133,68 +128,7 @@ public class AuctionDetailController {
         // Default chart data – populated after setData() provides bidHistory
         loadChartData();
 
-        // Custom cell factory for comments ListView
-        commentsListView.setCellFactory(lv -> new ListCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setGraphic(null);
-                    setStyle("-fx-background-color: transparent;");
-                    return;
-                }
 
-                // Format stored as "author|text|time"
-                String[] parts = item.split("\\|", 3);
-                String author    = parts.length > 0 ? parts[0] : "?";
-                String text      = parts.length > 1 ? parts[1] : item;
-                String timestamp = parts.length > 2 ? parts[2] : "";
-
-                // Initials avatar
-                String initials = author.length() >= 2
-                        ? (author.charAt(0) + author.substring(author.length() - 1)).toUpperCase()
-                        : author.toUpperCase();
-
-                Label avatarLabel = new Label(initials);
-                avatarLabel.setStyle("-fx-text-fill: #000000; -fx-font-weight: bold; -fx-font-size: 12px;");
-                VBox avatar = new VBox(avatarLabel);
-                avatar.setAlignment(Pos.CENTER);
-                avatar.setStyle("-fx-min-width: 36; -fx-min-height: 36; -fx-max-width: 36; -fx-max-height: 36;"
-                        + " -fx-background-color: #D4AF37; -fx-background-radius: 50;");
-
-                // Author + timestamp row
-                Label authorLabel = new Label(author);
-                authorLabel.setStyle("-fx-text-fill: #D4AF37; -fx-font-weight: bold; -fx-font-size: 13px;");
-                HBox.setHgrow(authorLabel, Priority.ALWAYS);
-
-                Label timeLabel = new Label(timestamp);
-                timeLabel.setStyle("-fx-text-fill: #777777; -fx-font-size: 11px;");
-
-                HBox header = new HBox(authorLabel, timeLabel);
-                header.setAlignment(Pos.CENTER_LEFT);
-                header.setSpacing(8);
-
-                Label textLabel = new Label(text);
-                textLabel.setStyle("-fx-text-fill: #CCCCCC; -fx-font-size: 13px;");
-                textLabel.setWrapText(true);
-
-                VBox content = new VBox(header, textLabel);
-                content.setSpacing(3);
-                HBox.setHgrow(content, Priority.ALWAYS);
-
-                HBox card = new HBox(avatar, content);
-                card.setSpacing(12);
-                card.setAlignment(Pos.TOP_LEFT);
-                card.setPadding(new Insets(12, 14, 12, 14));
-                card.setStyle("-fx-background-color: #161616; -fx-background-radius: 8;"
-                        + " -fx-border-color: #D4AF37 transparent transparent transparent;"
-                        + " -fx-border-width: 0 0 0 3;");
-
-                setGraphic(card);
-                setStyle("-fx-background-color: transparent; -fx-padding: 4 0 4 0;");
-                setPrefWidth(0); // allow wrapping
-            }
-        });
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -406,16 +340,7 @@ public class AuctionDetailController {
         }
     }
 
-    private void handlePostComment() {
-        String text = commentInputField.getText().trim();
-        if (text.isEmpty()) return;
 
-        String timestamp = LocalDateTime.now().format(DISPLAY_FMT);
-        // Store as "author|text|time" for the CellFactory to parse
-        commentsListView.getItems().add(0, "You|" + text + "|" + timestamp);
-        commentsListView.scrollTo(0);
-        commentInputField.clear();
-    }
 
     // ─────────────────────────────────────────────────────────────
     // Price-history chart

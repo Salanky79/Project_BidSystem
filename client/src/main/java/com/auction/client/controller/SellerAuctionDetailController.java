@@ -51,10 +51,7 @@ public class SellerAuctionDetailController {
   // ── BIDDERS ─────────────────────────────────────────────────
   @FXML private ListView<String> bidderListView;
 
-  // ── COMMENTS ────────────────────────────────────────────────
-  @FXML private ListView<String> commentsListView;
-  @FXML private TextField commentInputField;
-  @FXML private Button postCommentButton;
+
 
   private String auctionId;
   private double currentPrice;
@@ -158,10 +155,7 @@ public class SellerAuctionDetailController {
           });
     }
 
-    // Post Comment
-    if (postCommentButton != null) {
-      postCommentButton.setOnAction(e -> handlePostComment());
-    }
+
 
     if (saveBidStepButton != null) {
       saveBidStepButton.setOnAction(e -> handleSetBidStep());
@@ -172,7 +166,6 @@ public class SellerAuctionDetailController {
     }
 
     setupBidderList();
-    setupCommentList();
   }
 
   private void setupBidderList() {
@@ -245,89 +238,7 @@ public class SellerAuctionDetailController {
             });
   }
 
-  private void setupCommentList() {
-    if (commentsListView == null) return;
 
-    commentsListView
-        .getItems()
-        .addAll(
-            "User B|When does it ship?|12/04/2026 11:30",
-            "User A|Is it authentic?|12/04/2026 10:15");
-
-    commentsListView.setCellFactory(
-        lv ->
-            new ListCell<>() {
-              @Override
-              protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                  setGraphic(null);
-                  setStyle("-fx-background-color: transparent;");
-                  return;
-                }
-
-                String[] parts = item.split("\\|", 3);
-                String author = parts.length > 0 ? parts[0] : "?";
-                String text = parts.length > 1 ? parts[1] : item;
-                String timestamp = parts.length > 2 ? parts[2] : "";
-
-                String initials =
-                    author.length() >= 2
-                        ? (author.charAt(0) + author.substring(author.length() - 1)).toUpperCase()
-                        : author.toUpperCase();
-
-                Label avatarLabel = new Label(initials);
-                avatarLabel.setStyle(
-                    "-fx-text-fill: #000000; -fx-font-weight: bold; -fx-font-size: 12px;");
-                VBox avatar = new VBox(avatarLabel);
-                avatar.setAlignment(Pos.CENTER);
-                avatar.setStyle(
-                    "-fx-min-width: 36; -fx-min-height: 36; -fx-max-width: 36; -fx-max-height: 36;"
-                        + " -fx-background-color: #D4AF37; -fx-background-radius: 50;");
-
-                Label authorLabel = new Label(author);
-                authorLabel.setStyle(
-                    "-fx-text-fill: #D4AF37; -fx-font-weight: bold; -fx-font-size: 13px;");
-                HBox.setHgrow(authorLabel, Priority.ALWAYS);
-
-                Label timeLabel = new Label(timestamp);
-                timeLabel.setStyle("-fx-text-fill: #777777; -fx-font-size: 11px;");
-
-                HBox header = new HBox(8, authorLabel, timeLabel);
-                header.setAlignment(Pos.CENTER_LEFT);
-
-                Label textLabel = new Label(text);
-                textLabel.setStyle("-fx-text-fill: #CCCCCC; -fx-font-size: 13px;");
-                textLabel.setWrapText(true);
-
-                VBox content = new VBox(3, header, textLabel);
-                HBox.setHgrow(content, Priority.ALWAYS);
-
-                HBox card = new HBox(12, avatar, content);
-                card.setAlignment(Pos.TOP_LEFT);
-                card.setPadding(new Insets(12, 14, 12, 14));
-                card.setStyle(
-                    "-fx-background-color: #161616; -fx-background-radius: 8; -fx-border-color:"
-                        + " #D4AF37 transparent transparent transparent; -fx-border-width: 0 0 0"
-                        + " 3;");
-
-                setGraphic(card);
-                setStyle("-fx-background-color: transparent; -fx-padding: 4 0 4 0;");
-                setPrefWidth(0);
-              }
-            });
-  }
-
-  private void handlePostComment() {
-    if (commentInputField == null || commentsListView == null) return;
-    String text = commentInputField.getText().trim();
-    if (text.isEmpty()) return;
-
-    String timestamp = LocalDateTime.now().format(DISPLAY_FMT);
-    commentsListView.getItems().add(0, "Seller|" + text + "|" + timestamp);
-    commentsListView.scrollTo(0);
-    commentInputField.clear();
-  }
 
   private void handleSetBidStep() {
     if (bidStepField == null || bidStepField.getText().trim().isEmpty()) return;
