@@ -1,7 +1,7 @@
 package com.auction.client.controller;
 
 import com.auction.client.service.DeletedAuctionsStore;
-import com.auction.client.service.WatchlistService;
+
 import java.util.Optional;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -20,7 +20,6 @@ public class SellerItemCardController {
   @FXML private Label bidsLabel;
   @FXML private Label timeLabel;
   @FXML private Label statusLabel;
-  @FXML private Label followStatusLabel;
   @FXML private Button deleteButton;
 
   private String icon;
@@ -61,11 +60,7 @@ public class SellerItemCardController {
     this.status = status;
     this.auctionId = auctionId;
 
-    if (followStatusLabel != null) {
-      boolean isFollowed = WatchlistService.getInstance().isFollowed(auctionId);
-      followStatusLabel.setVisible(isFollowed);
-      followStatusLabel.setManaged(isFollowed);
-    }
+
 
     priceLabel.setText(String.format("%,.0f VND", price));
 

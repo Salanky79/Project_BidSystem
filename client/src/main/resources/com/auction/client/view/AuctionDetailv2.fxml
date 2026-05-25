@@ -31,7 +31,6 @@
 
                 <!-- Tag Buttons: Follow (outline gold), Active (filled gold), Other (outline grey) -->
                 <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Button fx:id="followButton" style="-fx-background-color: transparent; -fx-border-color: #D4AF37; -fx-border-radius: 20; -fx-background-radius: 20; -fx-text-fill: #D4AF37; -fx-font-size: 12px; -fx-padding: 5 16 5 16; -fx-cursor: hand;" text="+ Follow" />
                     <Button style="-fx-background-color: #D4AF37; -fx-border-color: #D4AF37; -fx-border-radius: 20; -fx-background-radius: 20; -fx-text-fill: #000000; -fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 5 16 5 16; -fx-cursor: hand;" text="Active" />
                     <Button style="-fx-background-color: transparent; -fx-border-color: #555555; -fx-border-radius: 20; -fx-background-radius: 20; -fx-text-fill: #888888; -fx-font-size: 12px; -fx-padding: 5 16 5 16; -fx-cursor: hand;" text="Other" />
                 </HBox>

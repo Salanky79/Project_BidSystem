@@ -14,7 +14,6 @@
         <HBox alignment="TOP_RIGHT" spacing="8">
             <Region HBox.hgrow="ALWAYS" />
             <Button fx:id="deleteButton" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 3 10 3 10; -fx-background-radius: 20; -fx-cursor: hand;" text="🗑 Delete" visible="false" managed="false"/>
-            <Label fx:id="followStatusLabel" style="-fx-background-color: transparent; -fx-text-fill: #D4AF37; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 3 10 3 10; -fx-border-color: #D4AF37; -fx-border-radius: 20; -fx-background-radius: 20;" text="Followed" visible="false" managed="false"/>
             <Label fx:id="categoryLabel" style="-fx-background-color: #f0a500; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 3 10 3 10; -fx-background-radius: 20;" text="Category" />
         </HBox>
         <Label fx:id="nameLabel" mouseTransparent="true" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a; -fx-wrap-text: true;" text="Item Name" />

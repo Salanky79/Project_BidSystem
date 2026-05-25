@@ -6,8 +6,7 @@ import java.util.Set;
 /**
  * Singleton in-memory store tracking auction IDs that the seller has "deleted" from the UI.
  * Both Seller and Bidder views consult this store to hide deleted auctions.
- *
- * <p>Pattern mirrors {@link WatchlistService} — simple, no file I/O, lives for the session.
+ * <p>Simple in-memory store, no file I/O, lives for the session.
  */
 public class DeletedAuctionsStore {
 

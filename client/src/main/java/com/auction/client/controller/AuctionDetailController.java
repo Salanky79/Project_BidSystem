@@ -31,7 +31,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import com.auction.client.service.WatchlistService;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -50,7 +49,6 @@ public class AuctionDetailController {
     // ── HEADER ──────────────────────────────────────────────────
     @FXML private Label  productTitleLabel;
     @FXML private Button closeButton;
-    @FXML private Button followButton;
 
     // ── LEFT COLUMN ─────────────────────────────────────────────
     @FXML private LineChart<String, Number> priceHistoryChart;
@@ -84,7 +82,6 @@ public class AuctionDetailController {
     private String        auctionId;
     private LocalDateTime endTime;
     private Timeline      countdownTimeline;
-    private boolean       isFollowing = false;
     private boolean       autoBidEnabled = false;
     private List<BidDTO> bidHistory = new ArrayList<>();
     private double        startingPrice = 0;
@@ -95,11 +92,6 @@ public class AuctionDetailController {
     private final XYChart.Series<String, Number> chartSeries = new XYChart.Series<>();
     private String startTimeISO; // real start time from server (ISO format)
     private Consumer<Response<?>> bidPushListener;
-
-    private static final String FOLLOW_GOLD_STYLE =
-            "-fx-background-color: transparent; -fx-border-color: #D4AF37; -fx-border-radius: 20; -fx-background-radius: 20; -fx-text-fill: #D4AF37; -fx-font-size: 12px; -fx-padding: 5 16 5 16; -fx-cursor: hand;";
-    private static final String FOLLOW_GRAY_STYLE =
-            "-fx-background-color: transparent; -fx-border-color: #777777; -fx-border-radius: 20; -fx-background-radius: 20; -fx-text-fill: #888888; -fx-font-size: 12px; -fx-padding: 5 16 5 16; -fx-cursor: hand;";
 
     private static final DateTimeFormatter DISPLAY_FMT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -117,9 +109,6 @@ public class AuctionDetailController {
             Stage stage = (Stage) closeButton.getScene().getWindow();
             stage.close();
         });
-
-        // Follow toggle
-        followButton.setOnAction(e -> handleFollowToggle());
 
         // Place Bid button
         placeBidButton.setOnAction(e -> handlePlaceBid());
@@ -187,10 +176,6 @@ public class AuctionDetailController {
             }
         }
         startCountdown();
-        
-        // Sync initial follow state
-        this.isFollowing = WatchlistService.getInstance().isFollowed(this.auctionId);
-        updateFollowButtonStyle();
 
         refreshAuctionDetail();
         registerBidPushRefresh();
@@ -235,25 +220,6 @@ public class AuctionDetailController {
     // ─────────────────────────────────────────────────────────────
     // Handlers
     // ─────────────────────────────────────────────────────────────
-    private void handleFollowToggle() {
-        isFollowing = !isFollowing;
-        WatchlistService.getInstance().toggle(this.auctionId);
-        updateFollowButtonStyle();
-        
-        // Refresh home if we are in Watchlist view? 
-        // Not easily accessible here, but the data is updated.
-    }
-    
-    private void updateFollowButtonStyle() {
-        if (isFollowing) {
-            followButton.setText("− Unfollow");
-            followButton.setStyle(FOLLOW_GRAY_STYLE);
-        } else {
-            followButton.setText("+ Follow");
-            followButton.setStyle(FOLLOW_GOLD_STYLE);
-        }
-    }
-
     private void handlePlaceBid() {
         String input = bidInputField.getText().trim();
         if (input.isEmpty()) return;
