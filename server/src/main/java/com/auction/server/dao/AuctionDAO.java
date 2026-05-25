@@ -182,11 +182,68 @@ public class AuctionDAO {
         }
     }
 
+    private double sumRunningWinningBidsByBidder(Connection conn, String bidderId, Set<String> excludedAuctionIds) throws SQLException {
+        StringBuilder sql = new StringBuilder("""
+                SELECT COALESCE(SUM(current_price), 0) AS total_amount
+                FROM auctions
+                WHERE status = ?
+                  AND highest_bidder_id = ?
+                """);
+
+        if (excludedAuctionIds != null && !excludedAuctionIds.isEmpty()) {
+            sql.append(" AND id NOT IN (");
+            sql.append("?,".repeat(excludedAuctionIds.size()));
+            sql.setLength(sql.length() - 1);
+            sql.append(")");
+        }
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int index = 1;
+            ps.setString(index++, AuctionStatus.RUNNING.name());
+            ps.setString(index++, bidderId);
+            if (excludedAuctionIds != null) {
+                for (String auctionId : excludedAuctionIds) {
+                    ps.setString(index++, auctionId);
+                }
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getDouble("total_amount") : 0.0;
+            }
+        }
+    }
+
+    private double findUserBalance(Connection conn, String userId) throws SQLException {
+        String sql = "SELECT balance FROM users WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("balance");
+                }
+            }
+        }
+        return 0.0;
+    }
+
 
     public boolean updateHighestBidIfHigher(Connection conn, String id, String bidderId, double amount) throws SQLException {
+        Auction auction = findById(id);
+        if (auction == null) {
+            return false;
+        }
+
+        double reservedInOtherRunningAuctions = sumRunningWinningBidsByBidder(conn, bidderId, Set.of(id));
+        double requiredForThisBid = amount;
+        if (auction.getHighestBidder() != null && bidderId.equals(auction.getHighestBidder().getId())) {
+            requiredForThisBid = amount - auction.getCurrentHighestBid();
+        }
+        double bidderBalance = findUserBalance(conn, bidderId);
+        if (bidderBalance - reservedInOtherRunningAuctions < requiredForThisBid) {
+            return false;
+        }
+
         String sql = """
                 UPDATE auctions a
-                JOIN users u ON u.id = ?
                 SET a.current_price = ?,
                     a.highest_bidder_id = ?,
                     a.end_time = CASE
@@ -201,50 +258,19 @@ public class AuctionDAO {
                   AND a.start_time <= ?
                   AND a.end_time > ?
                   AND ? >= (a.current_price + a.bid_step)
-                  AND (
-                    u.balance - (
-                      SELECT COALESCE(SUM(other.current_price), 0)
-                      FROM (
-                        SELECT current_price
-                        FROM auctions
-                        WHERE status = ?
-                          AND highest_bidder_id = ?
-                          AND id <> ?
-                      ) other
-                    )
-                  ) >= (
-                    CASE
-                      WHEN a.highest_bidder_id = ? THEN (? - a.current_price)
-                      ELSE ?
-                    END
-                  )
              """;
-        // USER có thể đấu giá nhiều bid cùng lúc nên phải lấy balance - tổng các auc khác
-        // Where đúng => chạy SET
-        // check nếu chưa có người bid or xem người bid phải khác nhau mới được bid
-        // <> : khác
-        // vẫn dùng cas >= 0 vì có thể TIMESTAMPDIFF sẽ làm tròn xuống (logic status đã được check trước ở Where rồi)
-        // UPDATE WHERE => ATOMIC UPDATE
-        // a.end_time - now (tg còn lại)
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, bidderId);
-            ps.setDouble(2, amount);
-            ps.setString(3, bidderId);
+            ps.setDouble(1, amount);
+            ps.setString(2, bidderId);
             Timestamp now = Timestamp.valueOf(java.time.LocalDateTime.now());
+            ps.setTimestamp(3, now);
             ps.setTimestamp(4, now);
-            ps.setTimestamp(5, now);
-            ps.setString(6, bidderId);
-            ps.setString(7, id);
-            ps.setString(8, AuctionStatus.RUNNING.name());
+            ps.setString(5, bidderId);
+            ps.setString(6, id);
+            ps.setString(7, AuctionStatus.RUNNING.name());
+            ps.setTimestamp(8, now);
             ps.setTimestamp(9, now);
-            ps.setTimestamp(10, now);
-            ps.setDouble(11, amount);
-            ps.setString(12, AuctionStatus.RUNNING.name());
-            ps.setString(13, bidderId);
-            ps.setString(14, id);
-            ps.setString(15, bidderId);
-            ps.setDouble(16, amount);
-            ps.setDouble(17, amount);
+            ps.setDouble(10, amount);
             return ps.executeUpdate() > 0;
         }
     }
@@ -380,3 +406,4 @@ public class AuctionDAO {
         return MapAuctionDB.mapAuction(rs, item, seller, highestBidder);
     }
 }
+

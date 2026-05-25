@@ -208,21 +208,6 @@ public class AuctionService {
         return auctionDAO.updateEndTime(req.getAuctionId(), newEndTime);
     }
 
-    public Bidder requireBidder(String bidderId) throws SQLException, ValidationException {
-        User bidderUser = userDAO.findById(bidderId);
-        if (!(bidderUser instanceof Bidder bidder)) {
-            throw new ValidationException("User is not a bidder.");
-        }
-        return bidder;
-    }
-
-    public boolean isAuctionRunning(Auction auction) {
-        if (auction == null) {
-            return false;
-        }
-        LocalDateTime now = LocalDateTime.now();
-        return !(now.isAfter(auction.getEndTime()) || now.isBefore(auction.getStartTime()));
-    }
 
     protected Connection getConnection() throws SQLException {
         return DatabaseConnection.getConnection();
@@ -237,7 +222,7 @@ public class AuctionService {
                 boolean updated = auctionDAO.updateHighestBidIfHigher(conn, auction.getId(), bidder.getId(), amount);
                 if (!updated) {
                     conn.rollback();
-                    throw new ValidationException("Bid rejected: auction is not running, already ended, insufficient balance, or current price changed.");
+                    throw new ValidationException("Place bid fail");
                 }
 
                 bidTransactionDAO.saveBidTransaction(conn, transaction);
@@ -296,5 +281,21 @@ public class AuctionService {
         } else {
             return auctionDAO.findAll();
         }
+    }
+
+    public boolean isAuctionRunning(Auction auction) {
+        if (auction == null) {
+            return false;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        return !(now.isAfter(auction.getEndTime()) || now.isBefore(auction.getStartTime()));
+    }
+
+    public Bidder requireBidder(String bidderId) throws SQLException, ValidationException {
+        User bidderUser = userDAO.findById(bidderId);
+        if (!(bidderUser instanceof Bidder bidder)) {
+            throw new ValidationException("User is not a bidder.");
+        }
+        return bidder;
     }
 }
