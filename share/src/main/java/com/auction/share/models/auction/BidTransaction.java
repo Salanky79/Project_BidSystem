@@ -20,10 +20,6 @@ public class BidTransaction extends Entity {
     this.timestamp = LocalDateTime.now();
   }
 
-  /** Trả về mô tả giao dịch để hiển thị. */
-  public String getTransactionDetails() {
-    return "Account [" + bidder.getUsername() + "] placed " + amount + " VND at " + timestamp;
-  }
 
   public Auction getAuction() {
     return auction;

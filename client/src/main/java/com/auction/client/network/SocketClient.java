@@ -9,7 +9,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Map;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -21,6 +23,7 @@ public class SocketClient {
   // requestId → callback
   // nhiều request gửi cùng lúc => Cần ID
   private final Map<String, Consumer<Response<?>>> callbacks;
+  private final List<Consumer<Response<?>>> pushListeners;
   private final SessionManager sessionManager;
 
   private Socket socket;
@@ -32,9 +35,22 @@ public class SocketClient {
     this.host = host;
     this.port = port;
     this.sessionManager = sessionManager;
-    // mỗi task một virtual thread riêng
+
     this.executorService = Executors.newCachedThreadPool();
     this.callbacks = new ConcurrentHashMap<>();
+    this.pushListeners = new CopyOnWriteArrayList<>();
+  }
+
+  public void addPushListener(Consumer<Response<?>> listener) {
+    if (listener != null) {
+      pushListeners.add(listener);
+    }
+  }
+
+  public void removePushListener(Consumer<Response<?>> listener) {
+    if (listener != null) {
+      pushListeners.remove(listener);
+    }
   }
 
   // gửi request lên server
@@ -92,6 +108,14 @@ public class SocketClient {
               Object incoming = inputStream.readObject();
               if (incoming instanceof Response<?> response) {
                 if (response.getRequestId() == null) {
+                  for (Consumer<Response<?>> listener : pushListeners) {
+                    try {
+                      listener.accept(response);
+                    } catch (RuntimeException listenerError) {
+                      System.err.println("Push listener handling failed: " + listenerError.getMessage());
+                      listenerError.printStackTrace();
+                    }
+                  }
                   continue;
                 }
                 Consumer<Response<?>> callback = callbacks.remove(response.getRequestId());

@@ -9,15 +9,16 @@ import com.auction.share.models.user.Bidder;
 import com.auction.share.models.user.Seller;
 import com.auction.share.models.user.User;
 
+import javax.xml.crypto.Data;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.List;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 public class AuctionDAO {
     private final ItemDAO itemDAO = new ItemDAO();
@@ -151,7 +152,8 @@ public class AuctionDAO {
         return list;
     }
 
-    private double sumRunningWinningBidsByBidder(Connection conn, String bidderId, Set<String> excludedAuctionIds) throws SQLException {
+
+    public double sumRunningWinningBidsByBidder(String bidderId, Set<String> excludedAuctionIds) throws SQLException {
         StringBuilder sql = new StringBuilder("""
                 SELECT COALESCE(SUM(current_price), 0) AS total_amount
                 FROM auctions
@@ -166,7 +168,8 @@ public class AuctionDAO {
             sql.append(")");
         }
 
-        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int index = 1;
             ps.setString(index++, AuctionStatus.RUNNING.name());
             ps.setString(index++, bidderId);
@@ -181,9 +184,10 @@ public class AuctionDAO {
         }
     }
 
-    private double findUserBalance(Connection conn, String userId) throws SQLException {
+    private double findUserBalance(String userId) throws SQLException {
         String sql = "SELECT balance FROM users WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -195,18 +199,18 @@ public class AuctionDAO {
     }
 
 
-    public boolean updateHighestBidIfHigher(Connection conn, String id, String bidderId, double amount) throws SQLException {
+    public boolean updateHighestBidIfHigher(String id, String bidderId, double amount) throws SQLException {
         Auction auction = findById(id);
         if (auction == null) {
             return false;
         }
 
-        double reservedInOtherRunningAuctions = sumRunningWinningBidsByBidder(conn, bidderId, Set.of(id));
+        double reservedInOtherRunningAuctions = sumRunningWinningBidsByBidder(bidderId, Set.of(id));
         double requiredForThisBid = amount;
         if (auction.getHighestBidder() != null && bidderId.equals(auction.getHighestBidder().getId())) {
             requiredForThisBid = amount - auction.getCurrentHighestBid();
         }
-        double bidderBalance = findUserBalance(conn, bidderId);
+        double bidderBalance = findUserBalance(bidderId);
         if (bidderBalance - reservedInOtherRunningAuctions < requiredForThisBid) {
             return false;
         }
@@ -228,7 +232,8 @@ public class AuctionDAO {
                   AND a.end_time > ?
                   AND ? >= (a.current_price + a.bid_step)
              """;
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDouble(1, amount);
             ps.setString(2, bidderId);
             Timestamp now = Timestamp.valueOf(java.time.LocalDateTime.now());

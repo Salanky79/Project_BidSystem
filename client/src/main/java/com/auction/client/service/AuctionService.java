@@ -1,9 +1,7 @@
 package com.auction.client.service;
 
 import com.auction.client.network.SocketClient;
-import com.auction.share.DTO.CreateAuctionRequest;
-import com.auction.share.DTO.ListAuctionRequest;
-import com.auction.share.DTO.Response;
+import com.auction.share.DTO.*;
 import com.auction.share.exceptions.ValidationException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -93,13 +91,13 @@ public class AuctionService {
   }
 
   public void extendEndTime(String auctionId, long minutes, Consumer<Response<?>> onResponse) {
-    com.auction.share.DTO.ExtendEndTimeRequest request =
+    ExtendEndTimeRequest request =
         new com.auction.share.DTO.ExtendEndTimeRequest(auctionId, minutes, null);
     socketClient.send(request, onResponse);
   }
 
   public void getAuctionDetail(String auctionId, Consumer<Response<?>> onResponse) {
-    com.auction.share.DTO.GetAuctionDetailRequest request =
+    GetAuctionDetailRequest request =
         new com.auction.share.DTO.GetAuctionDetailRequest(auctionId);
     socketClient.send(request, onResponse);
   }
