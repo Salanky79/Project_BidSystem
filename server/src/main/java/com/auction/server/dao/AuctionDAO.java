@@ -199,7 +199,7 @@ public class AuctionDAO {
     }
 
 
-    public boolean updateHighestBidIfHigher(String id, String bidderId, double amount) throws SQLException {
+    public boolean updateHighestBidIfHigher(Connection conn, String id, String bidderId, double amount) throws SQLException {
         Auction auction = findById(id);
         if (auction == null) {
             return false;
@@ -232,8 +232,7 @@ public class AuctionDAO {
                   AND a.end_time > ?
                   AND ? >= (a.current_price + a.bid_step)
              """;
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDouble(1, amount);
             ps.setString(2, bidderId);
             Timestamp now = Timestamp.valueOf(java.time.LocalDateTime.now());
@@ -380,4 +379,3 @@ public class AuctionDAO {
         return MapAuctionDB.mapAuction(rs, item, seller, highestBidder);
     }
 }
-

@@ -255,8 +255,7 @@ public class AuctionService {
     try (Connection conn = getConnection()) {
       conn.setAutoCommit(false);
       try {
-        boolean updated =
-            auctionDAO.updateHighestBidIfHigher(conn, auction.getId(), bidder.getId(), amount);
+        boolean updated = auctionDAO.updateHighestBidIfHigher(conn, auction.getId(), bidder.getId(), amount);
         if (!updated) {
           conn.rollback();
           throw new ValidationException(
