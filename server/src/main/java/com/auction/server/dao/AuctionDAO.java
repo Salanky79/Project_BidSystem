@@ -151,37 +151,6 @@ public class AuctionDAO {
         return list;
     }
 
-    public double sumRunningWinningBidsByBidder(String bidderId, Set<String> excludedAuctionIds) throws SQLException {
-        StringBuilder sql = new StringBuilder("""
-                SELECT COALESCE(SUM(current_price), 0) AS total_amount
-                FROM auctions
-                WHERE status = ?
-                  AND highest_bidder_id = ?
-                """);
-
-        if (excludedAuctionIds != null && !excludedAuctionIds.isEmpty()) {
-            sql.append(" AND id NOT IN (");
-            sql.append("?,".repeat(excludedAuctionIds.size()));
-            sql.setLength(sql.length() - 1);
-            sql.append(")");
-        }
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            int index = 1;
-            ps.setString(index++, AuctionStatus.RUNNING.name());
-            ps.setString(index++, bidderId);
-            if (excludedAuctionIds != null) {
-                for (String auctionId : excludedAuctionIds) {
-                    ps.setString(index++, auctionId);
-                }
-            }
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? rs.getDouble("total_amount") : 0.0;
-            }
-        }
-    }
-
     private double sumRunningWinningBidsByBidder(Connection conn, String bidderId, Set<String> excludedAuctionIds) throws SQLException {
         StringBuilder sql = new StringBuilder("""
                 SELECT COALESCE(SUM(current_price), 0) AS total_amount
