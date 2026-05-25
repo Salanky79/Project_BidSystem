@@ -63,6 +63,8 @@ public class SellerAuctionDetailController {
   private static final DateTimeFormatter DISPLAY_FMT =
       DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
   private static final DateTimeFormatter ISO_FMT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+  private static final DateTimeFormatter ALT_DB_FMT =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
   @FXML
   public void initialize() {
@@ -206,14 +208,16 @@ public class SellerAuctionDetailController {
         // Update start/end time labels with real data from server (ISO format)
         this.startTimeISO = detail.getStartTime();
         if (detail.getStartTime() != null && startTimeLabel != null) {
-          startTimeLabel.setText(detail.getStartTime());
+          startTimeLabel.setText(formatDateTimeForDisplay(detail.getStartTime()));
         }
         if (detail.getEndTime() != null) {
           this.endTimeISO = detail.getEndTime();
-          if (endTimeLabel != null) endTimeLabel.setText(detail.getEndTime());
-          try {
-            this.endTime = LocalDateTime.parse(detail.getEndTime(), ISO_FMT);
-          } catch (Exception ignored) {}
+          if (endTimeLabel != null) endTimeLabel.setText(formatDateTimeForDisplay(detail.getEndTime()));
+          LocalDateTime parsedEnd = parseDateTime(detail.getEndTime());
+          if (parsedEnd != null) {
+            this.endTime = parsedEnd;
+            startCountdown();
+          }
         }
 
         if (winnerIdLabel != null) {
@@ -308,6 +312,25 @@ public class SellerAuctionDetailController {
     long minutes = ChronoUnit.MINUTES.between(now, endTime) % 60;
     long seconds = ChronoUnit.SECONDS.between(now, endTime) % 60;
     endsInLabel.setText(String.format("%dd %02dh %02dm %02ds", days, hours, minutes, seconds));
+  }
+
+  private static LocalDateTime parseDateTime(String raw) {
+    if (raw == null) return null;
+    String s = raw.trim();
+    if (s.isEmpty()) return null;
+
+    try { return LocalDateTime.parse(s, ISO_FMT); } catch (Exception ignored) {}
+    try { return LocalDateTime.parse(s, DISPLAY_FMT); } catch (Exception ignored) {}
+    try { return LocalDateTime.parse(s, ALT_DB_FMT); } catch (Exception ignored) {}
+    try { return LocalDateTime.parse(s.replace(' ', 'T'), ISO_FMT); } catch (Exception ignored) {}
+
+    return null;
+  }
+
+  private static String formatDateTimeForDisplay(String raw) {
+    LocalDateTime dt = parseDateTime(raw);
+    if (dt == null) return raw == null ? "N/A" : raw;
+    return dt.format(DISPLAY_FMT);
   }
 
   public static void open(
