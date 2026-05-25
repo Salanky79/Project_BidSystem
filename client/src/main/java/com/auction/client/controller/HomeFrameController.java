@@ -10,8 +10,32 @@ public class HomeFrameController extends FrameController {
 
     protected HomeController currentHomeController;
 
-    public void loadHomePage() {
-        loadHomePage("All");
+    @javafx.fxml.FXML
+    private javafx.scene.control.Label budgetLabel;
+
+    private double currentBudget = 0.0;
+
+    @javafx.fxml.FXML
+    public void handleTopUp(ActionEvent event) {
+        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog("0");
+        dialog.setTitle("Nạp tiền");
+        dialog.setHeaderText("Nạp tiền vào tài khoản");
+        dialog.setContentText("Nhập số tiền muốn nạp:");
+
+        java.util.Optional<String> result = dialog.showAndWait();
+        result.ifPresent(amountStr -> {
+            try {
+                double amount = Double.parseDouble(amountStr);
+                if (amount > 0) {
+                    currentBudget += amount;
+                    if (budgetLabel != null) {
+                        budgetLabel.setText(String.format("%.1f", currentBudget));
+                    }
+                }
+            } catch (NumberFormatException e) {
+                // Ignore invalid input
+            }
+        });
     }
 
     public void loadHomePage(String filterStatus) {
@@ -45,22 +69,17 @@ public class HomeFrameController extends FrameController {
         changeView("/com/auction/client/view/profile.fxml");
     }
 
-    public void handleSell() {
-        changeView("/com/auction/client/view/Sell.fxml");
-    }
-
     public void handleActiveListings() {
         loadHomePage("RUNNING");
     }
 
-    public void handleHome(ActionEvent actionEvent) {
+    public void handleHome() {
         loadHomePage("All");
     }
 
-    public void handleYourListing(ActionEvent actionEvent) {
-    }
 
-    public void handleWatchlist(ActionEvent actionEvent) {
+
+    public void handleWatchlist() {
         loadHomePage("Watchlist");
     }
 }

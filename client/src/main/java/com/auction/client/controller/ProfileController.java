@@ -7,6 +7,8 @@ import com.auction.share.DTO.ProfileDTO;
 import com.auction.share.DTO.Response;
 import com.auction.share.DTO.UserDTO;
 import com.auction.share.exceptions.ValidationException;
+import java.net.URL;
+import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,118 +21,125 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
 public class ProfileController implements Initializable {
-    private final UserService userService = ClientContext.userService();
+  private final UserService userService = ClientContext.userService();
 
-    @FXML private Label nameLabel;
-    @FXML private TextField nameField;
-    @FXML private TextField usernameField;
-    @FXML private TextField emailField;
-    @FXML private TextField phoneField;
-    @FXML private Button editButton;
+  @FXML private Label nameLabel;
+  @FXML private TextField nameField;
+  @FXML private TextField usernameField;
+  @FXML private TextField emailField;
+  @FXML private TextField phoneField;
+  @FXML private Button editButton;
 
-    @FXML private TableView<ProfileBidTransactionDTO> table;
-    @FXML private TableColumn<ProfileBidTransactionDTO, String> colItem;
-    @FXML private TableColumn<ProfileBidTransactionDTO, String> colStatus;
-    @FXML private TableColumn<ProfileBidTransactionDTO, Double> colBid;
-    @FXML private TableColumn<ProfileBidTransactionDTO, String> colTime;
+  @FXML private TableView<ProfileBidTransactionDTO> table;
+  @FXML private TableColumn<ProfileBidTransactionDTO, String> colItem;
+  @FXML private TableColumn<ProfileBidTransactionDTO, String> colStatus;
+  @FXML private TableColumn<ProfileBidTransactionDTO, Double> colBid;
+  @FXML private TableColumn<ProfileBidTransactionDTO, String> colTime;
 
-    private boolean isEditing = false;
+  private boolean isEditing = false;
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        setupTableColumns();
-        loadProfileData();
-        editButton.setOnAction(event -> handleEditAction());
-        setFieldsEditable(false);
+  @Override
+  public void initialize(URL url, ResourceBundle rb) {
+    setupTableColumns();
+    loadProfileData();
+    editButton.setOnAction(event -> handleEditAction());
+    setFieldsEditable(false);
+  }
+
+  private void setupTableColumns() {
+    colItem.setCellValueFactory(new PropertyValueFactory<>("itemName"));
+    colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+    colBid.setCellValueFactory(new PropertyValueFactory<>("bidAmount"));
+    colTime.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
+  }
+
+  private void loadProfileData() {
+    userService.getProfile(response -> Platform.runLater(() -> bindProfileResponse(response)));
+  }
+
+  private void bindProfileResponse(Response<?> response) {
+    if (response == null
+        || !response.isSuccess()
+        || !(response.getData() instanceof ProfileDTO profileDTO)) {
+      return;
     }
 
-    private void setupTableColumns() {
-        colItem.setCellValueFactory(new PropertyValueFactory<>("itemName"));
-        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
-        colBid.setCellValueFactory(new PropertyValueFactory<>("bidAmount"));
-        colTime.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
+    UserDTO user = profileDTO.getUser();
+    if (user != null) {
+      bindUser(user);
     }
 
-    private void loadProfileData() {
-        userService.getProfile(response -> Platform.runLater(() -> bindProfileResponse(response)));
+    ObservableList<ProfileBidTransactionDTO> history =
+        FXCollections.observableArrayList(profileDTO.getBidTransactions());
+    table.setItems(history);
+  }
+
+  private void bindUser(UserDTO user) {
+    nameLabel.setText(user.getFullName());
+    nameField.setText(user.getFullName());
+    usernameField.setText(user.getUsername());
+    emailField.setText(user.getEmail());
+    phoneField.setText(user.getPhoneNumber());
+  }
+
+  private void setFieldsEditable(boolean canEdit) {
+    nameField.setEditable(canEdit);
+    emailField.setEditable(canEdit);
+    phoneField.setEditable(canEdit);
+    usernameField.setEditable(false);
+
+    String style =
+        canEdit
+            ? "-fx-background-color: white; -fx-border-color: #3498db;"
+            : "-fx-background-color: #f0f0f0; -fx-border-color: transparent;";
+    nameField.setStyle(style);
+    emailField.setStyle(style);
+    phoneField.setStyle(style);
+    usernameField.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: transparent;");
+  }
+
+  private void saveProfileChanges() {
+    try {
+      userService.updateProfile(
+          nameField.getText(),
+          phoneField.getText(),
+          emailField.getText(),
+          response ->
+              Platform.runLater(
+                  () -> {
+                    if (response != null
+                        && response.isSuccess()
+                        && response.getData() instanceof UserDTO userDTO) {
+                      bindUser(userDTO);
+                      finishEditing();
+                    } else {
+                      System.out.println(
+                          "Failed to update profile: "
+                              + (response != null ? response.getMessage() : "Unknown error"));
+                    }
+                  }));
+    } catch (ValidationException e) {
+      System.out.println("Invalid profile data: " + e.getMessage());
     }
+  }
 
-    private void bindProfileResponse(Response<?> response) {
-        if (response == null || !response.isSuccess() || !(response.getData() instanceof ProfileDTO profileDTO)) {
-            return;
-        }
+  private void finishEditing() {
+    isEditing = false;
+    setFieldsEditable(false);
+    editButton.setText("Edit Profile");
+    editButton.setStyle("-fx-background-color: #1a1a1a; -fx-text-fill: white;");
+  }
 
-        UserDTO user = profileDTO.getUser();
-        if (user != null) {
-            bindUser(user);
-        }
-
-        ObservableList<ProfileBidTransactionDTO> history = FXCollections.observableArrayList(profileDTO.getBidTransactions());
-        table.setItems(history);
+  private void handleEditAction() {
+    if (!isEditing) {
+      isEditing = true;
+      setFieldsEditable(true);
+      editButton.setText("SAVE CHANGES");
+      editButton.setStyle(
+          "-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
+    } else {
+      saveProfileChanges();
     }
-
-    private void bindUser(UserDTO user) {
-        nameLabel.setText(user.getFullName());
-        nameField.setText(user.getFullName());
-        usernameField.setText(user.getUsername());
-        emailField.setText(user.getEmail());
-        phoneField.setText(user.getPhoneNumber());
-    }
-
-    private void setFieldsEditable(boolean canEdit) {
-        nameField.setEditable(canEdit);
-        emailField.setEditable(canEdit);
-        phoneField.setEditable(canEdit);
-        usernameField.setEditable(false);
-
-        String style = canEdit
-                ? "-fx-background-color: white; -fx-border-color: #3498db;"
-                : "-fx-background-color: #f0f0f0; -fx-border-color: transparent;";
-        nameField.setStyle(style);
-        emailField.setStyle(style);
-        phoneField.setStyle(style);
-        usernameField.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: transparent;");
-    }
-
-    private void saveProfileChanges() {
-        try {
-            userService.updateProfile(
-                    nameField.getText(),
-                    phoneField.getText(),
-                    emailField.getText(),
-                    response -> Platform.runLater(() -> {
-                        if (response != null && response.isSuccess() && response.getData() instanceof UserDTO userDTO) {
-                            bindUser(userDTO);
-                            finishEditing();
-                        } else {
-                            System.out.println("Failed to update profile: " + (response != null ? response.getMessage() : "Unknown error"));
-                        }
-                    })
-            );
-        } catch (ValidationException e) {
-            System.out.println("Invalid profile data: " + e.getMessage());
-        }
-    }
-
-    private void finishEditing() {
-        isEditing = false;
-        setFieldsEditable(false);
-        editButton.setText("Edit Profile");
-        editButton.setStyle("-fx-background-color: #1a1a1a; -fx-text-fill: white;");
-    }
-
-    private void handleEditAction() {
-        if (!isEditing) {
-            isEditing = true;
-            setFieldsEditable(true);
-            editButton.setText("SAVE CHANGES");
-            editButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
-        } else {
-            saveProfileChanges();
-        }
-    }
+  }
 }

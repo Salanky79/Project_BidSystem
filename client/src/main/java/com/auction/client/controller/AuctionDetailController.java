@@ -13,7 +13,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -23,10 +22,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -36,8 +33,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-
-import static com.auction.client.ClientContext.auctionService;
 
 public class AuctionDetailController {
 
@@ -49,12 +44,7 @@ public class AuctionDetailController {
     @FXML private Button followButton;
 
     // ── LEFT COLUMN ─────────────────────────────────────────────
-    @FXML private Button         btnDay;
-    @FXML private Button         btnWeek;
-    @FXML private Button         btnMonth;
     @FXML private LineChart<String, Number> priceHistoryChart;
-    @FXML private CategoryAxis   chartXAxis;
-    @FXML private NumberAxis     chartYAxis;
 
     @FXML private Label sellerNameLabel;
     @FXML private Label ratingLabel;
@@ -66,7 +56,7 @@ public class AuctionDetailController {
     @FXML private Label     startTimeLabel;
     @FXML private Label     endTimeLabel;
     @FXML private Label     endsInLabel;
-    @FXML private ImageView productImageView;
+    @FXML private Label     productIconLabel;
     @FXML private TextField bidInputField;
     @FXML private Button    placeBidButton;
     @FXML private Label     minBidLabel;
@@ -76,11 +66,7 @@ public class AuctionDetailController {
     @FXML private Button    cancelAutoBidButton;
     @FXML private Label     autoBidStatusLabel;
 
-    // ── COMMENTS ─────────────────────────────────────────────────
-    @FXML private ComboBox<String> commentSortBox;
-    @FXML private ListView<String> commentsListView;
-    @FXML private TextField        commentInputField;
-    @FXML private Button           postCommentButton;
+
 
     // ── State ────────────────────────────────────────────────────
     private double        currentPrice;
@@ -91,6 +77,14 @@ public class AuctionDetailController {
     private Timeline      countdownTimeline;
     private boolean       isFollowing = false;
     private boolean       autoBidEnabled = false;
+    private java.util.List<com.auction.share.DTO.BidDTO> bidHistory = new java.util.ArrayList<>();
+    private double        startingPrice = 0;
+    private static final int  MAX_CHART_POINTS = 5;
+    private static final DateTimeFormatter CHART_FMT =
+            DateTimeFormatter.ofPattern("dd/MM HH:mm");
+    // Persistent series – never replaced, only data points are added/removed
+    private final XYChart.Series<String, Number> chartSeries = new XYChart.Series<>();
+    private String startTimeISO; // real start time from server (ISO format)
 
     private static final String FOLLOW_GOLD_STYLE =
             "-fx-background-color: transparent; -fx-border-color: #D4AF37; -fx-border-radius: 20; -fx-background-radius: 20; -fx-text-fill: #D4AF37; -fx-font-size: 12px; -fx-padding: 5 16 5 16; -fx-cursor: hand;";
@@ -119,79 +113,22 @@ public class AuctionDetailController {
         enableAutoBidButton.setOnAction(e -> handleEnableAutoBid());
         cancelAutoBidButton.setOnAction(e -> handleCancelAutoBid());
 
-        // Post Comment button
-        postCommentButton.setOnAction(e -> handlePostComment());
 
-        // Price-history filter buttons
-        btnDay.setOnAction(e   -> loadChartData("day"));
-        btnWeek.setOnAction(e  -> loadChartData("week"));
-        btnMonth.setOnAction(e -> loadChartData("month"));
 
-        // Default chart data
-        loadChartData("month");
+        // Configure Y-axis: auto-range without forcing zero so the chart
+        // zooms in near the actual bid prices instead of compressing them.
+        if (priceHistoryChart != null) {
+            NumberAxis yAxis = (NumberAxis) priceHistoryChart.getYAxis();
+            yAxis.setAutoRanging(true);
+            yAxis.setForceZeroInRange(false);
+            // Attach the persistent series once
+            priceHistoryChart.getData().add(chartSeries);
+        }
 
-        // Custom cell factory for comments ListView
-        commentsListView.setCellFactory(lv -> new ListCell<String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setGraphic(null);
-                    setStyle("-fx-background-color: transparent;");
-                    return;
-                }
+        // Default chart data – populated after setData() provides bidHistory
+        loadChartData();
 
-                // Format stored as "author|text|time"
-                String[] parts = item.split("\\|", 3);
-                String author    = parts.length > 0 ? parts[0] : "?";
-                String text      = parts.length > 1 ? parts[1] : item;
-                String timestamp = parts.length > 2 ? parts[2] : "";
 
-                // Initials avatar
-                String initials = author.length() >= 2
-                        ? (author.substring(0, 1) + author.substring(author.length() - 1)).toUpperCase()
-                        : author.toUpperCase();
-
-                Label avatarLabel = new Label(initials);
-                avatarLabel.setStyle("-fx-text-fill: #000000; -fx-font-weight: bold; -fx-font-size: 12px;");
-                VBox avatar = new VBox(avatarLabel);
-                avatar.setAlignment(Pos.CENTER);
-                avatar.setStyle("-fx-min-width: 36; -fx-min-height: 36; -fx-max-width: 36; -fx-max-height: 36;"
-                        + " -fx-background-color: #D4AF37; -fx-background-radius: 50;");
-
-                // Author + timestamp row
-                Label authorLabel = new Label(author);
-                authorLabel.setStyle("-fx-text-fill: #D4AF37; -fx-font-weight: bold; -fx-font-size: 13px;");
-                HBox.setHgrow(authorLabel, Priority.ALWAYS);
-
-                Label timeLabel = new Label(timestamp);
-                timeLabel.setStyle("-fx-text-fill: #777777; -fx-font-size: 11px;");
-
-                HBox header = new HBox(authorLabel, timeLabel);
-                header.setAlignment(Pos.CENTER_LEFT);
-                header.setSpacing(8);
-
-                Label textLabel = new Label(text);
-                textLabel.setStyle("-fx-text-fill: #CCCCCC; -fx-font-size: 13px;");
-                textLabel.setWrapText(true);
-
-                VBox content = new VBox(header, textLabel);
-                content.setSpacing(3);
-                HBox.setHgrow(content, Priority.ALWAYS);
-
-                HBox card = new HBox(avatar, content);
-                card.setSpacing(12);
-                card.setAlignment(Pos.TOP_LEFT);
-                card.setPadding(new Insets(12, 14, 12, 14));
-                card.setStyle("-fx-background-color: #161616; -fx-background-radius: 8;"
-                        + " -fx-border-color: #D4AF37 transparent transparent transparent;"
-                        + " -fx-border-width: 0 0 0 3;");
-
-                setGraphic(card);
-                setStyle("-fx-background-color: transparent; -fx-padding: 4 0 4 0;");
-                setPrefWidth(0); // allow wrapping
-            }
-        });
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -204,8 +141,7 @@ public class AuctionDetailController {
             double price,
             double bidStep,
             int    bids,
-            String startTime,
-            String endTime,
+            String time,
             String status,
             String auctionId
     ) {
@@ -217,19 +153,22 @@ public class AuctionDetailController {
         productTitleLabel.setText(name);
         currentPriceLabel.setText(String.format("%.0f VND", price));
         totalBidsLabel.setText(String.valueOf(bids));
-        startTimeLabel.setText(formatDateTimeForDisplay(startTime));
-        endTimeLabel.setText(formatDateTimeForDisplay(endTime));
+        endTimeLabel.setText(time);
+        startTimeLabel.setText("Loading...");
         sellerNameLabel.setText("Unknown");
-        descriptionLabel.setText("No description provided.");
+        descriptionLabel.setText("Loading description...");
+        if (productIconLabel != null && icon != null) {
+            productIconLabel.setText(icon);
+        }
         minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + bidStep));
         resetAutoBidState();
 
         // Parse end time for countdown
         try {
-            this.endTime = LocalDateTime.parse(endTime, DISPLAY_FMT);
+            this.endTime = LocalDateTime.parse(time, ISO_FMT);
         } catch (Exception ex) {
             try {
-                this.endTime = LocalDateTime.parse(endTime, DISPLAY_FMT);
+                this.endTime = LocalDateTime.parse(time, DISPLAY_FMT);
             } catch (Exception ignored) {
                 this.endTime = null;
             }
@@ -240,24 +179,41 @@ public class AuctionDetailController {
         this.isFollowing = WatchlistService.getInstance().isFollowed(this.auctionId);
         updateFollowButtonStyle();
 
-
         // Fetch latest data from server
-        ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> {
-            javafx.application.Platform.runLater(() -> {
-                if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
-                    this.currentPrice = detail.getCurrentPrice();
-                    this.bidStep = detail.getBidStep();
-                    this.totalBids = detail.getBidHistory() != null ? detail.getBidHistory().size() : this.totalBids;
+        com.auction.client.ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
+            if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
+                this.currentPrice = detail.getCurrentPrice();
+                this.bidStep = detail.getBidStep();
+                this.totalBids = detail.getBidHistory() != null ? detail.getBidHistory().size() : this.totalBids;
 
-                    this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));
-                    this.totalBidsLabel.setText(String.valueOf(this.totalBids));
-                    this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
-                    this.sellerNameLabel.setText(detail.getSellerName());
-                    this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description provided.");
+                this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));
+                this.totalBidsLabel.setText(String.valueOf(this.totalBids));
+                this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
+                this.sellerNameLabel.setText(detail.getSellerName());
+                this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description provided.");
+                
+                this.bidHistory = detail.getBidHistory() != null ? detail.getBidHistory() : new java.util.ArrayList<>();
+                this.startingPrice = detail.getStartingPrice();
+
+                // Update start/end time labels with real data from server (ISO format)
+                this.startTimeISO = detail.getStartTime();
+                if (detail.getStartTime() != null) {
+                    this.startTimeLabel.setText(detail.getStartTime());
                 }
-            });
-        });
+                if (detail.getEndTime() != null) {
+                    this.endTimeLabel.setText(detail.getEndTime());
+                    // Re-parse endTime in case server has a different value
+                    try {
+                        this.endTime = LocalDateTime.parse(detail.getEndTime(), ISO_FMT);
+                    } catch (Exception ignored) {}
+                }
+
+                loadChartData();
+            }
+        }));
     }
+
+
 
     // ─────────────────────────────────────────────────────────────
     // Static factory – opens a new Stage with AuctionDetailv2.fxml
@@ -269,8 +225,7 @@ public class AuctionDetailController {
             double price,
             double bidStep,
             int    bids,
-            String startTime,
-            String endTime,
+            String time,
             String status,
             String auctionId
     ) {
@@ -282,7 +237,7 @@ public class AuctionDetailController {
             Parent root = loader.load();
 
             AuctionDetailController ctrl = loader.getController();
-            ctrl.setData(icon, category, name, price, bidStep, bids, startTime, endTime, status, auctionId);
+            ctrl.setData(icon, category, name, price, bidStep, bids, time, status, auctionId);
 
             Stage stage = new Stage();
             stage.setTitle("Auction – " + name);
@@ -330,6 +285,11 @@ public class AuctionDetailController {
                         totalBidsLabel.setText(String.valueOf(totalBids));
                         minBidLabel.setText(String.format("Minimum bid: %.0f VND", currentPrice + bidStep));
                         bidInputField.clear();
+
+                        String username = ClientContext.userService().getSessionManager().getCurrentUserId();
+                        bidHistory.add(new com.auction.share.DTO.BidDTO(username != null ? username : "You", currentPrice, LocalDateTime.now().format(ISO_FMT)));
+                        // Append a live point to the chart without clearing existing data
+                        appendChartPoint(currentPrice);
                     } else {
                         showBidError(response != null ? response.getMessage() : "Lỗi kết nối máy chủ");
                     }
@@ -380,61 +340,67 @@ public class AuctionDetailController {
         }
     }
 
-    private void handlePostComment() {
-        String text = commentInputField.getText().trim();
-        if (text.isEmpty()) return;
 
-        String timestamp = LocalDateTime.now().format(DISPLAY_FMT);
-        // Store as "author|text|time" for the CellFactory to parse
-        commentsListView.getItems().add(0, "You|" + text + "|" + timestamp);
-        commentsListView.scrollTo(0);
-        commentInputField.clear();
-    }
 
     // ─────────────────────────────────────────────────────────────
     // Price-history chart
     // ─────────────────────────────────────────────────────────────
-    private void loadChartData(String range) {
-        priceHistoryChart.getData().clear();
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
 
-        switch (range) {
-            case "day" -> {
-                series.getData().add(new XYChart.Data<>("08:00", currentPrice * 0.90));
-                series.getData().add(new XYChart.Data<>("10:00", currentPrice * 0.93));
-                series.getData().add(new XYChart.Data<>("12:00", currentPrice * 0.95));
-                series.getData().add(new XYChart.Data<>("14:00", currentPrice * 0.97));
-                series.getData().add(new XYChart.Data<>("16:00", currentPrice * 0.99));
-                series.getData().add(new XYChart.Data<>("Now",   currentPrice));
-            }
-            case "week" -> {
-                series.getData().add(new XYChart.Data<>("Mon", currentPrice * 0.75));
-                series.getData().add(new XYChart.Data<>("Tue", currentPrice * 0.80));
-                series.getData().add(new XYChart.Data<>("Wed", currentPrice * 0.85));
-                series.getData().add(new XYChart.Data<>("Thu", currentPrice * 0.88));
-                series.getData().add(new XYChart.Data<>("Fri", currentPrice * 0.92));
-                series.getData().add(new XYChart.Data<>("Sat", currentPrice * 0.97));
-                series.getData().add(new XYChart.Data<>("Now", currentPrice));
-            }
-            default -> {  // month
-                series.getData().add(new XYChart.Data<>("W1", currentPrice * 0.60));
-                series.getData().add(new XYChart.Data<>("W2", currentPrice * 0.72));
-                series.getData().add(new XYChart.Data<>("W3", currentPrice * 0.85));
-                series.getData().add(new XYChart.Data<>("W4", currentPrice * 0.94));
-                series.getData().add(new XYChart.Data<>("Now", currentPrice));
+    /**
+     * (Re)builds the chart from bidHistory.
+     * Always keeps at most MAX_CHART_POINTS points.
+     */
+    private void loadChartData() {
+        chartSeries.getData().clear();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM HH:mm");
+
+        // Collect qualifying bids sorted oldest-first
+        java.util.List<XYChart.Data<String, Number>> points = new java.util.ArrayList<>();
+
+        if (bidHistory != null && !bidHistory.isEmpty()) {
+            java.util.List<com.auction.share.DTO.BidDTO> sortedBids = new java.util.ArrayList<>(bidHistory);
+            sortedBids.sort((b1, b2) -> {
+                try {
+                    return LocalDateTime.parse(b1.getTimestamp(), ISO_FMT)
+                                       .compareTo(LocalDateTime.parse(b2.getTimestamp(), ISO_FMT));
+                } catch (Exception e) { return 0; }
+            });
+
+            for (com.auction.share.DTO.BidDTO bid : sortedBids) {
+                try {
+                    LocalDateTime bidTime = LocalDateTime.parse(bid.getTimestamp(), ISO_FMT);
+                    points.add(new XYChart.Data<>(bidTime.format(formatter), bid.getAmount()));
+                } catch (Exception ignored) {}
             }
         }
 
-        priceHistoryChart.getData().add(series);
-        highlightActiveFilter(range);
+        // Always ensure at least a starting anchor
+        if (points.isEmpty()) {
+            String startLabel = "Start";
+            if (startTimeISO != null) {
+                try {
+                    startLabel = LocalDateTime.parse(startTimeISO, ISO_FMT).format(formatter);
+                } catch (Exception ignored) {}
+            }
+            points.add(new XYChart.Data<>(startLabel, startingPrice > 0 ? startingPrice : currentPrice));
+        }
+
+        // Keep only the last MAX_CHART_POINTS entries
+        int from = Math.max(0, points.size() - MAX_CHART_POINTS);
+        chartSeries.getData().addAll(points.subList(from, points.size()));
     }
 
-    private void highlightActiveFilter(String active) {
-        String gold   = "-fx-background-color: #FFD700; -fx-border-color: #FFD700; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #000000; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 5 14 5 14; -fx-cursor: hand;";
-        String normal = "-fx-background-color: #222222; -fx-border-color: #3A3A3A; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #AAAAAA; -fx-font-size: 11px; -fx-padding: 5 14 5 14; -fx-cursor: hand;";
-        btnDay.setStyle(active.equals("day")   ? gold : normal);
-        btnWeek.setStyle(active.equals("week") ? gold : normal);
-        btnMonth.setStyle(active.equals("month") ? gold : normal);
+    /**
+     * Appends a single live price point captured at the moment currentPrice changes.
+     * Automatically trims the oldest point when the count exceeds MAX_CHART_POINTS.
+     */
+    private void appendChartPoint(double price) {
+        String label = LocalDateTime.now().format(CHART_FMT);
+        chartSeries.getData().add(new XYChart.Data<>(label, price));
+        while (chartSeries.getData().size() > MAX_CHART_POINTS) {
+            chartSeries.getData().remove(0);
+        }
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -492,18 +458,5 @@ public class AuctionDetailController {
         cancelAutoBidButton.setDisable(!autoBidEnabled);
         autoBidMaxInputField.setDisable(autoBidEnabled);
         autoBidIncrementInputField.setDisable(autoBidEnabled);
-    }
-
-    private String formatDateTimeForDisplay(String value) {
-        if (value == null || value.isBlank()) return "N/A";
-        try {
-            return LocalDateTime.parse(value, ISO_FMT).format(DISPLAY_FMT);
-        } catch (Exception ex) {
-            try {
-                return LocalDateTime.parse(value, DISPLAY_FMT).format(DISPLAY_FMT);
-            } catch (Exception ignored) {
-                return value;
-            }
-        }
     }
 }

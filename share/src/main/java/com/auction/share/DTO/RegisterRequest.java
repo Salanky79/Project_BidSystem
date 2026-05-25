@@ -1,63 +1,60 @@
 package com.auction.share.DTO;
 
-public class
+/** Yêu cầu đăng ký tài khoản mới. */
+public class RegisterRequest extends Request {
+  private static final long serialVersionUID = 1L;
 
+  private final String username;
+  private final String password;
+  private final String fullName;
+  private final String role;
+  private final String phoneNumber;
+  private final String email;
+  private final String address;
 
-RegisterRequest extends Request {
-    private static final long serialVersionUID = 1L;
+  public RegisterRequest(
+      String username,
+      String password,
+      String fullName,
+      String role,
+      String phoneNumber,
+      String email,
+      String address) {
+    super(Action.REGISTER);
+    this.username = username;
+    this.password = password;
+    this.fullName = fullName;
+    this.role = role;
+    this.phoneNumber = phoneNumber;
+    this.email = email;
+    this.address = address;
+  }
 
-    private final String username;
-    private final String password;
-    private final String fullName;
-    private final String role;
-    private final String phoneNumber;
-    private final String email;
-    private final String address;
+  public String getUsername() {
+    return username;
+  }
 
-    public RegisterRequest(
-            String username,
-            String password,
-            String fullName,
-            String role,
-            String phoneNumber,
-            String email,
-            String address
-    ) {
-        super(Action.REGISTER);
-        this.username = username;
-        this.password = password;
-        this.fullName = fullName;
-        this.role = role;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
-        this.address = address;
-    }
+  public String getPassword() {
+    return password;
+  }
 
-    public String getUsername() {
-        return username;
-    }
+  public String getFullName() {
+    return fullName;
+  }
 
-    public String getPassword() {
-        return password;
-    }
+  public String getRole() {
+    return role;
+  }
 
-    public String getFullName() {
-        return fullName;
-    }
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
 
-    public String getRole() {
-        return role;
-    }
+  public String getEmail() {
+    return email;
+  }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getAddress() {
-        return address;
-    }
+  public String getAddress() {
+    return address;
+  }
 }

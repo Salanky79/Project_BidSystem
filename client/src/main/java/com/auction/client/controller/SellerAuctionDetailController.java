@@ -1,17 +1,19 @@
 package com.auction.client.controller;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -22,146 +24,171 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-
 public class SellerAuctionDetailController {
 
-    // ── HEADER ──────────────────────────────────────────────────
-    @FXML private Button closeButton;
-    @FXML private Label productTitleLabel;
+  // ── HEADER ──────────────────────────────────────────────────
+  @FXML private Button closeButton;
+  @FXML private Label productTitleLabel;
 
-    // ── CHART ───────────────────────────────────────────────────
-    @FXML private Button btnDay;
-    @FXML private Button btnWeek;
-    @FXML private Button btnMonth;
-    @FXML private LineChart<String, Number> priceHistoryChart;
-    @FXML private CategoryAxis chartXAxis;
-    @FXML private NumberAxis chartYAxis;
+  // ── CHART ───────────────────────────────────────────────────
+  @FXML private LineChart<String, Number> priceHistoryChart;
 
-    // ── STATS ───────────────────────────────────────────────────
-    @FXML private Label currentHighBidLabel;
-    @FXML private Label totalBidsLabel;
-    @FXML private Label startTimeLabel;
-    @FXML private Label endTimeLabel;
-    @FXML private Label endsInLabel;
+  // ── STATS ───────────────────────────────────────────────────
+  @FXML private Label currentHighBidLabel;
+  @FXML private Label totalBidsLabel;
+  @FXML private Label startTimeLabel;
+  @FXML private Label endTimeLabel;
+  @FXML private Label endsInLabel;
 
-    // ── CONTROLS ────────────────────────────────────────────────
-    @FXML private Button pauseAuctionButton;
-    @FXML private Button cancelAuctionButton;
-    @FXML private TextField bidStepField;
-    @FXML private Button saveBidStepButton;
-    @FXML private TextField extendEndTimeField;
-    @FXML private Button saveExtendTimeButton;
+  // ── CONTROLS ────────────────────────────────────────────────
+  @FXML private Button pauseAuctionButton;
+  @FXML private Button cancelAuctionButton;
+  @FXML private TextField bidStepField;
+  @FXML private Button saveBidStepButton;
+  @FXML private TextField extendEndTimeField;
+  @FXML private Button saveExtendTimeButton;
 
-    // ── BIDDERS ─────────────────────────────────────────────────
-    @FXML private ListView<String> bidderListView;
+  // ── BIDDERS ─────────────────────────────────────────────────
+  @FXML private ListView<String> bidderListView;
 
-    // ── COMMENTS ────────────────────────────────────────────────
-    @FXML private ListView<String> commentsListView;
-    @FXML private TextField commentInputField;
-    @FXML private Button postCommentButton;
 
-    private String auctionId;
-    private double currentPrice;
-    private int totalBids;
-    private LocalDateTime endTime;
-    private Timeline countdownTimeline;
-    private boolean isPaused = false;
 
-    private static final DateTimeFormatter DISPLAY_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    private static final DateTimeFormatter ISO_FMT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+  private String auctionId;
+  private double currentPrice;
+  private double startingPrice = 0;
+  private LocalDateTime endTime;
+  private Timeline countdownTimeline;
+  private boolean isPaused = false;
+  private static final int MAX_CHART_POINTS = 5;
+  // Persistent series – never replaced, only data points are added/removed
+  private final XYChart.Series<String, Number> chartSeries = new XYChart.Series<>();
+  private String startTimeISO; // real start time from server (ISO format)
+  private String endTimeISO;   // real end time from server (ISO format)
+  private java.util.List<com.auction.share.DTO.BidDTO> bidHistory = new java.util.ArrayList<>();
 
-    @FXML
-    public void initialize() {
-        if (closeButton != null) {
-            closeButton.setOnAction(e -> {
-                Stage stage = (Stage) closeButton.getScene().getWindow();
-                stage.close();
-            });
-        }
+  private static final DateTimeFormatter DISPLAY_FMT =
+      DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+  private static final DateTimeFormatter ISO_FMT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-        // Chart filters
-        if (btnDay != null) btnDay.setOnAction(e -> loadChartData("day"));
-        if (btnWeek != null) btnWeek.setOnAction(e -> loadChartData("week"));
-        if (btnMonth != null) btnMonth.setOnAction(e -> loadChartData("month"));
-        if (priceHistoryChart != null) loadChartData("month");
-
-        // Action Buttons
-        if (pauseAuctionButton != null) {
-            pauseAuctionButton.setOnAction(e -> {
-                isPaused = !isPaused;
-                if (isPaused) {
-                    pauseAuctionButton.setText("▶  Resume Auction");
-                    pauseAuctionButton.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 10 12 10 12; -fx-background-radius: 6; -fx-border-radius: 6;");
-                } else {
-                    pauseAuctionButton.setText("⏸  Pause Auction");
-                    pauseAuctionButton.setStyle("-fx-background-color: transparent; -fx-border-color: #B32626; -fx-border-width: 1; -fx-text-fill: #E57373; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 10 12 10 12; -fx-background-radius: 6; -fx-border-radius: 6;");
-                }
-            });
-        }
-        
-        if (cancelAuctionButton != null) {
-            cancelAuctionButton.setOnAction(e -> {
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to cancel this auction?", ButtonType.YES, ButtonType.NO);
-                alert.showAndWait().ifPresent(res -> {
-                    if (res == ButtonType.YES) {
-                        com.auction.client.ClientContext.auctionService().cancelAuction(auctionId, response -> {
-                            Platform.runLater(() -> {
-                                if (response != null && response.isSuccess()) {
-                                    cancelAuctionButton.setText("Cancelled");
-                                    cancelAuctionButton.setDisable(true);
-                                    if (pauseAuctionButton != null) pauseAuctionButton.setDisable(true);
-                                    if (endsInLabel != null) endsInLabel.setText("Cancelled");
-                                    if (countdownTimeline != null) countdownTimeline.stop();
-                                } else {
-                                    Alert error = new Alert(Alert.AlertType.ERROR, "Failed to cancel auction: " + (response != null ? response.getMessage() : "Unknown error"));
-                                    error.show();
-                                }
-                            });
-                        });
-                    }
-                });
-            });
-        }
-
-        // Post Comment
-        if (postCommentButton != null) {
-            postCommentButton.setOnAction(e -> handlePostComment());
-        }
-
-        if (saveBidStepButton != null) {
-            saveBidStepButton.setOnAction(e -> handleSetBidStep());
-        }
-
-        if (saveExtendTimeButton != null) {
-            saveExtendTimeButton.setOnAction(e -> handleExtendEndTime());
-        }
-
-        setupBidderList();
-        setupCommentList();
+  @FXML
+  public void initialize() {
+    if (closeButton != null) {
+      closeButton.setOnAction(
+          e -> {
+            Stage stage = (Stage) closeButton.getScene().getWindow();
+            stage.close();
+          });
     }
 
-    private void setupBidderList() {
-        if (bidderListView == null) return;
-        
-        bidderListView.getItems().addAll(
+    // Chart filters
+    if (priceHistoryChart != null) {
+      NumberAxis yAxis = (NumberAxis) priceHistoryChart.getYAxis();
+      yAxis.setAutoRanging(true);
+      yAxis.setForceZeroInRange(false);
+      priceHistoryChart.getData().add(chartSeries);
+      // will be populated after setData() sets currentPrice
+    }
+
+    // Action Buttons
+    if (pauseAuctionButton != null) {
+      pauseAuctionButton.setOnAction(
+          e -> {
+            isPaused = !isPaused;
+            if (isPaused) {
+              pauseAuctionButton.setText("▶  Resume Auction");
+              pauseAuctionButton.setStyle(
+                  "-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;"
+                      + " -fx-font-size: 12px; -fx-padding: 10 12 10 12; -fx-background-radius: 6;"
+                      + " -fx-border-radius: 6;");
+            } else {
+              pauseAuctionButton.setText("⏸  Pause Auction");
+              pauseAuctionButton.setStyle(
+                  "-fx-background-color: transparent; -fx-border-color: #B32626; -fx-border-width:"
+                      + " 1; -fx-text-fill: #E57373; -fx-font-weight: bold; -fx-font-size: 12px;"
+                      + " -fx-padding: 10 12 10 12; -fx-background-radius: 6; -fx-border-radius:"
+                      + " 6;");
+            }
+          });
+    }
+
+    if (cancelAuctionButton != null) {
+      cancelAuctionButton.setOnAction(
+          e -> {
+            Alert alert =
+                new Alert(
+                    Alert.AlertType.CONFIRMATION,
+                    "Are you sure you want to cancel this auction?",
+                    ButtonType.YES,
+                    ButtonType.NO);
+            alert
+                .showAndWait()
+                .ifPresent(
+                    res -> {
+                      if (res == ButtonType.YES) {
+                        com.auction.client.ClientContext.auctionService()
+                            .cancelAuction(
+                                auctionId,
+                                response ->
+                                    Platform.runLater(
+                                        () -> {
+                                          if (response != null && response.isSuccess()) {
+                                            cancelAuctionButton.setText("Cancelled");
+                                            cancelAuctionButton.setDisable(true);
+                                            if (pauseAuctionButton != null)
+                                              pauseAuctionButton.setDisable(true);
+                                            if (endsInLabel != null)
+                                              endsInLabel.setText("Cancelled");
+                                            if (countdownTimeline != null) countdownTimeline.stop();
+                                          } else {
+                                            Alert error =
+                                                new Alert(
+                                                    Alert.AlertType.ERROR,
+                                                    "Failed to cancel auction: "
+                                                        + (response != null
+                                                            ? response.getMessage()
+                                                            : "Unknown error"));
+                                            error.show();
+                                          }
+                                        }));
+                      }
+                    });
+          });
+    }
+
+
+
+    if (saveBidStepButton != null) {
+      saveBidStepButton.setOnAction(e -> handleSetBidStep());
+    }
+
+    if (saveExtendTimeButton != null) {
+      saveExtendTimeButton.setOnAction(e -> handleExtendEndTime());
+    }
+
+    setupBidderList();
+  }
+
+  private void setupBidderList() {
+    if (bidderListView == null) return;
+
+    bidderListView
+        .getItems()
+        .addAll(
             "User A|4.5|Contacted",
             "User B|3.0|Flagged",
             "User C|4.8|Pending",
-            "User D|4.2|Confirmed"
-        );
+            "User D|4.2|Confirmed");
 
-        bidderListView.setCellFactory(lv -> new ListCell<String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
+    bidderListView.setCellFactory(
+        lv ->
+            new ListCell<>() {
+              @Override
+              protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
-                    setGraphic(null);
-                    setStyle("-fx-background-color: transparent;");
-                    return;
+                  setGraphic(null);
+                  setStyle("-fx-background-color: transparent;");
+                  return;
                 }
 
                 String[] parts = item.split("\\|", 3);
@@ -173,268 +200,281 @@ public class SellerAuctionDetailController {
                 iconLabel.setStyle("-fx-text-fill: #D4AF37; -fx-font-size: 16px;");
 
                 Label nameLabel = new Label(name + " (" + rating + "★)");
-                nameLabel.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 12px; -fx-font-weight: bold;");
-                
+                nameLabel.setStyle(
+                    "-fx-text-fill: #FFFFFF; -fx-font-size: 12px; -fx-font-weight: bold;");
+
                 Label statusLabel = new Label(status);
-                String statusColor = status.equals("Flagged") ? "#E57373" : (status.equals("Pending") ? "#FFD700" : "#4CAF50");
+                String statusColor =
+                    status.equals("Flagged")
+                        ? "#E57373"
+                        : (status.equals("Pending") ? "#FFD700" : "#4CAF50");
                 statusLabel.setStyle("-fx-text-fill: " + statusColor + "; -fx-font-size: 10px;");
 
                 VBox infoBox = new VBox(1, nameLabel, statusLabel);
                 HBox.setHgrow(infoBox, Priority.ALWAYS);
 
                 Button profileBtn = new Button("👁 Profile");
-                profileBtn.setStyle("-fx-background-color: transparent; -fx-border-color: #D4AF37; -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #D4AF37; -fx-font-size: 10px; -fx-padding: 4 8 4 8; -fx-cursor: hand;");
-                
+                profileBtn.setStyle(
+                    "-fx-background-color: transparent; -fx-border-color: #D4AF37;"
+                        + " -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;"
+                        + " -fx-text-fill: #D4AF37; -fx-font-size: 10px; -fx-padding: 4 8 4 8;"
+                        + " -fx-cursor: hand;");
+
                 Button banBtn = new Button("Ban");
-                banBtn.setStyle("-fx-background-color: #B32626; -fx-border-color: #B32626; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: #FFFFFF; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 4 8 4 8; -fx-cursor: hand;");
+                banBtn.setStyle(
+                    "-fx-background-color: #B32626; -fx-border-color: #B32626; -fx-border-radius:"
+                        + " 4; -fx-background-radius: 4; -fx-text-fill: #FFFFFF; -fx-font-size:"
+                        + " 10px; -fx-font-weight: bold; -fx-padding: 4 8 4 8; -fx-cursor: hand;");
 
                 HBox row = new HBox(8, iconLabel, infoBox, profileBtn, banBtn);
                 row.setAlignment(Pos.CENTER_LEFT);
-                row.setStyle("-fx-background-color: #1A1A1A; -fx-padding: 8 10 8 10; -fx-background-radius: 6;");
+                row.setStyle(
+                    "-fx-background-color: #1A1A1A; -fx-padding: 8 10 8 10; -fx-background-radius:"
+                        + " 6;");
 
                 setGraphic(row);
                 setStyle("-fx-background-color: transparent; -fx-padding: 4 0 4 0;");
-            }
-        });
-    }
-
-    private void setupCommentList() {
-        if (commentsListView == null) return;
-        
-        commentsListView.getItems().addAll(
-            "User B|When does it ship?|12/04/2026 11:30",
-            "User A|Is it authentic?|12/04/2026 10:15"
-        );
-
-        commentsListView.setCellFactory(lv -> new ListCell<String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setGraphic(null);
-                    setStyle("-fx-background-color: transparent;");
-                    return;
-                }
-
-                String[] parts = item.split("\\|", 3);
-                String author = parts.length > 0 ? parts[0] : "?";
-                String text = parts.length > 1 ? parts[1] : item;
-                String timestamp = parts.length > 2 ? parts[2] : "";
-
-                String initials = author.length() >= 2
-                        ? (author.substring(0, 1) + author.substring(author.length() - 1)).toUpperCase()
-                        : author.toUpperCase();
-
-                Label avatarLabel = new Label(initials);
-                avatarLabel.setStyle("-fx-text-fill: #000000; -fx-font-weight: bold; -fx-font-size: 12px;");
-                VBox avatar = new VBox(avatarLabel);
-                avatar.setAlignment(Pos.CENTER);
-                avatar.setStyle("-fx-min-width: 36; -fx-min-height: 36; -fx-max-width: 36; -fx-max-height: 36; -fx-background-color: #D4AF37; -fx-background-radius: 50;");
-
-                Label authorLabel = new Label(author);
-                authorLabel.setStyle("-fx-text-fill: #D4AF37; -fx-font-weight: bold; -fx-font-size: 13px;");
-                HBox.setHgrow(authorLabel, Priority.ALWAYS);
-
-                Label timeLabel = new Label(timestamp);
-                timeLabel.setStyle("-fx-text-fill: #777777; -fx-font-size: 11px;");
-
-                HBox header = new HBox(8, authorLabel, timeLabel);
-                header.setAlignment(Pos.CENTER_LEFT);
-
-                Label textLabel = new Label(text);
-                textLabel.setStyle("-fx-text-fill: #CCCCCC; -fx-font-size: 13px;");
-                textLabel.setWrapText(true);
-
-                VBox content = new VBox(3, header, textLabel);
-                HBox.setHgrow(content, Priority.ALWAYS);
-
-                HBox card = new HBox(12, avatar, content);
-                card.setAlignment(Pos.TOP_LEFT);
-                card.setPadding(new Insets(12, 14, 12, 14));
-                card.setStyle("-fx-background-color: #161616; -fx-background-radius: 8; -fx-border-color: #D4AF37 transparent transparent transparent; -fx-border-width: 0 0 0 3;");
-
-                setGraphic(card);
-                setStyle("-fx-background-color: transparent; -fx-padding: 4 0 4 0;");
-                setPrefWidth(0);
-            }
-        });
-    }
-
-    private void handlePostComment() {
-        if (commentInputField == null || commentsListView == null) return;
-        String text = commentInputField.getText().trim();
-        if (text.isEmpty()) return;
-
-        String timestamp = LocalDateTime.now().format(DISPLAY_FMT);
-        commentsListView.getItems().add(0, "Seller|" + text + "|" + timestamp);
-        commentsListView.scrollTo(0);
-        commentInputField.clear();
-    }
-
-    private void handleSetBidStep() {
-        if (bidStepField == null || bidStepField.getText().trim().isEmpty()) return;
-        try {
-            double step = Double.parseDouble(bidStepField.getText().trim());
-            com.auction.client.ClientContext.auctionService().setBidStep(auctionId, step, response -> {
-                Platform.runLater(() -> {
-                    if (response != null && response.isSuccess()) {
-                        Alert success = new Alert(Alert.AlertType.INFORMATION, "Bid step updated to " + step);
-                        success.show();
-                        bidStepField.clear();
-                    } else {
-                        Alert error = new Alert(Alert.AlertType.ERROR, "Failed to update bid step: " + (response != null ? response.getMessage() : "Unknown error"));
-                        error.show();
-                    }
-                });
+              }
             });
-        } catch (NumberFormatException e) {
-            new Alert(Alert.AlertType.ERROR, "Invalid bid step value!").show();
-        }
-    }
+  }
 
-    private void handleExtendEndTime() {
-        if (extendEndTimeField == null || extendEndTimeField.getText().trim().isEmpty()) return;
-        try {
-            long minutes = Long.parseLong(extendEndTimeField.getText().trim());
-            com.auction.client.ClientContext.auctionService().extendEndTime(auctionId, minutes, response -> {
-                Platform.runLater(() -> {
-                    if (response != null && response.isSuccess()) {
-                        Alert success = new Alert(Alert.AlertType.INFORMATION, "Extended end time by " + minutes + " minutes");
-                        success.show();
-                        extendEndTimeField.clear();
-                        if (endTime != null) {
-                            endTime = endTime.plusMinutes(minutes);
-                            if (endTimeLabel != null) endTimeLabel.setText(endTime.format(DISPLAY_FMT));
-                            updateCountdown();
+
+
+  private void handleSetBidStep() {
+    if (bidStepField == null || bidStepField.getText().trim().isEmpty()) return;
+    try {
+      double step = Double.parseDouble(bidStepField.getText().trim());
+      com.auction.client.ClientContext.auctionService()
+          .setBidStep(
+              auctionId,
+              step,
+              response ->
+                  Platform.runLater(
+                      () -> {
+                        if (response != null && response.isSuccess()) {
+                          Alert success =
+                              new Alert(Alert.AlertType.INFORMATION, "Bid step updated to " + step);
+                          success.show();
+                          bidStepField.clear();
+                        } else {
+                          Alert error =
+                              new Alert(
+                                  Alert.AlertType.ERROR,
+                                  "Failed to update bid step: "
+                                      + (response != null
+                                          ? response.getMessage()
+                                          : "Unknown error"));
+                          error.show();
                         }
-                    } else {
-                        Alert error = new Alert(Alert.AlertType.ERROR, "Failed to extend time: " + (response != null ? response.getMessage() : "Unknown error"));
-                        error.show();
-                    }
-                });
-            });
-        } catch (NumberFormatException e) {
-            new Alert(Alert.AlertType.ERROR, "Invalid minutes value!").show();
-        }
+                      }));
+    } catch (NumberFormatException e) {
+      new Alert(Alert.AlertType.ERROR, "Invalid bid step value!").show();
     }
+  }
 
-    public void setData(String icon, String category, String name, double price, int bids, String time, String status, String auctionId) {
-        this.auctionId = auctionId;
-        this.currentPrice = price;
-        this.totalBids = bids;
+  private void handleExtendEndTime() {
+    if (extendEndTimeField == null || extendEndTimeField.getText().trim().isEmpty()) return;
+    try {
+      long minutes = Long.parseLong(extendEndTimeField.getText().trim());
+      com.auction.client.ClientContext.auctionService()
+          .extendEndTime(
+              auctionId,
+              minutes,
+              response ->
+                  Platform.runLater(
+                      () -> {
+                        if (response != null && response.isSuccess()) {
+                          Alert success =
+                              new Alert(
+                                  Alert.AlertType.INFORMATION,
+                                  "Extended end time by " + minutes + " minutes");
+                          success.show();
+                          extendEndTimeField.clear();
+                          if (endTime != null) {
+                            endTime = endTime.plusMinutes(minutes);
+                            if (endTimeLabel != null)
+                              endTimeLabel.setText(endTime.format(DISPLAY_FMT));
+                            updateCountdown();
+                          }
+                        } else {
+                          Alert error =
+                              new Alert(
+                                  Alert.AlertType.ERROR,
+                                  "Failed to extend time: "
+                                      + (response != null
+                                          ? response.getMessage()
+                                          : "Unknown error"));
+                          error.show();
+                        }
+                      }));
+    } catch (NumberFormatException e) {
+      new Alert(Alert.AlertType.ERROR, "Invalid minutes value!").show();
+    }
+  }
 
-        if (productTitleLabel != null) productTitleLabel.setText(name);
-        if (currentHighBidLabel != null) currentHighBidLabel.setText(String.format("%,.0f VND", price));
-        if (totalBidsLabel != null) totalBidsLabel.setText(String.valueOf(bids));
-        
-        if (endTimeLabel != null) endTimeLabel.setText(time);
-        if (startTimeLabel != null) startTimeLabel.setText(LocalDateTime.now().format(DISPLAY_FMT));
+  public void setData(
+      String icon,
+      String category,
+      String name,
+      double price,
+      int bids,
+      String time,
+      String status,
+      String auctionId) {
+    this.auctionId = auctionId;
+    this.currentPrice = price;
+    this.startingPrice = price; // will be overridden if we later get real starting price
+    this.endTimeISO = time;
 
-        try {
-            this.endTime = LocalDateTime.parse(time, ISO_FMT);
-        } catch (Exception ex) {
-            try {
-                this.endTime = LocalDateTime.parse(time, DISPLAY_FMT);
-            } catch (Exception ignored) {
-                this.endTime = null;
-            }
+    if (productTitleLabel != null) productTitleLabel.setText(name);
+    if (currentHighBidLabel != null) currentHighBidLabel.setText(String.format("%,.0f VND", price));
+    if (totalBidsLabel != null) totalBidsLabel.setText(String.valueOf(bids));
+
+    if (endTimeLabel != null) endTimeLabel.setText(time);
+    if (startTimeLabel != null) startTimeLabel.setText("Loading...");
+
+    try {
+      this.endTime = LocalDateTime.parse(time, ISO_FMT);
+    } catch (Exception ex) {
+      try {
+        this.endTime = LocalDateTime.parse(time, DISPLAY_FMT);
+      } catch (Exception ignored) {
+        this.endTime = null;
+      }
+    }
+    startCountdown();
+
+    // Fetch real detail from server to get startTime, bidHistory, etc.
+    com.auction.client.ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
+      if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
+        this.currentPrice = detail.getCurrentPrice();
+        this.startingPrice = detail.getStartingPrice();
+        this.bidHistory = detail.getBidHistory() != null ? detail.getBidHistory() : new java.util.ArrayList<>();
+
+        if (currentHighBidLabel != null) currentHighBidLabel.setText(String.format("%,.0f VND", this.currentPrice));
+        if (totalBidsLabel != null) totalBidsLabel.setText(String.valueOf(this.bidHistory.size()));
+
+        // Update start/end time labels with real data from server (ISO format)
+        this.startTimeISO = detail.getStartTime();
+        if (detail.getStartTime() != null && startTimeLabel != null) {
+          startTimeLabel.setText(detail.getStartTime());
         }
-        startCountdown();
-        
+        if (detail.getEndTime() != null) {
+          this.endTimeISO = detail.getEndTime();
+          if (endTimeLabel != null) endTimeLabel.setText(detail.getEndTime());
+          try {
+            this.endTime = LocalDateTime.parse(detail.getEndTime(), ISO_FMT);
+          } catch (Exception ignored) {}
+        }
+
         if (priceHistoryChart != null) {
-            loadChartData("month");
+          loadChartData();
         }
-    }
-
-    private void loadChartData(String range) {
-        if (priceHistoryChart == null) return;
-        
-        priceHistoryChart.getData().clear();
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-
-        switch (range) {
-            case "day" -> {
-                series.getData().add(new XYChart.Data<>("08:00", currentPrice * 0.90));
-                series.getData().add(new XYChart.Data<>("10:00", currentPrice * 0.93));
-                series.getData().add(new XYChart.Data<>("12:00", currentPrice * 0.95));
-                series.getData().add(new XYChart.Data<>("14:00", currentPrice * 0.97));
-                series.getData().add(new XYChart.Data<>("16:00", currentPrice * 0.99));
-                series.getData().add(new XYChart.Data<>("Now",   currentPrice));
-            }
-            case "week" -> {
-                series.getData().add(new XYChart.Data<>("Mon", currentPrice * 0.75));
-                series.getData().add(new XYChart.Data<>("Tue", currentPrice * 0.80));
-                series.getData().add(new XYChart.Data<>("Wed", currentPrice * 0.85));
-                series.getData().add(new XYChart.Data<>("Thu", currentPrice * 0.88));
-                series.getData().add(new XYChart.Data<>("Fri", currentPrice * 0.92));
-                series.getData().add(new XYChart.Data<>("Sat", currentPrice * 0.97));
-                series.getData().add(new XYChart.Data<>("Now", currentPrice));
-            }
-            default -> {  // month
-                series.getData().add(new XYChart.Data<>("W1", currentPrice * 0.60));
-                series.getData().add(new XYChart.Data<>("W2", currentPrice * 0.72));
-                series.getData().add(new XYChart.Data<>("W3", currentPrice * 0.85));
-                series.getData().add(new XYChart.Data<>("W4", currentPrice * 0.94));
-                series.getData().add(new XYChart.Data<>("Now", currentPrice));
-            }
+      } else {
+        // Fallback: load chart with what we have
+        if (priceHistoryChart != null) {
+          loadChartData();
         }
+      }
+    }));
+  }
 
-        priceHistoryChart.getData().add(series);
-        highlightActiveFilter(range);
-    }
+  private void loadChartData() {
+    if (priceHistoryChart == null) return;
 
-    private void highlightActiveFilter(String active) {
-        String gold   = "-fx-background-color: #FFD700; -fx-border-color: #FFD700; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #000000; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 5 14 5 14; -fx-cursor: hand;";
-        String normal = "-fx-background-color: #222222; -fx-border-color: #3A3A3A; -fx-border-radius: 6; -fx-background-radius: 6; -fx-text-fill: #AAAAAA; -fx-font-size: 11px; -fx-padding: 5 14 5 14; -fx-cursor: hand;";
-        if (btnDay != null) btnDay.setStyle(active.equals("day")   ? gold : normal);
-        if (btnWeek != null) btnWeek.setStyle(active.equals("week") ? gold : normal);
-        if (btnMonth != null) btnMonth.setStyle(active.equals("month") ? gold : normal);
-    }
+    chartSeries.getData().clear();
 
-    private void startCountdown() {
-        if (countdownTimeline != null) countdownTimeline.stop();
-        if (endTime == null) {
-            if (endsInLabel != null) endsInLabel.setText("N/A");
-            return;
-        }
-        countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> updateCountdown()));
-        countdownTimeline.setCycleCount(Animation.INDEFINITE);
-        countdownTimeline.play();
-        updateCountdown();
-    }
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM HH:mm");
 
-    private void updateCountdown() {
-        if (endsInLabel == null) return;
-        LocalDateTime now = LocalDateTime.now();
-        if (now.isAfter(endTime)) {
-            endsInLabel.setText("Ended");
-            if (countdownTimeline != null) countdownTimeline.stop();
-            return;
-        }
-        long days    = ChronoUnit.DAYS.between(now, endTime);
-        long hours   = ChronoUnit.HOURS.between(now, endTime) % 24;
-        long minutes = ChronoUnit.MINUTES.between(now, endTime) % 60;
-        long seconds = ChronoUnit.SECONDS.between(now, endTime) % 60;
-        endsInLabel.setText(String.format("%dd %02dh %02dm %02ds", days, hours, minutes, seconds));
-    }
+    // Collect qualifying bids sorted oldest-first
+    java.util.List<XYChart.Data<String, Number>> points = new java.util.ArrayList<>();
 
-    public static void open(String icon, String category, String name, double price, int bids, String time, String status, String auctionId) {
+    if (bidHistory != null && !bidHistory.isEmpty()) {
+      java.util.List<com.auction.share.DTO.BidDTO> sortedBids = new java.util.ArrayList<>(bidHistory);
+      sortedBids.sort((b1, b2) -> {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    SellerAuctionDetailController.class.getResource("/com/auction/client/view/SellerAuctionDetailView.fxml")
-            );
-            Parent root = loader.load();
+          return LocalDateTime.parse(b1.getTimestamp(), ISO_FMT)
+                             .compareTo(LocalDateTime.parse(b2.getTimestamp(), ISO_FMT));
+        } catch (Exception e) { return 0; }
+      });
 
-            SellerAuctionDetailController ctrl = loader.getController();
-            ctrl.setData(icon, category, name, price, bids, time, status, auctionId);
-
-            Stage stage = new Stage();
-            stage.setTitle("Seller Auction Management - " + name);
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error loading SellerAuctionDetailView.fxml");
-        }
+      for (com.auction.share.DTO.BidDTO bid : sortedBids) {
+        try {
+          LocalDateTime bidTime = LocalDateTime.parse(bid.getTimestamp(), ISO_FMT);
+          points.add(new XYChart.Data<>(bidTime.format(formatter), bid.getAmount()));
+        } catch (Exception ignored) {}
+      }
     }
+
+    // Always ensure at least a starting anchor
+    if (points.isEmpty()) {
+      String startLabel = "Start";
+      if (startTimeISO != null) {
+        try {
+          startLabel = LocalDateTime.parse(startTimeISO, ISO_FMT).format(formatter);
+        } catch (Exception ignored) {}
+      }
+      points.add(new XYChart.Data<>(startLabel, startingPrice > 0 ? startingPrice : currentPrice));
+    }
+
+    // Keep only the last MAX_CHART_POINTS entries
+    int from = Math.max(0, points.size() - MAX_CHART_POINTS);
+    chartSeries.getData().addAll(points.subList(from, points.size()));
+  }
+
+  private void startCountdown() {
+    if (countdownTimeline != null) countdownTimeline.stop();
+    if (endTime == null) {
+      if (endsInLabel != null) endsInLabel.setText("N/A");
+      return;
+    }
+    countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> updateCountdown()));
+    countdownTimeline.setCycleCount(Animation.INDEFINITE);
+    countdownTimeline.play();
+    updateCountdown();
+  }
+
+  private void updateCountdown() {
+    if (endsInLabel == null) return;
+    LocalDateTime now = LocalDateTime.now();
+    if (now.isAfter(endTime)) {
+      endsInLabel.setText("Ended");
+      if (countdownTimeline != null) countdownTimeline.stop();
+      return;
+    }
+    long days = ChronoUnit.DAYS.between(now, endTime);
+    long hours = ChronoUnit.HOURS.between(now, endTime) % 24;
+    long minutes = ChronoUnit.MINUTES.between(now, endTime) % 60;
+    long seconds = ChronoUnit.SECONDS.between(now, endTime) % 60;
+    endsInLabel.setText(String.format("%dd %02dh %02dm %02ds", days, hours, minutes, seconds));
+  }
+
+  public static void open(
+      String icon,
+      String category,
+      String name,
+      double price,
+      int bids,
+      String time,
+      String status,
+      String auctionId) {
+    try {
+      FXMLLoader loader =
+          new FXMLLoader(
+              SellerAuctionDetailController.class.getResource(
+                  "/com/auction/client/view/SellerAuctionDetailView.fxml"));
+      Parent root = loader.load();
+
+      SellerAuctionDetailController ctrl = loader.getController();
+      ctrl.setData(icon, category, name, price, bids, time, status, auctionId);
+
+      Stage stage = new Stage();
+      stage.setTitle("Seller Auction Management - " + name);
+      stage.setScene(new Scene(root));
+      stage.show();
+    } catch (IOException e) {
+      e.printStackTrace();
+      System.err.println("Error loading SellerAuctionDetailView.fxml");
+    }
+  }
 }

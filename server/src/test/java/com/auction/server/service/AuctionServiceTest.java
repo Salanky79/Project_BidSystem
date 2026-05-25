@@ -42,15 +42,13 @@ class AuctionServiceTest {
     private UserDAO userDAO;
     @Mock
     private BidBroadcastService bidBroadcastService;
-    @Mock
-    private AutoBidService autoBidService;
 
     @Test
     void createAuction_startAfterEnd_throwsValidation() throws Exception {
         Seller seller = seller("seller-1");
         when(userDAO.findById("seller-1")).thenReturn(seller);
 
-        AuctionService service = new AuctionService(auctionDAO, itemDAO, bidTransactionDAO, userDAO, bidBroadcastService, autoBidService);
+        AuctionService service = new AuctionService(auctionDAO, itemDAO, bidTransactionDAO, userDAO, bidBroadcastService);
         LocalDateTime start = LocalDateTime.now().plusHours(2);
         LocalDateTime end = LocalDateTime.now().plusHours(1);
         CreateAuctionRequest request = createRequest("seller-1", start, end);
@@ -63,7 +61,7 @@ class AuctionServiceTest {
         Bidder bidder = new Bidder("b", "p", "Bidder", "090", "b@mail.com", "HN");
         when(userDAO.findById("seller-1")).thenReturn(bidder);
 
-        AuctionService service = new AuctionService(auctionDAO, itemDAO, bidTransactionDAO, userDAO, bidBroadcastService, autoBidService);
+        AuctionService service = new AuctionService(auctionDAO, itemDAO, bidTransactionDAO, userDAO, bidBroadcastService);
         CreateAuctionRequest request = createRequest("seller-1", LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(2));
 
         assertThrows(ValidationException.class, () -> service.createAuction(request));
@@ -76,7 +74,7 @@ class AuctionServiceTest {
         when(itemDAO.saveItem(any(Item.class))).thenReturn(true);
         when(auctionDAO.saveAuction(any(Auction.class))).thenReturn(true);
 
-        AuctionService service = new AuctionService(auctionDAO, itemDAO, bidTransactionDAO, userDAO, bidBroadcastService, autoBidService);
+        AuctionService service = new AuctionService(auctionDAO, itemDAO, bidTransactionDAO, userDAO, bidBroadcastService);
         CreateAuctionRequest request = createRequest("seller-1", LocalDateTime.now().plusMinutes(1), LocalDateTime.now().plusHours(2));
 
         service.createAuction(request);
@@ -151,7 +149,7 @@ class AuctionServiceTest {
     }
 
     private AuctionService testableService() {
-        return new AuctionService(auctionDAO, itemDAO, bidTransactionDAO, userDAO, bidBroadcastService, autoBidService) {
+        return new AuctionService(auctionDAO, itemDAO, bidTransactionDAO, userDAO, bidBroadcastService) {
             @Override
             protected Connection getConnection() {
                 return fakeConnection();
@@ -182,10 +180,9 @@ class AuctionServiceTest {
                 "Phone",
                 "Desc",
                 "item",
-                100,
+                100.0,
                 start.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                end.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                false
+                end.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         );
     }
 

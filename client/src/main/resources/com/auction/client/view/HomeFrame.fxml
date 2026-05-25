@@ -19,6 +19,11 @@
             <Label style="-fx-font-size: 14px; -fx-text-fill: #555555;" text="Logged In as " />
             <Label fx:id="usernameLabel" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;" text="User" />
             <Region prefWidth="16.0" />
+            <Label style="-fx-font-size: 14px; -fx-text-fill: #555555;" text="Budget (VND): " />
+            <Label fx:id="budgetLabel" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #28a745;" text="0.0" />
+            <Region prefWidth="8.0" />
+            <Button onAction="#handleTopUp" prefHeight="30.0" style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 4; -fx-cursor: hand;" text="Nạp tiền" />
+            <Region prefWidth="16.0" />
             <Button fx:id="logoutBtn" onAction="#handleLogout" prefHeight="36.0" prefWidth="90.0" style="-fx-background-color: transparent; -fx-border-color: #1a1a1a; -fx-border-width: 1.5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand;" text="Log Out" />
         </HBox>
     </top>
@@ -39,19 +44,12 @@
                 <VBox.margin><Insets left="20.0" right="20.0" /></VBox.margin>
             </Button>
 
-            <!-- Trendings -->
-            <Button fx:id="btnTrendings" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;" text="Trendings">
-                <VBox.margin><Insets left="20.0" right="20.0" /></VBox.margin>
-            </Button>
+
 
             <Separator style="-fx-background-color: #444444;">
                 <VBox.margin><Insets bottom="10.0" left="20.0" right="20.0" top="10.0" /></VBox.margin>
             </Separator>
 
-            <!-- Your Listings -->
-            <Button fx:id="btnYourListings" onAction="#handleYourListing" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;" text="My Bids">
-                <VBox.margin><Insets left="20.0" right="20.0" /></VBox.margin>
-            </Button>
 
             <!-- Watchlist -->
             <Button fx:id="btnWatchlist" onAction="#handleWatchlist" prefHeight="48.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-padding: 0 0 0 20; -fx-cursor: hand;" text="Watchlist">
