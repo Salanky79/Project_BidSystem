@@ -41,7 +41,6 @@ public class SellerAuctionDetailController {
   @FXML private Label endsInLabel;
 
   // ── CONTROLS ────────────────────────────────────────────────
-  @FXML private Button pauseAuctionButton;
   @FXML private Button cancelAuctionButton;
   @FXML private TextField bidStepField;
   @FXML private Button saveBidStepButton;
@@ -58,7 +57,6 @@ public class SellerAuctionDetailController {
   private double startingPrice = 0;
   private LocalDateTime endTime;
   private Timeline countdownTimeline;
-  private boolean isPaused = false;
   private static final int MAX_CHART_POINTS = 5;
   // Persistent series – never replaced, only data points are added/removed
   private final XYChart.Series<String, Number> chartSeries = new XYChart.Series<>();
@@ -89,28 +87,6 @@ public class SellerAuctionDetailController {
       // will be populated after setData() sets currentPrice
     }
 
-    // Action Buttons
-    if (pauseAuctionButton != null) {
-      pauseAuctionButton.setOnAction(
-          e -> {
-            isPaused = !isPaused;
-            if (isPaused) {
-              pauseAuctionButton.setText("▶  Resume Auction");
-              pauseAuctionButton.setStyle(
-                  "-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;"
-                      + " -fx-font-size: 12px; -fx-padding: 10 12 10 12; -fx-background-radius: 6;"
-                      + " -fx-border-radius: 6;");
-            } else {
-              pauseAuctionButton.setText("⏸  Pause Auction");
-              pauseAuctionButton.setStyle(
-                  "-fx-background-color: transparent; -fx-border-color: #B32626; -fx-border-width:"
-                      + " 1; -fx-text-fill: #E57373; -fx-font-weight: bold; -fx-font-size: 12px;"
-                      + " -fx-padding: 10 12 10 12; -fx-background-radius: 6; -fx-border-radius:"
-                      + " 6;");
-            }
-          });
-    }
-
     if (cancelAuctionButton != null) {
       cancelAuctionButton.setOnAction(
           e -> {
@@ -134,8 +110,6 @@ public class SellerAuctionDetailController {
                                           if (response != null && response.isSuccess()) {
                                             cancelAuctionButton.setText("Cancelled");
                                             cancelAuctionButton.setDisable(true);
-                                            if (pauseAuctionButton != null)
-                                              pauseAuctionButton.setDisable(true);
                                             if (endsInLabel != null)
                                               endsInLabel.setText("Cancelled");
                                             if (countdownTimeline != null) countdownTimeline.stop();

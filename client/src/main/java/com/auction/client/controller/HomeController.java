@@ -3,7 +3,7 @@ package com.auction.client.controller;
 import com.auction.client.ClientContext;
 import com.auction.client.service.AuctionService;
 import com.auction.client.service.DeletedAuctionsStore;
-import com.auction.client.service.WatchlistService;
+
 import com.auction.share.DTO.AuctionSummaryDTO;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ public class HomeController extends HomeFrameController {
   /** Cached list of all auctions fetched from server (avoids repeated network calls). */
   private final List<AuctionSummaryDTO> allAuctions = new ArrayList<>();
 
-  /** Current status filter set by sidebar (e.g. "All", "Active", "Watchlist"). */
+  /** Current status filter set by sidebar (e.g. "All", "Active"). */
   private String currentStatusFilter = "All";
 
   /** Current category filter set by the filter bar (e.g. "All", "Jewelry", "Cars"). */
@@ -175,14 +175,12 @@ public class HomeController extends HomeFrameController {
   }
 
   // ── Filter helpers ────────────────────────────────────────────────────────
-  /** Status filter: used by sidebar navigation (All / Active / Watchlist …). */
+  /** Status filter: used by sidebar navigation (All / Active …). */
   private boolean matchesStatusFilter(String filterStatus, String status, String auctionId) {
     if (DeletedAuctionsStore.getInstance().isDeleted(auctionId)) {
       return false;
     }
-    if ("Watchlist".equalsIgnoreCase(filterStatus)) {
-      return WatchlistService.getInstance().isFollowed(auctionId);
-    }
+
     if ("CANCELED".equalsIgnoreCase(status) || "Draft".equalsIgnoreCase(status)) {
       return false;
     }

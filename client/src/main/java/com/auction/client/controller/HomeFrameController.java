@@ -79,7 +79,4 @@ public class HomeFrameController extends FrameController {
 
 
 
-    public void handleWatchlist() {
-        loadHomePage("Watchlist");
-    }
 }

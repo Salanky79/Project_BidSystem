@@ -291,17 +291,8 @@
                            text="AUCTION CONTROL PANEL" />
                     <Separator style="-fx-background-color: #2A2A2A; -fx-opacity: 1;" />
 
-                    <!-- Pause / Cancel row -->
+                    <!-- Cancel row -->
                     <HBox spacing="10">
-                        <Button fx:id="pauseAuctionButton"
-                                HBox.hgrow="ALWAYS" maxWidth="Infinity"
-                                style="-fx-background-color: transparent;
-                                       -fx-border-color: #B32626; -fx-border-width: 1;
-                                       -fx-border-radius: 6; -fx-background-radius: 6;
-                                       -fx-text-fill: #E57373; -fx-font-weight: bold;
-                                       -fx-font-size: 12px; -fx-padding: 10 12 10 12;
-                                       -fx-cursor: hand;"
-                                text="⏸  Pause Auction" />
                         <Button fx:id="cancelAuctionButton"
                                 HBox.hgrow="ALWAYS" maxWidth="Infinity"
                                 style="-fx-background-color: #B32626; -fx-border-color: #B32626;
