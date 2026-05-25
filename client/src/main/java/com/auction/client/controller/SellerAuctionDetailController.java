@@ -10,17 +10,12 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -57,7 +52,6 @@ public class SellerAuctionDetailController {
   // Persistent series – never replaced, only data points are added/removed
   private final XYChart.Series<String, Number> chartSeries = new XYChart.Series<>();
   private String startTimeISO; // real start time from server (ISO format)
-  private String endTimeISO;   // real end time from server (ISO format)
   private java.util.List<com.auction.share.DTO.BidDTO> bidHistory = new java.util.ArrayList<>();
 
   private static final DateTimeFormatter DISPLAY_FMT =
@@ -175,7 +169,6 @@ public class SellerAuctionDetailController {
     this.auctionId = auctionId;
     this.currentPrice = price;
     this.startingPrice = price; // will be overridden if we later get real starting price
-    this.endTimeISO = time;
 
     if (productTitleLabel != null) productTitleLabel.setText(name);
     if (currentHighBidLabel != null) currentHighBidLabel.setText(String.format("%,.0f VND", price));
@@ -211,7 +204,6 @@ public class SellerAuctionDetailController {
           startTimeLabel.setText(formatDateTimeForDisplay(detail.getStartTime()));
         }
         if (detail.getEndTime() != null) {
-          this.endTimeISO = detail.getEndTime();
           if (endTimeLabel != null) endTimeLabel.setText(formatDateTimeForDisplay(detail.getEndTime()));
           LocalDateTime parsedEnd = parseDateTime(detail.getEndTime());
           if (parsedEnd != null) {

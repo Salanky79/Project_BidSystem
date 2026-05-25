@@ -84,8 +84,8 @@
 
                     <!-- Star rating (icon stars) + Contact button (outline gold) -->
                     <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label style="-fx-text-fill: #D4AF37; -fx-font-size: 15px;" text="★★★★☆" />
-                        <Label fx:id="ratingLabel" style="-fx-text-fill: #CCCCCC; -fx-font-size: 13px;" text="4.6" />
+                        <Label style="-fx-text-fill: #D4AF37; -fx-font-size: 15px;" text="★★★★★" />
+                        <Label fx:id="ratingLabel" style="-fx-text-fill: #CCCCCC; -fx-font-size: 13px;" text="5.0" />
 
                     </HBox>
 

@@ -35,26 +35,6 @@ public class HomeFrameController extends FrameController {
         ClientContext.socketClient().addPushListener(bidPushListener);
     }
 
-    @FXML
-    public void handleTopUp(ActionEvent event) {
-        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog("0");
-        dialog.setTitle("Nạp tiền");
-        dialog.setHeaderText("Nạp tiền vào tài khoản");
-        dialog.setContentText("Nhập số tiền muốn nạp:");
-
-        java.util.Optional<String> result = dialog.showAndWait();
-        result.ifPresent(amountStr -> {
-            try {
-                double amount = Double.parseDouble(amountStr);
-                if (amount > 0) {
-                    refreshCurrentBudget();
-                }
-            } catch (NumberFormatException e) {
-                // Ignore invalid input
-            }
-        });
-    }
-
     public void loadHomePage(String filterStatus) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/client/view/Home.fxml"));
@@ -92,12 +72,6 @@ public class HomeFrameController extends FrameController {
 
     public void handleHome() {
         loadHomePage("All");
-    }
-
-
-
-    public void handleWatchlist() {
-        loadHomePage("Watchlist");
     }
 
     private void refreshCurrentBudget() {

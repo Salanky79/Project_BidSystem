@@ -41,9 +41,6 @@
                     prefWidth="80.0"
                     style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"
                     text="Vehicle" HBox.hgrow="ALWAYS"/>
-            <Button maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="100.0"
-                    style="-fx-background-color: #f0a500; -fx-text-fill: #1a1a1a; -fx-font-size: 13px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;"
-                    text="Sort By" HBox.hgrow="ALWAYS"/>
         </HBox>
 
         <!-- ScrollPane with auction grid -->
