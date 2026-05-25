@@ -25,12 +25,12 @@ public class HomeController extends HomeFrameController {
 
   // Category filter buttons
   @FXML private Button btnAll;
+  @FXML private Button btnAntique;
+  @FXML private Button btnArt;
+  @FXML private Button btnElectronic;
   @FXML private Button btnJewelry;
-  @FXML private Button btnWatches;
-  @FXML private Button btnBags;
-  @FXML private Button btnFineArt;
-  @FXML private Button btnCars;
-  @FXML private Button btnOthers;
+  @FXML private Button btnRealEstate;
+  @FXML private Button btnVehicle;
 
   // ── State ──────────────────────────────────────────────────────────────────
   /** Cached list of all auctions fetched from server (avoids repeated network calls). */
@@ -98,33 +98,33 @@ public class HomeController extends HomeFrameController {
   }
 
   @FXML
+  private void handleFilterAntique() {
+    applyCategory("Antique");
+  }
+
+  @FXML
+  private void handleFilterArt() {
+    applyCategory("Art");
+  }
+
+  @FXML
+  private void handleFilterElectronic() {
+    applyCategory("Electronic");
+  }
+
+  @FXML
   private void handleFilterJewelry() {
     applyCategory("Jewelry");
   }
 
   @FXML
-  private void handleFilterWatches() {
-    applyCategory("Watches");
+  private void handleFilterRealEstate() {
+    applyCategory("RealEstate");
   }
 
   @FXML
-  private void handleFilterBags() {
-    applyCategory("Bags");
-  }
-
-  @FXML
-  private void handleFilterFineArt() {
-    applyCategory("Fine Art");
-  }
-
-  @FXML
-  private void handleFilterCars() {
-    applyCategory("Cars");
-  }
-
-  @FXML
-  private void handleFilterOthers() {
-    applyCategory("Others");
+  private void handleFilterVehicle() {
+    applyCategory("Vehicle");
   }
 
   private void applyCategory(String category) {
@@ -191,16 +191,13 @@ public class HomeController extends HomeFrameController {
    */
   private boolean matchesCategoryFilter(String categoryFilter, String category) {
     if (category == null) category = "";
-    String finalCategory = category;
     return switch (categoryFilter) {
+      case "Antique" -> "Antique".equalsIgnoreCase(category);
+      case "Art" -> "Art".equalsIgnoreCase(category);
+      case "Electronic" -> "Electronic".equalsIgnoreCase(category);
       case "Jewelry" -> "Jewelry".equalsIgnoreCase(category);
-      case "Watches" -> "Watch".equalsIgnoreCase(category);
-      case "Bags" -> "Hand Bag".equalsIgnoreCase(category) || "Clothing".equalsIgnoreCase(category);
-      case "Fine Art" -> "Art".equalsIgnoreCase(category);
-      case "Cars" -> "Car".equalsIgnoreCase(category);
-      case "Others" ->
-          Stream.of("Jewelry", "Watch", "Hand Bag", "Clothing", "Art", "Car")
-              .noneMatch(c -> c.equalsIgnoreCase(finalCategory));
+      case "RealEstate" -> "RealEstate".equalsIgnoreCase(category);
+      case "Vehicle" -> "Vehicle".equalsIgnoreCase(category);
       default -> true; // "All" or unknown → show everything
     };
   }
@@ -208,8 +205,8 @@ public class HomeController extends HomeFrameController {
   // ── UI helpers ────────────────────────────────────────────────────────────
   private void updateFilterButtons(String activeCategory) {
     // Reset all to inactive, then highlight the active one
-    Button[] allBtns = {btnAll, btnJewelry, btnWatches, btnBags, btnFineArt, btnCars, btnOthers};
-    String[] labels = {"All", "Jewelry", "Watches", "Bags", "Fine Art", "Cars", "Others"};
+    Button[] allBtns = {btnAll, btnAntique, btnArt, btnElectronic, btnJewelry, btnRealEstate, btnVehicle};
+    String[] labels = {"All", "Antique", "Art", "Electronic", "Jewelry", "RealEstate", "Vehicle"};
 
     for (int i = 0; i < allBtns.length; i++) {
       if (allBtns[i] != null) {
@@ -221,12 +218,12 @@ public class HomeController extends HomeFrameController {
   private String iconForCategory(String category) {
     if (category == null) return "📦";
     return switch (category) {
-      case "Electronic" -> "📱";
-      case "Watch" -> "⌚";
-      case "Hand Bag", "Clothing" -> "👜";
-      case "Car" -> "🚗";
+      case "Antique" -> "🏺";
       case "Art" -> "🖼";
+      case "Electronic" -> "📱";
       case "Jewelry" -> "💍";
+      case "RealEstate" -> "🏠";
+      case "Vehicle" -> "🚗";
       default -> "📦";
     };
   }

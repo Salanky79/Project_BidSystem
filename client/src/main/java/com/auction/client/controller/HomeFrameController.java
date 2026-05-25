@@ -77,8 +77,7 @@ public class HomeFrameController extends FrameController {
         loadHomePage("All");
     }
 
-    public void handleYourListing() {
-    }
+
 
     public void handleWatchlist() {
         loadHomePage("Watchlist");

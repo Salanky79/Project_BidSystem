@@ -17,30 +17,30 @@
                     prefWidth="70.0"
                     style="-fx-background-color: #1a1a1a; -fx-text-fill: white;   -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"
                     text="All" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnAntique" onAction="#handleFilterAntique" maxWidth="1.7976931348623157E308"
+                    prefHeight="38.0" prefWidth="85.0"
+                    style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"
+                    text="Antique" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnArt" onAction="#handleFilterArt" maxWidth="1.7976931348623157E308"
+                    prefHeight="38.0" prefWidth="85.0"
+                    style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"
+                    text="Art" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnElectronic" onAction="#handleFilterElectronic" maxWidth="1.7976931348623157E308" prefHeight="38.0"
+                    prefWidth="75.0"
+                    style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"
+                    text="Electronic" HBox.hgrow="ALWAYS"/>
             <Button fx:id="btnJewelry" onAction="#handleFilterJewelry" maxWidth="1.7976931348623157E308"
                     prefHeight="38.0" prefWidth="85.0"
                     style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"
                     text="Jewelry" HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnWatches" onAction="#handleFilterWatches" maxWidth="1.7976931348623157E308"
-                    prefHeight="38.0" prefWidth="85.0"
+            <Button fx:id="btnRealEstate" onAction="#handleFilterRealEstate" maxWidth="1.7976931348623157E308" prefHeight="38.0"
+                    prefWidth="85.0"
                     style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"
-                    text="Watches" HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnBags" onAction="#handleFilterBags" maxWidth="1.7976931348623157E308" prefHeight="38.0"
-                    prefWidth="75.0"
-                    style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"
-                    text="Bags" HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnFineArt" onAction="#handleFilterFineArt" maxWidth="1.7976931348623157E308"
-                    prefHeight="38.0" prefWidth="85.0"
-                    style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"
-                    text="Fine Art" HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnCars" onAction="#handleFilterCars" maxWidth="1.7976931348623157E308" prefHeight="38.0"
-                    prefWidth="70.0"
-                    style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"
-                    text="Cars" HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnOthers" onAction="#handleFilterOthers" maxWidth="1.7976931348623157E308" prefHeight="38.0"
+                    text="Real Estate" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnVehicle" onAction="#handleFilterVehicle" maxWidth="1.7976931348623157E308" prefHeight="38.0"
                     prefWidth="80.0"
                     style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-size: 13px; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"
-                    text="Others" HBox.hgrow="ALWAYS"/>
+                    text="Vehicle" HBox.hgrow="ALWAYS"/>
             <Button maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="100.0"
                     style="-fx-background-color: #f0a500; -fx-text-fill: #1a1a1a; -fx-font-size: 13px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;"
                     text="Sort By" HBox.hgrow="ALWAYS"/>
