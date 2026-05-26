@@ -63,7 +63,7 @@ public class AuctionDAO {
     public Auction findById(Connection conn, String id) throws SQLException {
         String sql = """
                 SELECT a.id, a.item_id, a.seller_id, a.current_price, a.highest_bidder_id, a.start_time, a.end_time, a.bid_step, a.status,
-                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category,
+                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category, i.image_url AS item_image_url,
                        s.username AS seller_username, s.fullname AS seller_fullname, s.phoneNumber AS seller_phoneNumber, s.email AS seller_email, s.address AS seller_address, s.balance AS seller_balance,
                        b.username AS bidder_username, b.fullname AS bidder_fullname, b.phoneNumber AS bidder_phoneNumber, b.email AS bidder_email, b.address AS bidder_address, b.balance AS bidder_balance
                 FROM auctions a
@@ -93,7 +93,7 @@ public class AuctionDAO {
         List<Auction> list = new ArrayList<>();
         String sql = """
                 SELECT a.id, a.item_id, a.seller_id, a.current_price, a.highest_bidder_id, a.start_time, a.end_time, a.bid_step, a.status,
-                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category,
+                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category, i.image_url AS item_image_url,
                        s.username AS seller_username, s.fullname AS seller_fullname, s.phoneNumber AS seller_phoneNumber, s.email AS seller_email, s.address AS seller_address, s.balance AS seller_balance,
                        b.username AS bidder_username, b.fullname AS bidder_fullname, b.phoneNumber AS bidder_phoneNumber, b.email AS bidder_email, b.address AS bidder_address, b.balance AS bidder_balance
                 FROM auctions a
@@ -120,7 +120,7 @@ public class AuctionDAO {
         List<Auction> list = new ArrayList<>();
         String sql = """
                 SELECT a.id, a.item_id, a.seller_id, a.current_price, a.highest_bidder_id, a.start_time, a.end_time, a.bid_step, a.status,
-                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category,
+                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category, i.image_url AS item_image_url,
                        s.username AS seller_username, s.fullname AS seller_fullname, s.phoneNumber AS seller_phoneNumber, s.email AS seller_email, s.address AS seller_address, s.balance AS seller_balance,
                        b.username AS bidder_username, b.fullname AS bidder_fullname, b.phoneNumber AS bidder_phoneNumber, b.email AS bidder_email, b.address AS bidder_address, b.balance AS bidder_balance
                 FROM auctions a
@@ -151,7 +151,7 @@ public class AuctionDAO {
         List<Auction> list = new ArrayList<>();
         String sql = """
                 SELECT a.id, a.item_id, a.seller_id, a.current_price, a.highest_bidder_id, a.start_time, a.end_time, a.bid_step, a.status,
-                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category,
+                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category, i.image_url AS item_image_url,
                        s.username AS seller_username, s.fullname AS seller_fullname, s.phoneNumber AS seller_phoneNumber, s.email AS seller_email, s.address AS seller_address, s.balance AS seller_balance,
                        b.username AS bidder_username, b.fullname AS bidder_fullname, b.phoneNumber AS bidder_phoneNumber, b.email AS bidder_email, b.address AS bidder_address, b.balance AS bidder_balance
                 FROM auctions a
@@ -182,7 +182,7 @@ public class AuctionDAO {
         List<Auction> list = new ArrayList<>();
         String sql = """
                 SELECT a.id, a.item_id, a.seller_id, a.current_price, a.highest_bidder_id, a.start_time, a.end_time, a.bid_step, a.status,
-                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category,
+                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category, i.image_url AS item_image_url,
                        s.username AS seller_username, s.fullname AS seller_fullname, s.phoneNumber AS seller_phoneNumber, s.email AS seller_email, s.address AS seller_address, s.balance AS seller_balance,
                        b.username AS bidder_username, b.fullname AS bidder_fullname, b.phoneNumber AS bidder_phoneNumber, b.email AS bidder_email, b.address AS bidder_address, b.balance AS bidder_balance
                 FROM auctions a
@@ -449,6 +449,7 @@ public class AuctionDAO {
         }
         Item item = new Item(itemName, itemDescription, itemStartingPrice, sellerId, category);
         item.setID(itemId);
+        item.setImageUrl(rs.getString("item_image_url"));
 
         // Map Seller
         String sellerUsername = rs.getString("seller_username");

@@ -202,7 +202,8 @@ public class SellController implements Initializable {
         .getExtensionFilters()
         .addAll(
             new FileChooser.ExtensionFilter(
-                "Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp"));
+                "Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp", "*.PNG", "*.JPG", "*.JPEG", "*.GIF", "*.BMP"),
+            new FileChooser.ExtensionFilter("All Files", "*.*"));
 
     Stage stage = (Stage) chooseImageButton.getScene().getWindow();
     selectedImageFile = fileChooser.showOpenDialog(stage);
