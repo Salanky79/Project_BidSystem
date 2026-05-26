@@ -44,7 +44,7 @@ public class AuctionService {
   private final UserDAO userDAO;
   private final BidBroadcastService bidBroadcastService;
   private AutoBidService autoBidService;
-  private final CloudinaryService cloudinaryService = new CloudinaryService();
+  private CloudinaryService cloudinaryService;
 
   public AuctionService(
       AuctionDAO auctionDAO,
@@ -72,6 +72,10 @@ public class AuctionService {
 
   public void setAutoBidService(AutoBidService autoBidService) {
     this.autoBidService = autoBidService;
+  }
+
+  public void setCloudinaryService(CloudinaryService cloudinaryService) {
+    this.cloudinaryService = cloudinaryService;
   }
 
   public Auction createAuction(CreateAuctionRequest req) throws SQLException, ValidationException {

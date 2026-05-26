@@ -12,6 +12,7 @@ import com.auction.server.service.AuctionStatusScheduler;
 import com.auction.server.service.AutoBidRegistry;
 import com.auction.server.service.AutoBidService;
 import com.auction.server.service.BidBroadcastService;
+import com.auction.server.service.CloudinaryService;
 import com.auction.server.service.UserService;
 import com.auction.server.util.DatabaseConnection;
 import java.io.IOException;
@@ -44,6 +45,7 @@ public class ServerApplication {
             auctionDao, itemDao, bidTransactionDao, userDao, bidBroadcastService, null);
     AutoBidService autoBidService = new AutoBidService(autoBidRegistry, auctionService);
     auctionService.setAutoBidService(autoBidService);
+    auctionService.setCloudinaryService(new CloudinaryService());
     AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionDao, 3000);
     // chạy ngầm bộ đếm thời gian đấu giá (cập nhật trạng thái liên tục)
     backgroundExecutor.submit(
