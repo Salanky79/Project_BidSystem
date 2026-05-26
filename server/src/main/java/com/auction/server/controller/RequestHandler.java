@@ -5,23 +5,7 @@ import com.auction.server.network.ClientSession;
 import com.auction.server.service.AuctionService;
 import com.auction.server.service.AutoBidService;
 import com.auction.server.service.UserService;
-import com.auction.share.DTO.Action;
-import com.auction.share.DTO.CancelAutoBidRequest;
-import com.auction.share.DTO.CreateAuctionRequest;
-import com.auction.share.DTO.ExtendEndTimeRequest;
-import com.auction.share.DTO.GetAuctionDetailRequest;
-import com.auction.share.DTO.GetProfileRequest;
-import com.auction.share.DTO.ListAuctionRequest;
-import com.auction.share.DTO.LoginRequest;
-import com.auction.share.DTO.PlaceBidRequest;
-import com.auction.share.DTO.RegisterAutoBidRequest;
-import com.auction.share.DTO.RegisterRequest;
-import com.auction.share.DTO.Request;
-import com.auction.share.DTO.Response;
-import com.auction.share.DTO.SetAutoBidRequest;
-import com.auction.share.DTO.SetBidStepRequest;
-import com.auction.share.DTO.UnsubscribeAuctionRequest;
-import com.auction.share.DTO.UpdateProfileRequest;
+import com.auction.share.DTO.*;
 import com.auction.share.exceptions.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +51,8 @@ public class RequestHandler {
                 auctionController.createAuction((CreateAuctionRequest) request);
             case Action.CANCEL_AUCTION ->
                 auctionController.cancelAuction(
-                    (com.auction.share.DTO.CancelAuctionRequest) request);
+                    (CancelAuctionRequest) request,
+                    session == null ? null : session.getUserId());
             case Action.PLACE_BID -> auctionController.placeBid((PlaceBidRequest) request);
             case Action.SET_AUTO_BID ->
                 auctionController.registerAutoBid(

@@ -41,6 +41,7 @@ public class AuctionService {
   private final UserDAO userDAO;
   private final BidBroadcastService bidBroadcastService;
   private AutoBidService autoBidService;
+  private ImageStorageService imageStorageService;
 
   public AuctionService(
       AuctionDAO auctionDAO,
@@ -70,6 +71,10 @@ public class AuctionService {
     this.autoBidService = autoBidService;
   }
 
+  public void setImageStorageService(ImageStorageService imageStorageService) {
+    this.imageStorageService = imageStorageService;
+  }
+
   public Auction createAuction(CreateAuctionRequest req) throws SQLException, ValidationException {
     User sellerUser = userDAO.findById(req.getSellerId());
     if (!(sellerUser instanceof Seller seller)) {
@@ -90,6 +95,12 @@ public class AuctionService {
             req.getStartingPrice(),
             req.getSellerId(),
             category);
+
+    if (imageStorageService != null && req.getImageBytes() != null) {
+      String imagePath = imageStorageService.saveImage(item.getId(), req.getImageBytes());
+      item.setImagePath(imagePath);
+    }
+
     Auction auction = new Auction(item, seller, startTime, endTime);
 
     itemDAO.saveItem(item);
@@ -97,10 +108,17 @@ public class AuctionService {
     return auction;
   }
 
-  public boolean cancelAuction(String auctionId) throws SQLException, ValidationException {
+  public boolean cancelAuction(String auctionId, String requesterUserId) throws SQLException, ValidationException {
     Auction auction = auctionDAO.findById(auctionId);
     if (auction == null) {
       throw new ValidationException("Auction not found.");
+    }
+    User requester = userDAO.findById(requesterUserId);
+    if (!(requester instanceof Seller)) {
+      throw new ValidationException("Only seller can cancel an auction.");
+    }
+    if (!auction.getSeller().getId().equals(requesterUserId)) {
+      throw new ValidationException("You are not allowed to cancel this auction.");
     }
     if (auction.getStatus() == AuctionStatus.FINISHED
         || auction.getStatus() == AuctionStatus.CANCELED) {
@@ -184,6 +202,11 @@ public class AuctionService {
     String highestBidderUsername =
         auction.getHighestBidder() != null ? auction.getHighestBidder().getUsername() : null;
 
+    byte[] imageBytes = null;
+    if (imageStorageService != null && auction.getItem().getImagePath() != null) {
+      imageBytes = imageStorageService.loadImage(auction.getItem().getImagePath());
+    }
+
     return new AuctionDetailDTO(
         auction.getId(),
         auction.getItem().getName(),
@@ -198,7 +221,8 @@ public class AuctionService {
         auction.getEndTime().format(formatter),
         highestBidderName,
         highestBidderUsername,
-        bidHistory);
+        bidHistory,
+        imageBytes);
   }
 
   public List<AuctionSummaryDTO> listAuctions(ListAuctionRequest req) throws SQLException {
@@ -207,6 +231,11 @@ public class AuctionService {
     DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     for (Auction auction : auctions) {
+      int bidCount = 0;
+      try {
+        bidCount = bidTransactionDAO.findByAuction(auction).size();
+      } catch (Exception ignored) {}
+
       summaries.add(
           new AuctionSummaryDTO(
               auction.getId(),
@@ -214,6 +243,7 @@ public class AuctionService {
               auction.getItem().getCategory().name(),
               auction.getCurrentHighestBid(),
               auction.getBidStep(),
+              bidCount,
               auction.getStatus().name(),
               auction.getStartTime().format(formatter),
               auction.getEndTime().format(formatter)));

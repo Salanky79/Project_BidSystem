@@ -29,9 +29,10 @@ public class ExtendEndTimeRequest extends Request {
 
   @Override
   public Request withUserId(String userId) {
-    if (this.sellerId == null || this.sellerId.isBlank()) {
-      return new ExtendEndTimeRequest(auctionId, minutes, userId);
+    if (userId == null || userId.isBlank()) {
+      return this;
     }
-    return this;
+    // Always trust server-side session userId, never client-supplied sellerId.
+    return new ExtendEndTimeRequest(auctionId, minutes, userId);
   }
 }

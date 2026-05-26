@@ -356,6 +356,35 @@ public class AuctionDAO {
         }
     }
 
+    /** Lấy danh sách auction RUNNING đã hết giờ (end_time <= now). */
+    public List<String> findEndedRunningAuctionIds(LocalDateTime now) throws SQLException {
+        if (now == null) {
+            now = LocalDateTime.now();
+        }
+
+        String sql = """
+                SELECT id
+                FROM auctions
+                WHERE status = ?
+                  AND end_time <= ?
+                """;
+        List<String> ids = new ArrayList<>();
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, AuctionStatus.RUNNING.name());
+            ps.setTimestamp(2, Timestamp.valueOf(now));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String id = rs.getString("id");
+                    if (id != null && !id.isBlank()) {
+                        ids.add(id);
+                    }
+                }
+            }
+        }
+        return ids;
+    }
+
     // HELPER
     private Auction extractAuction(ResultSet rs) throws SQLException {
         String itemId = rs.getString("item_id");

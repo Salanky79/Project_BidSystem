@@ -31,8 +31,16 @@ public final class MapAuctionDB {
       category = Category.ITEM;
     }
 
+    String imagePath = null;
+    try {
+      imagePath = rs.getString("image_path");
+    } catch (SQLException ignored) {
+      // Bỏ qua lỗi nếu database chưa được chạy migration cột image_path
+    }
+
     Item item = new Item(name, description, startingPrice, sellerId, category);
     item.setID(id);
+    item.setImagePath(imagePath);
     return item;
   }
 

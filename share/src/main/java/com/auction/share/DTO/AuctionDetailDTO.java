@@ -18,9 +18,10 @@ public class AuctionDetailDTO implements Serializable {
   private final String status;
   private final String startTime;
   private final String endTime;
-   private final String highestBidderName;
+  private final String highestBidderName;
   private final String highestBidderUsername;
   private final List<BidDTO> bidHistory;
+  private final byte[] imageBytes;
 
   public AuctionDetailDTO(
       String auctionId,
@@ -37,6 +38,40 @@ public class AuctionDetailDTO implements Serializable {
       String highestBidderName,
       String highestBidderUsername,
       List<BidDTO> bidHistory) {
+    this(
+        auctionId,
+        itemName,
+        description,
+        category,
+        sellerName,
+        startingPrice,
+        currentPrice,
+        bidStep,
+        status,
+        startTime,
+        endTime,
+        highestBidderName,
+        highestBidderUsername,
+        bidHistory,
+        null);
+  }
+
+  public AuctionDetailDTO(
+      String auctionId,
+      String itemName,
+      String description,
+      String category,
+      String sellerName,
+      double startingPrice,
+      double currentPrice,
+      double bidStep,
+      String status,
+      String startTime,
+      String endTime,
+      String highestBidderName,
+      String highestBidderUsername,
+      List<BidDTO> bidHistory,
+      byte[] imageBytes) {
     this.auctionId = auctionId;
     this.itemName = itemName;
     this.description = description;
@@ -51,6 +86,7 @@ public class AuctionDetailDTO implements Serializable {
     this.highestBidderName = highestBidderName;
     this.highestBidderUsername = highestBidderUsername;
     this.bidHistory = bidHistory;
+    this.imageBytes = imageBytes;
   }
 
   public String getAuctionId() {
@@ -108,4 +144,8 @@ public class AuctionDetailDTO implements Serializable {
   public List<BidDTO> getBidHistory() {
     return bidHistory;
   }
-}
+
+  public byte[] getImageBytes() {
+    return imageBytes;
+  }
+}

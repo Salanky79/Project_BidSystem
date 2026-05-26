@@ -26,6 +26,7 @@ public class ClientSession {
     // khóa synchronized block để tránh lỗi luồng khi nhiều thread cùng ghi ra mạng
     synchronized (outputStream) {
       outputStream.writeObject(response);
+      outputStream.reset();
       outputStream.flush();
     }
   }

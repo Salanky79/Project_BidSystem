@@ -1,0 +1,35 @@
+{
+  "changelists": [
+    {
+      "name": "Default",
+      "files": [
+        "client/src/main/java/com/auction/client/controller/AuctionDetailController.java",
+        "client/src/main/java/com/auction/client/controller/HomeController.java",
+        "client/src/main/java/com/auction/client/controller/ItemCardController.java",
+        "client/src/main/java/com/auction/client/network/SocketClient.java",
+        "server/src/main/java/com/auction/server/ServerApplication.java",
+        "server/src/main/java/com/auction/server/controller/AuctionController.java",
+        "server/src/main/java/com/auction/server/controller/RequestHandler.java",
+        "server/src/main/java/com/auction/server/dao/AuctionDAO.java",
+        "server/src/main/java/com/auction/server/network/AuctionSubscriptionRegistry.java",
+        "server/src/main/java/com/auction/server/network/ClientSession.java",
+        "server/src/main/java/com/auction/server/service/AuctionService.java",
+        "server/src/main/java/com/auction/server/service/AuctionStatusScheduler.java",
+        "server/src/main/java/com/auction/server/service/AutoBidRegistry.java",
+        "share/src/main/java/com/auction/share/DTO/AuctionSummaryDTO.java",
+        "share/src/main/java/com/auction/share/DTO/CancelAutoBidRequest.java",
+        "share/src/main/java/com/auction/share/DTO/CreateAuctionRequest.java",
+        "share/src/main/java/com/auction/share/DTO/ExtendEndTimeRequest.java",
+        "share/src/main/java/com/auction/share/DTO/GetProfileRequest.java",
+        "share/src/main/java/com/auction/share/DTO/ListAuctionRequest.java",
+        "share/src/main/java/com/auction/share/DTO/PlaceBidRequest.java",
+        "share/src/main/java/com/auction/share/DTO/RegisterAutoBidRequest.java",
+        "share/src/main/java/com/auction/share/DTO/SetAutoBidRequest.java",
+        "share/src/main/java/com/auction/share/DTO/SetBidStepRequest.java",
+        "share/src/main/java/com/auction/share/DTO/UpdateProfileRequest.java",
+        ".vscode/changelists.json"
+      ]
+    }
+  ],
+  "active": "Default"
+}
