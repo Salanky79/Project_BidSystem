@@ -12,7 +12,7 @@ import java.sql.SQLException;
 public class ItemDAO {
     
     public boolean saveItem(Item item) throws SQLException {
-        String sql = "INSERT INTO items (id, seller_id, name, category, starting_price, description) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO items (id, seller_id, name, category, starting_price, description, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
              
@@ -22,6 +22,7 @@ public class ItemDAO {
             ps.setString(4, item.getCategory().name());
             ps.setDouble(5, item.getStartingPrice());
             ps.setString(6, item.getDescription());
+            ps.setString(7, item.getImagePath());
 
             int row = ps.executeUpdate();
             return row > 0;

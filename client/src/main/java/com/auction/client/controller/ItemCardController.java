@@ -71,19 +71,6 @@ public class ItemCardController {
     bidsLabel.setText(bids + (bids <= 1 ? " bid" : " bids"));
     timeLabel.setText("Ending In : " + formatDateTimeForDisplay(time));
 
-    // Fetch actual bid count asynchronously
-    com.auction.client.ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> {
-      if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
-        int actualBids = detail.getBidHistory() != null ? detail.getBidHistory().size() : 0;
-        this.bids = actualBids;
-        javafx.application.Platform.runLater(() -> {
-          if (bidsLabel != null) {
-            bidsLabel.setText(actualBids + (actualBids <= 1 ? " bid" : " bids"));
-          }
-        });
-      }
-    });
-
     if (cardRoot != null) {
       cardRoot.setOnMouseClicked(event -> handleCardClick());
     }

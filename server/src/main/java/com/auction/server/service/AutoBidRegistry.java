@@ -40,6 +40,13 @@ public class AutoBidRegistry {
     }
   }
 
+  public void clearAuction(String auctionId) {
+    if (auctionId == null || auctionId.isBlank()) {
+      return;
+    }
+    configsByAuction.remove(auctionId);
+  }
+
   public List<AutoBidConfig> getConfigs(String auctionId) {
     ConcurrentHashMap<String, AutoBidConfig> byBidder = configsByAuction.get(auctionId);
     if (byBidder == null || byBidder.isEmpty()) {

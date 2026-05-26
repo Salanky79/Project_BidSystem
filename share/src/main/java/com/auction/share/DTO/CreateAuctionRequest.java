@@ -11,6 +11,7 @@ public class CreateAuctionRequest extends Request {
   private final double startingPrice;
   private final String startTime;
   private final String endTime;
+  private final byte[] imageBytes;
 
   public CreateAuctionRequest(
       String sellerId,
@@ -20,6 +21,18 @@ public class CreateAuctionRequest extends Request {
       double startingPrice,
       String startTime,
       String endTime) {
+    this(sellerId, itemName, description, category, startingPrice, startTime, endTime, null);
+  }
+
+  public CreateAuctionRequest(
+      String sellerId,
+      String itemName,
+      String description,
+      String category,
+      double startingPrice,
+      String startTime,
+      String endTime,
+      byte[] imageBytes) {
     super(Action.CREATE_AUCTION);
     this.sellerId = sellerId;
     this.itemName = itemName;
@@ -28,6 +41,7 @@ public class CreateAuctionRequest extends Request {
     this.startingPrice = startingPrice;
     this.startTime = startTime;
     this.endTime = endTime;
+    this.imageBytes = imageBytes;
   }
 
   public String getSellerId() {
@@ -58,11 +72,15 @@ public class CreateAuctionRequest extends Request {
     return endTime;
   }
 
+  public byte[] getImageBytes() {
+    return imageBytes;
+  }
+
   @Override
   public Request withUserId(String userId) {
     if (this.sellerId == null || this.sellerId.isBlank()) {
       return new CreateAuctionRequest(
-          userId, itemName, description, category, startingPrice, startTime, endTime);
+          userId, itemName, description, category, startingPrice, startTime, endTime, imageBytes);
     }
     return this;
   }

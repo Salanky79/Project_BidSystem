@@ -42,6 +42,7 @@ public class AuctionController {
             auction.getItem().getCategory().name(),
             auction.getCurrentHighestBid(),
             auction.getBidStep(),
+            0,
             auction.getStatus().name(),
             auction.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             auction.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -49,9 +50,11 @@ public class AuctionController {
     return Response.success("Auction created successfully.", summaryDTO);
   }
 
-  public Response<Boolean> cancelAuction(CancelAuctionRequest request) throws Exception {
+  public Response<Boolean> cancelAuction(CancelAuctionRequest request, String requesterUserId)
+      throws Exception {
     validateRequiredText(request.getAuctionId(), "Auction ID is required.");
-    boolean success = auctionService.cancelAuction(request.getAuctionId());
+    validateRequiredText(requesterUserId, "Authentication required.");
+    boolean success = auctionService.cancelAuction(request.getAuctionId(), requesterUserId);
     return Response.success("Auction canceled successfully.", success);
   }
 

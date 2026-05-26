@@ -245,6 +245,20 @@ public class SellController implements Initializable {
             .atTime(Integer.parseInt(eHH), Integer.parseInt(emm))
             .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
+    byte[] imageBytes = null;
+    if (selectedImageFile != null) {
+      if (selectedImageFile.length() > 5 * 1024 * 1024) {
+        showError("File size must not exceed 5MB.");
+        return;
+      }
+      try {
+        imageBytes = java.nio.file.Files.readAllBytes(selectedImageFile.toPath());
+      } catch (java.io.IOException e) {
+        showError("Failed to read image file: " + e.getMessage());
+        return;
+      }
+    }
+
     try {
       auctionService.createAuction(
           listingName,
@@ -253,6 +267,7 @@ public class SellController implements Initializable {
           listingPrice,
           startTimeStr,
           endTimeStr,
+          imageBytes,
           response ->
               Platform.runLater(
                   () -> {

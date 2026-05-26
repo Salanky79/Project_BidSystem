@@ -444,6 +444,23 @@ public class AuctionDetailController {
                 this.sellerNameLabel.setText(detail.getSellerName());
                 this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description provided.");
 
+                if (detail.getImageBytes() != null && detail.getImageBytes().length > 0) {
+                    try {
+                        javafx.scene.image.Image img = new javafx.scene.image.Image(new java.io.ByteArrayInputStream(detail.getImageBytes()));
+                        javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
+                        imgView.setFitWidth(150);
+                        imgView.setFitHeight(150);
+                        imgView.setPreserveRatio(true);
+                        productIconLabel.setGraphic(imgView);
+                        productIconLabel.setText(""); // clear emoji
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    productIconLabel.setGraphic(null);
+                    productIconLabel.setText("📦");
+                }
+
                 this.bidHistory = detail.getBidHistory() != null ? detail.getBidHistory() : new java.util.ArrayList<>();
                 this.startingPrice = detail.getStartingPrice();
 

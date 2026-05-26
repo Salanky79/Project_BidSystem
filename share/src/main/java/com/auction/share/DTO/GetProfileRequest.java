@@ -17,9 +17,10 @@ public class GetProfileRequest extends Request {
 
   @Override
   public Request withUserId(String userId) {
-    if (this.userId == null || this.userId.isBlank()) {
-      return new GetProfileRequest(userId);
+    if (userId == null || userId.isBlank()) {
+      return this;
     }
-    return this;
+    // Always trust server-side session userId, never client-supplied userId.
+    return new GetProfileRequest(userId);
   }
 }
