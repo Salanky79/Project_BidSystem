@@ -28,13 +28,10 @@ public class ItemDAO {
         }
     }
 
-    public Item findById(String id) throws SQLException {
+    public Item findById(Connection conn, String id) throws SQLException {
         String sql = "SELECT * FROM items WHERE id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-             
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, id);
-            
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return MapAuctionDB.mapItem(rs);
@@ -42,5 +39,11 @@ public class ItemDAO {
             }
         }
         return null;
+    }
+
+    public Item findById(String id) throws SQLException {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            return findById(conn, id);
+        }
     }
 }

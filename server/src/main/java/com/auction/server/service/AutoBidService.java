@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 
 /** Dịch vụ xử lý logic đặt giá tự động (Auto-bid), tự động ra giá thay người dùng. */
 public class AutoBidService {
-  private static final int MAX_STEPS_PER_TRIGGER = 200;
+  private static final int MAX_STEPS_PER_TRIGGER = 50;
 
   private final AutoBidRegistry registry;
   private final AuctionService auctionService;
