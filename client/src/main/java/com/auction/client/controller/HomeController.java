@@ -7,7 +7,9 @@ import com.auction.client.service.DeletedAuctionsStore;
 import com.auction.share.DTO.AuctionSummaryDTO;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -43,6 +45,9 @@ public class HomeController extends HomeFrameController {
   /** Current category filter set by the filter bar (e.g. "All", "Jewelry", "Cars"). */
   private String currentCategoryFilter = "All";
 
+  /** Cache các HBox card node theo auctionId – tránh load lại FXML mỗi lần filter. */
+  private final Map<String, HBox> cardCache = new HashMap<>();
+
   // ── Button style constants ─────────────────────────────────────────────────
   private static final String STYLE_ACTIVE =
       "-fx-background-color: #1a1a1a; -fx-text-fill: white; -fx-font-size: 13px; "
@@ -69,6 +74,7 @@ public class HomeController extends HomeFrameController {
     updateFilterButtons("All");
 
     allAuctions.clear();
+    cardCache.clear(); // reset cache khi load dữ liệu mới từ server
     auctionGrid.getChildren().clear();
 
     auctionService.getAuctions(
@@ -145,31 +151,37 @@ public class HomeController extends HomeFrameController {
       if (!matchesStatusFilter(currentStatusFilter, dto.getStatus(), dto.getAuctionId())) continue;
       if (!matchesCategoryFilter(currentCategoryFilter, dto.getCategory())) continue;
 
-      try {
-        FXMLLoader loader =
-            new FXMLLoader(getClass().getResource("/com/auction/client/view/ItemCard.fxml"));
-        HBox card = loader.load();
-
-        ItemCardController cardController = loader.getController();
-        cardController.setData(
-            iconForCategory(dto.getCategory()),
-            dto.getCategory(),
-            dto.getItemName(),
-            dto.getCurrentPrice(),
-            dto.getBidStep(),
-            0,
-            dto.getEndTime(),
-            dto.getStatus(),
-            dto.getAuctionId());
-
-        auctionGrid.add(card, column++, row);
-        GridPane.setMargin(card, new Insets(10));
-        if (column == 2) {
-          column = 0;
-          row++;
+      // Lấy từ cache nếu đã tạo trước đó – tránh load lại FXML khi chỉ đổi filter
+      HBox card = cardCache.computeIfAbsent(dto.getAuctionId(), id -> {
+        try {
+          FXMLLoader loader =
+              new FXMLLoader(getClass().getResource("/com/auction/client/view/ItemCard.fxml"));
+          HBox node = loader.load();
+          ItemCardController cardController = loader.getController();
+          cardController.setData(
+              iconForCategory(dto.getCategory()),
+              dto.getCategory(),
+              dto.getItemName(),
+              dto.getCurrentPrice(),
+              dto.getBidStep(),
+              dto.getBidCount(),
+              dto.getEndTime(),
+              dto.getStatus(),
+              dto.getAuctionId(),
+              dto.getImageUrl());
+          return node;
+        } catch (IOException e) {
+          e.printStackTrace();
+          return null;
         }
-      } catch (IOException e) {
-        e.printStackTrace();
+      });
+
+      if (card == null) continue;
+      auctionGrid.add(card, column++, row);
+      GridPane.setMargin(card, new Insets(10));
+      if (column == 2) {
+        column = 0;
+        row++;
       }
     }
   }

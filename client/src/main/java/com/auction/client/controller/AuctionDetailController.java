@@ -32,6 +32,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -84,6 +86,7 @@ public class AuctionDetailController {
     private double        bidStep;
     private int           totalBids;
     private String        auctionId;
+    private String        icon;
     private LocalDateTime endTime;
     private Timeline      countdownTimeline;
     private boolean       autoBidEnabled = false;
@@ -98,9 +101,33 @@ public class AuctionDetailController {
     private Consumer<Response<?>> bidPushListener;
 
     private static final DateTimeFormatter DISPLAY_FMT =
+            DateTimeFormatter.ofPattern("dd/MM/yy HH:mm");
+    private static final DateTimeFormatter LEGACY_DISPLAY_FMT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final DateTimeFormatter ISO_FMT =
             DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private static final DateTimeFormatter ALT_DB_FMT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    private static LocalDateTime parseDateTime(String raw) {
+        if (raw == null) return null;
+        String s = raw.trim();
+        if (s.isEmpty()) return null;
+
+        try { return LocalDateTime.parse(s, ISO_FMT); } catch (Exception ignored) {}
+        try { return LocalDateTime.parse(s, LEGACY_DISPLAY_FMT); } catch (Exception ignored) {}
+        try { return LocalDateTime.parse(s, DISPLAY_FMT); } catch (Exception ignored) {}
+        try { return LocalDateTime.parse(s, ALT_DB_FMT); } catch (Exception ignored) {}
+        try { return LocalDateTime.parse(s.replace(' ', 'T'), ISO_FMT); } catch (Exception ignored) {}
+
+        return null;
+    }
+
+    private static String formatDateTimeForDisplay(String raw) {
+        LocalDateTime dt = parseDateTime(raw);
+        if (dt == null) return raw == null ? "N/A" : raw;
+        return dt.format(DISPLAY_FMT);
+    }
 
     // ─────────────────────────────────────────────────────────────
     @FXML
@@ -155,11 +182,12 @@ public class AuctionDetailController {
         this.bidStep      = bidStep;
         this.totalBids    = bids;
         this.auctionId    = auctionId;
+        this.icon         = icon;
 
         productTitleLabel.setText(name);
         currentPriceLabel.setText(String.format("%.0f VND", price));
         totalBidsLabel.setText(String.valueOf(bids));
-        endTimeLabel.setText(time);
+        endTimeLabel.setText(formatDateTimeForDisplay(time));
         startTimeLabel.setText("Loading...");
         sellerNameLabel.setText("Unknown");
         descriptionLabel.setText("Loading description...");
@@ -170,15 +198,7 @@ public class AuctionDetailController {
         resetAutoBidState();
 
         // Parse end time for countdown
-        try {
-            this.endTime = LocalDateTime.parse(time, DISPLAY_FMT);
-        } catch (Exception ex) {
-            try {
-                this.endTime = LocalDateTime.parse(time, DISPLAY_FMT);
-            } catch (Exception ignored) {
-                this.endTime = null;
-            }
-        }
+        this.endTime = parseDateTime(time);
         startCountdown();
 
         refreshAuctionDetail();
@@ -390,7 +410,7 @@ public class AuctionDetailController {
         long hours   = ChronoUnit.HOURS.between(now, endTime) % 24;
         long minutes = ChronoUnit.MINUTES.between(now, endTime) % 60;
         long seconds = ChronoUnit.SECONDS.between(now, endTime) % 60;
-        endsInLabel.setText(String.format("%dd %02dh %02dm %02ds", days, hours, minutes, seconds));
+        endsInLabel.setText(String.format("%02d:%02d:%02d:%02d", days, hours, minutes, seconds));
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -425,7 +445,7 @@ public class AuctionDetailController {
                     && response.getData() instanceof BidUpdateEvent event
                     && auctionId != null
                     && auctionId.equals(event.getAuctionId())) {
-                Platform.runLater(this::refreshAuctionDetail);
+                Platform.runLater(() -> applyBidUpdate(event));
             }
         };
         socketClient().addPushListener(bidPushListener);
@@ -440,22 +460,40 @@ public class AuctionDetailController {
 
                 this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));
                 this.totalBidsLabel.setText(String.valueOf(this.totalBids));
+                this.minBidLabel.setStyle(""); // clear style lỗi nếu có
                 this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
                 this.sellerNameLabel.setText(detail.getSellerName());
                 this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description provided.");
+
+                // Load ảnh sản phẩm từ Cloudinary nếu có
+                if (detail.getImageUrl() != null && !detail.getImageUrl().isBlank()) {
+                    ImageView imageView = new ImageView();
+                    imageView.setFitWidth(280);
+                    imageView.setFitHeight(280);
+                    imageView.setPreserveRatio(true);
+                    
+                    Image image = new Image(detail.getImageUrl(), 280, 280, true, true, true);
+                    imageView.setImage(image);
+                    
+                    productIconLabel.setGraphic(imageView);
+                    productIconLabel.setText("");
+                } else {
+                    productIconLabel.setGraphic(null);
+                    if (icon != null) {
+                        productIconLabel.setText(icon);
+                    }
+                }
 
                 this.bidHistory = detail.getBidHistory() != null ? detail.getBidHistory() : new java.util.ArrayList<>();
                 this.startingPrice = detail.getStartingPrice();
 
                 this.startTimeISO = detail.getStartTime();
                 if (detail.getStartTime() != null) {
-                    this.startTimeLabel.setText(detail.getStartTime());
+                    this.startTimeLabel.setText(formatDateTimeForDisplay(detail.getStartTime()));
                 }
                 if (detail.getEndTime() != null) {
-                    this.endTimeLabel.setText(detail.getEndTime());
-                    try {
-                        this.endTime = LocalDateTime.parse(detail.getEndTime(), DISPLAY_FMT);
-                    } catch (Exception ignored) {}
+                    this.endTimeLabel.setText(formatDateTimeForDisplay(detail.getEndTime()));
+                    this.endTime = parseDateTime(detail.getEndTime());
                 }
 
                 loadChartData();
@@ -465,6 +503,40 @@ public class AuctionDetailController {
                 }
             }
         }));
+    }
+
+    private void applyBidUpdate(BidUpdateEvent event) {
+        if (event == null) return;
+
+        this.currentPrice = event.getCurrentHighestBid();
+        this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));
+        this.minBidLabel.setStyle(""); // clear style lỗi nếu có
+        this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
+
+        if (this.bidHistory == null) {
+            this.bidHistory = new java.util.ArrayList<>();
+        }
+
+        boolean exists = false;
+        for (BidDTO b : this.bidHistory) {
+            if (Double.compare(b.getAmount(), event.getAmount()) == 0
+                    && b.getBidderName().equals(event.getBidderName())
+                    && b.getTimestamp().equals(event.getBidTime())) {
+                exists = true;
+                break;
+            }
+        }
+
+        if (!exists) {
+            this.bidHistory.add(new BidDTO(event.getBidderName(), event.getAmount(), event.getBidTime()));
+            this.totalBids = this.bidHistory.size();
+            this.totalBidsLabel.setText(String.valueOf(this.totalBids));
+            appendChartPoint(this.currentPrice);
+        }
+
+        if (winnerNameLabel != null) {
+            winnerNameLabel.setText(event.getBidderName());
+        }
     }
 
     private void updateAutoBidControls() {

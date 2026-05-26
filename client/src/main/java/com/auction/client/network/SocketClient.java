@@ -36,7 +36,8 @@ public class SocketClient {
     this.port = port;
     this.sessionManager = sessionManager;
 
-    this.executorService = Executors.newCachedThreadPool();
+    this.executorService =
+        Executors.newSingleThreadExecutor();
     this.callbacks = new ConcurrentHashMap<>();
     this.pushListeners = new CopyOnWriteArrayList<>();
   }

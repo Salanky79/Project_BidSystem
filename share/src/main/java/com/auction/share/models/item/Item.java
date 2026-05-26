@@ -10,6 +10,7 @@ public class Item extends Entity {
   private double startingPrice;
   private String sellerId;
   private final Category category;
+  private String imageUrl;
 
   /** Tạo mặt hàng với thông tin cơ bản. */
   public Item(
@@ -40,5 +41,13 @@ public class Item extends Entity {
 
   public Category getCategory() {
     return category;
+  }
+
+  public String getImageUrl() {
+    return imageUrl;
+  }
+
+  public void setImageUrl(String imageUrl) {
+    this.imageUrl = imageUrl;
   }
 }

@@ -112,7 +112,8 @@ public class SellerDashboardController {
                                 0, // bids
                                 dto.getEndTime(),
                                 dto.getStatus(),
-                                dto.getAuctionId());
+                                dto.getAuctionId(),
+                                dto.getImageUrl());
 
                             auctionGrid.add(card, col++, row);
                             GridPane.setMargin(card, new Insets(10));

@@ -44,7 +44,9 @@ public class AuctionController {
             auction.getBidStep(),
             auction.getStatus().name(),
             auction.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-            auction.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            auction.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            0,
+            auction.getItem().getImageUrl());
 
     return Response.success("Auction created successfully.", summaryDTO);
   }

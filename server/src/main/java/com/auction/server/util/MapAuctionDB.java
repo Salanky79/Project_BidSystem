@@ -23,6 +23,7 @@ public final class MapAuctionDB {
     String categoryRaw = rs.getString("category");
     double startingPrice = rs.getDouble("starting_price");
     String description = rs.getString("description");
+    String imageUrl = rs.getString("image_url");
 
     Category category;
     try {
@@ -33,6 +34,7 @@ public final class MapAuctionDB {
 
     Item item = new Item(name, description, startingPrice, sellerId, category);
     item.setID(id);
+    item.setImageUrl(imageUrl);
     return item;
   }
 

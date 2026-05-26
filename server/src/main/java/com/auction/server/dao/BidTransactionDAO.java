@@ -90,4 +90,35 @@ public class BidTransactionDAO {
         return list;
     }
 
+    /**
+     * Đếm số lượt đặt giá cho nhiều auction cùng lúc bằng 1 query GROUP BY.
+     * Tránh N+1 queries khi hiển thị danh sách auction.
+     *
+     * @param auctionIds danh sách ID auction cần đếm
+     * @return Map: auctionId → số lượt đặt giá
+     */
+    public java.util.Map<String, Integer> countByAuctionIds(java.util.List<String> auctionIds) throws SQLException {
+        java.util.Map<String, Integer> result = new java.util.HashMap<>();
+        if (auctionIds == null || auctionIds.isEmpty()) {
+            return result;
+        }
+
+        String placeholders = "?,".repeat(auctionIds.size());
+        placeholders = placeholders.substring(0, placeholders.length() - 1);
+        String sql = "SELECT auction_id, COUNT(*) AS cnt FROM bid_transactions WHERE auction_id IN ("
+                + placeholders + ") GROUP BY auction_id";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (int i = 0; i < auctionIds.size(); i++) {
+                ps.setString(i + 1, auctionIds.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.put(rs.getString("auction_id"), rs.getInt("cnt"));
+                }
+            }
+        }
+        return result;
+    }
 }

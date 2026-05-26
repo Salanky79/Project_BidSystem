@@ -11,10 +11,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class SellerItemCardController {
 
   @FXML private HBox cardRoot;
+  @FXML private StackPane itemcard;
   @FXML private Label iconLabel;
   @FXML private Label categoryLabel;
   @FXML private Label nameLabel;
@@ -55,8 +59,20 @@ public class SellerItemCardController {
       String time,
       String status,
       String auctionId) {
+    setData(icon, category, name, price, bids, time, status, auctionId, null);
+  }
+
+  public void setData(
+      String icon,
+      String category,
+      String name,
+      double price,
+      int bids,
+      String time,
+      String status,
+      String auctionId,
+      String imageUrl) {
     statusLabel.setText(status);
-    iconLabel.setText(icon);
     categoryLabel.setText(category);
     nameLabel.setText(name);
 
@@ -69,7 +85,37 @@ public class SellerItemCardController {
     this.status = status;
     this.auctionId = auctionId;
 
+    // Load ảnh sản phẩm từ Cloudinary
+    if (imageUrl != null && !imageUrl.isBlank()) {
+      iconLabel.setVisible(false);
+      ImageView imageView = new ImageView();
+      imageView.setFitWidth(160);
+      imageView.setFitHeight(160);
+      imageView.setPreserveRatio(false); // fill to fit card border
+      
+      // Load ảnh bất đồng bộ ngầm (background loading = true)
+      Image image = new Image(imageUrl, 160, 160, false, true, true);
+      imageView.setImage(image);
+      
+      // Clip ảnh bo tròn góc trên bên trái và dưới bên trái khớp với CSS StackPane
+      javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(160, 160);
+      clip.setArcWidth(24); // khớp với border-radius: 12 của StackPane
+      clip.setArcHeight(24);
+      imageView.setClip(clip);
 
+      // Thêm imageView vào làm con đầu tiên của StackPane (sau statusLabel)
+      if (itemcard != null) {
+        // Xóa các ImageView cũ nếu có (để tránh chồng chéo khi render lại)
+        itemcard.getChildren().removeIf(node -> node instanceof ImageView);
+        itemcard.getChildren().add(0, imageView);
+      }
+    } else {
+      iconLabel.setVisible(true);
+      iconLabel.setText(icon);
+      if (itemcard != null) {
+        itemcard.getChildren().removeIf(node -> node instanceof ImageView);
+      }
+    }
 
     priceLabel.setText(String.format("%,.0f VND", price));
 

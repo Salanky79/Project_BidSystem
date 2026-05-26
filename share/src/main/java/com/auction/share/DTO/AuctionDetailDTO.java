@@ -5,7 +5,7 @@ import java.util.List;
 
 /** Đối tượng truyền dữ liệu (DTO) chứa thông tin chi tiết của một phiên đấu giá. */
 public class AuctionDetailDTO implements Serializable {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   private final String auctionId;
   private final String itemName;
@@ -18,9 +18,43 @@ public class AuctionDetailDTO implements Serializable {
   private final String status;
   private final String startTime;
   private final String endTime;
-   private final String highestBidderName;
+  private final String highestBidderName;
   private final String highestBidderUsername;
   private final List<BidDTO> bidHistory;
+  private final String imageUrl;
+
+  public AuctionDetailDTO(
+      String auctionId,
+      String itemName,
+      String description,
+      String category,
+      String sellerName,
+      double startingPrice,
+      double currentPrice,
+      double bidStep,
+      String status,
+      String startTime,
+      String endTime,
+      String highestBidderName,
+      String highestBidderUsername,
+      List<BidDTO> bidHistory,
+      String imageUrl) {
+    this.auctionId = auctionId;
+    this.itemName = itemName;
+    this.description = description;
+    this.category = category;
+    this.sellerName = sellerName;
+    this.startingPrice = startingPrice;
+    this.currentPrice = currentPrice;
+    this.bidStep = bidStep;
+    this.status = status;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.highestBidderName = highestBidderName;
+    this.highestBidderUsername = highestBidderUsername;
+    this.bidHistory = bidHistory;
+    this.imageUrl = imageUrl;
+  }
 
   public AuctionDetailDTO(
       String auctionId,
@@ -37,20 +71,22 @@ public class AuctionDetailDTO implements Serializable {
       String highestBidderName,
       String highestBidderUsername,
       List<BidDTO> bidHistory) {
-    this.auctionId = auctionId;
-    this.itemName = itemName;
-    this.description = description;
-    this.category = category;
-    this.sellerName = sellerName;
-    this.startingPrice = startingPrice;
-    this.currentPrice = currentPrice;
-    this.bidStep = bidStep;
-    this.status = status;
-    this.startTime = startTime;
-    this.endTime = endTime;
-    this.highestBidderName = highestBidderName;
-    this.highestBidderUsername = highestBidderUsername;
-    this.bidHistory = bidHistory;
+    this(
+        auctionId,
+        itemName,
+        description,
+        category,
+        sellerName,
+        startingPrice,
+        currentPrice,
+        bidStep,
+        status,
+        startTime,
+        endTime,
+        highestBidderName,
+        highestBidderUsername,
+        bidHistory,
+        null);
   }
 
   public String getAuctionId() {
@@ -107,5 +143,9 @@ public class AuctionDetailDTO implements Serializable {
 
   public List<BidDTO> getBidHistory() {
     return bidHistory;
+  }
+
+  public String getImageUrl() {
+    return imageUrl;
   }
 }

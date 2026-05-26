@@ -30,6 +30,21 @@ public class AuctionService {
       String endTimeStr,
       Consumer<Response<?>> onResponse)
       throws ValidationException {
+    createAuction(itemName, description, category, startingPriceStr, startTimeStr, endTimeStr, null, null, onResponse);
+  }
+
+  /** Tạo một phiên đấu giá mới kèm theo ảnh. */
+  public void createAuction(
+      String itemName,
+      String description,
+      String category,
+      String startingPriceStr,
+      String startTimeStr,
+      String endTimeStr,
+      byte[] imageBytes,
+      String imageName,
+      Consumer<Response<?>> onResponse)
+      throws ValidationException {
     if (itemName == null || itemName.trim().isEmpty()) {
       throw new ValidationException("Tên sản phẩm không được để trống!");
     }
@@ -59,7 +74,7 @@ public class AuctionService {
 
     CreateAuctionRequest request =
         new CreateAuctionRequest(
-            null, itemName, description, category, startingPrice, startTimeStr, endTimeStr);
+            null, itemName, description, category, startingPrice, startTimeStr, endTimeStr, imageBytes, imageName);
     socketClient.send(request, onResponse);
   }
 

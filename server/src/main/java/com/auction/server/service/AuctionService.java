@@ -4,6 +4,7 @@ import com.auction.server.dao.AuctionDAO;
 import com.auction.server.dao.BidTransactionDAO;
 import com.auction.server.dao.ItemDAO;
 import com.auction.server.dao.UserDAO;
+import com.auction.server.service.CloudinaryService;
 import com.auction.server.util.DatabaseConnection;
 import com.auction.share.DTO.AuctionDetailDTO;
 import com.auction.share.DTO.AuctionSummaryDTO;
@@ -30,6 +31,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Dịch vụ xử lý nghiệp vụ cốt lõi của các phiên đấu giá (tạo, hủy, đặt giá, kiểm tra trạng thái).
@@ -41,6 +44,7 @@ public class AuctionService {
   private final UserDAO userDAO;
   private final BidBroadcastService bidBroadcastService;
   private AutoBidService autoBidService;
+  private final CloudinaryService cloudinaryService = new CloudinaryService();
 
   public AuctionService(
       AuctionDAO auctionDAO,
@@ -90,6 +94,18 @@ public class AuctionService {
             req.getStartingPrice(),
             req.getSellerId(),
             category);
+
+    // Upload image to Cloudinary if provided
+    if (req.getImageBytes() != null && req.getImageBytes().length > 0) {
+      try {
+        String imageUrl = cloudinaryService.uploadImage(req.getImageBytes(), req.getImageName());
+        item.setImageUrl(imageUrl);
+      } catch (Exception e) {
+        System.err.println("Failed to upload image to Cloudinary: " + e.getMessage());
+        // Cho phép tiếp tục tạo đấu giá kể cả khi upload ảnh thất bại để tránh chặn người dùng
+      }
+    }
+
     Auction auction = new Auction(item, seller, startTime, endTime);
 
     itemDAO.saveItem(item);
@@ -198,15 +214,23 @@ public class AuctionService {
         auction.getEndTime().format(formatter),
         highestBidderName,
         highestBidderUsername,
-        bidHistory);
+        bidHistory,
+        auction.getItem().getImageUrl());
   }
 
   public List<AuctionSummaryDTO> listAuctions(ListAuctionRequest req) throws SQLException {
     List<Auction> auctions = resolveAuctionsByFilter(req);
-    List<AuctionSummaryDTO> summaries = new ArrayList<>();
+    if (auctions.isEmpty()) return new ArrayList<>();
+
     DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
+    // Lấy toàn bộ số lượt bid bằng 1 query GROUP BY thay vì N query riêng lẻ
+    List<String> ids = auctions.stream().map(Auction::getId).collect(Collectors.toList());
+    Map<String, Integer> bidCounts = bidTransactionDAO.countByAuctionIds(ids);
+
+    List<AuctionSummaryDTO> summaries = new ArrayList<>();
     for (Auction auction : auctions) {
+      int bidCount = bidCounts.getOrDefault(auction.getId(), 0);
       summaries.add(
           new AuctionSummaryDTO(
               auction.getId(),
@@ -216,7 +240,9 @@ public class AuctionService {
               auction.getBidStep(),
               auction.getStatus().name(),
               auction.getStartTime().format(formatter),
-              auction.getEndTime().format(formatter)));
+              auction.getEndTime().format(formatter),
+              bidCount,
+              auction.getItem().getImageUrl()));
     }
     return summaries;
   }

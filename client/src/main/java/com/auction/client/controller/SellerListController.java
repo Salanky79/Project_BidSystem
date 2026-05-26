@@ -97,7 +97,8 @@ public class SellerListController {
           0,
           dto.getEndTime(),
           dto.getStatus(),
-          dto.getAuctionId());
+          dto.getAuctionId(),
+          dto.getImageUrl());
 
       cardList.getChildren().add(card);
     } catch (IOException e) {
