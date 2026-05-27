@@ -1,6 +1,5 @@
 package com.auction.client.network;
 
-import com.auction.client.session.SessionManager;
 import com.auction.share.DTO.Request;
 import com.auction.share.DTO.Response;
 import java.io.EOFException;
@@ -24,17 +23,15 @@ public class SocketClient {
   // nhiều request gửi cùng lúc => Cần ID
   private final Map<String, Consumer<Response<?>>> callbacks;
   private final List<Consumer<Response<?>>> pushListeners;
-  private final SessionManager sessionManager;
 
   private Socket socket;
   private ObjectOutputStream outputStream;
   private ObjectInputStream inputStream;
   private volatile boolean listening;
 
-  public SocketClient(String host, int port, SessionManager sessionManager) {
+  public SocketClient(String host, int port) {
     this.host = host;
     this.port = port;
-    this.sessionManager = sessionManager;
 
     this.executorService =
         Executors.newSingleThreadExecutor();
@@ -66,18 +63,17 @@ public class SocketClient {
       return;
     }
 
-    Request outboundRequest = enrichWithUserId(request);
     if (onResponse != null) {
-      callbacks.put(outboundRequest.getRequestId(), onResponse);
+      callbacks.put(request.getRequestId(), onResponse);
     }
 
-    // serialization Object để truyền qua sever
+    // serialization Object để truyền qua server
     try {
-      outputStream.writeObject(outboundRequest);
+      outputStream.writeObject(request);
       outputStream.flush();
     } catch (IOException e) {
       if (onResponse != null) {
-        callbacks.remove(outboundRequest.getRequestId());
+        callbacks.remove(request.getRequestId());
         onResponse.accept(Response.fail("Failed to send request: " + e.getMessage()));
       }
       closeConnection();
@@ -144,16 +140,7 @@ public class SocketClient {
         });
   }
 
-  private Request enrichWithUserId(Request request) {
-    if (request == null) {
-      return null;
-    }
-    String userId = sessionManager.getCurrentUserId();
-    if (userId == null || userId.isBlank()) {
-      return request;
-    }
-    return request.withUserId(userId);
-  }
+
 
   private void closeConnection() {
     try {

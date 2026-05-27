@@ -9,6 +9,11 @@ import java.util.UUID;
  */
 public abstract class Request implements Serializable {
   private String requestId = UUID.randomUUID().toString();
+
+  /** Cho phép copy requestId gốc sang object mới tạo bởi withUserId(). */
+  public void setRequestId(String requestId) {
+    this.requestId = requestId;
+  }
   private final String action;
 
   protected Request(String action) {

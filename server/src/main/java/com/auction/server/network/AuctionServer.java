@@ -63,8 +63,14 @@ public class AuctionServer implements Runnable {
         }
 
         // tự động nhúng userId từ phiên (session) vào request để xác thực
-        Request authedRequest =
-            (session.getUserId() != null) ? request.withUserId(session.getUserId()) : request;
+        // giữ nguyên requestId gốc để client callback khớp đúng
+        Request authedRequest;
+        if (session.getUserId() != null) {
+            authedRequest = request.withUserId(session.getUserId());
+            authedRequest.setRequestId(request.getRequestId());
+        } else {
+            authedRequest = request;
+        }
 
         long startTime = System.currentTimeMillis();
         LOGGER.info(

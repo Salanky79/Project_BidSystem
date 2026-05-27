@@ -30,6 +30,14 @@ public class ListAuctionRequest extends Request {
 
   @Override
   public Request withUserId(String userId) {
-    return this;
+    // Nếu đã có sellerId (client truyền) thì giữ nguyên.
+    // Nếu chưa có → server inject từ session (dùng cho trang "My Auctions" của Seller).
+    if (sellerId != null && !sellerId.isBlank()) {
+      return this;
+    }
+    if (userId == null || userId.isBlank()) {
+      return this;
+    }
+    return new ListAuctionRequest(status, userId);
   }
 }

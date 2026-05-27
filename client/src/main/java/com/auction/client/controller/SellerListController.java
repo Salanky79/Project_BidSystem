@@ -26,13 +26,11 @@ public class SellerListController {
 
   public void loadItems(String mode) {
     titleLabel.setText(labelFor(mode));
-    String sellerId = ClientContext.userService().getSessionManager().getCurrentUserId();
 
     showLoading(true);
     cardList.getChildren().clear();
 
     auctionService.getSellerAuctions(
-        sellerId,
         null,
         response ->
             Platform.runLater(

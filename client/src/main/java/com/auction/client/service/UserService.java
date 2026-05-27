@@ -1,7 +1,6 @@
 package com.auction.client.service;
 
 import com.auction.client.network.SocketClient;
-import com.auction.client.session.SessionManager;
 import com.auction.share.DTO.GetProfileRequest;
 import com.auction.share.DTO.LoginRequest;
 import com.auction.share.DTO.RegisterRequest;
@@ -13,11 +12,9 @@ import java.util.function.Consumer;
 
 public class UserService {
   private final SocketClient socketClient;
-  private final SessionManager sessionManager;
 
-  public UserService(SocketClient socketClient, SessionManager sessionManager) {
+  public UserService(SocketClient socketClient) {
     this.socketClient = socketClient;
-    this.sessionManager = sessionManager;
   }
 
   // Consumer cho phép nhận vào biến chứa hàm (lambda ->///)
@@ -42,14 +39,7 @@ public class UserService {
     socketClient.send(
         request,
         response -> {
-          if (response != null
-              && response.isSuccess()
-              && response.getData() instanceof UserDTO userDTO) {
-            sessionManager.setCurrentUserId(userDTO.getId());
-          }
           if (onResponse != null) {
-            // gọi cái hàm ( biến chứa hàm ) // chính là Platform.runlater
-            // thực thi callback đang nằm trong Consumer
             onResponse.accept(response);
           }
         });
@@ -97,11 +87,6 @@ public class UserService {
     socketClient.send(
         request,
         response -> {
-          if (response != null
-              && response.isSuccess()
-              && response.getData() instanceof UserDTO userDTO) {
-            sessionManager.setCurrentUserId(userDTO.getId());
-          }
           if (onResponse != null) {
             onResponse.accept(response);
           }
@@ -136,8 +121,4 @@ public class UserService {
         onResponse);
   }
 
-  /** Trả về SessionManager để các controller có thể đọc currentUserId. */
-  public SessionManager getSessionManager() {
-    return sessionManager;
-  }
 }

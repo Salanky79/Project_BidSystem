@@ -259,8 +259,7 @@ public class AuctionDetailController {
                         minBidLabel.setText(String.format("Minimum bid: %.0f VND", currentPrice + bidStep));
                         bidInputField.clear();
 
-                        String username = ClientContext.userService().getSessionManager().getCurrentUserId();
-                        bidHistory.add(new com.auction.share.DTO.BidDTO(username != null ? username : "You", currentPrice, LocalDateTime.now().format(ISO_FMT)));
+                        bidHistory.add(new com.auction.share.DTO.BidDTO("You", currentPrice, LocalDateTime.now().format(ISO_FMT)));
                         // Append a live point to the chart without clearing existing data
                         appendChartPoint(currentPrice);
                     } else {

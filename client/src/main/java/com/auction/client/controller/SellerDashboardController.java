@@ -72,15 +72,8 @@ public class SellerDashboardController {
   // ===== LOAD CARDS =====
 
   private void loadAuctionCards(String filterStatus) {
-    String sellerId = ClientContext.userService().getSessionManager().getCurrentUserId();
-    if (sellerId == null) {
-      System.out.println("User not logged in, cannot load seller auctions.");
-      return;
-    }
-
     ClientContext.auctionService()
         .getSellerAuctions(
-            sellerId,
             null,
             response -> {
               Platform.runLater(
