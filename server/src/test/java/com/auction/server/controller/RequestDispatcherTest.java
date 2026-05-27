@@ -27,7 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class RequestHandlerTest {
+class RequestDispatcherTest {
 
     @Mock
     private UserService userService;
@@ -43,7 +43,7 @@ class RequestHandlerTest {
 
     @Test
     void handle_nullAction_returnsFailResponse() {
-        RequestHandler handler = new RequestHandler(userService, auctionService, autoBidService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, subscriptionRegistry);
 
         Response<?> response = handler.handle(new RawRequest(null), null);
 
@@ -53,7 +53,7 @@ class RequestHandlerTest {
 
     @Test
     void handle_requestIdPropagated() throws Exception {
-        RequestHandler handler = new RequestHandler(userService, auctionService, autoBidService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, subscriptionRegistry);
         Bidder bidder = new Bidder("alice", "pwd", "Alice", "090", "alice@mail.com", "HCM");
         bidder.setID("u-1");
         when(userService.login("alice", "pwd")).thenReturn(bidder);
@@ -68,7 +68,7 @@ class RequestHandlerTest {
 
     @Test
     void handle_classCastException_returnsFailResponse() {
-        RequestHandler handler = new RequestHandler(userService, auctionService, autoBidService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, subscriptionRegistry);
 
         Response<?> response = handler.handle(new RawRequest(Action.LOGIN), null);
 
@@ -78,7 +78,7 @@ class RequestHandlerTest {
 
     @Test
     void handle_login_routesToUserController() throws Exception {
-        RequestHandler handler = new RequestHandler(userService, auctionService, autoBidService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, subscriptionRegistry);
         Bidder bidder = new Bidder("alice", "pwd", "Alice", "090", "alice@mail.com", "HCM");
         bidder.setID("u-1");
         when(userService.login("alice", "pwd")).thenReturn(bidder);
@@ -91,7 +91,7 @@ class RequestHandlerTest {
 
     @Test
     void handle_unsubscribe_nullAuctionId_unsubscribeAll() throws Exception {
-        RequestHandler handler = new RequestHandler(userService, auctionService, autoBidService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, subscriptionRegistry);
         ClientSession session = new ClientSession(new ObjectOutputStream(new ByteArrayOutputStream()));
 
         Response<?> response = handler.handle(new UnsubscribeAuctionRequest(null), session);

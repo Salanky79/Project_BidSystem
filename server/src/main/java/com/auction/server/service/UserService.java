@@ -3,6 +3,7 @@ package com.auction.server.service;
 import com.auction.server.dao.BidTransactionDAO;
 import com.auction.server.dao.AuctionDAO;
 import com.auction.server.dao.UserDAO;
+import com.auction.server.mapper.MapUserDTO;
 import com.auction.server.util.PasswordUtil;
 import com.auction.share.DTO.ProfileBidTransactionDTO;
 import com.auction.share.DTO.ProfileDTO;
@@ -24,11 +25,13 @@ public class UserService {
   private final UserDAO userDAO;
   private final BidTransactionDAO bidTransactionDAO;
   private final AuctionDAO auctionDAO;
+  private final MapUserDTO userMapper;
 
-  public UserService(UserDAO userDAO) {
+  public UserService(UserDAO userDAO, BidTransactionDAO bidTransactionDAO, AuctionDAO auctionDAO, MapUserDTO userMapper) {
     this.userDAO = userDAO;
-    this.bidTransactionDAO = new BidTransactionDAO();
-    this.auctionDAO = new AuctionDAO();
+    this.bidTransactionDAO = bidTransactionDAO;
+    this.auctionDAO = auctionDAO;
+    this.userMapper = userMapper;
   }
 
   public boolean register(User user)
@@ -92,7 +95,7 @@ public class UserService {
 
   public ProfileDTO getProfile(String id) throws SQLException, ValidationException {
     User user = getById(id);
-    UserDTO baseUserDTO = toUserDTO(user);
+    UserDTO baseUserDTO = userMapper.toUserDTO(user);
     double availableBalance =
         baseUserDTO.getBalance()
             - auctionDAO.sumRunningWinningBidsByBidder(user.getId(), Collections.emptySet());
@@ -113,35 +116,6 @@ public class UserService {
   }
 
   // HELPER: các hàm hỗ trợ chuyển đổi dữ liệu
-  private UserDTO toUserDTO(User user) {
-    String phoneNumber = null;
-    String email = null;
-    String address = null;
-    double balance = 0.0;
-
-    if (user instanceof Bidder bidder) {
-      phoneNumber = bidder.getPhoneNumber();
-      email = bidder.getEmail();
-      address = bidder.getAddress();
-      balance = bidder.getBalance();
-    } else if (user instanceof Seller seller) {
-      phoneNumber = seller.getPhoneNumber();
-      email = seller.getEmail();
-      address = seller.getAddress();
-      balance = seller.getBalance();
-    }
-    return new UserDTO(
-        user.getId(),
-        user.getUsername(),
-        user.getFullName(),
-        user.getRole().name(),
-        phoneNumber,
-        email,
-        address,
-        balance,
-        balance);
-  }
-
   private static String extractEmail(User user) {
     if (user instanceof Bidder bidder) {
       return bidder.getEmail();

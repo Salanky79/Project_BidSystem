@@ -1,15 +1,12 @@
 package com.auction.server.dao;
 
 import com.auction.server.util.DatabaseConnection;
-import com.auction.server.util.MapAuctionDB;
 import com.auction.share.enums.AuctionStatus;
 import com.auction.share.models.auction.Auction;
 import com.auction.share.models.item.Item;
 import com.auction.share.models.user.Bidder;
 import com.auction.share.models.user.Seller;
-import com.auction.share.models.user.User;
 
-import javax.xml.crypto.Data;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

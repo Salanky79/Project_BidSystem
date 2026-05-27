@@ -2,6 +2,7 @@ package com.auction.server.service;
 
 import com.auction.server.dao.BidTransactionDAO;
 import com.auction.server.dao.UserDAO;
+import com.auction.server.mapper.MapUserDTO;
 import com.auction.server.util.PasswordUtil;
 import com.auction.share.exceptions.AuthenticationException;
 import com.auction.share.exceptions.DuplicateResourceException;
@@ -13,8 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -33,14 +32,17 @@ class UserServiceTest {
     @Mock
     private BidTransactionDAO bidTransactionDAO;
 
+    @Mock
+    private com.auction.server.dao.AuctionDAO auctionDAO;
+
+    private MapUserDTO userMapper;
+
     private UserService userService;
 
     @BeforeEach
     void setUp() throws Exception {
-        userService = new UserService(userDAO);
-        Field field = UserService.class.getDeclaredField("bidTransactionDAO");
-        field.setAccessible(true);
-        field.set(userService, bidTransactionDAO);
+        userMapper = new MapUserDTO();
+        userService = new UserService(userDAO, bidTransactionDAO, auctionDAO, userMapper);
     }
 
     @Test

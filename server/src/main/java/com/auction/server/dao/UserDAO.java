@@ -1,6 +1,6 @@
 package com.auction.server.dao;
 
-import com.auction.server.util.MapUserDB;
+import com.auction.server.mapper.MapUserDB;
 import com.auction.server.util.DatabaseConnection;
 import com.auction.share.models.user.Admin;
 import com.auction.share.models.user.Bidder;

@@ -1,6 +1,6 @@
 package com.auction.server.network;
 
-import com.auction.server.controller.RequestHandler;
+import com.auction.server.controller.RequestDispatcher;
 import com.auction.share.DTO.Action;
 import com.auction.share.DTO.GetAuctionDetailRequest;
 import com.auction.share.DTO.Request;
@@ -21,15 +21,15 @@ public class AuctionServer implements Runnable {
   private static final Logger LOGGER = LoggerFactory.getLogger(AuctionServer.class);
 
   private final Socket clientSocket;
-  private final RequestHandler requestHandler;
+  private final RequestDispatcher requestDispatcher;
   private final AuctionSubscriptionRegistry subscriptionRegistry;
 
   public AuctionServer(
       Socket clientSocket,
-      RequestHandler requestHandler,
+      RequestDispatcher requestDispatcher,
       AuctionSubscriptionRegistry subscriptionRegistry) {
     this.clientSocket = clientSocket;
-    this.requestHandler = requestHandler;
+    this.requestDispatcher = requestDispatcher;
     this.subscriptionRegistry = subscriptionRegistry;
   }
 
@@ -79,7 +79,7 @@ public class AuctionServer implements Runnable {
             request.getAction(),
             request.getClass().getSimpleName());
 
-        Response<?> response = requestHandler.handle(authedRequest, session);
+        Response<?> response = requestDispatcher.handle(authedRequest, session);
 
         // lưu userId vào session ngay sau khi đăng nhập thành công
         if (Action.LOGIN.equals(request.getAction())

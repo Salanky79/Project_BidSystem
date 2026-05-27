@@ -1,7 +1,7 @@
 package com.auction.server.dao;
 
 import com.auction.server.util.DatabaseConnection;
-import com.auction.server.util.MapAuctionDB;
+import com.auction.server.mapper.MapAuctionDB;
 import com.auction.share.models.item.Item;
 
 import java.sql.Connection;

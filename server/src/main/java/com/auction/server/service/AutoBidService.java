@@ -1,6 +1,6 @@
 package com.auction.server.service;
 
-import com.auction.server.model.AutoBidConfig;
+import com.auction.server.util.AutoBidConfig;
 import com.auction.share.DTO.CancelAutoBidRequest;
 import com.auction.share.DTO.PlaceBidRequest;
 import com.auction.share.DTO.RegisterAutoBidRequest;

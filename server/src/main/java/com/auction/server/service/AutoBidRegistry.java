@@ -1,6 +1,6 @@
 package com.auction.server.service;
 
-import com.auction.server.model.AutoBidConfig;
+import com.auction.server.util.AutoBidConfig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

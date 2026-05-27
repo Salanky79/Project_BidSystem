@@ -1,4 +1,4 @@
-package com.auction.server.util;
+package com.auction.server.mapper;
 
 import com.auction.share.models.user.Admin;
 import com.auction.share.models.user.Bidder;
