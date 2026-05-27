@@ -119,8 +119,26 @@ public class ItemCardController {
     // Hiển thị số lượt bid – lấy thẳng từ DTO, không gọi thêm network
     bidsLabel.setText(bids + (bids <= 1 ? " bid" : " bids"));
 
-    // Hiển thị thời gian kết thúc theo format dd/MM/yy HH:mm
-    timeLabel.setText("Ending In : " + formatDateTimeForDisplay(time));
+    // Hiển thị thời gian kết thúc hoặc người thắng cuộc nếu đã kết thúc
+    if ("FINISHED".equalsIgnoreCase(status) || "End".equalsIgnoreCase(status)) {
+      timeLabel.setText("Winner: Loading...");
+      com.auction.client.ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> {
+        if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
+          String winnerName = detail.getHighestBidderName();
+          javafx.application.Platform.runLater(() -> {
+            if (timeLabel != null) {
+              if (winnerName != null && !winnerName.trim().isEmpty()) {
+                timeLabel.setText("Winner: " + winnerName);
+              } else {
+                timeLabel.setText("Winner: None (No bids)");
+              }
+            }
+          });
+        }
+      });
+    } else {
+      timeLabel.setText("Ending In : " + formatDateTimeForDisplay(time));
+    }
 
     if (cardRoot != null) {
       cardRoot.setOnMouseClicked(event -> handleCardClick());
