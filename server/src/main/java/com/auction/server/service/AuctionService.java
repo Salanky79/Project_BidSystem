@@ -326,7 +326,9 @@ public class AuctionService {
 
   private List<Auction> resolveAuctionsByFilter(ListAuctionRequest req) throws SQLException {
     if (req == null) {
-      return auctionDAO.findAll();
+      return auctionDAO.findAll().stream()
+          .filter(a -> a.getStatus() != AuctionStatus.CANCELED)
+          .collect(java.util.stream.Collectors.toList());
     }
 
     String sellerId = req.getSellerId();
@@ -343,14 +345,24 @@ public class AuctionService {
       }
     }
 
+    List<Auction> result;
     if (hasSeller && hasStatus) {
-      return auctionDAO.findBySellerAndStatus(sellerId, status);
+      result = auctionDAO.findBySellerAndStatus(sellerId, status);
     } else if (hasSeller) {
-      return auctionDAO.findBySeller(sellerId);
+      result = auctionDAO.findBySeller(sellerId);
     } else if (hasStatus) {
-      return auctionDAO.findByStatus(status);
+      result = auctionDAO.findByStatus(status);
     } else {
-      return auctionDAO.findAll();
+      result = auctionDAO.findAll();
     }
+
+    // Nếu không tìm kiếm theo một seller cụ thể (lấy danh sách chung cho trang chủ), lọc bỏ CANCELED
+    if (!hasSeller) {
+      result = result.stream()
+          .filter(a -> a.getStatus() != AuctionStatus.CANCELED)
+          .collect(java.util.stream.Collectors.toList());
+    }
+
+    return result;
   }
 }

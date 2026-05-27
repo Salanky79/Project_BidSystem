@@ -84,8 +84,8 @@ public class AuctionService {
 
   /** Lấy danh sách auction của seller đang đăng nhập, có thể lọc theo status. */
   public void getSellerAuctions(String status, Consumer<Response<?>> onResponse) {
-    // sellerId = null → server tự inject từ session
-    socketClient.send(new ListAuctionRequest(status, null), onResponse);
+    // sellerId = null, sellerOnly = true → server tự inject từ session
+    socketClient.send(new ListAuctionRequest(status, null, true), onResponse);
   }
 
   public void cancelAuction(String auctionId, Consumer<Response<?>> onResponse) {

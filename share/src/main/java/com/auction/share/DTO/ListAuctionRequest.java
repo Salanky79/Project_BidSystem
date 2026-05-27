@@ -5,19 +5,17 @@ public class ListAuctionRequest extends Request {
   private static final long serialVersionUID = 1L;
   private final String status;
   private final String sellerId;
+  private final boolean sellerOnly;
 
   public ListAuctionRequest() {
-    this(null, null);
+    this(null, null, false);
   }
 
-  public ListAuctionRequest(String status) {
-    this(status, null);
-  }
-
-  public ListAuctionRequest(String status, String sellerId) {
+  public ListAuctionRequest(String status, String sellerId, boolean sellerOnly) {
     super(Action.LIST_AUCTIONS);
     this.status = status;
     this.sellerId = sellerId;
+    this.sellerOnly = sellerOnly;
   }
 
   public String getStatus() {
@@ -30,14 +28,10 @@ public class ListAuctionRequest extends Request {
 
   @Override
   public Request withUserId(String userId) {
-    // Nếu đã có sellerId (client truyền) thì giữ nguyên.
-    // Nếu chưa có → server inject từ session (dùng cho trang "My Auctions" của Seller).
-    if (sellerId != null && !sellerId.isBlank()) {
-      return this;
+    // Chỉ tự động điền userId vào sellerId nếu yêu cầu này thuộc về Seller Dashboard (sellerOnly = true)
+    if (sellerOnly && (sellerId == null || sellerId.isBlank())) {
+      return new ListAuctionRequest(status, userId, true);
     }
-    if (userId == null || userId.isBlank()) {
-      return this;
-    }
-    return new ListAuctionRequest(status, userId);
+    return this;
   }
 }
