@@ -46,7 +46,8 @@ public class ServerApplication {
     AutoBidService autoBidService = new AutoBidService(autoBidRegistry, auctionService);
     auctionService.setAutoBidService(autoBidService);
     auctionService.setCloudinaryService(new CloudinaryService());
-    AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionDao, 3000);
+    AuctionStatusScheduler auctionStatusScheduler =
+        new AuctionStatusScheduler(auctionDao, subscriptionRegistry, autoBidRegistry, 3000L);
     // chạy ngầm bộ đếm thời gian đấu giá (cập nhật trạng thái liên tục)
     backgroundExecutor.submit(
         () -> {
