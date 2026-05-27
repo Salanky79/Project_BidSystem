@@ -36,7 +36,8 @@ public class SocketClient {
     this.port = port;
     this.sessionManager = sessionManager;
 
-    this.executorService = Executors.newSingleThreadExecutor();
+    this.executorService =
+        Executors.newSingleThreadExecutor();
     this.callbacks = new ConcurrentHashMap<>();
     this.pushListeners = new CopyOnWriteArrayList<>();
   }
@@ -73,7 +74,6 @@ public class SocketClient {
     // serialization Object để truyền qua sever
     try {
       outputStream.writeObject(outboundRequest);
-      outputStream.reset();
       outputStream.flush();
     } catch (IOException e) {
       if (onResponse != null) {

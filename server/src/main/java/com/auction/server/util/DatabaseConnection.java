@@ -16,7 +16,7 @@ public class DatabaseConnection {
     return Dotenv.configure().ignoreIfMissing().load();
   }
 
-  private static String getConfigValue(String key) {
+  public static String getConfigValue(String key) {
     String systemValue = System.getenv(key);
     if (systemValue != null && !systemValue.isBlank()) {
       return systemValue;

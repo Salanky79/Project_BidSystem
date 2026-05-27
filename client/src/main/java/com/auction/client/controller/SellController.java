@@ -202,7 +202,8 @@ public class SellController implements Initializable {
         .getExtensionFilters()
         .addAll(
             new FileChooser.ExtensionFilter(
-                "Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp"));
+                "Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp", "*.PNG", "*.JPG", "*.JPEG", "*.GIF", "*.BMP"),
+            new FileChooser.ExtensionFilter("All Files", "*.*"));
 
     Stage stage = (Stage) chooseImageButton.getScene().getWindow();
     selectedImageFile = fileChooser.showOpenDialog(stage);
@@ -246,15 +247,18 @@ public class SellController implements Initializable {
             .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
     byte[] imageBytes = null;
+    String imageName = null;
+
     if (selectedImageFile != null) {
       if (selectedImageFile.length() > 5 * 1024 * 1024) {
-        showError("File size must not exceed 5MB.");
+        showError("Kích thước ảnh vượt quá giới hạn cho phép (tối đa 5MB)!");
         return;
       }
       try {
         imageBytes = java.nio.file.Files.readAllBytes(selectedImageFile.toPath());
+        imageName = selectedImageFile.getName();
       } catch (java.io.IOException e) {
-        showError("Failed to read image file: " + e.getMessage());
+        showError("Không thể đọc tệp hình ảnh đã chọn!");
         return;
       }
     }
@@ -268,6 +272,7 @@ public class SellController implements Initializable {
           startTimeStr,
           endTimeStr,
           imageBytes,
+          imageName,
           response ->
               Platform.runLater(
                   () -> {

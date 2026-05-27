@@ -4,6 +4,7 @@ import com.auction.server.dao.AuctionDAO;
 import com.auction.server.dao.BidTransactionDAO;
 import com.auction.server.dao.ItemDAO;
 import com.auction.server.dao.UserDAO;
+import com.auction.server.service.CloudinaryService;
 import com.auction.server.util.DatabaseConnection;
 import com.auction.share.DTO.AuctionDetailDTO;
 import com.auction.share.DTO.AuctionSummaryDTO;
@@ -30,6 +31,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Dịch vụ xử lý nghiệp vụ cốt lõi của các phiên đấu giá (tạo, hủy, đặt giá, kiểm tra trạng thái).
@@ -41,7 +44,7 @@ public class AuctionService {
   private final UserDAO userDAO;
   private final BidBroadcastService bidBroadcastService;
   private AutoBidService autoBidService;
-  private ImageStorageService imageStorageService;
+  private CloudinaryService cloudinaryService;
 
   public AuctionService(
       AuctionDAO auctionDAO,
@@ -71,8 +74,8 @@ public class AuctionService {
     this.autoBidService = autoBidService;
   }
 
-  public void setImageStorageService(ImageStorageService imageStorageService) {
-    this.imageStorageService = imageStorageService;
+  public void setCloudinaryService(CloudinaryService cloudinaryService) {
+    this.cloudinaryService = cloudinaryService;
   }
 
   public Auction createAuction(CreateAuctionRequest req) throws SQLException, ValidationException {
@@ -96,9 +99,15 @@ public class AuctionService {
             req.getSellerId(),
             category);
 
-    if (imageStorageService != null && req.getImageBytes() != null) {
-      String imagePath = imageStorageService.saveImage(item.getId(), req.getImageBytes());
-      item.setImagePath(imagePath);
+    // Upload image to Cloudinary if provided
+    if (req.getImageBytes() != null && req.getImageBytes().length > 0) {
+      try {
+        String imageUrl = cloudinaryService.uploadImage(req.getImageBytes(), req.getImageName());
+        item.setImageUrl(imageUrl);
+      } catch (Exception e) {
+        System.err.println("Failed to upload image to Cloudinary: " + e.getMessage());
+        // Cho phép tiếp tục tạo đấu giá kể cả khi upload ảnh thất bại để tránh chặn người dùng
+      }
     }
 
     Auction auction = new Auction(item, seller, startTime, endTime);
@@ -108,17 +117,10 @@ public class AuctionService {
     return auction;
   }
 
-  public boolean cancelAuction(String auctionId, String requesterUserId) throws SQLException, ValidationException {
+  public boolean cancelAuction(String auctionId) throws SQLException, ValidationException {
     Auction auction = auctionDAO.findById(auctionId);
     if (auction == null) {
       throw new ValidationException("Auction not found.");
-    }
-    User requester = userDAO.findById(requesterUserId);
-    if (!(requester instanceof Seller)) {
-      throw new ValidationException("Only seller can cancel an auction.");
-    }
-    if (!auction.getSeller().getId().equals(requesterUserId)) {
-      throw new ValidationException("You are not allowed to cancel this auction.");
     }
     if (auction.getStatus() == AuctionStatus.FINISHED
         || auction.getStatus() == AuctionStatus.CANCELED) {
@@ -202,11 +204,6 @@ public class AuctionService {
     String highestBidderUsername =
         auction.getHighestBidder() != null ? auction.getHighestBidder().getUsername() : null;
 
-    byte[] imageBytes = null;
-    if (imageStorageService != null && auction.getItem().getImagePath() != null) {
-      imageBytes = imageStorageService.loadImage(auction.getItem().getImagePath());
-    }
-
     return new AuctionDetailDTO(
         auction.getId(),
         auction.getItem().getName(),
@@ -222,20 +219,22 @@ public class AuctionService {
         highestBidderName,
         highestBidderUsername,
         bidHistory,
-        imageBytes);
+        auction.getItem().getImageUrl());
   }
 
   public List<AuctionSummaryDTO> listAuctions(ListAuctionRequest req) throws SQLException {
     List<Auction> auctions = resolveAuctionsByFilter(req);
-    List<AuctionSummaryDTO> summaries = new ArrayList<>();
+    if (auctions.isEmpty()) return new ArrayList<>();
+
     DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-    for (Auction auction : auctions) {
-      int bidCount = 0;
-      try {
-        bidCount = bidTransactionDAO.findByAuction(auction).size();
-      } catch (Exception ignored) {}
+    // Lấy toàn bộ số lượt bid bằng 1 query GROUP BY thay vì N query riêng lẻ
+    List<String> ids = auctions.stream().map(Auction::getId).collect(Collectors.toList());
+    Map<String, Integer> bidCounts = bidTransactionDAO.countByAuctionIds(ids);
 
+    List<AuctionSummaryDTO> summaries = new ArrayList<>();
+    for (Auction auction : auctions) {
+      int bidCount = bidCounts.getOrDefault(auction.getId(), 0);
       summaries.add(
           new AuctionSummaryDTO(
               auction.getId(),
@@ -243,10 +242,11 @@ public class AuctionService {
               auction.getItem().getCategory().name(),
               auction.getCurrentHighestBid(),
               auction.getBidStep(),
-              bidCount,
               auction.getStatus().name(),
               auction.getStartTime().format(formatter),
-              auction.getEndTime().format(formatter)));
+              auction.getEndTime().format(formatter),
+              bidCount,
+              auction.getItem().getImageUrl()));
     }
     return summaries;
   }

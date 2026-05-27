@@ -12,7 +12,7 @@ import java.sql.SQLException;
 public class ItemDAO {
     
     public boolean saveItem(Item item) throws SQLException {
-        String sql = "INSERT INTO items (id, seller_id, name, category, starting_price, description, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO items (id, seller_id, name, category, starting_price, description, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
              
@@ -22,20 +22,17 @@ public class ItemDAO {
             ps.setString(4, item.getCategory().name());
             ps.setDouble(5, item.getStartingPrice());
             ps.setString(6, item.getDescription());
-            ps.setString(7, item.getImagePath());
+            ps.setString(7, item.getImageUrl());
 
             int row = ps.executeUpdate();
             return row > 0;
         }
     }
 
-    public Item findById(String id) throws SQLException {
+    public Item findById(Connection conn, String id) throws SQLException {
         String sql = "SELECT * FROM items WHERE id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-             
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, id);
-            
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return MapAuctionDB.mapItem(rs);
@@ -43,5 +40,11 @@ public class ItemDAO {
             }
         }
         return null;
+    }
+
+    public Item findById(String id) throws SQLException {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            return findById(conn, id);
+        }
     }
 }

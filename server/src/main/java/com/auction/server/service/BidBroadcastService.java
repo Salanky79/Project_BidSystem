@@ -4,11 +4,14 @@ import com.auction.server.network.AuctionSubscriptionRegistry;
 import com.auction.share.DTO.BidUpdateEvent;
 import com.auction.share.DTO.Response;
 import java.io.IOException;
+import java.util.concurrent.Executors;
 
 public class BidBroadcastService {
   public static final String BID_UPDATED = "BID_UPDATED";
 
   private final AuctionSubscriptionRegistry subscriptionRegistry;
+
+  private final java.util.concurrent.ExecutorService broadcastExecutor = Executors.newCachedThreadPool();
 
   public BidBroadcastService(AuctionSubscriptionRegistry subscriptionRegistry) {
     this.subscriptionRegistry = subscriptionRegistry;
@@ -18,15 +21,17 @@ public class BidBroadcastService {
   public void broadcastBidUpdate(BidUpdateEvent event) {
     Response<BidUpdateEvent> pushMessage = Response.success(BID_UPDATED, event);
 
-    subscriptionRegistry.getSubscribers(event.getAuctionId()).parallelStream()
-        .forEach(
-            session -> {
-              try {
-                session.send(pushMessage);
-              } catch (IOException ignored) {
-                // xoá client đó khỏi tất cả auction subscription
-                subscriptionRegistry.unsubscribeAll(session);
-              }
-            });
+    for (com.auction.server.network.ClientSession session :
+        subscriptionRegistry.getSubscribers(event.getAuctionId())) {
+      broadcastExecutor.submit(
+          () -> {
+            try {
+              session.send(pushMessage);
+            } catch (IOException ignored) {
+              // xoá client đó khỏi tất cả auction subscription
+              subscriptionRegistry.unsubscribeAll(session);
+            }
+          });
+    }
   }
 }

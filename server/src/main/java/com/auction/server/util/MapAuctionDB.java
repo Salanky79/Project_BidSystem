@@ -23,6 +23,7 @@ public final class MapAuctionDB {
     String categoryRaw = rs.getString("category");
     double startingPrice = rs.getDouble("starting_price");
     String description = rs.getString("description");
+    String imageUrl = rs.getString("image_url");
 
     Category category;
     try {
@@ -31,16 +32,9 @@ public final class MapAuctionDB {
       category = Category.ITEM;
     }
 
-    String imagePath = null;
-    try {
-      imagePath = rs.getString("image_path");
-    } catch (SQLException ignored) {
-      // Bỏ qua lỗi nếu database chưa được chạy migration cột image_path
-    }
-
     Item item = new Item(name, description, startingPrice, sellerId, category);
     item.setID(id);
-    item.setImagePath(imagePath);
+    item.setImageUrl(imageUrl);
     return item;
   }
 
