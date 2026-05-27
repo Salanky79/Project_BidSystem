@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane maxHeight="730.0" maxWidth="600.0" minHeight="730.0" minWidth="600.0" prefHeight="730.0" prefWidth="600.0" stylesheets="@../sell.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.SellController">
+<AnchorPane maxHeight="730.0" maxWidth="600.0" minHeight="730.0" minWidth="600.0" prefHeight="730.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.SellController">
    <children>
       <Label alignment="CENTER" contentDisplay="CENTER" layoutX="33.0" layoutY="40.0" prefHeight="35.0" prefWidth="535.0" text="Add Listing" textAlignment="CENTER" AnchorPane.leftAnchor="33.0" AnchorPane.rightAnchor="32.0" AnchorPane.topAnchor="20.0">
          <font>
