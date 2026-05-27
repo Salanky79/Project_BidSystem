@@ -1,5 +1,6 @@
 package com.auction.server.controller;
 
+import com.auction.server.mapper.MapUserDTO;
 import com.auction.server.service.UserService;
 import com.auction.share.DTO.GetProfileRequest;
 import com.auction.share.DTO.LoginRequest;
@@ -22,10 +23,11 @@ import java.sql.SQLException;
  */
 public class UserController {
   private final UserService userService;
+  private final MapUserDTO mapUserDTO;
 
-  // luồng xử lý: RequestHandler → UserController → UserService → DAO
-  public UserController(UserService userService) {
+  public UserController(UserService userService, MapUserDTO mapUserDTO) {
     this.userService = userService;
+    this.mapUserDTO = mapUserDTO;
   }
 
   public Response<UserDTO> login(LoginRequest request) throws Exception {
@@ -36,14 +38,14 @@ public class UserController {
 
     // gọi hàm logic nghiệp vụ từ service
     User user = userService.login(username, password);
-    return Response.success("Login success.", toUserDTO(user));
+    return Response.success("Login success.", mapUserDTO.toUserDTO(user));
   }
 
   public Response<UserDTO> register(RegisterRequest request) throws Exception {
-    User user = toUser(request);
+    User user = mapUserDTO.toUser(request);
     validateUserForRegister(user);
     userService.register(user);
-    return Response.success("Register success.", toUserDTO(user));
+    return Response.success("Register success.", mapUserDTO.toUserDTO(user));
   }
 
   public Response<UserDTO> updateProfile(UpdateProfileRequest request) throws Exception {
@@ -68,7 +70,7 @@ public class UserController {
     }
 
     User user = userService.getById(request.getUserId());
-    return Response.success("Profile updated successfully.", toUserDTO(user));
+    return Response.success("Profile updated successfully.", mapUserDTO.toUserDTO(user));
   }
 
   public Response<ProfileDTO> getProfile(GetProfileRequest request) throws Exception {
@@ -79,64 +81,7 @@ public class UserController {
     return Response.success("Profile loaded successfully.", profile);
   }
 
-  // HELPER: mapping request DTO thành entity User trong hệ thống
-  private User toUser(RegisterRequest request) {
-    Role role = Role.valueOf(request.getRole().trim().toUpperCase());
-    // switch expression khởi tạo đối tượng tương ứng theo enum Role
-    return switch (role) {
-      case BIDDER ->
-          new Bidder(
-              request.getUsername(),
-              request.getPassword(),
-              request.getFullName(),
-              request.getPhoneNumber(),
-              request.getEmail(),
-              request.getAddress());
-      case SELLER ->
-          new Seller(
-              request.getUsername(),
-              request.getPassword(),
-              request.getFullName(),
-              request.getPhoneNumber(),
-              request.getEmail(),
-              request.getAddress());
-      case ADMIN ->
-          new Admin(request.getUsername(), request.getPassword(), request.getFullName(), 1);
-    };
-  }
-
-  // HELPER: mapping entity User thành profile DTO để trả về cho client
-  private UserDTO toUserDTO(User user) throws SQLException {
-    String phoneNumber = null;
-    String email = null;
-    String address = null;
-    double balance = 0.0;
-
-    if (user instanceof Bidder bidder) {
-      phoneNumber = bidder.getPhoneNumber();
-      email = bidder.getEmail();
-      address = bidder.getAddress();
-      balance = bidder.getBalance();
-    } else if (user instanceof Seller seller) {
-      phoneNumber = seller.getPhoneNumber();
-      email = seller.getEmail();
-      address = seller.getAddress();
-      balance = seller.getBalance();
-    }
-    double availableBalance = balance;
-
-    return new UserDTO(
-        user.getId(),
-        user.getUsername(),
-        user.getFullName(),
-        user.getRole().name(),
-        phoneNumber,
-        email,
-        address,
-        balance,
-        availableBalance);
-  }
-
+  // HELPER
   private static void validateUserForRegister(User user) throws ValidationException {
     if (user == null) {
       throw new ValidationException("User is required.");

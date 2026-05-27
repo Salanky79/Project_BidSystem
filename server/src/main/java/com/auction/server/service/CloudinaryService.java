@@ -2,7 +2,6 @@ package com.auction.server.service;
 
 import com.auction.server.util.DatabaseConnection;
 import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Dịch vụ tích hợp Cloudinary hỗ trợ upload mảng byte hình ảnh lên Cloud Storage. */
-public class CloudinaryService {
+public class CloudinaryService implements ImageStorage {
   private static final Logger LOGGER = LoggerFactory.getLogger(CloudinaryService.class);
   private final Cloudinary cloudinary;
 

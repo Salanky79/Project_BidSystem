@@ -8,11 +8,13 @@ import com.auction.server.dao.UserDAO;
 import com.auction.server.mapper.MapUserDTO;
 import com.auction.server.network.AuctionServer;
 import com.auction.server.network.AuctionSubscriptionRegistry;
+import com.auction.server.service.AuctionQueryService;
 import com.auction.server.service.AuctionService;
 import com.auction.server.service.AuctionStatusScheduler;
 import com.auction.server.service.AutoBidRegistry;
 import com.auction.server.service.AutoBidService;
 import com.auction.server.service.BidBroadcastService;
+import com.auction.server.service.BidService;
 import com.auction.server.service.CloudinaryService;
 import com.auction.server.service.UserService;
 import com.auction.server.util.DatabaseConnection;
@@ -44,11 +46,15 @@ public class ServerApplication {
     AuctionSubscriptionRegistry subscriptionRegistry = new AuctionSubscriptionRegistry();
     BidBroadcastService bidBroadcastService = new BidBroadcastService(subscriptionRegistry);
 
+    AuctionService auctionService = new AuctionService(auctionDao, itemDao, userDao);
+    auctionService.setImageStorage(new CloudinaryService());
+
+    BidService bidService = new BidService(auctionDao, bidTransactionDao, userDao, bidBroadcastService);
+    AuctionQueryService auctionQueryService = new AuctionQueryService(auctionDao, bidTransactionDao);
+
     AutoBidRegistry autoBidRegistry = new AutoBidRegistry();
-    AuctionService auctionService = new AuctionService(auctionDao, itemDao, bidTransactionDao, userDao, bidBroadcastService, null);
-    AutoBidService autoBidService = new AutoBidService(autoBidRegistry, auctionService);
-    auctionService.setAutoBidService(autoBidService);
-    auctionService.setCloudinaryService(new CloudinaryService());
+    AutoBidService autoBidService = new AutoBidService(autoBidRegistry, bidService, auctionQueryService, userDao);
+    bidService.setAutoBidService(autoBidService);
 
     AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionDao, subscriptionRegistry, autoBidRegistry, 2000L);
     // chạy ngầm bộ đếm thời gian đấu giá (cập nhật trạng thái liên tục)
@@ -69,7 +75,8 @@ public class ServerApplication {
           }
         });
 
-    RequestDispatcher requestDispatcher = new RequestDispatcher(userService, auctionService, autoBidService, subscriptionRegistry);
+    RequestDispatcher requestDispatcher =
+        new RequestDispatcher(userService, auctionService, autoBidService, bidService, auctionQueryService, subscriptionRegistry);
 
     try (ServerSocket serverSocket = new ServerSocket(port)) {
       System.out.println("Server start on port: " + port);

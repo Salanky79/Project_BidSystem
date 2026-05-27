@@ -15,11 +15,19 @@ import java.util.List;
 public class AuctionController {
   private final AuctionService auctionService;
   private final AutoBidService autoBidService;
+  private final com.auction.server.service.BidService bidService;
+  private final com.auction.server.service.AuctionQueryService auctionQueryService;
 
   // khởi tạo controller với các service tương ứng
-  public AuctionController(AuctionService auctionService, AutoBidService autoBidService) {
+  public AuctionController(
+      AuctionService auctionService,
+      AutoBidService autoBidService,
+      com.auction.server.service.BidService bidService,
+      com.auction.server.service.AuctionQueryService auctionQueryService) {
     this.auctionService = auctionService;
     this.autoBidService = autoBidService;
+    this.bidService = bidService;
+    this.auctionQueryService = auctionQueryService;
   }
 
   // xử lý logic tạo phiên đấu giá và chuẩn bị DTO trả về cho client
@@ -67,7 +75,7 @@ public class AuctionController {
       throw new ValidationException("Bid amount must be greater than 0.");
     }
 
-    boolean success = auctionService.placeBid(request);
+    boolean success = bidService.autoPlaceBid(request);
     return Response.success("Bid placed successfully.", success);
   }
 
@@ -99,13 +107,13 @@ public class AuctionController {
       throws Exception {
     validateRequiredText(request.getAuctionId(), "Auction ID is required.");
 
-    AuctionDetailDTO detail = auctionService.getAuctionDetail(request.getAuctionId());
+    AuctionDetailDTO detail = auctionQueryService.getAuctionDetail(request.getAuctionId());
     return Response.success("Auction detail retrieved.", detail);
   }
 
   public Response<List<AuctionSummaryDTO>> listAuctions(ListAuctionRequest request)
       throws Exception {
-    List<AuctionSummaryDTO> list = auctionService.listAuctions(request);
+    List<AuctionSummaryDTO> list = auctionQueryService.listAuctions(request);
     return Response.success("Auctions retrieved successfully.", list);
   }
 
@@ -120,16 +128,6 @@ public class AuctionController {
     return Response.success("Bid step updated successfully.", success);
   }
 
-  public Response<Boolean> extendEndTime(ExtendEndTimeRequest request) throws Exception {
-    validateRequiredText(request.getAuctionId(), "Auction ID is required.");
-    validateRequiredText(request.getSellerId(), "Seller ID is required.");
-    if (request.getMinutes() <= 0) {
-      throw new ValidationException("Minutes must be greater than 0.");
-    }
-
-    boolean success = auctionService.extendEndTime(request);
-    return Response.success("Auction end time extended successfully.", success);
-  }
 
   // HELPER
   private static void validateRequiredText(String value, String message)

@@ -1,10 +1,13 @@
 package com.auction.server.controller;
 
+import com.auction.server.mapper.MapUserDTO;
 import com.auction.server.network.AuctionSubscriptionRegistry;
 import com.auction.server.network.ClientSession;
 import com.auction.server.service.AuctionService;
 import com.auction.server.service.AutoBidService;
 import com.auction.server.service.UserService;
+import com.auction.server.service.BidService;
+import com.auction.server.service.AuctionQueryService;
 import com.auction.share.DTO.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,10 +26,12 @@ public class RequestDispatcher {
             UserService userService,
             AuctionService auctionService,
             AutoBidService autoBidService,
+            BidService bidService,
+            AuctionQueryService auctionQueryService,
             AuctionSubscriptionRegistry subscriptionRegistry) {
         
-        UserController userController = new UserController(userService);
-        AuctionController auctionController = new AuctionController(auctionService, autoBidService);
+        UserController userController = new UserController(userService, new MapUserDTO());
+        AuctionController auctionController = new AuctionController(auctionService, autoBidService, bidService, auctionQueryService);
         this.subscriptionRegistry = subscriptionRegistry;
 
         // Đăng ký các processors
@@ -46,7 +51,6 @@ public class RequestDispatcher {
         register(Action.GET_AUCTION_DETAIL, (req, session) -> auctionController.getAuctionDetail((GetAuctionDetailRequest) req));
         register(Action.LIST_AUCTIONS, (req, session) -> auctionController.listAuctions((ListAuctionRequest) req));
         register(Action.SET_BID_STEP, (req, session) -> auctionController.setBidStep((SetBidStepRequest) req));
-        register(Action.EXTEND_END_TIME, (req, session) -> auctionController.extendEndTime((ExtendEndTimeRequest) req));
         
         register(Action.UNSUBSCRIBE_AUCTION, (req, session) -> handleUnsubscribe((UnsubscribeAuctionRequest) req, session));
     }

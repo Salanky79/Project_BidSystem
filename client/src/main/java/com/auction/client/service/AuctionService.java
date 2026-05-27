@@ -100,11 +100,6 @@ public class AuctionService {
     socketClient.send(request, onResponse);
   }
 
-  public void extendEndTime(String auctionId, long minutes, Consumer<Response<?>> onResponse) {
-    ExtendEndTimeRequest request =
-        new com.auction.share.DTO.ExtendEndTimeRequest(auctionId, minutes, null);
-    socketClient.send(request, onResponse);
-  }
 
   public void getAuctionDetail(String auctionId, Consumer<Response<?>> onResponse) {
     GetAuctionDetailRequest request =

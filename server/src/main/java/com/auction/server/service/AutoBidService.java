@@ -14,107 +14,122 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import com.auction.server.dao.UserDAO;
+import com.auction.share.models.user.User;
+import com.auction.share.models.user.Bidder;
 
 /** Dịch vụ xử lý logic đặt giá tự động (Auto-bid), tự động ra giá thay người dùng. */
 public class AutoBidService {
   private static final int MAX_STEPS_PER_TRIGGER = 50;
 
-  private final AutoBidRegistry registry;
-  private final AuctionService auctionService;
-  private final ExecutorService executor;
-  private final Set<String> processingAuctions = ConcurrentHashMap.newKeySet();
+    private final AutoBidRegistry registry;
+    private final BidService bidService;
+    private final AuctionQueryService auctionQueryService;
+    private final UserDAO userDAO;
+    private final ExecutorService executor;
+    private final Set<String> processingAuctions = ConcurrentHashMap.newKeySet();
 
-  public AutoBidService(AutoBidRegistry registry, AuctionService auctionService) {
-    this.registry = registry;
-    this.auctionService = auctionService;
-    executor = Executors.newSingleThreadExecutor();
-  }
-
-  public boolean register(RegisterAutoBidRequest request) throws SQLException, ValidationException {
-    validateConfig(request.getMaxBid(), request.getIncrement());
-
-    Auction auction = auctionService.getAuctionById(request.getAuctionId());
-    if (!auctionService.isAuctionRunning(auction)) {
-      throw new ValidationException("Auction is not running.");
-    }
-    if (request.getMaxBid() <= auction.getCurrentHighestBid()) {
-      throw new ValidationException("Auto-bid max must be higher than current highest bid.");
+    public AutoBidService(
+            AutoBidRegistry registry,
+            BidService bidService,
+            AuctionQueryService auctionQueryService,
+            UserDAO userDAO) {
+        this.registry = registry;
+        this.bidService = bidService;
+        this.auctionQueryService = auctionQueryService;
+        this.userDAO = userDAO;
+        executor = Executors.newSingleThreadExecutor();
     }
 
-    auctionService.requireBidder(request.getBidderId());
-    AutoBidConfig config =
-        new AutoBidConfig(
-            request.getBidderId(),
-            request.getAuctionId(),
-            request.getMaxBid(),
-            request.getIncrement(),
-            LocalDateTime.now());
-    registry.register(config);
-    triggerAutoBid(request.getAuctionId(), request.getBidderId());
-    return true;
-  }
+    public boolean register(RegisterAutoBidRequest request) throws SQLException, ValidationException {
+        validateConfig(request.getMaxBid(), request.getIncrement());
 
-  public boolean cancel(CancelAutoBidRequest request) {
-    return registry.cancel(request.getAuctionId(), request.getBidderId());
-  }
+        Auction auction = auctionQueryService.getAuctionById(request.getAuctionId());
+        if (!auctionQueryService.isAuctionRunning(auction)) {
+            throw new ValidationException("Auction is not running.");
+        }
+        if (request.getMaxBid() <= auction.getCurrentHighestBid()) {
+            throw new ValidationException("Auto-bid max must be higher than current highest bid.");
+        }
 
-  public void triggerAutoBid(String auctionId, String lastBidderId) {
-    if (!processingAuctions.add(auctionId)) {
-      return;
+        User bidderUser = userDAO.findById(request.getBidderId());
+        if (!(bidderUser instanceof Bidder)) {
+            throw new ValidationException("User is not a bidder.");
+        }
+        
+        AutoBidConfig config =
+                new AutoBidConfig(
+                        request.getBidderId(),
+                        request.getAuctionId(),
+                        request.getMaxBid(),
+                        request.getIncrement(),
+                        LocalDateTime.now());
+        registry.register(config);
+        triggerAutoBid(request.getAuctionId(), request.getBidderId());
+        return true;
     }
-    executor.submit(
-        () -> {
-          try {
-            processAutoBid(auctionId, lastBidderId);
-          } finally {
-            processingAuctions.remove(auctionId);
-          }
-        });
-  }
 
-  public void processAutoBid(String auctionId, String lastBidderId) {
-    String latestBidderId = lastBidderId;
-    int steps = 0;
-
-    while (steps++ < MAX_STEPS_PER_TRIGGER) {
-      Auction auction;
-      try {
-        auction = auctionService.getAuctionById(auctionId);
-      } catch (SQLException e) {
-        return;
-      }
-      if (!auctionService.isAuctionRunning(auction)) {
-        return;
-      }
-
-      List<AutoBidConfig> configs = registry.getConfigs(auctionId);
-      if (configs.isEmpty()) {
-        return;
-      }
-
-      AutoBidConfig candidate =
-          pickCandidate(configs, latestBidderId, auction.getCurrentHighestBid());
-      if (candidate == null) {
-        return;
-      }
-
-      double nextAmount = auction.getCurrentHighestBid() + candidate.getIncrement();
-      if (nextAmount > candidate.getMaxBid()) {
-        registry.cancel(candidate.getAuctionId(), candidate.getBidderId());
-        continue;
-      }
-
-      try {
-        auctionService.placeBidInternal(
-            new PlaceBidRequest(candidate.getAuctionId(), candidate.getBidderId(), nextAmount),
-            false);
-        latestBidderId = candidate.getBidderId();
-      } catch (Exception e) {
-        registry.cancel(candidate.getAuctionId(), candidate.getBidderId());
-        return;
-      }
+    public boolean cancel(CancelAutoBidRequest request) {
+        return registry.cancel(request.getAuctionId(), request.getBidderId());
     }
-  }
+
+    public void triggerAutoBid(String auctionId, String lastBidderId) {
+        if (!processingAuctions.add(auctionId)) {
+            return;
+        }
+        executor.submit(
+                () -> {
+                    try {
+                        processAutoBid(auctionId, lastBidderId);
+                    } finally {
+                        processingAuctions.remove(auctionId);
+                    }
+                });
+    }
+
+    public void processAutoBid(String auctionId, String lastBidderId) {
+        String latestBidderId = lastBidderId;
+        int steps = 0;
+
+        while (steps++ < MAX_STEPS_PER_TRIGGER) {
+            Auction auction;
+            try {
+                auction = auctionQueryService.getAuctionById(auctionId);
+            } catch (SQLException e) {
+                return;
+            }
+            if (!auctionQueryService.isAuctionRunning(auction)) {
+                return;
+            }
+
+            List<AutoBidConfig> configs = registry.getConfigs(auctionId);
+            if (configs.isEmpty()) {
+                return;
+            }
+
+            AutoBidConfig candidate =
+                    pickCandidate(configs, latestBidderId, auction.getCurrentHighestBid());
+            if (candidate == null) {
+                return;
+            }
+
+            double nextAmount = auction.getCurrentHighestBid() + candidate.getIncrement();
+            if (nextAmount > candidate.getMaxBid()) {
+                registry.cancel(candidate.getAuctionId(), candidate.getBidderId());
+                continue;
+            }
+
+            try {
+                bidService.placeBid(
+                        new PlaceBidRequest(candidate.getAuctionId(), candidate.getBidderId(), nextAmount),
+                        false);
+                latestBidderId = candidate.getBidderId();
+            } catch (Exception e) {
+                registry.cancel(candidate.getAuctionId(), candidate.getBidderId());
+                return;
+            }
+        }
+    }
 
   private static AutoBidConfig pickCandidate(
       List<AutoBidConfig> configs, String lastBidderId, double currentHighestBid) {

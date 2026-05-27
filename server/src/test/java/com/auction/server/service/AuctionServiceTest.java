@@ -37,18 +37,14 @@ class AuctionServiceTest {
     @Mock
     private ItemDAO itemDAO;
     @Mock
-    private BidTransactionDAO bidTransactionDAO;
-    @Mock
     private UserDAO userDAO;
-    @Mock
-    private BidBroadcastService bidBroadcastService;
 
     @Test
     void createAuction_startAfterEnd_throwsValidation() throws Exception {
         Seller seller = seller("seller-1");
         when(userDAO.findById("seller-1")).thenReturn(seller);
 
-        AuctionService service = new AuctionService(auctionDAO, itemDAO, bidTransactionDAO, userDAO, bidBroadcastService);
+        AuctionService service = new AuctionService(auctionDAO, itemDAO, userDAO);
         LocalDateTime start = LocalDateTime.now().plusHours(2);
         LocalDateTime end = LocalDateTime.now().plusHours(1);
         CreateAuctionRequest request = createRequest("seller-1", start, end);
@@ -61,7 +57,7 @@ class AuctionServiceTest {
         Bidder bidder = new Bidder("b", "p", "Bidder", "090", "b@mail.com", "HN");
         when(userDAO.findById("seller-1")).thenReturn(bidder);
 
-        AuctionService service = new AuctionService(auctionDAO, itemDAO, bidTransactionDAO, userDAO, bidBroadcastService);
+        AuctionService service = new AuctionService(auctionDAO, itemDAO, userDAO);
         CreateAuctionRequest request = createRequest("seller-1", LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(2));
 
         assertThrows(ValidationException.class, () -> service.createAuction(request));
@@ -74,7 +70,7 @@ class AuctionServiceTest {
         when(itemDAO.saveItem(any(Item.class))).thenReturn(true);
         when(auctionDAO.saveAuction(any(Auction.class))).thenReturn(true);
 
-        AuctionService service = new AuctionService(auctionDAO, itemDAO, bidTransactionDAO, userDAO, bidBroadcastService);
+        AuctionService service = new AuctionService(auctionDAO, itemDAO, userDAO);
         CreateAuctionRequest request = createRequest("seller-1", LocalDateTime.now().plusMinutes(1), LocalDateTime.now().plusHours(2));
 
         service.createAuction(request);
@@ -83,96 +79,7 @@ class AuctionServiceTest {
         verify(auctionDAO).saveAuction(any(Auction.class));
     }
 
-    @Test
-    void placeBid_auctionNotFound_throwsValidation() throws Exception {
-        when(auctionDAO.findById("a-1")).thenReturn(null);
-        AuctionService service = testableService();
 
-        assertThrows(ValidationException.class, () -> service.placeBid(new PlaceBidRequest("a-1", "b-1", 200)));
-    }
-
-    @Test
-    void placeBid_auctionNotRunning_throwsValidation() throws Exception {
-        Seller seller = seller("s-1");
-        Auction auction = new Auction(
-                new Item("Phone", "Desc", 100, "s-1", Category.ITEM),
-                seller,
-                LocalDateTime.now().minusHours(2),
-                LocalDateTime.now().minusHours(1)
-        );
-        when(auctionDAO.findById("a-1")).thenReturn(auction);
-        AuctionService service = testableService();
-
-        assertThrows(ValidationException.class, () -> service.placeBid(new PlaceBidRequest("a-1", "b-1", 200)));
-    }
-
-    @Test
-    void placeBid_amountTooLow_throwsValidation() throws Exception {
-        Auction auction = runningAuction(100);
-        Bidder bidder = new Bidder("b", "p", "Bidder", "090", "b@mail.com", "HN");
-        bidder.setID("b-1");
-        bidder.setBalance(1000);
-        when(auctionDAO.findById("a-1")).thenReturn(auction);
-        when(userDAO.findById("b-1")).thenReturn(bidder);
-        AuctionService service = testableService();
-
-        assertThrows(ValidationException.class, () -> service.placeBid(new PlaceBidRequest("a-1", "b-1", 100)));
-    }
-
-    @Test
-    void placeBid_userNotBidder_throwsValidation() throws Exception {
-        Auction auction = runningAuction(100);
-        Seller seller = seller("s-2");
-        when(auctionDAO.findById("a-1")).thenReturn(auction);
-        when(userDAO.findById("x-1")).thenReturn(seller);
-        AuctionService service = testableService();
-
-        assertThrows(ValidationException.class, () -> service.placeBid(new PlaceBidRequest("a-1", "x-1", 150)));
-    }
-
-    @Test
-    void placeBid_success_returnsTrue() throws Exception {
-        Auction auction = runningAuction(100);
-        Bidder bidder = new Bidder("b", "p", "Bidder", "090", "b@mail.com", "HN");
-        bidder.setID("b-1");
-        bidder.setBalance(1000);
-        when(auctionDAO.findById("a-1")).thenReturn(auction);
-        when(userDAO.findById("b-1")).thenReturn(bidder);
-        when(auctionDAO.updateHighestBidIfHigher(any(Connection.class), eq(auction.getId()), eq("b-1"), eq(150.0))).thenReturn(true);
-        when(bidTransactionDAO.saveBidTransaction(any(Connection.class), any())).thenReturn(true);
-
-        AuctionService service = testableService();
-        boolean ok = service.placeBid(new PlaceBidRequest("a-1", "b-1", 150));
-
-        assertTrue(ok);
-        verify(auctionDAO).updateHighestBidIfHigher(any(Connection.class), eq(auction.getId()), eq("b-1"), eq(150.0));
-    }
-
-    private AuctionService testableService() {
-        return new AuctionService(auctionDAO, itemDAO, bidTransactionDAO, userDAO, bidBroadcastService) {
-            @Override
-            protected Connection getConnection() {
-                return fakeConnection();
-            }
-        };
-    }
-
-    private static Connection fakeConnection() {
-        return (Connection) Proxy.newProxyInstance(
-                Connection.class.getClassLoader(),
-                new Class[]{Connection.class},
-                (proxy, method, args) -> {
-                    String name = method.getName();
-                    if ("setAutoCommit".equals(name) || "commit".equals(name) || "rollback".equals(name) || "close".equals(name)) {
-                        return null;
-                    }
-                    if ("isClosed".equals(name)) {
-                        return false;
-                    }
-                    throw new UnsupportedOperationException("Unsupported Connection method in test: " + name);
-                }
-        );
-    }
 
     private static CreateAuctionRequest createRequest(String sellerId, LocalDateTime start, LocalDateTime end) {
         return new CreateAuctionRequest(
