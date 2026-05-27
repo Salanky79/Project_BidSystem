@@ -263,6 +263,10 @@ public class SellController implements Initializable {
       }
     }
 
+    // Disable button to prevent double-click or multiple submissions
+    addButton.setDisable(true);
+    addButton.setText("Adding...");
+
     try {
       auctionService.createAuction(
           listingName,
@@ -276,6 +280,8 @@ public class SellController implements Initializable {
           response ->
               Platform.runLater(
                   () -> {
+                    addButton.setDisable(false);
+                    addButton.setText("Add");
                     if (response != null && response.isSuccess()) {
                       showSuccess();
                       clearFields();
@@ -285,6 +291,8 @@ public class SellController implements Initializable {
                     }
                   }));
     } catch (ValidationException e) {
+      addButton.setDisable(false);
+      addButton.setText("Add");
       showError(e.getMessage());
     }
   }
