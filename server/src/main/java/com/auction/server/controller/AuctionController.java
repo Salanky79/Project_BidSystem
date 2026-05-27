@@ -42,7 +42,6 @@ public class AuctionController {
             auction.getItem().getCategory().name(),
             auction.getCurrentHighestBid(),
             auction.getBidStep(),
-            0,
             auction.getStatus().name(),
             auction.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             auction.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
@@ -56,7 +55,7 @@ public class AuctionController {
       throws Exception {
     validateRequiredText(request.getAuctionId(), "Auction ID is required.");
     validateRequiredText(requesterUserId, "Authentication required.");
-    boolean success = auctionService.cancelAuction(request.getAuctionId(), requesterUserId);
+    boolean success = auctionService.cancelAuction(request.getAuctionId());
     return Response.success("Auction canceled successfully.", success);
   }
 
