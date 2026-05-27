@@ -1,7 +1,5 @@
 package com.auction.client.controller;
 
-import com.auction.client.service.DeletedAuctionsStore;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -26,7 +24,6 @@ public class SellerItemCardController {
   @FXML private Label bidsLabel;
   @FXML private Label timeLabel;
   @FXML private Label statusLabel;
-  @FXML private Button deleteButton;
 
   private String icon;
   private String category;
@@ -139,21 +136,7 @@ public class SellerItemCardController {
       cardRoot.setOnMouseClicked(event -> handleCardClick());
     }
 
-    // ── Delete button: only visible for CANCELED auctions ──
-    if (deleteButton != null) {
-      if ("CANCELED".equals(status)) {
-        deleteButton.setVisible(true);
-        deleteButton.setManaged(true);
-        deleteButton.setOnAction(
-            event -> {
-              event.consume(); // prevent click from bubbling to cardRoot
-              handleDelete();
-            });
-      } else {
-        deleteButton.setVisible(false);
-        deleteButton.setManaged(false);
-      }
-    }
+
 
     if (status.equals("Active")) {
       statusLabel.setStyle(
@@ -177,20 +160,7 @@ public class SellerItemCardController {
     }
   }
 
-  private void handleDelete() {
-    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-    alert.setTitle("Delete Auction");
-    alert.setHeaderText("Delete \"" + name + "\"?");
-    alert.setContentText("This auction will be removed from the listing. This action cannot be undone during this session.");
 
-    Optional<ButtonType> result = alert.showAndWait();
-    if (result.isPresent() && result.get() == ButtonType.OK) {
-      DeletedAuctionsStore.getInstance().delete(auctionId);
-      if (refreshCallback != null) {
-        refreshCallback.run();
-      }
-    }
-  }
 
   @FXML
   private void handleCardClick() {
