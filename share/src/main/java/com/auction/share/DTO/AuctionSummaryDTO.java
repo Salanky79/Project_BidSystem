@@ -41,31 +41,6 @@ public class AuctionSummaryDTO implements Serializable {
     this.imageUrl = imageUrl;
   }
 
-  public AuctionSummaryDTO(
-      String auctionId,
-      String itemName,
-      String category,
-      double currentPrice,
-      double bidStep,
-      String status,
-      String startTime,
-      String endTime,
-      int bidCount) {
-    this(auctionId, itemName, category, currentPrice, bidStep, status, startTime, endTime, bidCount, null);
-  }
-
-  /** Constructor tương thích ngược (bidCount = 0) để không phá vỡ các đoạn code cũ. */
-  public AuctionSummaryDTO(
-      String auctionId,
-      String itemName,
-      String category,
-      double currentPrice,
-      double bidStep,
-      String status,
-      String startTime,
-      String endTime) {
-    this(auctionId, itemName, category, currentPrice, bidStep, status, startTime, endTime, 0, null);
-  }
 
   public String getAuctionId() {
     return auctionId;
