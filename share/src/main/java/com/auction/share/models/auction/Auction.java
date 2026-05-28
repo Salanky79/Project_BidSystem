@@ -18,6 +18,7 @@ public class Auction extends Entity {
   private Bidder highestBidder;
   private double bidStep;
   private AuctionStatus status;
+  private int bidCount;
 
   /** Tạo phiên đấu giá từ cấu hình sản phẩm và thời gian. */
   public Auction(Item item, Seller seller, LocalDateTime startTime, LocalDateTime endTime) {
@@ -30,6 +31,7 @@ public class Auction extends Entity {
     this.highestBidder = null;
     this.bidStep = 1.0d;
     this.status = AuctionStatus.OPEN;
+    this.bidCount = 0;
   }
 
   public void markRunning() {
@@ -63,6 +65,11 @@ public class Auction extends Entity {
     return status;
   }
 
+  public boolean isRunning() {
+    LocalDateTime now = LocalDateTime.now();
+    return status == AuctionStatus.RUNNING && !now.isBefore(startTime) && !now.isAfter(endTime);
+  }
+
   public double getCurrentHighestBid() {
     return currentHighestBid;
   }
@@ -89,5 +96,13 @@ public class Auction extends Entity {
 
   public void setBidStep(double bidStep) {
     this.bidStep = bidStep;
+  }
+
+  public int getBidCount() {
+    return bidCount;
+  }
+
+  public void setBidCount(int bidCount) {
+    this.bidCount = bidCount;
   }
 }

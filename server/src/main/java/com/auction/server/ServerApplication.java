@@ -5,7 +5,11 @@ import com.auction.server.dao.AuctionDAO;
 import com.auction.server.dao.BidTransactionDAO;
 import com.auction.server.dao.ItemDAO;
 import com.auction.server.dao.UserDAO;
-import com.auction.server.mapper.MapUserDTO;
+import com.auction.server.dao.AuctionDAOImpl;
+import com.auction.server.dao.BidTransactionDAOImpl;
+import com.auction.server.dao.ItemDAOImpl;
+import com.auction.server.dao.UserDAOImpl;
+import com.auction.server.mapper.UserMapper;
 import com.auction.server.network.AuctionServer;
 import com.auction.server.network.AuctionSubscriptionRegistry;
 import com.auction.server.service.AuctionQueryService;
@@ -15,7 +19,7 @@ import com.auction.server.service.AutoBidRegistry;
 import com.auction.server.service.AutoBidService;
 import com.auction.server.service.BidBroadcastService;
 import com.auction.server.service.BidService;
-import com.auction.server.service.CloudinaryService;
+import com.auction.server.util.CloudinaryService;
 import com.auction.server.service.UserService;
 import com.auction.server.util.DatabaseConnection;
 import java.io.IOException;
@@ -36,11 +40,11 @@ public class ServerApplication {
 
   public static void main(String[] args) throws SQLException {
 
-    UserDAO userDao = new UserDAO();
-    MapUserDTO userMapper = new MapUserDTO();
-    ItemDAO itemDao = new ItemDAO();
-    AuctionDAO auctionDao = new AuctionDAO();
-    BidTransactionDAO bidTransactionDao = new BidTransactionDAO();
+    UserDAO userDao = new UserDAOImpl();
+    UserMapper userMapper = new UserMapper();
+    ItemDAO itemDao = new ItemDAOImpl();
+    AuctionDAO auctionDao = new AuctionDAOImpl();
+    BidTransactionDAO bidTransactionDao = new BidTransactionDAOImpl();
     UserService userService = new UserService(userDao, bidTransactionDao, auctionDao, userMapper);
 
     AuctionSubscriptionRegistry subscriptionRegistry = new AuctionSubscriptionRegistry();
@@ -54,29 +58,14 @@ public class ServerApplication {
 
     AutoBidRegistry autoBidRegistry = new AutoBidRegistry();
     AutoBidService autoBidService = new AutoBidService(autoBidRegistry, bidService, auctionQueryService, userDao);
-    bidService.setAutoBidService(autoBidService);
 
-    AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionDao, subscriptionRegistry, autoBidRegistry, 2000L);
+    AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionDao, auctionService, subscriptionRegistry, autoBidRegistry, 2000L);
     // chạy ngầm bộ đếm thời gian đấu giá (cập nhật trạng thái liên tục)
-    backgroundExecutor.submit(
-        () -> {
-          while (!Thread.currentThread().isInterrupted()) {
-            try {
-              auctionStatusScheduler.run();
-            } catch (RuntimeException e) {
-              System.err.println("Auction status scheduler failed, restarting: " + e.getMessage());
-              try {
-                Thread.sleep(1000);
-              } catch (InterruptedException interruptedException) {
-                Thread.currentThread().interrupt();
-                break;
-              }
-            }
-          }
-        });
+    backgroundExecutor.submit(auctionStatusScheduler);
 
+    com.auction.server.service.BidCoordinator bidCoordinator = new com.auction.server.service.BidCoordinator(bidService, autoBidService);
     RequestDispatcher requestDispatcher =
-        new RequestDispatcher(userService, auctionService, autoBidService, bidService, auctionQueryService, subscriptionRegistry);
+        new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry);
 
     try (ServerSocket serverSocket = new ServerSocket(port)) {
       System.out.println("Server start on port: " + port);

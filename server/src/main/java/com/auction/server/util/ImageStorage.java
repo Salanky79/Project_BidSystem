@@ -1,4 +1,4 @@
-package com.auction.server.service;
+package com.auction.server.util;
 
 import java.io.IOException;
 

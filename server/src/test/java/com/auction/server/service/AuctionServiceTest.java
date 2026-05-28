@@ -16,8 +16,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.lang.reflect.Proxy;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+import com.auction.server.util.DatabaseConnection;
+import static org.mockito.Mockito.mock;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,10 +41,23 @@ class AuctionServiceTest {
     @Mock
     private UserDAO userDAO;
 
+    private Connection mockConn;
+
+    @BeforeEach
+    void setUp() {
+        mockConn = mock(Connection.class);
+        DatabaseConnection.setTestConnection(mockConn);
+    }
+
+    @AfterEach
+    void tearDown() {
+        DatabaseConnection.setTestConnection(null);
+    }
+
     @Test
     void createAuction_startAfterEnd_throwsValidation() throws Exception {
         Seller seller = seller("seller-1");
-        when(userDAO.findById("seller-1")).thenReturn(seller);
+        when(userDAO.findById(any(Connection.class), eq("seller-1"))).thenReturn(seller);
 
         AuctionService service = new AuctionService(auctionDAO, itemDAO, userDAO);
         LocalDateTime start = LocalDateTime.now().plusHours(2);
@@ -55,7 +70,7 @@ class AuctionServiceTest {
     @Test
     void createAuction_userNotSeller_throwsValidation() throws Exception {
         Bidder bidder = new Bidder("b", "p", "Bidder", "090", "b@mail.com", "HN");
-        when(userDAO.findById("seller-1")).thenReturn(bidder);
+        when(userDAO.findById(any(Connection.class), eq("seller-1"))).thenReturn(bidder);
 
         AuctionService service = new AuctionService(auctionDAO, itemDAO, userDAO);
         CreateAuctionRequest request = createRequest("seller-1", LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(2));
@@ -66,17 +81,17 @@ class AuctionServiceTest {
     @Test
     void createAuction_success_savesItemAndAuction() throws Exception {
         Seller seller = seller("seller-1");
-        when(userDAO.findById("seller-1")).thenReturn(seller);
-        when(itemDAO.saveItem(any(Item.class))).thenReturn(true);
-        when(auctionDAO.saveAuction(any(Auction.class))).thenReturn(true);
+        when(userDAO.findById(any(Connection.class), eq("seller-1"))).thenReturn(seller);
+        when(itemDAO.saveItem(any(Connection.class), any(Item.class))).thenReturn(true);
+        when(auctionDAO.saveAuction(any(Connection.class), any(Auction.class))).thenReturn(true);
 
         AuctionService service = new AuctionService(auctionDAO, itemDAO, userDAO);
         CreateAuctionRequest request = createRequest("seller-1", LocalDateTime.now().plusMinutes(1), LocalDateTime.now().plusHours(2));
 
         service.createAuction(request);
 
-        verify(itemDAO).saveItem(any(Item.class));
-        verify(auctionDAO).saveAuction(any(Auction.class));
+        verify(itemDAO).saveItem(any(Connection.class), any(Item.class));
+        verify(auctionDAO).saveAuction(any(Connection.class), any(Auction.class));
     }
 
 

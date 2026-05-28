@@ -1,12 +1,12 @@
 package com.auction.server.controller;
 
-import com.auction.server.mapper.MapUserDTO;
+import com.auction.server.mapper.UserMapper;
 import com.auction.server.network.AuctionSubscriptionRegistry;
 import com.auction.server.network.ClientSession;
-import com.auction.server.service.AuctionService;
+import com.auction.server.service.IAuctionService;
 import com.auction.server.service.AutoBidService;
-import com.auction.server.service.UserService;
-import com.auction.server.service.BidService;
+import com.auction.server.service.IUserService;
+import com.auction.server.service.BidCoordinator;
 import com.auction.server.service.AuctionQueryService;
 import com.auction.share.DTO.*;
 import org.slf4j.Logger;
@@ -23,19 +23,25 @@ public class RequestDispatcher {
     private final AuctionSubscriptionRegistry subscriptionRegistry;
 
     public RequestDispatcher(
-            UserService userService,
-            AuctionService auctionService,
+            IUserService userService,
+            IAuctionService auctionService,
             AutoBidService autoBidService,
-            BidService bidService,
+            BidCoordinator bidCoordinator,
             AuctionQueryService auctionQueryService,
             AuctionSubscriptionRegistry subscriptionRegistry) {
         
-        UserController userController = new UserController(userService, new MapUserDTO());
-        AuctionController auctionController = new AuctionController(auctionService, autoBidService, bidService, auctionQueryService);
+        UserController userController = new UserController(userService, new UserMapper());
+        AuctionController auctionController = new AuctionController(auctionService, autoBidService, bidCoordinator, auctionQueryService);
         this.subscriptionRegistry = subscriptionRegistry;
 
         // Đăng ký các processors
-        register(Action.LOGIN, (req, session) -> userController.login((LoginRequest) req));
+        register(Action.LOGIN, (req, session) -> {
+            Response<UserDTO> res = userController.login((LoginRequest) req);
+            if (res.isSuccess() && res.getData() != null) {
+                res.setAuthenticatedUserId(res.getData().getId());
+            }
+            return res;
+        });
         register(Action.REGISTER, (req, session) -> userController.register((RegisterRequest) req));
         register(Action.UPDATE_PROFILE, (req, session) -> userController.updateProfile((UpdateProfileRequest) req));
         register(Action.GET_PROFILE, (req, session) -> userController.getProfile((GetProfileRequest) req));

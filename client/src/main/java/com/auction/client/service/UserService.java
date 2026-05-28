@@ -98,7 +98,7 @@ public class UserService {
   }
 
   public void updateProfile(
-      String fullName, String phoneNumber, String email, Consumer<Response<?>> onResponse)
+      String fullName, String phoneNumber, String email, String password, Consumer<Response<?>> onResponse)
       throws ValidationException {
     if (fullName == null || fullName.trim().isEmpty()) {
       throw new ValidationException("Ho ten khong duoc de trong!");
@@ -117,7 +117,7 @@ public class UserService {
 
     socketClient.send(
         new UpdateProfileRequest(
-            null, fullName.trim(), null, normalizedPhone, normalizedEmail, null),
+            null, fullName.trim(), password, normalizedPhone, normalizedEmail, null),
         onResponse);
   }
 

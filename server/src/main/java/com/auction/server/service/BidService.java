@@ -11,18 +11,19 @@ import com.auction.share.models.auction.Auction;
 import com.auction.share.models.auction.BidTransaction;
 import com.auction.share.models.user.Bidder;
 import com.auction.share.models.user.User;
+import java.util.Set;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class BidService {
+public class BidService implements IBidService {
     private final AuctionDAO auctionDAO;
     private final BidTransactionDAO bidTransactionDAO;
     private final UserDAO userDAO;
     private final BidBroadcastService bidBroadcastService;
-    private AutoBidService autoBidService;
+
 
     public BidService(
             AuctionDAO auctionDAO,
@@ -35,82 +36,88 @@ public class BidService {
         this.bidBroadcastService = bidBroadcastService;
     }
 
-    public void setAutoBidService(AutoBidService autoBidService) {
-        this.autoBidService = autoBidService;
-    }
 
-    public boolean autoPlaceBid(PlaceBidRequest req) throws SQLException, ValidationException {
-        return placeBid(req, true);
-    }
 
     public boolean placeBid(PlaceBidRequest req, boolean triggerAutoBid) throws SQLException, ValidationException {
-        Auction auction = auctionDAO.findById(req.getAuctionId());
-        if (!isAuctionRunning(auction)) {
-            throw new ValidationException(
-                    auction == null ? "Auction not found." : "Auction is not running.");
-        }
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            Auction auction = auctionDAO.findById(conn, req.getAuctionId());
+            if (auction == null || !auction.isRunning()) {
+                throw new ValidationException(
+                        auction == null ? "Auction not found." : "Auction is not running.");
+            }
 
-        Bidder bidder = requireBidder(req.getBidderId());
-        if (req.getAmount() <= auction.getCurrentHighestBid()) {
-            throw new ValidationException("Bid amount must be higher than current highest bid.");
-        }
-        if (req.getAmount() < auction.getCurrentHighestBid() + auction.getBidStep()) {
-            throw new ValidationException("Bid amount must be at least current price + bid step.");
-        }
+            Bidder bidder = requireBidder(conn, req.getBidderId());
+            if (req.getAmount() <= auction.getCurrentHighestBid()) {
+                throw new ValidationException("Bid amount must be higher than current highest bid.");
+            }
+            if (req.getAmount() < auction.getCurrentHighestBid() + auction.getBidStep()) {
+                throw new ValidationException("Bid amount must be at least current price + bid step.");
+            }
 
-        placeBidAndBroadcast(auction, bidder, req.getAmount());
-        if (triggerAutoBid && autoBidService != null) {
-            autoBidService.triggerAutoBid(req.getAuctionId(), bidder.getId());
+            placeBidAndBroadcast(conn, auction, bidder, req.getAmount());
+            return true;
         }
-        return true;
     }
 
-    private void placeBidAndBroadcast(Auction auction, Bidder bidder, double amount) throws SQLException, ValidationException {
+    private void placeBidAndBroadcast(Connection conn, Auction auction, Bidder bidder, double amount) throws SQLException, ValidationException {
         BidTransaction transaction = new BidTransaction(auction, bidder, amount);
 
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            conn.setAutoCommit(false);
-            try {
-                boolean updated = auctionDAO.updateHighestBidIfHigher(conn, auction.getId(), bidder.getId(), amount);
+        conn.setAutoCommit(false);
+        try {
+                // 1. Lock user balance row to prevent double-spending
+                double currentBalance = userDAO.findBalanceForUpdate(conn, bidder.getId());
+                
+                // 2. Check if user has enough balance considering reserved amounts in other running auctions
+                double reservedInOtherRunningAuctions = auctionDAO.sumAuctionCurrentPrices(conn, bidder.getId(), Set.of(auction.getId()));
+                double requiredForThisBid = amount;
+                if (auction.getHighestBidder() != null && bidder.getId().equals(auction.getHighestBidder().getId())) {
+                    requiredForThisBid = amount - auction.getCurrentHighestBid();
+                }
+                
+                if (currentBalance - reservedInOtherRunningAuctions < requiredForThisBid) {
+                    throw new ValidationException("Insufficient balance.");
+                }
+
+                // 3. Atomic check & update auction
+                boolean updated = auctionDAO.updateHighestBid(conn, auction.getId(), bidder.getId(), amount);
                 if (!updated) {
-                    conn.rollback();
                     throw new ValidationException(
-                            "Bid rejected: auction is not running, already ended, insufficient balance, or current price changed.");
+                            "Bid rejected: auction is not running, already ended, or current price changed.");
                 }
 
                 bidTransactionDAO.saveBidTransaction(conn, transaction);
+                
+                // 4. Re-fetch auction within the same transaction to get the exact bid_count and end_time
+                Auction updatedAuction = auctionDAO.findById(conn, auction.getId());
+
                 conn.commit();
+                
+                // 5. Broadcast the new event
                 bidBroadcastService.broadcastBidUpdate(
                         new BidUpdateEvent(
                                 BidBroadcastService.BID_UPDATED,
-                                auction.getId(),
+                                updatedAuction.getId(),
                                 bidder.getId(),
                                 bidder.getFullName(),
                                 amount,
                                 amount,
-                                transaction.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
-            } catch (SQLException | ValidationException e) {
-                conn.rollback();
-                throw e;
-            } finally {
-                conn.setAutoCommit(true);
-            }
+                                transaction.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                                updatedAuction.getBidCount()));
+        } catch (SQLException | ValidationException e) {
+            conn.rollback();
+            throw e;
+        } finally {
+            conn.setAutoCommit(true);
         }
     }
 
-    private Bidder requireBidder(String bidderId) throws SQLException, ValidationException {
-        User bidderUser = userDAO.findById(bidderId);
+    private Bidder requireBidder(Connection conn, String bidderId) throws SQLException, ValidationException {
+        User bidderUser = userDAO.findById(conn, bidderId);
         if (!(bidderUser instanceof Bidder bidder)) {
             throw new ValidationException("User is not a bidder.");
         }
         return bidder;
     }
 
-    private boolean isAuctionRunning(Auction auction) {
-        if (auction == null) {
-            return false;
-        }
-        LocalDateTime now = LocalDateTime.now();
-        return !(now.isAfter(auction.getEndTime()) || now.isBefore(auction.getStartTime()));
-    }
+
 }

@@ -1,11 +1,12 @@
 package com.auction.server.controller;
 
-import com.auction.server.service.AuctionService;
+import com.auction.server.service.IAuctionService;
 import com.auction.server.service.AutoBidService;
 import com.auction.share.DTO.*;
+import com.auction.server.mapper.AuctionMapper;
 import com.auction.share.exceptions.ValidationException;
 import com.auction.share.models.auction.Auction;
-import java.time.format.DateTimeFormatter;
+
 import java.util.List;
 
 /**
@@ -13,20 +14,20 @@ import java.util.List;
  * giá).
  */
 public class AuctionController {
-  private final AuctionService auctionService;
+  private final IAuctionService auctionService;
   private final AutoBidService autoBidService;
-  private final com.auction.server.service.BidService bidService;
+  private final com.auction.server.service.BidCoordinator bidCoordinator;
   private final com.auction.server.service.AuctionQueryService auctionQueryService;
 
   // khởi tạo controller với các service tương ứng
   public AuctionController(
-      AuctionService auctionService,
+      IAuctionService auctionService,
       AutoBidService autoBidService,
-      com.auction.server.service.BidService bidService,
+      com.auction.server.service.BidCoordinator bidCoordinator,
       com.auction.server.service.AuctionQueryService auctionQueryService) {
     this.auctionService = auctionService;
     this.autoBidService = autoBidService;
-    this.bidService = bidService;
+    this.bidCoordinator = bidCoordinator;
     this.auctionQueryService = auctionQueryService;
   }
 
@@ -43,18 +44,7 @@ public class AuctionController {
 
     Auction auction = auctionService.createAuction(request);
 
-    AuctionSummaryDTO summaryDTO =
-        new AuctionSummaryDTO(
-            auction.getId(),
-            auction.getItem().getName(),
-            auction.getItem().getCategory().name(),
-            auction.getCurrentHighestBid(),
-            auction.getBidStep(),
-            auction.getStatus().name(),
-            auction.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-            auction.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-            0,
-            auction.getItem().getImageUrl());
+    AuctionSummaryDTO summaryDTO = AuctionMapper.toSummaryDTO(auction);
 
     return Response.success("Auction created successfully.", summaryDTO);
   }
@@ -63,8 +53,8 @@ public class AuctionController {
       throws Exception {
     validateRequiredText(request.getAuctionId(), "Auction ID is required.");
     validateRequiredText(requesterUserId, "Authentication required.");
-    boolean success = auctionService.cancelAuction(request.getAuctionId());
-    return Response.success("Auction canceled successfully.", success);
+    auctionService.cancelAuction(request.getAuctionId(), requesterUserId);
+    return Response.success("Auction canceled successfully.", true);
   }
 
   public Response<Boolean> placeBid(PlaceBidRequest request) throws Exception {
@@ -75,7 +65,7 @@ public class AuctionController {
       throw new ValidationException("Bid amount must be greater than 0.");
     }
 
-    boolean success = bidService.autoPlaceBid(request);
+    boolean success = bidCoordinator.placeBidAndTriggerAuto(request);
     return Response.success("Bid placed successfully.", success);
   }
 

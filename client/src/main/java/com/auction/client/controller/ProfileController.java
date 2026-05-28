@@ -19,6 +19,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 public class ProfileController implements Initializable {
@@ -29,6 +30,7 @@ public class ProfileController implements Initializable {
   @FXML private TextField usernameField;
   @FXML private TextField emailField;
   @FXML private TextField phoneField;
+  @FXML private PasswordField passwordField;
   @FXML private Button editButton;
 
   @FXML private TableView<ProfileBidTransactionDTO> table;
@@ -81,12 +83,14 @@ public class ProfileController implements Initializable {
     usernameField.setText(user.getUsername());
     emailField.setText(user.getEmail());
     phoneField.setText(user.getPhoneNumber());
+    passwordField.setText("");
   }
 
   private void setFieldsEditable(boolean canEdit) {
     nameField.setEditable(canEdit);
     emailField.setEditable(canEdit);
     phoneField.setEditable(canEdit);
+    passwordField.setEditable(canEdit);
     usernameField.setEditable(false);
 
     String style =
@@ -96,6 +100,7 @@ public class ProfileController implements Initializable {
     nameField.setStyle(style);
     emailField.setStyle(style);
     phoneField.setStyle(style);
+    passwordField.setStyle(style);
     usernameField.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: transparent;");
   }
 
@@ -105,6 +110,7 @@ public class ProfileController implements Initializable {
           nameField.getText(),
           phoneField.getText(),
           emailField.getText(),
+          passwordField.getText(),
           response ->
               Platform.runLater(
                   () -> {

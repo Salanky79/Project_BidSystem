@@ -1,11 +1,9 @@
 package com.auction.server.network;
 
 import com.auction.server.controller.RequestDispatcher;
-import com.auction.share.DTO.Action;
 import com.auction.share.DTO.GetAuctionDetailRequest;
 import com.auction.share.DTO.Request;
 import com.auction.share.DTO.Response;
-import com.auction.share.DTO.UserDTO;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -82,11 +80,9 @@ public class AuctionServer implements Runnable {
         Response<?> response = requestDispatcher.handle(authedRequest, session);
 
         // lưu userId vào session ngay sau khi đăng nhập thành công
-        if (Action.LOGIN.equals(request.getAction())
-            && response.isSuccess()
-            && response.getData() instanceof UserDTO userDTO) {
-          session.setUserId(userDTO.getId());
-          LOGGER.info("Session authenticated for userId={}", userDTO.getId());
+        if (response.getAuthenticatedUserId() != null) {
+          session.setUserId(response.getAuthenticatedUserId());
+          LOGGER.info("Session authenticated for userId={}", response.getAuthenticatedUserId());
         }
 
         long elapsedMs = System.currentTimeMillis() - startTime;

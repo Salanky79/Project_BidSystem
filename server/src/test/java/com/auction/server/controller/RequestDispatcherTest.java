@@ -2,10 +2,10 @@ package com.auction.server.controller;
 
 import com.auction.server.network.AuctionSubscriptionRegistry;
 import com.auction.server.network.ClientSession;
-import com.auction.server.service.AuctionService;
+import com.auction.server.service.IAuctionService;
 import com.auction.server.service.AutoBidService;
-import com.auction.server.service.UserService;
-import com.auction.server.service.BidService;
+import com.auction.server.service.IUserService;
+import com.auction.server.service.BidCoordinator;
 import com.auction.server.service.AuctionQueryService;
 import com.auction.share.DTO.Action;
 import com.auction.share.DTO.LoginRequest;
@@ -32,16 +32,16 @@ import static org.mockito.Mockito.when;
 class RequestDispatcherTest {
 
     @Mock
-    private UserService userService;
+    private IUserService userService;
 
     @Mock
-    private AuctionService auctionService;
+    private IAuctionService auctionService;
 
     @Mock
     private AutoBidService autoBidService;
 
     @Mock
-    private BidService bidService;
+    private BidCoordinator bidCoordinator;
 
     @Mock
     private AuctionQueryService auctionQueryService;
@@ -51,7 +51,7 @@ class RequestDispatcherTest {
 
     @Test
     void handle_nullAction_returnsFailResponse() {
-        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidService, auctionQueryService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry);
 
         Response<?> response = handler.handle(new RawRequest(null), null);
 
@@ -61,7 +61,7 @@ class RequestDispatcherTest {
 
     @Test
     void handle_requestIdPropagated() throws Exception {
-        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidService, auctionQueryService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry);
         Bidder bidder = new Bidder("alice", "pwd", "Alice", "090", "alice@mail.com", "HCM");
         bidder.setID("u-1");
         when(userService.login("alice", "pwd")).thenReturn(bidder);
@@ -76,7 +76,7 @@ class RequestDispatcherTest {
 
     @Test
     void handle_classCastException_returnsFailResponse() {
-        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidService, auctionQueryService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry);
 
         Response<?> response = handler.handle(new RawRequest(Action.LOGIN), null);
 
@@ -86,7 +86,7 @@ class RequestDispatcherTest {
 
     @Test
     void handle_login_routesToUserController() throws Exception {
-        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidService, auctionQueryService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry);
         Bidder bidder = new Bidder("alice", "pwd", "Alice", "090", "alice@mail.com", "HCM");
         bidder.setID("u-1");
         when(userService.login("alice", "pwd")).thenReturn(bidder);
@@ -99,7 +99,7 @@ class RequestDispatcherTest {
 
     @Test
     void handle_unsubscribe_nullAuctionId_unsubscribeAll() throws Exception {
-        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidService, auctionQueryService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry);
         ClientSession session = new ClientSession(new ObjectOutputStream(new ByteArrayOutputStream()));
 
         Response<?> response = handler.handle(new UnsubscribeAuctionRequest(null), session);

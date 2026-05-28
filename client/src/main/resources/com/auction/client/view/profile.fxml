@@ -22,6 +22,7 @@
          <rowConstraints>
             <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
             <VBox spacing="5.0">
@@ -39,6 +40,10 @@
             <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <Label text="Phone Number" textFill="#888888" />
                <TextField fx:id="phoneField" editable="false" prefHeight="45.0" style="-fx-background-radius: 8; -fx-border-color: #ddd; -fx-border-radius: 8;" />
+            </VBox>
+            <VBox spacing="5.0" GridPane.rowIndex="2">
+               <Label text="New Password" textFill="#888888" />
+               <PasswordField fx:id="passwordField" editable="false" prefHeight="45.0" style="-fx-background-radius: 8; -fx-border-color: #ddd; -fx-border-radius: 8;" />
             </VBox>
          </children>
       </GridPane>

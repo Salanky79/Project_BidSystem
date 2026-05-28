@@ -2,6 +2,8 @@ package com.auction.server.service;
 
 import com.auction.server.dao.AuctionDAO;
 import com.auction.server.network.AuctionSubscriptionRegistry;
+import com.auction.server.util.DatabaseConnection;
+import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.sql.SQLException;
 import java.util.List;
@@ -16,6 +18,7 @@ import org.slf4j.LoggerFactory;
 public class AuctionStatusScheduler implements Runnable {
   private static final Logger LOGGER = LoggerFactory.getLogger(AuctionStatusScheduler.class);
   private final AuctionDAO auctionDAO;
+  private final AuctionService auctionService;
   private final AuctionSubscriptionRegistry subscriptionRegistry;
   private final AutoBidRegistry autoBidRegistry;
   private final long intervalMillis;
@@ -23,10 +26,12 @@ public class AuctionStatusScheduler implements Runnable {
 
   public AuctionStatusScheduler(
       AuctionDAO auctionDAO,
+      AuctionService auctionService,
       AuctionSubscriptionRegistry subscriptionRegistry,
       AutoBidRegistry autoBidRegistry,
       long intervalMillis) {
     this.auctionDAO = auctionDAO;
+    this.auctionService = auctionService;
     this.subscriptionRegistry = subscriptionRegistry;
     this.autoBidRegistry = autoBidRegistry;
     this.intervalMillis = intervalMillis;
@@ -40,19 +45,20 @@ public class AuctionStatusScheduler implements Runnable {
   public void run() {
     while (running.get() && !Thread.currentThread().isInterrupted()) {
       try {
-        // mỗi chu kỳ (interval) kiểm tra trạng thái các phiên đấu giá
-        auctionDAO.markOpenAuctionsAsRunning();
+        try (Connection conn = DatabaseConnection.getConnection()) {
+          auctionDAO.markOpenAuctionsAsRunning(conn);
 
-        LocalDateTime now = LocalDateTime.now();
-        List<String> endedAuctionIds = auctionDAO.findEndedRunningAuctionIds(now);
-        int finishedRows = auctionDAO.markRunningAuctionsAsFinished();
-        if (finishedRows > 0 && !endedAuctionIds.isEmpty()) {
-          for (String auctionId : endedAuctionIds) {
-            if (subscriptionRegistry != null) {
-              subscriptionRegistry.clearAuction(auctionId);
-            }
-            if (autoBidRegistry != null) {
-              autoBidRegistry.clearAuction(auctionId);
+          LocalDateTime now = LocalDateTime.now();
+          List<String> endedAuctionIds = auctionDAO.findEndedRunningAuctionIds(conn, now);
+          int finishedRows = auctionService.finishAuctions();
+          if (finishedRows > 0 && !endedAuctionIds.isEmpty()) {
+            for (String auctionId : endedAuctionIds) {
+              if (subscriptionRegistry != null) {
+                subscriptionRegistry.clearAuction(auctionId);
+              }
+              if (autoBidRegistry != null) {
+                autoBidRegistry.clearAuction(auctionId);
+              }
             }
           }
         }

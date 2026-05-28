@@ -6,6 +6,8 @@ import com.auction.share.DTO.PlaceBidRequest;
 import com.auction.share.DTO.RegisterAutoBidRequest;
 import com.auction.share.exceptions.ValidationException;
 import com.auction.share.models.auction.Auction;
+import com.auction.server.util.DatabaseConnection;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -45,16 +47,18 @@ public class AutoBidService {
         validateConfig(request.getMaxBid(), request.getIncrement());
 
         Auction auction = auctionQueryService.getAuctionById(request.getAuctionId());
-        if (!auctionQueryService.isAuctionRunning(auction)) {
-            throw new ValidationException("Auction is not running.");
+        if (auction == null || !auction.isRunning()) {
+            throw new ValidationException(auction == null ? "Auction not found." : "Auction is not running.");
         }
         if (request.getMaxBid() <= auction.getCurrentHighestBid()) {
             throw new ValidationException("Auto-bid max must be higher than current highest bid.");
         }
 
-        User bidderUser = userDAO.findById(request.getBidderId());
-        if (!(bidderUser instanceof Bidder)) {
-            throw new ValidationException("User is not a bidder.");
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            User bidderUser = userDAO.findById(conn, request.getBidderId());
+            if (!(bidderUser instanceof Bidder)) {
+                throw new ValidationException("User is not a bidder.");
+            }
         }
         
         AutoBidConfig config =
@@ -98,7 +102,7 @@ public class AutoBidService {
             } catch (SQLException e) {
                 return;
             }
-            if (!auctionQueryService.isAuctionRunning(auction)) {
+            if (auction == null || !auction.isRunning()) {
                 return;
             }
 

@@ -64,10 +64,10 @@ class AutoBidServiceTest {
     @Test
     void triggerAutoBid_skipLastBidder() throws Exception {
         AutoBidService service = new AutoBidService(registry, bidService, auctionQueryService, userDAO);
-        Auction auction = runningAuction(100);
+        Auction auction = org.mockito.Mockito.spy(runningAuction(100));
 
         when(auctionQueryService.getAuctionById("a-1")).thenReturn(auction);
-        when(auctionQueryService.isAuctionRunning(auction)).thenReturn(true, false);
+        when(auction.isRunning()).thenReturn(true, false);
         when(registry.getConfigs("a-1")).thenReturn(List.of(
                 new AutoBidConfig("b-1", "a-1", 500, 50, LocalDateTime.now()),
                 new AutoBidConfig("b-2", "a-1", 450, 50, LocalDateTime.now().plusSeconds(1))
@@ -92,10 +92,10 @@ class AutoBidServiceTest {
     @Test
     void triggerAutoBid_cancelWhenExceedMaxBid() throws Exception {
         AutoBidService service = new AutoBidService(registry, bidService, auctionQueryService, userDAO);
-        Auction auction = runningAuction(100);
+        Auction auction = org.mockito.Mockito.spy(runningAuction(100));
 
         when(auctionQueryService.getAuctionById("a-1")).thenReturn(auction);
-        when(auctionQueryService.isAuctionRunning(auction)).thenReturn(true, true, false);
+        when(auction.isRunning()).thenReturn(true, true, false);
         when(registry.getConfigs("a-1")).thenReturn(
                 List.of(new AutoBidConfig("b-2", "a-1", 120, 30, LocalDateTime.now())),
                 List.of()
@@ -110,10 +110,10 @@ class AutoBidServiceTest {
     @Test
     void triggerAutoBid_stopWhenAuctionClosed() throws Exception {
         AutoBidService service = new AutoBidService(registry, bidService, auctionQueryService, userDAO);
-        Auction auction = runningAuction(100);
+        Auction auction = org.mockito.Mockito.spy(runningAuction(100));
 
         when(auctionQueryService.getAuctionById("a-1")).thenReturn(auction);
-        when(auctionQueryService.isAuctionRunning(auction)).thenReturn(false);
+        when(auction.isRunning()).thenReturn(false);
 
         service.processAutoBid("a-1", "b-1");
 

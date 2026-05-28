@@ -1,6 +1,5 @@
-package com.auction.server.service;
+package com.auction.server.util;
 
-import com.auction.server.util.DatabaseConnection;
 import com.cloudinary.Cloudinary;
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,14 +13,14 @@ public class CloudinaryService implements ImageStorage {
   private final Cloudinary cloudinary;
 
   public CloudinaryService() {
-    String cloudinaryUrl = DatabaseConnection.getConfigValue("CLOUDINARY_URL");
+    String cloudinaryUrl = AppConfig.get("CLOUDINARY_URL");
     if (cloudinaryUrl != null && !cloudinaryUrl.isBlank()) {
       LOGGER.info("Initializing Cloudinary using CLOUDINARY_URL environment variable.");
       this.cloudinary = new Cloudinary(cloudinaryUrl);
     } else {
-      String cloudName = DatabaseConnection.getConfigValue("CLOUDINARY_CLOUD_NAME");
-      String apiKey = DatabaseConnection.getConfigValue("CLOUDINARY_API_KEY");
-      String apiSecret = DatabaseConnection.getConfigValue("CLOUDINARY_API_SECRET");
+      String cloudName = AppConfig.get("CLOUDINARY_CLOUD_NAME");
+      String apiKey = AppConfig.get("CLOUDINARY_API_KEY");
+      String apiSecret = AppConfig.get("CLOUDINARY_API_SECRET");
 
       if (cloudName == null || cloudName.isBlank() ||
           apiKey == null || apiKey.isBlank() ||

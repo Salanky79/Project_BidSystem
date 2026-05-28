@@ -99,6 +99,7 @@ public class AuctionDetailController {
     private final XYChart.Series<String, Number> chartSeries = new XYChart.Series<>();
     private String startTimeISO; // real start time from server (ISO format)
     private Consumer<Response<?>> bidPushListener;
+    private int lastProcessedBidCount = -1;
 
     private static final DateTimeFormatter DISPLAY_FMT =
             DateTimeFormatter.ofPattern("dd/MM/yy HH:mm");
@@ -463,6 +464,7 @@ public class AuctionDetailController {
                 this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
                 this.sellerNameLabel.setText(detail.getSellerName());
                 this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description provided.");
+                this.lastProcessedBidCount = detail.getBidCount();
 
                 // Load ảnh sản phẩm từ Cloudinary nếu có
                 if (detail.getImageUrl() != null && !detail.getImageUrl().isBlank()) {
@@ -506,6 +508,11 @@ public class AuctionDetailController {
 
     private void applyBidUpdate(BidUpdateEvent event) {
         if (event == null) return;
+        
+        if (event.getBidCount() <= lastProcessedBidCount) {
+            return; // Ignore outdated bid update
+        }
+        lastProcessedBidCount = event.getBidCount();
 
         this.currentPrice = event.getCurrentHighestBid();
         this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));

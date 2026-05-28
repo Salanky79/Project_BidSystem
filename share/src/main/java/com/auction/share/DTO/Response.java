@@ -13,10 +13,20 @@ public class Response<T> implements Serializable {
   private final String message;
   private final T data;
 
+  private String authenticatedUserId;
+
   public Response(boolean success, String message, T data) {
     this.success = success;
     this.message = message;
     this.data = data;
+  }
+
+  public String getAuthenticatedUserId() {
+      return authenticatedUserId;
+  }
+
+  public void setAuthenticatedUserId(String authenticatedUserId) {
+      this.authenticatedUserId = authenticatedUserId;
   }
 
   public boolean isSuccess() {

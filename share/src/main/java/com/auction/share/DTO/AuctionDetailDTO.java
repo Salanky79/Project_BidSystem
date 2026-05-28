@@ -21,6 +21,7 @@ public class AuctionDetailDTO implements Serializable {
   private final String highestBidderName;
   private final String highestBidderUsername;
   private final List<BidDTO> bidHistory;
+  private final int bidCount;
   private final String imageUrl;
 
   public AuctionDetailDTO(
@@ -38,6 +39,7 @@ public class AuctionDetailDTO implements Serializable {
       String highestBidderName,
       String highestBidderUsername,
       List<BidDTO> bidHistory,
+      int bidCount,
       String imageUrl) {
     this.auctionId = auctionId;
     this.itemName = itemName;
@@ -53,41 +55,10 @@ public class AuctionDetailDTO implements Serializable {
     this.highestBidderName = highestBidderName;
     this.highestBidderUsername = highestBidderUsername;
     this.bidHistory = bidHistory;
+    this.bidCount = bidCount;
     this.imageUrl = imageUrl;
   }
 
-  public AuctionDetailDTO(
-      String auctionId,
-      String itemName,
-      String description,
-      String category,
-      String sellerName,
-      double startingPrice,
-      double currentPrice,
-      double bidStep,
-      String status,
-      String startTime,
-      String endTime,
-      String highestBidderName,
-      String highestBidderUsername,
-      List<BidDTO> bidHistory) {
-    this(
-        auctionId,
-        itemName,
-        description,
-        category,
-        sellerName,
-        startingPrice,
-        currentPrice,
-        bidStep,
-        status,
-        startTime,
-        endTime,
-        highestBidderName,
-        highestBidderUsername,
-        bidHistory,
-        null);
-  }
 
   public String getAuctionId() {
     return auctionId;
@@ -143,6 +114,10 @@ public class AuctionDetailDTO implements Serializable {
 
   public List<BidDTO> getBidHistory() {
     return bidHistory;
+  }
+
+  public int getBidCount() {
+    return bidCount;
   }
 
   public String getImageUrl() {
