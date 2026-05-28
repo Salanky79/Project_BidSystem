@@ -32,6 +32,7 @@ public class BidTransactionDAO {
         }
     }
 
+    // tìm lịch suer giao dịch của 1 phiên đấu giá ( theo ID, TimeStamps )
     public List<BidTransaction> findByAuction(Auction auction) throws SQLException {
         List<BidTransaction> list = new ArrayList<>();
         String sql = "SELECT * FROM bid_transactions WHERE auction_id = ? ORDER BY timestamp DESC";
@@ -60,6 +61,7 @@ public class BidTransactionDAO {
         return list;
     }
 
+    // xem lịch sử tất cả giao dịch của ai đó ( join : bid_transactions + auctions + items )
     public List<ProfileBidTransactionDTO> findProfileTransactionsByBidderId(String bidderId) throws SQLException {
         List<ProfileBidTransactionDTO> list = new ArrayList<>();
         String sql = """
@@ -97,6 +99,7 @@ public class BidTransactionDAO {
      * @param auctionIds danh sách ID auction cần đếm
      * @return Map: auctionId → số lượt đặt giá
      */
+    // HashMap ( auction - countBid )
     public java.util.Map<String, Integer> countByAuctionIds(java.util.List<String> auctionIds) throws SQLException {
         java.util.Map<String, Integer> result = new java.util.HashMap<>();
         if (auctionIds == null || auctionIds.isEmpty()) {

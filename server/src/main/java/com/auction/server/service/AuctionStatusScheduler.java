@@ -42,7 +42,6 @@ public class AuctionStatusScheduler implements Runnable {
       try {
         // mỗi chu kỳ (interval) kiểm tra trạng thái các phiên đấu giá
         auctionDAO.markOpenAuctionsAsRunning();
-
         LocalDateTime now = LocalDateTime.now();
         List<String> endedAuctionIds = auctionDAO.findEndedRunningAuctionIds(now);
         int finishedRows = auctionDAO.markRunningAuctionsAsFinished();

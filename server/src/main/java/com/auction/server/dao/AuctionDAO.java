@@ -209,7 +209,7 @@ public class AuctionDAO {
         return list;
     }
 
-
+    // tính tổng số tiền mà client phải trả ( các phiên đang là người đứng đầu )
     public double sumRunningWinningBidsByBidder(Connection conn, String bidderId, Set<String> excludedAuctionIds) throws SQLException {
         StringBuilder sql = new StringBuilder("""
                 SELECT COALESCE(SUM(current_price), 0) AS total_amount
@@ -218,6 +218,7 @@ public class AuctionDAO {
                   AND highest_bidder_id = ?
                 """);
 
+        // ngoại trừ phiên đấu giá đang xét
         if (excludedAuctionIds != null && !excludedAuctionIds.isEmpty()) {
             sql.append(" AND id NOT IN (");
             sql.append("?,".repeat(excludedAuctionIds.size()));
@@ -240,6 +241,7 @@ public class AuctionDAO {
         }
     }
 
+    // check ví cá nhân
     public double sumRunningWinningBidsByBidder(String bidderId, Set<String> excludedAuctionIds) throws SQLException {
         try (Connection conn = DatabaseConnection.getConnection()) {
             return sumRunningWinningBidsByBidder(conn, bidderId, excludedAuctionIds);
@@ -276,6 +278,7 @@ public class AuctionDAO {
             return false;
         }
 
+        // ng đặt bid ko đc là người dẫn đầu hiện tại
         String sql = """
                 UPDATE auctions a
                 SET a.current_price = ?,

@@ -25,7 +25,6 @@ import java.util.concurrent.Executors;
 /** Lớp khởi chạy hệ thống Server, cấu hình các service, thread pool và socket lắng nghe. */
 public class ServerApplication {
   // thread pool tự tạo thêm luồng khi cần và tái sử dụng luồng nhàn rỗi cho Client
-
   private static final ExecutorService clientExecutor = Executors.newCachedThreadPool();
   // thread nền duy nhất dành cho việc chạy vòng lặp Scheduler
   private static final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
@@ -72,7 +71,7 @@ public class ServerApplication {
     try (ServerSocket serverSocket = new ServerSocket(port)) {
       System.out.println("Server start on port: " + port);
       while (!serverSocket.isClosed()) {
-        Socket clientSocket = serverSocket.accept();
+        Socket clientSocket = serverSocket.accept(); // đợi client kết nối
         clientExecutor.submit(
             new AuctionServer(clientSocket, requestHandler, subscriptionRegistry));
       } // giao việc xử lý client socket cho một thread độc lập trong pool

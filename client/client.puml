@@ -1,0 +1,533 @@
+@startuml
+skinparam classAttributeIconSize 0
+class com.auction.client.service.UserService {
+- SocketClient socketClient
++ void login(LoginRequest,Consumer<Response<?>>)
++ void signup(RegisterRequest,Consumer<Response<?>>)
++ void getProfile(Consumer<Response<?>>)
++ void updateProfile(String,String,String,Consumer<Response<?>>)
+}
+
+
+class com.auction.client.controller.Launcher {
++ {static} void main(String[])
+}
+
+class com.auction.client.controller.ProfileController {
+- UserService userService
+- Label nameLabel
+- TextField nameField
+- TextField usernameField
+- TextField emailField
+- TextField phoneField
+- Button editButton
+- TableView<ProfileBidTransactionDTO> table
+- TableColumn<ProfileBidTransactionDTO,String> colItem
+- TableColumn<ProfileBidTransactionDTO,String> colStatus
+- TableColumn<ProfileBidTransactionDTO,Double> colBid
+- TableColumn<ProfileBidTransactionDTO,String> colTime
+- boolean isEditing
++ void initialize(URL,ResourceBundle)
+- void setupTableColumns()
+- void loadProfileData()
+- void bindProfileResponse(Response<?>)
+- void bindUser(UserDTO)
+- void setFieldsEditable(boolean)
+- void saveProfileChanges()
+- void finishEditing()
+- void handleEditAction()
+}
+
+
+class com.auction.client.controller.SignupController {
+- UserService userService
+- TextField fullnameField
+- TextField usernameField
+- TextField emailField
+- TextField phoneField
+- TextField addressField
+- PasswordField passwordField
+- PasswordField confirmPasswordField
+- Label fullnameError
+- Label usernameError
+- Label emailError
+- Label phoneError
+- Label addressError
+- Label passwordError
+- Label confirmError
+- Label statusLabel
+- VBox sellerCard
+- VBox bidderCard
+- ComboBox<String> roleCombo
+- String defaultStyle
+- String selectedStyle
+- void resetErrors()
+- {static} String safeTrim(TextField)
+- void show(Label,boolean)
+- void highlight(Control,boolean)
+- void showValidationError(ValidationException)
+- void openDashboard(String,String)
+- void handleSignup()
++ void handleLogin(ActionEvent)
++ void selectSeller()
++ void selectBidder()
+}
+
+
+class com.auction.client.controller.HomeController {
+- AuctionService auctionService
+- GridPane auctionGrid
+- Button btnAll
+- Button btnAntique
+- Button btnArt
+- Button btnElectronic
+- Button btnJewelry
+- Button btnRealEstate
+- Button btnVehicle
+- List<AuctionSummaryDTO> allAuctions
+- String currentStatusFilter
+- String currentCategoryFilter
+- Map<String,HBox> cardCache
+- {static} String STYLE_ACTIVE
+- {static} String STYLE_INACTIVE
++ void initialize()
++ void loadAuction(String)
+- void handleFilterAll()
+- void handleFilterAntique()
+- void handleFilterArt()
+- void handleFilterElectronic()
+- void handleFilterJewelry()
+- void handleFilterRealEstate()
+- void handleFilterVehicle()
+- void applyCategory(String)
+- void renderGrid()
+- boolean matchesStatusFilter(String,String,String)
+- boolean matchesCategoryFilter(String,String)
+- void updateFilterButtons(String)
+- String iconForCategory(String)
+}
+
+
+class com.auction.client.controller.SellController {
+- AuctionService auctionService
+- TextField name
+- ComboBox<String> category
+- TextField startingprice
+- DatePicker startdate
+- ComboBox<String> startHour
+- ComboBox<String> startMinute
+- DatePicker enddate
+- ComboBox<String> endHour
+- ComboBox<String> endMinute
+- TextField description
+- Button chooseImageButton
+- Label imageLabel
+- Button addButton
+- Label validationLabel
+- ImageView closeButton
+- File selectedImageFile
+- {static} ObservableList<String> CATEGORIES
++ void initialize(URL,ResourceBundle)
+- void updateDatePickerText(DatePicker)
+- boolean validateInputs()
+- void showError(String)
+- void showSuccess()
+- void clearFields()
+- void handleChooseImage()
+- void handleAddListing()
+- void submitAuction()
+- void handleClose()
+}
+
+
+class com.auction.client.factory.SellerUIFactory {
++ DashboardProduct createDashboard()
+}
+
+class com.auction.client.controller.HelloApplication {
++ void start(Stage)
+}
+
+class com.auction.client.factory.DashboardNavigator {
++ {static} void openDashboard(Stage,String)
+- {static} DashboardProduct createDashboard(String)
+}
+
+interface com.auction.client.factory.RoleUIFactory {
+~ DashboardProduct createDashboard()
+}
+
+class com.auction.client.controller.LoginController {
+- UserService userService
+- TextField usernameField
+- PasswordField passwordField
+- Label errorLabel
+- TextField passwordVisible
+- Button eyeToggleBtn
+- boolean isPasswordVisible
++ void initialize()
++ void togglePassword()
+- {static} String extractErrorMessage(Response<?>)
+# void loadDashboard(ActionEvent,String)
+- void handleLogin(ActionEvent)
++ void handleSignup(ActionEvent)
+}
+
+
+class com.auction.client.controller.FrameController {
+# ScrollPane scrollContent
++ void setView(Node)
+# void changeView(String)
+# void onViewChanged(Node)
+# void showLogin(ActionEvent)
+}
+
+
+class com.auction.client.controller.SellerListController {
+- Label titleLabel
+- Label countBadge
+- VBox emptyState
+- HBox loadingBox
+- VBox cardList
+- Label emptyIcon
+- Label emptyMessage
+- AuctionService auctionService
++ void loadItems(String)
+- boolean matchesMode(String,AuctionSummaryDTO)
+- void appendCard(AuctionSummaryDTO,Runnable)
+- void showLoading(boolean)
+- void showEmpty(String,boolean)
+- String labelFor(String)
+- String emptyIconFor(String)
+- String emptyMsgFor(String)
+- String iconForCategory(String)
+}
+
+
+class com.auction.client.factory.BidderDashboard {
++ Scene getScene()
++ String getTitle()
+}
+
+class com.auction.client.factory.BidderUIFactory {
++ DashboardProduct createDashboard()
+}
+
+class com.auction.client.controller.SellerDashboardFrameController {
+- Label usernameLabel
+- ScrollPane scrollContent
+- Button btnHome
+- Button btnActive
+- Button btnSold
+- Button btnProfile
+- {static} String STYLE_SIDEBAR_ACTIVE
+- {static} String STYLE_SIDEBAR_INACTIVE
+- {static} String STYLE_SIDEBAR_INACTIVE_INDENT
+- {static} String STYLE_SIDEBAR_ACTIVE_INDENT
++ void initialize()
++ void handleLogout(ActionEvent)
++ void handleHome()
++ void handleActive()
++ void handleSold()
++ void handleProfile()
++ void handleSell()
+- void loadSellerList(String)
+- void loadView(String)
+- void highlightButton(String)
+}
+
+
+class com.auction.client.controller.SellerAuctionDetailController {
+- Button closeButton
+- Label productTitleLabel
+- LineChart<String,Number> priceHistoryChart
+- Label currentHighBidLabel
+- Label totalBidsLabel
+- Label startTimeLabel
+- Label endTimeLabel
+- Label endsInLabel
+- Label winnerIdLabel
+- Button cancelAuctionButton
+- TextField bidStepField
+- Button saveBidStepButton
+- String auctionId
+- double currentPrice
+- double startingPrice
+- LocalDateTime endTime
+- Timeline countdownTimeline
+- {static} int MAX_CHART_POINTS
+- XYChart.Series<String,Number> chartSeries
+- String startTimeISO
+- java.util.List<com.auction.share.DTO.BidDTO> bidHistory
+- {static} DateTimeFormatter DISPLAY_FMT
+- {static} DateTimeFormatter ISO_FMT
+- {static} DateTimeFormatter ALT_DB_FMT
++ void initialize()
+- void handleSetBidStep()
++ void setData(String,String,String,double,int,String,String,String)
+- void loadChartData()
+- void startCountdown()
+- void updateCountdown()
+- {static} LocalDateTime parseDateTime(String)
+- {static} String formatDateTimeForDisplay(String)
++ {static} void open(String,String,String,double,int,String,String,String)
+}
+
+
+class com.auction.client.controller.SellerItemCardController {
+- HBox cardRoot
+- StackPane itemcard
+- Label iconLabel
+- Label categoryLabel
+- Label nameLabel
+- Label priceLabel
+- Label bidsLabel
+- Label timeLabel
+- Label statusLabel
+- String icon
+- String category
+- String name
+- String status
+- double price
+- int bids
+- String time
+- String auctionId
+- {static} DateTimeFormatter DISPLAY_FMT
+- {static} DateTimeFormatter ISO_FMT
+- {static} DateTimeFormatter ALT_DB_FMT
+- Runnable refreshCallback
++ void setRefreshCallback(Runnable)
++ void setData(String,String,String,double,int,String,String,String)
++ void setData(String,String,String,double,int,String,String,String,String)
+- void handleCardClick()
+- {static} LocalDateTime parseDateTime(String)
+- {static} String formatDateTimeForDisplay(String)
+}
+
+
+class com.auction.client.service.AutoBidConfig {
+- double maxBid
+- double increment
+- boolean active
++ double getMaxBid()
++ double getIncrement()
++ boolean isActive()
+}
+
+
+class com.auction.client.service.BidService {
+- SocketClient socketClient
++ void placeBid(String,String,double,Consumer<Response<?>>)
++ void registerAutoBid(String,String,String,double,Consumer<Response<?>>)
++ void setAutoBid(String,String,String,double,Consumer<Response<?>>)
++ void cancelAutoBid(String,Consumer<Response<?>>)
+}
+
+
+class com.auction.client.service.AuctionService {
+- SocketClient socketClient
+- {static} DateTimeFormatter FORMATTER
++ void createAuction(String,String,String,String,String,String,Consumer<Response<?>>)
++ void createAuction(String,String,String,String,String,String,byte[],String,Consumer<Response<?>>)
++ void getAuctions(Consumer<Response<?>>)
++ void getSellerAuctions(String,Consumer<Response<?>>)
++ void cancelAuction(String,Consumer<Response<?>>)
++ void setBidStep(String,double,Consumer<Response<?>>)
++ void extendEndTime(String,long,Consumer<Response<?>>)
++ void getAuctionDetail(String,Consumer<Response<?>>)
+}
+
+
+class com.auction.client.controller.ItemCardController {
+- HBox cardRoot
+- StackPane itemcard
+- Label iconLabel
+- Label categoryLabel
+- Label nameLabel
+- Label priceLabel
+- Label bidsLabel
+- Label timeLabel
+- Label statusLabel
+- String icon
+- String category
+- String name
+- String status
+- double price
+- double bidStep
+- int bids
+- String time
+- String auctionId
+- {static} DateTimeFormatter DISPLAY_FMT
+- {static} DateTimeFormatter ISO_FMT
+- {static} DateTimeFormatter ALT_DB_FMT
+- {static} DateTimeFormatter LEGACY_DISPLAY_FMT
++ void setData(String,String,String,double,double,int,String,String,String)
++ void setData(String,String,String,double,double,int,String,String,String,String)
+- void handleCardClick()
+- {static} LocalDateTime parseDateTime(String)
+- {static} String formatDateTimeForDisplay(String)
+}
+
+
+class com.auction.client.network.SocketClient {
+- String host
+- int port
+- ExecutorService executorService
+- Map<String,Consumer<Response<?>>> callbacks
+- List<Consumer<Response<?>>> pushListeners
+- Socket socket
+- ObjectOutputStream outputStream
+- ObjectInputStream inputStream
+- boolean listening
++ void addPushListener(Consumer<Response<?>>)
++ void removePushListener(Consumer<Response<?>>)
++ void send(Request,Consumer<Response<?>>)
+- void ensureConnected()
+- void startListening()
+- void closeConnection()
+- void failCallbacks(String)
+}
+
+
+class com.auction.client.controller.AuctionDetailController {
+- BidService bidService
+- Label productTitleLabel
+- Button closeButton
+- LineChart<String,Number> priceHistoryChart
+- Label sellerNameLabel
+- Label ratingLabel
+- Label descriptionLabel
+- VBox winnerCard
+- Region winnerSpacer
+- Label winnerNameLabel
+- Label currentPriceLabel
+- Label totalBidsLabel
+- Label startTimeLabel
+- Label endTimeLabel
+- Label endsInLabel
+- Label productIconLabel
+- TextField bidInputField
+- Button placeBidButton
+- Label minBidLabel
+- TextField autoBidMaxInputField
+- TextField autoBidIncrementInputField
+- Button enableAutoBidButton
+- Button cancelAutoBidButton
+- Label autoBidStatusLabel
+- double currentPrice
+- double bidStep
+- int totalBids
+- String auctionId
+- String icon
+- LocalDateTime endTime
+- Timeline countdownTimeline
+- boolean autoBidEnabled
+- List<BidDTO> bidHistory
+- double startingPrice
+- {static} int MAX_CHART_POINTS
+- {static} DateTimeFormatter CHART_FMT
+- XYChart.Series<String,Number> chartSeries
+- String startTimeISO
+- Consumer<Response<?>> bidPushListener
+- {static} DateTimeFormatter DISPLAY_FMT
+- {static} DateTimeFormatter LEGACY_DISPLAY_FMT
+- {static} DateTimeFormatter ISO_FMT
+- {static} DateTimeFormatter ALT_DB_FMT
+- {static} LocalDateTime parseDateTime(String)
+- {static} String formatDateTimeForDisplay(String)
++ void initialize()
++ void setData(String,String,String,double,double,int,String,String,String)
++ {static} void open(String,String,String,double,double,int,String,String,String)
+- void handlePlaceBid()
+- void handleEnableAutoBid()
+- void handleCancelAutoBid()
+- void loadChartData()
+- void appendChartPoint(double)
+- void startCountdown()
+- void updateCountdown()
+- void showBidError(String)
+- void showAutoBidError(String)
+- void resetAutoBidState()
+- void registerBidPushRefresh()
+- void refreshAuctionDetail()
+- void applyBidUpdate(BidUpdateEvent)
+- void updateAutoBidControls()
+- void showWinnerInfo(com.auction.share.DTO.AuctionDetailDTO)
+}
+
+
+class com.auction.client.controller.SellerDashboardController {
+- Button btnFilterAll
+- Button btnFilterActive
+- Button btnFilterEnded
+- Button btnDateMonth
+- Button btnDate7Days
+- GridPane auctionGrid
+- {static} String STYLE_ACTIVE
+- {static} String STYLE_INACTIVE
++ void initialize()
++ void handleFilterAll()
++ void handleFilterActive()
++ void handleFilterEnded()
++ void handleDateMonth()
++ void handleDate7Days()
+- void loadAuctionCards(String)
+- boolean matchesFilter(String,String)
+- String iconForCategory(String)
+- void setStatusFilter(String)
+- void setDateFilter(String)
+}
+
+
+class com.auction.client.factory.SellerDashboardProduct {
++ Scene getScene()
++ String getTitle()
+}
+
+class com.auction.client.controller.HomeFrameController {
+# HomeController currentHomeController
+- javafx.scene.control.Label budgetLabel
+- Consumer<Response<?>> bidPushListener
++ void initialize()
++ void loadHomePage(String)
+# void onViewChanged(Node)
++ void handleLogout(ActionEvent)
++ void handleProfile()
++ void handleActiveListings()
++ void handleHome()
+- void refreshCurrentBudget()
+}
+
+
+class com.auction.client.ClientContext {
+- {static} String SERVER_HOST
+- {static} int SERVER_PORT
+- {static} SocketClient SOCKET_CLIENT
+- {static} UserService USER_SERVICE
+- {static} AuctionService AUCTION_SERVICE
+- {static} BidService BID_SERVICE
++ {static} UserService userService()
++ {static} AuctionService auctionService()
++ {static} BidService bidService()
++ {static} SocketClient socketClient()
+}
+
+
+interface com.auction.client.factory.DashboardProduct {
+~ Scene getScene()
+~ String getTitle()
+}
+
+
+
+javafx.fxml.Initializable <|.. com.auction.client.controller.ProfileController
+com.auction.client.controller.HomeFrameController <|-- com.auction.client.controller.HomeController
+javafx.fxml.Initializable <|.. com.auction.client.controller.SellController
+com.auction.client.factory.RoleUIFactory <|.. com.auction.client.factory.SellerUIFactory
+javafx.application.Application <|-- com.auction.client.controller.HelloApplication
+com.auction.client.factory.DashboardProduct <|.. com.auction.client.factory.BidderDashboard
+com.auction.client.factory.RoleUIFactory <|.. com.auction.client.factory.BidderUIFactory
+com.auction.client.controller.FrameController <|-- com.auction.client.controller.SellerDashboardFrameController
+com.auction.client.factory.DashboardProduct <|.. com.auction.client.factory.SellerDashboardProduct
+com.auction.client.controller.FrameController <|-- com.auction.client.controller.HomeFrameController
+@enduml

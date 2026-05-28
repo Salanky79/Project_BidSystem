@@ -67,6 +67,7 @@ public class UserController {
       userService.updatePhoneNumber(request.getUserId(), request.getPhoneNumber());
     }
 
+    // tìm user theo ID trong DB
     User user = userService.getById(request.getUserId());
     return Response.success("Profile updated successfully.", toUserDTO(user));
   }

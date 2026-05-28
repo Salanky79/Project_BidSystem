@@ -13,8 +13,8 @@ import java.util.List;
  * giá).
  */
 public class AuctionController {
-  private final AuctionService auctionService;
-  private final AutoBidService autoBidService;
+  private final AuctionService auctionService; // logic đặt bid
+  private final AutoBidService autoBidService; // logic autobid
 
   // khởi tạo controller với các service tương ứng
   public AuctionController(AuctionService auctionService, AutoBidService autoBidService) {
@@ -48,7 +48,7 @@ public class AuctionController {
             0,
             auction.getItem().getImageUrl());
 
-    return Response.success("Auction created successfully.", summaryDTO);
+    return Response.success("Auction created successfully.", summaryDTO); // trả về router Obj transfer
   }
 
   public Response<Boolean> cancelAuction(CancelAuctionRequest request, String requesterUserId)
@@ -132,6 +132,7 @@ public class AuctionController {
   }
 
   // HELPER
+  // static thuộc về class để ko cần tạo obj mới
   private static void validateRequiredText(String value, String message)
       throws ValidationException {
     if (value == null || value.isBlank()) {

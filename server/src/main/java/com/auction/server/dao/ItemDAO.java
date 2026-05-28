@@ -22,7 +22,7 @@ public class ItemDAO {
             ps.setString(4, item.getCategory().name());
             ps.setDouble(5, item.getStartingPrice());
             ps.setString(6, item.getDescription());
-            ps.setString(7, item.getImageUrl());
+            ps.setString(7, item.getImageUrl()); // cột image_URL
 
             int row = ps.executeUpdate();
             return row > 0;

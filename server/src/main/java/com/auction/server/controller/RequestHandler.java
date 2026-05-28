@@ -42,7 +42,7 @@ public class RequestHandler {
       // switch expression phân tích hành động và chuyển tiếp yêu cầu
       response =
           switch (request.getAction()) {
-            case Action.LOGIN -> userController.login((LoginRequest) request);
+            case Action.LOGIN -> userController.login((LoginRequest) request); // ép kiểu để lấy đúng dữ liệu
             case Action.REGISTER -> userController.register((RegisterRequest) request);
             case Action.UPDATE_PROFILE ->
                 userController.updateProfile((UpdateProfileRequest) request);
@@ -92,6 +92,7 @@ public class RequestHandler {
 
     String auctionId = request == null ? null : request.getAuctionId();
     if (auctionId == null || auctionId.isBlank()) {
+        // tắt app hoặc đăng xuất
       subscriptionRegistry.unsubscribeAll(session);
       return Response.success("Unsubscribed from all auctions.", true);
     }
@@ -100,6 +101,7 @@ public class RequestHandler {
     return Response.success("Unsubscribed from auction: " + auctionId, true);
   }
 
+  // gọi ở trên handle
   private RegisterAutoBidRequest toRegisterAutoBidRequest(SetAutoBidRequest request) {
     return new RegisterAutoBidRequest(
         request.getAuctionId(), request.getMaxBid(), request.getIncrement(), request.getBidderId());

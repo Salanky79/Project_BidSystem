@@ -112,7 +112,7 @@ public class AuctionService {
 
     Auction auction = new Auction(item, seller, startTime, endTime);
 
-    itemDAO.saveItem(item);
+    itemDAO.saveItem(item); // lưu vào DB
     auctionDAO.saveAuction(auction);
     return auction;
   }
@@ -199,12 +199,16 @@ public class AuctionService {
               tx.getBidder().getFullName(), tx.getAmount(), tx.getTimestamp().format(formatter)));
     }
 
+    // tách ra để tránh lỗi null
+    // Seller
     String highestBidderName =
         auction.getHighestBidder() != null ? auction.getHighestBidder().getFullName() : null;
+    // HighestBidder
     String highestBidderUsername =
         auction.getHighestBidder() != null ? auction.getHighestBidder().getUsername() : null;
 
     return new AuctionDetailDTO(
+            // item
         auction.getId(),
         auction.getItem().getName(),
         auction.getItem().getDescription(),
@@ -216,19 +220,22 @@ public class AuctionService {
         auction.getStatus().name(),
         auction.getStartTime().format(formatter),
         auction.getEndTime().format(formatter),
+
         highestBidderName,
         highestBidderUsername,
         bidHistory,
         auction.getItem().getImageUrl());
   }
 
+  // lấy danh sách auction
   public List<AuctionSummaryDTO> listAuctions(ListAuctionRequest req) throws SQLException {
+    // lấy từ DB
     List<Auction> auctions = resolveAuctionsByFilter(req);
     if (auctions.isEmpty()) return new ArrayList<>();
 
     DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-    // Lấy toàn bộ số lượt bid bằng 1 query GROUP BY thay vì N query riêng lẻ
+    // Lấy toàn bộ số lượt auctionID bằng 1 query GROUP BY thay vì N query riêng lẻ
     List<String> ids = auctions.stream().map(Auction::getId).collect(Collectors.toList());
     Map<String, Integer> bidCounts = bidTransactionDAO.countByAuctionIds(ids);
 
@@ -324,8 +331,12 @@ public class AuctionService {
     }
   }
 
+
+  // filter lấy những auction nào từ DB
   private List<Auction> resolveAuctionsByFilter(ListAuctionRequest req) throws SQLException {
+    // CASE 1: lấy toàn bộ auction (trừ cái đã bị hủy)
     if (req == null) {
+
       return auctionDAO.findAll().stream()
           .filter(a -> a.getStatus() != AuctionStatus.CANCELED)
           .collect(java.util.stream.Collectors.toList());
@@ -338,6 +349,7 @@ public class AuctionService {
 
     AuctionStatus status = null;
     if (hasStatus) {
+      // convert STATUS
       try {
         status = AuctionStatus.valueOf(statusStr.trim().toUpperCase());
       } catch (IllegalArgumentException e) {

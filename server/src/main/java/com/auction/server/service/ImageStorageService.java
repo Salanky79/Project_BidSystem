@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// lưu ảnh vào thư mục uploads/items
 public class ImageStorageService {
   private static final Logger LOGGER = LoggerFactory.getLogger(ImageStorageService.class);
   private final String uploadDir;
@@ -22,6 +23,7 @@ public class ImageStorageService {
   }
 
   private void createUploadDirectory() {
+    // nếu chưa có file thì tạo mới
     try {
       Path path = Paths.get(uploadDir);
       if (!Files.exists(path)) {

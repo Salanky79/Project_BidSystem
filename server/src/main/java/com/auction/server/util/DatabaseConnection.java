@@ -46,9 +46,9 @@ public class DatabaseConnection {
     config.setPassword(dbPass);
 
     config.setMaximumPoolSize(10); // giới hạn tối đa 10 kết nối cùng lúc đến DB
-    config.addDataSourceProperty("cachePrepStmts", "true");
-    config.addDataSourceProperty("prepStmtCacheSize", "250");
-    config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+    config.addDataSourceProperty("cachePrepStmts", "true"); // cache == lưu bộ nhớ đệm
+    config.addDataSourceProperty("prepStmtCacheSize", "250"); // số lượng câu lệnh đc mở
+    config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048"); // giới hạn độ dài câu lệnh
 
     ds = new HikariDataSource(config);
   }

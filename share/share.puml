@@ -1,0 +1,571 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class com.auction.share.models.user.Admin {
+- int accessLevel
++ int getAccessLevel()
+}
+
+
+class com.auction.share.DTO.UpdateProfileRequest {
+- {static} long serialVersionUID
+- String userId
+- String fullName
+- String password
+- String phoneNumber
+- String email
+- String address
++ String getUserId()
++ String getFullName()
++ String getPhoneNumber()
++ String getEmail()
++ String getAddress()
++ String getPassword()
++ Request withUserId(String)
+}
+
+
+class com.auction.share.DTO.ProfileDTO {
+- {static} long serialVersionUID
+- UserDTO user
+- List<ProfileBidTransactionDTO> bidTransactions
++ UserDTO getUser()
++ List<ProfileBidTransactionDTO> getBidTransactions()
+}
+
+
+class com.auction.share.exceptions.InsufficientFundsException {
+}
+class com.auction.share.exceptions.InvalidBidException {
+}
+class com.auction.share.DTO.SetBidStepRequest {
+- {static} long serialVersionUID
+- String auctionId
+- double bidStep
+- String sellerId
++ String getAuctionId()
++ double getBidStep()
++ String getSellerId()
++ Request withUserId(String)
+}
+
+
+abstract class com.auction.share.models.core.Entity {
+- String id
+- LocalDateTime createdAt
++ String getId()
++ void setID(String)
++ LocalDateTime getCreatedAt()
++ void setCreatedAt(LocalDateTime)
+}
+
+
+class com.auction.share.exceptions.AuthenticationException {
+}
+class com.auction.share.models.auction.BidTransaction {
+- Auction auction
+- Bidder bidder
+- double amount
+- LocalDateTime timestamp
++ Auction getAuction()
++ Bidder getBidder()
++ double getAmount()
++ void setTimestamp(LocalDateTime)
++ LocalDateTime getTimestamp()
+}
+
+
+class com.auction.share.models.item.Item {
+- String name
+- String description
+- double startingPrice
+- String sellerId
+- Category category
+- String imageUrl
++ String getName()
++ String getDescription()
++ double getStartingPrice()
++ String getSellerId()
++ Category getCategory()
++ String getImageUrl()
++ void setImageUrl(String)
+}
+
+
+enum com.auction.share.enums.Role {
++  BIDDER
++  SELLER
++  ADMIN
+}
+
+class com.auction.share.DTO.Response {
+- String resquestId
+- boolean success
+- String message
+- T data
++ boolean isSuccess()
++ void setRequestId(String)
++ String getRequestId()
++ String getMessage()
++ T getData()
++ {static} Response<T> success(String,T)
++ {static} Response<T> fail(String)
+}
+
+
+abstract class com.auction.share.DTO.Request {
+- String requestId
+- String action
++ void setRequestId(String)
++ String getAction()
++ Request withUserId(String)
++ String getRequestId()
+}
+
+
+class com.auction.share.models.user.Seller {
+- String phoneNumber
+- String email
+- String address
+- double balance
+- List<String> auctionIdList
++ Auction createAuction(Item,LocalDateTime,LocalDateTime)
++ void cancelAuction(Auction)
++ void addBalance(double)
++ void setBalance(double)
++ double getBalance()
++ String getPhoneNumber()
++ String getEmail()
++ String getAddress()
++ void setAddress(String)
+}
+
+
+class com.auction.share.DTO.GetAuctionDetailRequest {
+- {static} long serialVersionUID
+- String auctionId
++ String getAuctionId()
+}
+
+
+class com.auction.share.DTO.UnsubscribeAuctionRequest {
+- {static} long serialVersionUID
+- String auctionId
++ String getAuctionId()
+}
+
+
+enum com.auction.share.enums.Category {
++  ITEM
++  ANTIQUE
++  ART
++  ELECTRONIC
++  JEWELRY
++  REALESTATE
++  VEHICLE
+}
+
+class com.auction.share.DTO.LoginRequest {
+- {static} long serialVersionUID
+- String username
+- String password
++ String getUsername()
++ String getPassword()
+}
+
+
+class com.auction.share.exceptions.ValidationException {
+}
+class com.auction.share.DTO.PlaceBidRequest {
+- {static} long serialVersionUID
+- String auctionId
+- String bidderId
+- double amount
++ String getAuctionId()
++ String getBidderId()
++ double getAmount()
++ Request withUserId(String)
+}
+
+
+class com.auction.share.DTO.BidUpdateEvent {
+- {static} long serialVersionUID
+- String eventType
+- String auctionId
+- String bidderId
+- String bidderName
+- double amount
+- double currentHighestBid
+- String bidTime
++ String getEventType()
++ String getAuctionId()
++ String getBidderId()
++ String getBidderName()
++ double getAmount()
++ double getCurrentHighestBid()
++ String getBidTime()
+}
+
+
+class com.auction.share.DTO.AuctionSummaryDTO {
+- {static} long serialVersionUID
+- String auctionId
+- String itemName
+- String category
+- double currentPrice
+- double bidStep
+- String status
+- String startTime
+- String endTime
+- int bidCount
+- String imageUrl
++ String getAuctionId()
++ String getItemName()
++ String getCategory()
++ double getCurrentPrice()
++ double getBidStep()
++ String getStatus()
++ String getStartTime()
++ String getEndTime()
++ int getBidCount()
++ String getImageUrl()
+}
+
+
+class com.auction.share.exceptions.AuctionClosedException {
+}
+enum com.auction.share.enums.AuctionStatus {
++  OPEN
++  RUNNING
++  FINISHED
++  CANCELED
+}
+
+class com.auction.share.models.user.Bidder {
+- String phoneNumber
+- String email
+- double balance
+- String address
+- List<BidTransaction> bidHistory
++ void deductBalance(double)
++ void deposit(double)
++ void recordBidHistory(BidTransaction)
++ String getName()
++ String getAddress()
++ double getBalance()
++ String getPhoneNumber()
++ String getEmail()
++ void setBalance(double)
+}
+
+
+class com.auction.share.exceptions.AuctionNotFoundException {
+}
+class com.auction.share.DTO.CreateAuctionRequest {
+- {static} long serialVersionUID
+- String sellerId
+- String itemName
+- String description
+- String category
+- double startingPrice
+- String startTime
+- String endTime
+- byte[] imageBytes
+- String imageName
++ String getSellerId()
++ String getItemName()
++ String getDescription()
++ String getCategory()
++ double getStartingPrice()
++ String getStartTime()
++ String getEndTime()
++ byte[] getImageBytes()
++ String getImageName()
++ Request withUserId(String)
+}
+
+
+class com.auction.share.DTO.RegisterRequest {
+- {static} long serialVersionUID
+- String username
+- String password
+- String fullName
+- String role
+- String phoneNumber
+- String email
+- String address
++ String getUsername()
++ String getPassword()
++ String getFullName()
++ String getRole()
++ String getPhoneNumber()
++ String getEmail()
++ String getAddress()
+}
+
+
+class com.auction.share.DTO.GetProfileRequest {
+- {static} long serialVersionUID
+- String userId
++ String getUserId()
++ Request withUserId(String)
+}
+
+
+class com.auction.share.DTO.ProfileBidTransactionDTO {
+- {static} long serialVersionUID
+- String itemName
+- String status
+- double bidAmount
+- String timestamp
++ String getItemName()
++ String getStatus()
++ double getBidAmount()
++ String getTimestamp()
+}
+
+
+class com.auction.share.DTO.CancelAuctionRequest {
+- String auctionId
++ String getAuctionId()
++ void setAuctionId(String)
+}
+
+
+class com.auction.share.DTO.ExtendEndTimeRequest {
+- {static} long serialVersionUID
+- String auctionId
+- long minutes
+- String sellerId
++ String getAuctionId()
++ long getMinutes()
++ String getSellerId()
++ Request withUserId(String)
+}
+
+
+class com.auction.share.DTO.RegisterAutoBidRequest {
+- {static} long serialVersionUID
+- String auctionId
+- double maxBid
+- double increment
+- String bidderId
++ String getAuctionId()
++ double getMaxBid()
++ double getIncrement()
++ String getBidderId()
++ Request withUserId(String)
+}
+
+
+class com.auction.share.DTO.BidDTO {
+- {static} long serialVersionUID
+- String bidderName
+- double amount
+- String timestamp
++ String getBidderName()
++ double getAmount()
++ String getTimestamp()
+}
+
+
+class com.auction.share.DTO.Action {
++ {static} String LOGIN
++ {static} String REGISTER
++ {static} String LIST_AUCTIONS
++ {static} String GET_AUCTION_DETAIL
++ {static} String UNSUBSCRIBE_AUCTION
++ {static} String CREATE_AUCTION
++ {static} String PLACE_BID
++ {static} String REGISTER_AUTO_BID
++ {static} String CANCEL_AUTO_BID
++ {static} String SET_AUTO_BID
++ {static} String SET_BID_STEP
++ {static} String EXTEND_END_TIME
++ {static} String UPDATE_PROFILE
++ {static} String GET_PROFILE
++ {static} String CANCEL_AUCTION
+}
+
+class com.auction.share.models.auction.Auction {
+- Item item
+- Seller seller
+- LocalDateTime startTime
+- LocalDateTime endTime
+- double currentHighestBid
+- Bidder highestBidder
+- double bidStep
+- AuctionStatus status
++ void markRunning()
++ void setHighestBid(Bidder,double)
++ void markFinished()
++ void markCanceled()
++ void extendEndTimeMinutes(long)
++ Seller getSeller()
++ AuctionStatus getStatus()
++ double getCurrentHighestBid()
++ Bidder getHighestBidder()
++ double getBidStep()
++ Item getItem()
++ LocalDateTime getStartTime()
++ LocalDateTime getEndTime()
++ void setBidStep(double)
+}
+
+
+class com.auction.share.DTO.CancelAutoBidRequest {
+- {static} long serialVersionUID
+- String auctionId
+- String bidderId
++ String getAuctionId()
++ String getBidderId()
++ Request withUserId(String)
+}
+
+
+class com.auction.share.exceptions.AuctionSystemException {
+}
+class com.auction.share.DTO.ListAuctionRequest {
+- {static} long serialVersionUID
+- String status
+- String sellerId
+- boolean sellerOnly
++ String getStatus()
++ String getSellerId()
++ Request withUserId(String)
+}
+
+
+abstract class com.auction.share.models.user.User {
+- String username
+- String password
+- String fullName
+- Role role
++ void setRole(Role)
++ Role getRole()
++ String getFullName()
++ String getUsername()
++ String getPassword()
++ void setPassword(String)
+}
+
+
+class com.auction.share.DTO.AuctionDetailDTO {
+- {static} long serialVersionUID
+- String auctionId
+- String itemName
+- String description
+- String category
+- String sellerName
+- double startingPrice
+- double currentPrice
+- double bidStep
+- String status
+- String startTime
+- String endTime
+- String highestBidderName
+- String highestBidderUsername
+- List<BidDTO> bidHistory
+- String imageUrl
++ String getAuctionId()
++ String getItemName()
++ String getDescription()
++ String getCategory()
++ String getSellerName()
++ double getStartingPrice()
++ double getCurrentPrice()
++ double getBidStep()
++ String getStatus()
++ String getStartTime()
++ String getEndTime()
++ String getHighestBidderName()
++ String getHighestBidderUsername()
++ List<BidDTO> getBidHistory()
++ String getImageUrl()
+}
+
+
+class com.auction.share.exceptions.NetworkConnectionException {
+}
+class com.auction.share.exceptions.DuplicateResourceException {
+}
+class com.auction.share.DTO.SetAutoBidRequest {
+- {static} long serialVersionUID
+- String auctionId
+- String bidderId
+- double maxBid
+- double increment
++ String getAuctionId()
++ String getBidderId()
++ double getMaxBid()
++ double getIncrement()
++ Request withUserId(String)
+}
+
+
+class com.auction.share.DTO.UserDTO {
+- {static} long serialVersionUID
+- String id
+- String username
+- String fullName
+- String role
+- String phoneNumber
+- String email
+- String address
+- double balance
+- double availableBalance
++ String getId()
++ String getUsername()
++ String getFullName()
++ String getRole()
++ String getPhoneNumber()
++ String getEmail()
++ String getAddress()
++ double getBalance()
++ double getAvailableBalance()
+}
+
+
+
+
+com.auction.share.models.user.User <|-- com.auction.share.models.user.Admin
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.UpdateProfileRequest
+java.io.Serializable <|.. com.auction.share.DTO.ProfileDTO
+com.auction.share.exceptions.AuctionSystemException <|-- com.auction.share.exceptions.InsufficientFundsException
+com.auction.share.exceptions.AuctionSystemException <|-- com.auction.share.exceptions.InvalidBidException
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.SetBidStepRequest
+com.auction.share.exceptions.AuctionSystemException <|-- com.auction.share.exceptions.AuthenticationException
+com.auction.share.models.core.Entity <|-- com.auction.share.models.auction.BidTransaction
+com.auction.share.models.core.Entity <|-- com.auction.share.models.item.Item
+java.io.Serializable <|.. com.auction.share.DTO.Response
+java.io.Serializable <|.. com.auction.share.DTO.Request
+com.auction.share.models.user.User <|-- com.auction.share.models.user.Seller
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.GetAuctionDetailRequest
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.UnsubscribeAuctionRequest
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.LoginRequest
+com.auction.share.exceptions.AuctionSystemException <|-- com.auction.share.exceptions.ValidationException
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.PlaceBidRequest
+java.io.Serializable <|.. com.auction.share.DTO.BidUpdateEvent
+java.io.Serializable <|.. com.auction.share.DTO.AuctionSummaryDTO
+com.auction.share.exceptions.AuctionSystemException <|-- com.auction.share.exceptions.AuctionClosedException
+com.auction.share.models.user.User <|-- com.auction.share.models.user.Bidder
+com.auction.share.exceptions.AuctionSystemException <|-- com.auction.share.exceptions.AuctionNotFoundException
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.CreateAuctionRequest
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.RegisterRequest
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.GetProfileRequest
+java.io.Serializable <|.. com.auction.share.DTO.ProfileBidTransactionDTO
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.CancelAuctionRequest
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.ExtendEndTimeRequest
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.RegisterAutoBidRequest
+java.io.Serializable <|.. com.auction.share.DTO.BidDTO
+com.auction.share.models.core.Entity <|-- com.auction.share.models.auction.Auction
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.CancelAutoBidRequest
+com.auction.share.exceptions.Exception <|-- com.auction.share.exceptions.AuctionSystemException
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.ListAuctionRequest
+com.auction.share.models.core.Entity <|-- com.auction.share.models.user.User
+java.io.Serializable <|.. com.auction.share.DTO.AuctionDetailDTO
+com.auction.share.exceptions.AuctionSystemException <|-- com.auction.share.exceptions.NetworkConnectionException
+com.auction.share.exceptions.AuctionSystemException <|-- com.auction.share.exceptions.DuplicateResourceException
+com.auction.share.DTO.Request <|-- com.auction.share.DTO.SetAutoBidRequest
+java.io.Serializable <|.. com.auction.share.DTO.UserDTO
+@enduml

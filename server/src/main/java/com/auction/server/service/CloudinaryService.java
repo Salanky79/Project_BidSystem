@@ -73,6 +73,7 @@ public class CloudinaryService {
     params.put("public_id", publicId);
     params.put("resource_type", "image");
 
+    // lưu vào cloud dữ liệu nhị phân + trả về URL đến ảnh
     Map<?, ?> uploadResult = cloudinary.uploader().upload(imageBytes, params);
     
     String secureUrl = (String) uploadResult.get("secure_url");
