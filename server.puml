@@ -1,0 +1,443 @@
+@startuml
+skinparam classAttributeIconSize 0
+class com.auction.server.util.PasswordUtil {
++ {static} String hashPassword(String)
++ {static} boolean checkPassword(String,String)
+}
+
+class com.auction.server.service.AutoBidService {
+- {static} int MAX_STEPS_PER_TRIGGER
+- AutoBidRegistry registry
+- BidService bidService
+- AuctionQueryService auctionQueryService
+- UserDAO userDAO
+- ExecutorService executor
+- Set<String> processingAuctions
++ boolean register(RegisterAutoBidRequest)
++ boolean cancel(CancelAutoBidRequest)
++ void triggerAutoBid(String,String)
++ void processAutoBid(String,String)
+- {static} AutoBidConfig pickCandidate(List<AutoBidConfig>,String,double)
+- {static} void validateConfig(double,double)
+}
+
+
+class com.auction.server.service.BidCoordinator {
+- BidService bidService
+- AutoBidService autoBidService
++ boolean placeBidAndTriggerAuto(PlaceBidRequest)
+}
+
+
+class com.auction.server.mapper.UserMapper {
++ {static} User extractUserFromDB(ResultSet)
++ {static} void fillSpecificFields(PreparedStatement,User)
++ UserDTO fromUserToUserDTO(User)
++ User fromRequestToUser(RegisterRequest)
+}
+
+class com.auction.server.dao.BidTransactionDAOImpl {
++ boolean saveBidTransaction(Connection,BidTransaction)
++ List<BidTransaction> findByAuction(Connection,Auction)
++ List<ProfileBidTransactionDTO> findProfileTransactionsByBidderId(Connection,String)
+}
+
+class com.auction.server.controller.UserController {
+- IUserService userService
+- UserMapper mapUserDTO
++ Response<UserDTO> login(LoginRequest)
++ Response<UserDTO> register(RegisterRequest)
++ Response<UserDTO> updateProfile(UpdateProfileRequest)
++ Response<ProfileDTO> getProfile(GetProfileRequest)
+- {static} void validateUserForRegister(User)
+- {static} void validateRequiredText(String,String)
+- {static} void validatePassword(String)
+}
+
+
+class com.auction.server.util.DatabaseConnection {
+- {static} HikariConfig config
+- {static} HikariDataSource ds
+- {static} Connection testConnection
+- {static} void initDataSource()
++ {static} void setTestConnection(Connection)
++ {static} Connection getConnection()
++ {static} void shutdown()
+}
+
+
+interface com.auction.server.dao.ItemDAO {
+~ boolean saveItem(Connection,Item)
+~ Item findById(Connection,String)
+}
+
+class com.auction.server.service.UserServiceTest {
+- UserDAO userDAO
+- BidTransactionDAO bidTransactionDAO
+- com.auction.server.dao.AuctionDAO auctionDAO
+- UserMapper userMapper
+- UserService userService
+- Connection mockConn
+~ void setUp()
+~ void tearDown()
+~ void register_duplicateUsername_throwsDuplicate()
+~ void register_duplicateEmail_throwsDuplicate()
+~ void register_success_passwordIsHashed()
+~ void login_userNotFound_throwsAuthentication()
+~ void login_wrongPassword_throwsAuthentication()
+~ void login_success_returnsUser()
+~ void updateProfile_success_usesTransaction()
+~ void updateProfile_failure_rollbacks()
+- {static} Bidder bidder(String,String,String)
+}
+
+
+class com.auction.server.network.AuctionServer {
+- {static} Logger LOGGER
+- Socket clientSocket
+- RequestDispatcher requestDispatcher
+- AuctionSubscriptionRegistry subscriptionRegistry
++ void run()
+}
+
+
+class com.auction.server.util.AutoBidConfig {
+- String bidderId
+- String auctionId
+- double maxBid
+- double increment
+- LocalDateTime registeredAt
++ String getBidderId()
++ String getAuctionId()
++ double getMaxBid()
++ double getIncrement()
++ LocalDateTime getRegisteredAt()
+}
+
+
+interface com.auction.server.dao.UserDAO {
+~ boolean saveUser(Connection,User)
+~ boolean isUsernameTaken(Connection,String)
+~ User findById(Connection,String)
+~ User findByUsername(Connection,String)
+~ boolean isEmailTaken(Connection,String)
+~ boolean updateProfile(Connection,String,String,String,String,String,String)
+~ double findBalanceForUpdate(Connection,String)
+~ int deductWinningBidders(Connection,Timestamp)
+~ int creditSellers(Connection,Timestamp)
+}
+
+class com.auction.server.util.AppConfig {
+- {static} Dotenv dotenv
++ {static} String get(String)
+}
+
+
+class com.auction.server.mapper.AuctionMapper {
++ {static} Item extractItemFromDB(ResultSet)
++ {static} Auction extractAuctionFromDB(ResultSet)
++ {static} AuctionSummaryDTO toSummaryDTO(Auction)
++ {static} AuctionDetailDTO toDetailDTO(Auction,List<BidTransaction>)
+}
+
+class com.auction.server.service.UserService {
+- UserDAO userDAO
+- BidTransactionDAO bidTransactionDAO
+- AuctionDAO auctionDAO
+- UserMapper userMapper
++ boolean register(User)
++ User login(String,String)
++ User updateProfile(UpdateProfileRequest)
++ ProfileDTO getProfile(String)
+- {static} String extractEmail(User)
+}
+
+
+class com.auction.server.service.BidBroadcastService {
++ {static} String BID_UPDATED
+- AuctionSubscriptionRegistry subscriptionRegistry
+- java.util.concurrent.ExecutorService broadcastExecutor
++ void broadcastBidUpdate(BidUpdateEvent)
+}
+
+
+interface com.auction.server.service.IBidService {
+~ boolean placeBid(PlaceBidRequest,boolean)
+}
+
+interface com.auction.server.dao.BidTransactionDAO {
+~ boolean saveBidTransaction(Connection,BidTransaction)
+~ List<BidTransaction> findByAuction(Connection,Auction)
+~ List<ProfileBidTransactionDTO> findProfileTransactionsByBidderId(Connection,String)
+}
+
+class com.auction.server.service.AuctionStatusScheduler {
+- {static} Logger LOGGER
+- AuctionDAO auctionDAO
+- AuctionService auctionService
+- AuctionSubscriptionRegistry subscriptionRegistry
+- AutoBidRegistry autoBidRegistry
+- long intervalMillis
+- AtomicBoolean running
++ void shutdown()
++ void run()
+}
+
+
+class com.auction.server.service.AutoBidServiceTest {
+- AutoBidRegistry registry
+- BidService bidService
+- AuctionQueryService auctionQueryService
+- UserDAO userDAO
+~ void register_invalidMaxBid_throwsValidation()
+~ void register_invalidIncrement_throwsValidation()
+~ void triggerAutoBid_skipLastBidder()
+~ void triggerAutoBid_cancelWhenExceedMaxBid()
+~ void triggerAutoBid_stopWhenAuctionClosed()
+- {static} Auction runningAuction(double)
+}
+
+
+class com.auction.server.ServerApplication {
+- {static} ExecutorService clientExecutor
+- {static} ExecutorService backgroundExecutor
+- {static} int port
++ {static} void main(String[])
+}
+
+
+interface com.auction.server.util.ImageStorage {
+~ String uploadImage(byte[],String)
+}
+
+class com.auction.server.service.AuctionServiceTest {
+- AuctionDAO auctionDAO
+- ItemDAO itemDAO
+- UserDAO userDAO
+- Connection mockConn
+~ void setUp()
+~ void tearDown()
+~ void createAuction_startAfterEnd_throwsValidation()
+~ void createAuction_userNotSeller_throwsValidation()
+~ void createAuction_success_savesItemAndAuction()
+- {static} CreateAuctionRequest createRequest(String,LocalDateTime,LocalDateTime)
+- {static} Seller seller(String)
+- {static} Auction runningAuction(double)
+}
+
+
+class com.auction.server.controller.GlobalExceptionHandler {
+- {static} Logger LOGGER
++ Response<?> handle(Exception,String)
+}
+
+
+class com.auction.server.util.CloudinaryService {
+- {static} Logger LOGGER
+- Cloudinary cloudinary
++ String uploadImage(byte[],String)
+}
+
+
+class com.auction.server.service.AuctionQueryService {
+- AuctionDAO auctionDAO
+- BidTransactionDAO bidTransactionDAO
++ Auction getAuctionById(String)
++ AuctionDetailDTO getAuctionDetail(String)
++ List<AuctionSummaryDTO> listAuctions(ListAuctionRequest)
+- List<Auction> resolveAuctionsByFilter(Connection,ListAuctionRequest)
+}
+
+
+class com.auction.server.controller.RequestDispatcherTest {
+- IUserService userService
+- IAuctionService auctionService
+- AutoBidService autoBidService
+- BidCoordinator bidCoordinator
+- AuctionQueryService auctionQueryService
+- AuctionSubscriptionRegistry subscriptionRegistry
+~ void handle_nullAction_returnsFailResponse()
+~ void handle_requestIdPropagated()
+~ void handle_classCastException_returnsFailResponse()
+~ void handle_login_routesToUserController()
+~ void handle_unsubscribe_nullAuctionId_unsubscribeAll()
+- {static} void setRequestId(Request,String)
+}
+
+
+class com.auction.server.controller.RequestDispatcherTest$RawRequest {
+}
+class com.auction.server.service.AuctionService {
+- AuctionDAO auctionDAO
+- ItemDAO itemDAO
+- UserDAO userDAO
+- ImageStorage imageStorage
++ void setImageStorage(ImageStorage)
++ Auction createAuction(CreateAuctionRequest)
++ void cancelAuction(String,String)
++ int finishAuctions()
++ boolean setBidStep(SetBidStepRequest)
+- LocalDateTime parseDateTime(String)
+}
+
+
+class com.auction.server.controller.AuctionController {
+- IAuctionService auctionService
+- AutoBidService autoBidService
+- com.auction.server.service.BidCoordinator bidCoordinator
+- com.auction.server.service.AuctionQueryService auctionQueryService
++ Response<AuctionSummaryDTO> createAuction(CreateAuctionRequest)
++ Response<Boolean> cancelAuction(CancelAuctionRequest,String)
++ Response<Boolean> placeBid(PlaceBidRequest)
++ Response<Boolean> registerAutoBid(RegisterAutoBidRequest)
++ Response<Boolean> cancelAutoBid(CancelAutoBidRequest)
++ Response<AuctionDetailDTO> getAuctionDetail(GetAuctionDetailRequest)
++ Response<List<AuctionSummaryDTO>> listAuctions(ListAuctionRequest)
++ Response<Boolean> setBidStep(SetBidStepRequest)
+- {static} void validateRequiredText(String,String)
+}
+
+
+class com.auction.server.service.BidService {
+- AuctionDAO auctionDAO
+- BidTransactionDAO bidTransactionDAO
+- UserDAO userDAO
+- BidBroadcastService bidBroadcastService
++ boolean placeBid(PlaceBidRequest,boolean)
+- void placeBidAndBroadcast(Connection,Auction,Bidder,double)
+- Bidder requireBidder(Connection,String)
+}
+
+
+interface com.auction.server.service.IUserService {
+~ boolean register(User)
+~ User login(String,String)
+~ User updateProfile(UpdateProfileRequest)
+~ ProfileDTO getProfile(String)
+}
+
+class com.auction.server.controller.RequestDispatcher {
+- {static} Logger LOGGER
+- Map<String,ActionProcessor<Request>> processors
+- GlobalExceptionHandler exceptionHandler
+- AuctionSubscriptionRegistry subscriptionRegistry
+- void register(String,ActionProcessor<T>)
++ Response<?> handle(Request,ClientSession)
+- Response<Boolean> handleUnsubscribe(UnsubscribeAuctionRequest,ClientSession)
+- RegisterAutoBidRequest toRegisterAutoBidRequest(SetAutoBidRequest)
+}
+
+
+class com.auction.server.service.BidCoordinatorTest {
+- BidService bidService
+- AutoBidService autoBidService
+- BidCoordinator bidCoordinator
+~ void placeBidAndTriggerAuto_success()
+}
+
+
+class com.auction.server.dao.UserDAOImpl {
++ boolean saveUser(Connection,User)
++ boolean isUsernameTaken(Connection,String)
++ User findById(Connection,String)
++ User findByUsername(Connection,String)
++ boolean isEmailTaken(Connection,String)
++ boolean updateProfile(Connection,String,String,String,String,String,String)
++ double findBalanceForUpdate(Connection,String)
++ int deductWinningBidders(Connection,java.sql.Timestamp)
++ int creditSellers(Connection,java.sql.Timestamp)
+}
+
+class com.auction.server.service.AutoBidRegistry {
+- Map<String,ConcurrentHashMap<String,AutoBidConfig>> configsByAuction
++ void register(AutoBidConfig)
++ boolean cancel(String,String)
++ void cancelAll(String)
++ void clearAuction(String)
++ List<AutoBidConfig> getConfigs(String)
+}
+
+
+class com.auction.server.dao.ItemDAOImpl {
++ boolean saveItem(Connection,Item)
++ Item findById(Connection,String)
+}
+
+class com.auction.server.network.ClientSession {
+- ObjectOutputStream outputStream
+- String userId
++ String getUserId()
++ void setUserId(String)
++ void send(Response<?>)
+}
+
+
+interface com.auction.server.service.IAuctionService {
+~ Auction createAuction(CreateAuctionRequest)
+~ void cancelAuction(String,String)
+~ boolean setBidStep(SetBidStepRequest)
+~ int finishAuctions()
+}
+
+interface com.auction.server.dao.AuctionDAO {
+~ boolean saveAuction(Connection,Auction)
+~ boolean updateStatus(Connection,String,AuctionStatus)
+~ Auction findById(Connection,String)
+~ List<Auction> findAll(Connection)
+~ List<Auction> findByStatus(Connection,AuctionStatus)
+~ List<Auction> findBySeller(Connection,String)
+~ List<Auction> findBySellerAndStatus(Connection,String,AuctionStatus)
+~ double sumAuctionCurrentPrices(Connection,String,Set<String>)
+~ boolean updateHighestBid(Connection,String,String,double)
+~ boolean updateBidStep(Connection,String,double)
+~ int markOpenAuctionsAsRunning(Connection)
+~ int finishAuctions(Connection,Timestamp)
+~ List<String> findEndedRunningAuctionIds(Connection,LocalDateTime)
+}
+
+class com.auction.server.dao.AuctionDAOImpl {
++ boolean saveAuction(Connection,Auction)
++ boolean updateStatus(Connection,String,AuctionStatus)
++ Auction findById(Connection,String)
++ List<Auction> findAll(Connection)
++ List<Auction> findByStatus(Connection,AuctionStatus)
++ List<Auction> findBySeller(Connection,String)
++ List<Auction> findBySellerAndStatus(Connection,String,AuctionStatus)
++ double sumAuctionCurrentPrices(Connection,String,Set<String>)
++ boolean updateHighestBid(Connection,String,String,double)
++ boolean updateBidStep(Connection,String,double)
++ int markOpenAuctionsAsRunning(Connection)
++ int finishAuctions(Connection,java.sql.Timestamp)
++ List<String> findEndedRunningAuctionIds(Connection,LocalDateTime)
+}
+
+class com.auction.server.network.AuctionSubscriptionRegistry {
+- Map<String,Set<ClientSession>> subscribersByAuction
+- Map<ClientSession,Set<String>> auctionsBySession
++ void subscribe(String,ClientSession)
++ Set<ClientSession> getSubscribers(String)
++ void unsubscribe(String,ClientSession)
++ void unsubscribeAll(ClientSession)
++ void clearAuction(String)
+}
+
+
+interface com.auction.server.controller.ActionProcessor {
+~ Response<?> process(T,ClientSession)
+}
+
+
+
+com.auction.server.dao.BidTransactionDAO <|.. com.auction.server.dao.BidTransactionDAOImpl
+com.auction.server.network.Runnable <|.. com.auction.server.network.AuctionServer
+com.auction.server.service.IUserService <|.. com.auction.server.service.UserService
+com.auction.server.service.Runnable <|.. com.auction.server.service.AuctionStatusScheduler
+com.auction.server.util.ImageStorage <|.. com.auction.server.util.CloudinaryService
+com.auction.server.controller.RequestDispatcherTest +.. com.auction.server.controller.RequestDispatcherTest$RawRequest
+com.auction.server.controller.Request <|-- com.auction.server.controller.RequestDispatcherTest$RawRequest
+com.auction.server.service.IAuctionService <|.. com.auction.server.service.AuctionService
+com.auction.server.service.IBidService <|.. com.auction.server.service.BidService
+com.auction.server.dao.UserDAO <|.. com.auction.server.dao.UserDAOImpl
+com.auction.server.dao.ItemDAO <|.. com.auction.server.dao.ItemDAOImpl
+com.auction.server.dao.AuctionDAO <|.. com.auction.server.dao.AuctionDAOImpl
+@enduml
