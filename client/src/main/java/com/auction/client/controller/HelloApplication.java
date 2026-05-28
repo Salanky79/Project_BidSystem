@@ -1,5 +1,6 @@
 package com.auction.client.controller;
 
+import com.auction.client.ClientContext;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -15,5 +16,11 @@ public class HelloApplication extends Application {
     stage.setTitle("HanoiBid");
     stage.setScene(scene);
     stage.show();
+  }
+
+  @Override
+  public void stop() throws Exception {
+    ClientContext.socketClient().shutdown();
+    super.stop();
   }
 }
