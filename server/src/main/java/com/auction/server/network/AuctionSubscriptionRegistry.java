@@ -77,7 +77,7 @@ public class AuctionSubscriptionRegistry {
     }
   }
 
-  /** Cleanup toàn bộ subscribers cho 1 auction (thường dùng khi auction đã FINISHED/CANCELED). */
+  /** Cleanup toàn bộ subscribers cho 1 auction (dùng khi auction đã FINISHED/CANCELED). */
   public void clearAuction(String auctionId) {
     if (auctionId == null || auctionId.isBlank()) {
       return;

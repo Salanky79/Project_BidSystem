@@ -12,6 +12,7 @@ public class BidBroadcastService {
   private final AuctionSubscriptionRegistry subscriptionRegistry;
 
   private final java.util.concurrent.ExecutorService broadcastExecutor = Executors.newCachedThreadPool();
+  // gửi message song song
 
   public BidBroadcastService(AuctionSubscriptionRegistry subscriptionRegistry) {
     this.subscriptionRegistry = subscriptionRegistry;
@@ -29,6 +30,7 @@ public class BidBroadcastService {
               session.send(pushMessage);
             } catch (IOException ignored) {
               // xoá client đó khỏi tất cả auction subscription
+                // client có thể đã disconnect
               subscriptionRegistry.unsubscribeAll(session);
             }
           });

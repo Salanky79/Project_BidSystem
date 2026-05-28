@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /** Sự kiện cập nhật thông tin trả giá mới nhất. */
 public class BidUpdateEvent implements Serializable {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L; // biến thành byte
 
   private final String eventType;
   private final String auctionId;

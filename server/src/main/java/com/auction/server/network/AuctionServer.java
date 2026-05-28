@@ -17,9 +17,14 @@ import org.slf4j.LoggerFactory;
 /**
  * Luồng Server (Runnable) chuyên trách xử lý kết nối socket và thông điệp cho một Client cụ thể.
  */
-public class AuctionServer implements Runnable {
-  private static final Logger LOGGER = LoggerFactory.getLogger(AuctionServer.class);
 
+// xử lý từng request một chứ ko phải song song
+public class AuctionServer implements Runnable {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AuctionServer.class); // in log
+  // có level log
+  // có gile log           >>        println (in console )
+  // có timestamp
+  // dễ debug
   private final Socket clientSocket;
   private final RequestHandler requestHandler;
   private final AuctionSubscriptionRegistry subscriptionRegistry;
@@ -36,17 +41,20 @@ public class AuctionServer implements Runnable {
   @Override
   // chạy luồng lắng nghe và xử lý dữ liệu liên tục từ Client qua socket
   public void run() {
-    ClientSession session = null;
-    Socket socket = clientSocket;
+    ClientSession session = null; // thông tin của client
+    Socket socket = clientSocket; // kết nối giữa client và server
 
     try {
       LOGGER.info("Client connected: {}", socket.getRemoteSocketAddress());
 
       ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+      // luồng để sever gửi về client
 
       outputStream.flush();
+      // đẩy dữ liệu ngay lập tức ra network
 
       ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+      // luồng để sever nhận về từ client
 
       session = new ClientSession(outputStream);
 
@@ -64,6 +72,7 @@ public class AuctionServer implements Runnable {
 
         // tự động nhúng userId từ phiên (session) vào request để xác thực
         // giữ nguyên requestId gốc để client callback khớp đúng
+        // ko cần gửi ID
         Request authedRequest;
         if (session.getUserId() != null) {
             authedRequest = request.withUserId(session.getUserId());
@@ -85,10 +94,14 @@ public class AuctionServer implements Runnable {
         if (Action.LOGIN.equals(request.getAction())
             && response.isSuccess()
             && response.getData() instanceof UserDTO userDTO) {
+
           session.setUserId(userDTO.getId());
+          // gắn ID vào session
+
           LOGGER.info("Session authenticated for userId={}", userDTO.getId());
         }
 
+        // Client gửi request → server xử lý → đo xem mất bao nhiêu ms
         long elapsedMs = System.currentTimeMillis() - startTime;
         LOGGER.info(
             "Processed request: requestId={}, action={}, success={}, durationMs={}",
@@ -97,6 +110,7 @@ public class AuctionServer implements Runnable {
             response.isSuccess(),
             elapsedMs);
 
+        // “Client nào đang mở màn hình chi tiết auction này”
         if (response.isSuccess()) {
           if (request instanceof GetAuctionDetailRequest detailRequest) {
             subscriptionRegistry.subscribe(detailRequest.getAuctionId(), session);

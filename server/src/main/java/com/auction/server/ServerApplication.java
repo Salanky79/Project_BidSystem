@@ -72,8 +72,10 @@ public class ServerApplication {
       System.out.println("Server start on port: " + port);
       while (!serverSocket.isClosed()) {
         Socket clientSocket = serverSocket.accept(); // đợi client kết nối
+
         clientExecutor.submit(
             new AuctionServer(clientSocket, requestHandler, subscriptionRegistry));
+
       } // giao việc xử lý client socket cho một thread độc lập trong pool
     } catch (IOException e) {
       e.printStackTrace();
