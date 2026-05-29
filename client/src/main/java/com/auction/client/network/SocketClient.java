@@ -34,7 +34,12 @@ public class SocketClient {
     this.port = port;
 
     this.executorService =
-        Executors.newSingleThreadExecutor();
+        Executors.newSingleThreadExecutor(
+            runnable -> {
+              Thread thread = new Thread(runnable);
+              thread.setDaemon(true);
+              return thread;
+            });
     this.callbacks = new ConcurrentHashMap<>();
     this.pushListeners = new CopyOnWriteArrayList<>();
   }
@@ -141,6 +146,11 @@ public class SocketClient {
   }
 
 
+
+  public void shutdown() {
+    closeConnection();
+    executorService.shutdown();
+  }
 
   private void closeConnection() {
     try {
