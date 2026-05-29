@@ -11,7 +11,7 @@ import com.auction.share.models.auction.Auction;
 import com.auction.share.models.auction.BidTransaction;
 import com.auction.server.mapper.AuctionMapper;
 
-import com.auction.server.util.DatabaseConnection;
+import javax.sql.DataSource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -20,16 +20,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class AuctionQueryService {
+    private final DataSource dataSource;
     private final AuctionDAO auctionDAO;
     private final BidTransactionDAO bidTransactionDAO;
 
-    public AuctionQueryService(AuctionDAO auctionDAO, BidTransactionDAO bidTransactionDAO) {
+    public AuctionQueryService(DataSource dataSource, AuctionDAO auctionDAO, BidTransactionDAO bidTransactionDAO) {
+        this.dataSource = dataSource;
         this.auctionDAO = auctionDAO;
         this.bidTransactionDAO = bidTransactionDAO;
     }
 
     public Auction getAuctionById(String auctionId) throws SQLException {
-        try (Connection conn = DatabaseConnection.getConnection()) {
+        try (Connection conn = dataSource.getConnection()) {
             return auctionDAO.findById(conn, auctionId);
         }
     }
@@ -37,7 +39,7 @@ public class AuctionQueryService {
 
 
     public AuctionDetailDTO getAuctionDetail(String auctionId) throws SQLException, ValidationException {
-        try (Connection conn = DatabaseConnection.getConnection()) {
+        try (Connection conn = dataSource.getConnection()) {
             Auction auction = auctionDAO.findById(conn, auctionId);
             if (auction == null) {
                 throw new ValidationException("Auction not found.");
@@ -49,7 +51,7 @@ public class AuctionQueryService {
     }
 
     public List<AuctionSummaryDTO> listAuctions(ListAuctionRequest req) throws SQLException {
-        try (Connection conn = DatabaseConnection.getConnection()) {
+        try (Connection conn = dataSource.getConnection()) {
             List<Auction> auctions = resolveAuctionsByFilter(conn, req);
             if (auctions.isEmpty()) return new ArrayList<>();
 

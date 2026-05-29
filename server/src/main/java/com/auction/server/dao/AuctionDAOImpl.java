@@ -230,30 +230,25 @@ public class AuctionDAOImpl implements AuctionDAO {
                     a.highest_bidder_id = ?,
                     a.bid_count = a.bid_count + 1,
                     a.end_time = CASE
-                        WHEN TIMESTAMPDIFF(SECOND, ?, a.end_time) <= 10
-                             AND TIMESTAMPDIFF(SECOND, ?, a.end_time) >= 0
+                        WHEN TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP, a.end_time) <= 10
+                             AND TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP, a.end_time) >= 0
                              AND (a.highest_bidder_id IS NULL OR a.highest_bidder_id <> ?)
                         THEN DATE_ADD(a.end_time, INTERVAL 30 SECOND)
                         ELSE a.end_time
                     END
                 WHERE a.id = ?
                   AND a.status = ?
-                  AND a.start_time <= ?
-                  AND a.end_time > ?
+                  AND a.start_time <= CURRENT_TIMESTAMP
+                  AND a.end_time > CURRENT_TIMESTAMP
                   AND ? >= (a.current_price + a.bid_step)
              """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDouble(1, amount);
             ps.setString(2, bidderId);
-            Timestamp now = Timestamp.valueOf(java.time.LocalDateTime.now());
-            ps.setTimestamp(3, now);
-            ps.setTimestamp(4, now);
-            ps.setString(5, bidderId);
-            ps.setString(6, id);
-            ps.setString(7, AuctionStatus.RUNNING.name());
-            ps.setTimestamp(8, now);
-            ps.setTimestamp(9, now);
-            ps.setDouble(10, amount);
+            ps.setString(3, bidderId);
+            ps.setString(4, id);
+            ps.setString(5, AuctionStatus.RUNNING.name());
+            ps.setDouble(6, amount);
             return ps.executeUpdate() > 0;
         }
     }
@@ -272,15 +267,12 @@ public class AuctionDAOImpl implements AuctionDAO {
                 UPDATE auctions
                 SET status = ?
                 WHERE status = ?
-                  AND start_time <= ?
-                  AND end_time > ?
+                  AND start_time <= CURRENT_TIMESTAMP
+                  AND end_time > CURRENT_TIMESTAMP
                 """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            Timestamp now = Timestamp.valueOf(java.time.LocalDateTime.now());
             ps.setString(1, AuctionStatus.RUNNING.name());
             ps.setString(2, AuctionStatus.OPEN.name());
-            ps.setTimestamp(3, now);
-            ps.setTimestamp(4, now);
             return ps.executeUpdate();
         }
     }

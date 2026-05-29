@@ -15,26 +15,33 @@ import com.auction.share.models.user.Seller;
 import com.auction.share.models.user.User;
 
 import java.sql.Connection;
-import com.auction.server.util.DatabaseConnection;
+import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Dịch vụ xử lý Command liên quan đến phiên đấu giá (tạo, hủy, thay đổi cấu hình).
  */
-public class AuctionService implements IAuctionService {
+public class AuctionService implements ISchedulableAuctionService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuctionService.class);
+    private final DataSource dataSource;
     private final AuctionDAO auctionDAO;
     private final ItemDAO itemDAO;
     private final UserDAO userDAO;
     private ImageStorage imageStorage;
 
     public AuctionService(
+            DataSource dataSource,
             AuctionDAO auctionDAO,
             ItemDAO itemDAO,
             UserDAO userDAO) {
+        this.dataSource = dataSource;
         this.auctionDAO = auctionDAO;
         this.itemDAO = itemDAO;
         this.userDAO = userDAO;
@@ -45,7 +52,7 @@ public class AuctionService implements IAuctionService {
     }
 
     public Auction createAuction(CreateAuctionRequest req) throws SQLException, ValidationException {
-        try (Connection conn = DatabaseConnection.getConnection()) {
+        try (Connection conn = dataSource.getConnection()) {
             User sellerUser = userDAO.findById(conn, req.getSellerId());
             if (!(sellerUser instanceof Seller seller)) {
                 throw new ValidationException("User is not a seller.");
@@ -72,7 +79,8 @@ public class AuctionService implements IAuctionService {
                     String imageUrl = imageStorage.uploadImage(req.getImageBytes(), req.getImageName());
                     item.setImageUrl(imageUrl);
                 } catch (Exception e) {
-                    // Cho phép tiếp tục tạo đấu giá kể cả khi upload ảnh thất bại để tránh chặn người dùng
+                    LOGGER.warn("Image upload failed for item={}, auction will be created without image. Error: {}",
+                        req.getItemName(), e.getMessage());
                 }
             }
 
@@ -94,31 +102,35 @@ public class AuctionService implements IAuctionService {
     }
 
     public void cancelAuction(String auctionId, String sellerId) throws SQLException, ValidationException {
-        try (Connection conn = DatabaseConnection.getConnection()) {
+        try (Connection conn = dataSource.getConnection()) {
             Auction auction = auctionDAO.findById(conn, auctionId);
             if (auction == null || !auction.getSeller().getId().equals(sellerId)) {
                 throw new ValidationException("Auction not found or you are not the seller.");
             }
-            if (auction.getStatus() != AuctionStatus.OPEN) {
-                throw new ValidationException("Can only cancel OPEN auctions.");
+            if (auction.getStatus() != AuctionStatus.OPEN && auction.getStatus() != AuctionStatus.RUNNING) {
+                throw new ValidationException("Can only cancel OPEN or RUNNING auctions.");
             }
             auctionDAO.updateStatus(conn, auctionId, AuctionStatus.CANCELED);
         }
     }
 
-    public int finishAuctions() throws SQLException {
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+    public List<String> finishAuctionsAndGetIds() throws SQLException {
+        try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                // 1. Trừ tiền bidder
+                auctionDAO.markOpenAuctionsAsRunning(conn);
+                
+                Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+                List<String> endedIds = auctionDAO.findEndedRunningAuctionIds(conn, now.toLocalDateTime());
+                if (endedIds.isEmpty()) {
+                    conn.commit();
+                    return endedIds;
+                }
                 userDAO.deductWinningBidders(conn, now);
-                // 2. Cộng tiền seller
                 userDAO.creditSellers(conn, now);
-                // 3. Đổi trạng thái auction
-                int finishedRows = auctionDAO.finishAuctions(conn, now);
+                auctionDAO.finishAuctions(conn, now);
                 conn.commit();
-                return finishedRows;
+                return endedIds;
             } catch (SQLException e) {
                 conn.rollback();
                 throw e;
@@ -129,7 +141,7 @@ public class AuctionService implements IAuctionService {
     }
 
     public boolean setBidStep(SetBidStepRequest req) throws SQLException, ValidationException {
-        try (Connection conn = DatabaseConnection.getConnection()) {
+        try (Connection conn = dataSource.getConnection()) {
             Auction auction = auctionDAO.findById(conn, req.getAuctionId());
             if (auction == null) {
                 throw new ValidationException("Auction not found.");

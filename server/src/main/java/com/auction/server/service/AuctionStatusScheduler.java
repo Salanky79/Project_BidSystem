@@ -1,12 +1,8 @@
 package com.auction.server.service;
 
-import com.auction.server.dao.AuctionDAO;
-import com.auction.server.network.AuctionSubscriptionRegistry;
-import com.auction.server.util.DatabaseConnection;
-import java.sql.Connection;
-import java.time.LocalDateTime;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,24 +13,22 @@ import org.slf4j.LoggerFactory;
  */
 public class AuctionStatusScheduler implements Runnable {
   private static final Logger LOGGER = LoggerFactory.getLogger(AuctionStatusScheduler.class);
-  private final AuctionDAO auctionDAO;
-  private final AuctionService auctionService;
-  private final AuctionSubscriptionRegistry subscriptionRegistry;
-  private final AutoBidRegistry autoBidRegistry;
+  private final ISchedulableAuctionService auctionService;
+  private final List<AuctionLifecycleListener> listeners = new CopyOnWriteArrayList<>();
   private final long intervalMillis;
-  private final AtomicBoolean running = new AtomicBoolean(true);
+  private final AtomicBoolean running = new AtomicBoolean(false);
 
   public AuctionStatusScheduler(
-      AuctionDAO auctionDAO,
-      AuctionService auctionService,
-      AuctionSubscriptionRegistry subscriptionRegistry,
-      AutoBidRegistry autoBidRegistry,
+      ISchedulableAuctionService auctionService,
       long intervalMillis) {
-    this.auctionDAO = auctionDAO;
     this.auctionService = auctionService;
-    this.subscriptionRegistry = subscriptionRegistry;
-    this.autoBidRegistry = autoBidRegistry;
     this.intervalMillis = intervalMillis;
+  }
+
+  public void addListener(AuctionLifecycleListener listener) {
+    if (listener != null) {
+      listeners.add(listener);
+    }
   }
 
   public void shutdown() {
@@ -43,38 +37,32 @@ public class AuctionStatusScheduler implements Runnable {
 
   @Override
   public void run() {
-    while (running.get() && !Thread.currentThread().isInterrupted()) {
-      try {
-        try (Connection conn = DatabaseConnection.getConnection()) {
-          auctionDAO.markOpenAuctionsAsRunning(conn);
-
-          LocalDateTime now = LocalDateTime.now();
-          List<String> endedAuctionIds = auctionDAO.findEndedRunningAuctionIds(conn, now);
-          int finishedRows = auctionService.finishAuctions();
-          if (finishedRows > 0 && !endedAuctionIds.isEmpty()) {
-            for (String auctionId : endedAuctionIds) {
-              if (subscriptionRegistry != null) {
-                subscriptionRegistry.clearAuction(auctionId);
-              }
-              if (autoBidRegistry != null) {
-                autoBidRegistry.clearAuction(auctionId);
-              }
-            }
-          }
-        }
-        Thread.sleep(intervalMillis);
-      } catch (SQLException e) {
-        LOGGER.error("Scheduler DB error, retry in {}ms", intervalMillis, e);
+    if (!running.compareAndSet(false, true)) {
+      throw new IllegalStateException("Scheduler already running");
+    }
+    try {
+      while (running.get() && !Thread.currentThread().isInterrupted()) {
         try {
+          List<String> finishedIds = auctionService.finishAuctionsAndGetIds();
+          if (finishedIds != null && !finishedIds.isEmpty()) {
+            listeners.forEach(l -> l.onAuctionsFinished(finishedIds));
+          }
           Thread.sleep(intervalMillis);
-        } catch (InterruptedException interruptedException) {
+        } catch (SQLException e) {
+          LOGGER.error("Scheduler DB error, retry in {}ms", intervalMillis, e);
+          try {
+            Thread.sleep(intervalMillis);
+          } catch (InterruptedException interruptedException) {
+            Thread.currentThread().interrupt();
+            break;
+          }
+        } catch (InterruptedException e) {
           Thread.currentThread().interrupt();
           break;
         }
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        break;
       }
+    } finally {
+      running.set(false);
     }
   }
 }

@@ -3,7 +3,7 @@ package com.auction.server.service;
 import com.auction.server.dao.AuctionDAO;
 import com.auction.server.dao.BidTransactionDAO;
 import com.auction.server.dao.UserDAO;
-import com.auction.server.util.DatabaseConnection;
+import javax.sql.DataSource;
 import com.auction.share.DTO.BidUpdateEvent;
 import com.auction.share.DTO.PlaceBidRequest;
 import com.auction.share.exceptions.ValidationException;
@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class BidService implements IBidService {
+    private final DataSource dataSource;
     private final AuctionDAO auctionDAO;
     private final BidTransactionDAO bidTransactionDAO;
     private final UserDAO userDAO;
@@ -26,10 +27,12 @@ public class BidService implements IBidService {
 
 
     public BidService(
+            DataSource dataSource,
             AuctionDAO auctionDAO,
             BidTransactionDAO bidTransactionDAO,
             UserDAO userDAO,
             BidBroadcastService bidBroadcastService) {
+        this.dataSource = dataSource;
         this.auctionDAO = auctionDAO;
         this.bidTransactionDAO = bidTransactionDAO;
         this.userDAO = userDAO;
@@ -38,8 +41,8 @@ public class BidService implements IBidService {
 
 
 
-    public boolean placeBid(PlaceBidRequest req, boolean triggerAutoBid) throws SQLException, ValidationException {
-        try (Connection conn = DatabaseConnection.getConnection()) {
+    public boolean placeBid(PlaceBidRequest req) throws SQLException, ValidationException {
+        try (Connection conn = dataSource.getConnection()) {
             Auction auction = auctionDAO.findById(conn, req.getAuctionId());
             if (auction == null || !auction.isRunning()) {
                 throw new ValidationException(

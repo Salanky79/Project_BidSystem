@@ -11,5 +11,4 @@ public interface IAuctionService {
     Auction createAuction(CreateAuctionRequest request) throws SQLException, ValidationException;
     void cancelAuction(String auctionId, String requesterUserId) throws SQLException, ValidationException;
     boolean setBidStep(SetBidStepRequest request) throws SQLException, ValidationException;
-    int finishAuctions() throws SQLException;
 }

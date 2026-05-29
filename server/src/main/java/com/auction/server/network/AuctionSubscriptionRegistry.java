@@ -3,9 +3,11 @@ package com.auction.server.network;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+import com.auction.server.service.AuctionLifecycleListener;
 
 /** Sổ đăng ký (Registry) quản lý các phiên bản Client đang theo dõi realtime từng phiên đấu giá. */
-public class AuctionSubscriptionRegistry {
+public class AuctionSubscriptionRegistry implements AuctionLifecycleListener {
   private final Map<String, Set<ClientSession>> subscribersByAuction = new ConcurrentHashMap<>();
   private final Map<ClientSession, Set<String>> auctionsBySession = new ConcurrentHashMap<>();
 
@@ -101,6 +103,14 @@ public class AuctionSubscriptionRegistry {
       if (auctionIds.isEmpty()) {
         auctionsBySession.remove(session, auctionIds);
       }
+    }
+  }
+
+  @Override
+  public void onAuctionsFinished(List<String> auctionIds) {
+    if (auctionIds == null) return;
+    for (String id : auctionIds) {
+      clearAuction(id);
     }
   }
 }

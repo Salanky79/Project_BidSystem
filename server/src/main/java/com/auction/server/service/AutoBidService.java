@@ -7,12 +7,14 @@ import com.auction.share.DTO.RegisterAutoBidRequest;
 import com.auction.share.exceptions.ValidationException;
 import com.auction.share.models.auction.Auction;
 import com.auction.server.util.DatabaseConnection;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,23 +26,33 @@ import com.auction.share.models.user.Bidder;
 public class AutoBidService {
   private static final int MAX_STEPS_PER_TRIGGER = 50;
 
+    private final DataSource dataSource;
     private final AutoBidRegistry registry;
     private final BidService bidService;
     private final AuctionQueryService auctionQueryService;
     private final UserDAO userDAO;
     private final ExecutorService executor;
     private final Set<String> processingAuctions = ConcurrentHashMap.newKeySet();
+    private final Map<String, String> pendingTriggers = new ConcurrentHashMap<>();
 
     public AutoBidService(
+            DataSource dataSource,
             AutoBidRegistry registry,
             BidService bidService,
             AuctionQueryService auctionQueryService,
             UserDAO userDAO) {
+        this.dataSource = dataSource;
         this.registry = registry;
         this.bidService = bidService;
         this.auctionQueryService = auctionQueryService;
         this.userDAO = userDAO;
         executor = Executors.newSingleThreadExecutor();
+    }
+    
+    public void shutdown() {
+        if (executor != null && !executor.isShutdown()) {
+            executor.shutdownNow();
+        }
     }
 
     public boolean register(RegisterAutoBidRequest request) throws SQLException, ValidationException {
@@ -54,7 +66,7 @@ public class AutoBidService {
             throw new ValidationException("Auto-bid max must be higher than current highest bid.");
         }
 
-        try (Connection conn = DatabaseConnection.getConnection()) {
+        try (Connection conn = dataSource.getConnection()) {
             User bidderUser = userDAO.findById(conn, request.getBidderId());
             if (!(bidderUser instanceof Bidder)) {
                 throw new ValidationException("User is not a bidder.");
@@ -78,15 +90,21 @@ public class AutoBidService {
     }
 
     public void triggerAutoBid(String auctionId, String lastBidderId) {
+        pendingTriggers.put(auctionId, lastBidderId);
         if (!processingAuctions.add(auctionId)) {
             return;
         }
         executor.submit(
                 () -> {
                     try {
-                        processAutoBid(auctionId, lastBidderId);
+                        String triggerer = pendingTriggers.remove(auctionId);
+                        processAutoBid(auctionId, triggerer);
                     } finally {
                         processingAuctions.remove(auctionId);
+                        String nextTriggerer = pendingTriggers.remove(auctionId);
+                        if (nextTriggerer != null) {
+                            triggerAutoBid(auctionId, nextTriggerer);
+                        }
                     }
                 });
     }
@@ -125,9 +143,14 @@ public class AutoBidService {
 
             try {
                 bidService.placeBid(
-                        new PlaceBidRequest(candidate.getAuctionId(), candidate.getBidderId(), nextAmount),
-                        false);
+                        new PlaceBidRequest(candidate.getAuctionId(), candidate.getBidderId(), nextAmount));
                 latestBidderId = candidate.getBidderId();
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
             } catch (Exception e) {
                 registry.cancel(candidate.getAuctionId(), candidate.getBidderId());
                 return;

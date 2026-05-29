@@ -19,6 +19,7 @@ import com.auction.share.models.user.User;
  * sơ).
  */
 public class UserController {
+  private static final int MIN_PASSWORD_LENGTH = 6;
   private final IUserService userService;
   private final UserMapper mapUserDTO;
 
@@ -101,8 +102,8 @@ public class UserController {
 
   private static void validatePassword(String password) throws ValidationException {
     validateRequiredText(password, "Password is required.");
-    if (password.length() < 6) {
-      throw new ValidationException("Password must be at least " + 6 + " characters.");
+    if (password.length() < MIN_PASSWORD_LENGTH) {
+      throw new ValidationException("Password must be at least " + MIN_PASSWORD_LENGTH + " characters.");
     }
   }
 }

@@ -11,8 +11,11 @@ import com.auction.share.models.user.User;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UserMapper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserMapper.class);
     public static User extractUserFromDB(ResultSet rs) throws SQLException {
         String uuid = rs.getString("id");
         String username = rs.getString("username");
@@ -41,7 +44,8 @@ public class UserMapper {
                 user = new Admin(username, password, fullName, accessLevel);
                 break;
             default:
-                throw new SQLException("Unsupported role from database: " + role);
+                LOGGER.warn("Unsupported role from database: {}", role);
+                return null;
         }
 
         user.setID(uuid);

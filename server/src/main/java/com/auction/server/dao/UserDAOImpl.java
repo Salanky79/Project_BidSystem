@@ -7,6 +7,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDAOImpl implements UserDAO {
     // LƯU TÀI KHOẢN MỚI
@@ -83,24 +85,24 @@ public class UserDAOImpl implements UserDAO {
 
     public boolean updateProfile(Connection conn, String userId, String fullName, String email, String address, String phoneNumber, String password) throws SQLException {
         StringBuilder sql = new StringBuilder("UPDATE users SET ");
-        boolean first = true;
-        if (fullName != null && !fullName.isBlank()) { sql.append("fullname = ?"); first = false; }
-        if (email != null && !email.isBlank()) { if (!first) sql.append(", "); sql.append("email = ?"); first = false; }
-        if (address != null && !address.isBlank()) { if (!first) sql.append(", "); sql.append("address = ?"); first = false; }
-        if (phoneNumber != null && !phoneNumber.isBlank()) { if (!first) sql.append(", "); sql.append("phoneNumber = ?"); first = false; }
-        if (password != null && !password.isBlank()) { if (!first) sql.append(", "); sql.append("password = ?"); first = false; }
+        List<Object> params = new ArrayList<>();
 
-        if (first) return false; // nothing to update
+        if (fullName != null && !fullName.isBlank()) { sql.append("fullname = ?, "); params.add(fullName); }
+        if (email != null && !email.isBlank()) { sql.append("email = ?, "); params.add(email); }
+        if (address != null && !address.isBlank()) { sql.append("address = ?, "); params.add(address); }
+        if (phoneNumber != null && !phoneNumber.isBlank()) { sql.append("phoneNumber = ?, "); params.add(phoneNumber); }
+        if (password != null && !password.isBlank()) { sql.append("password = ?, "); params.add(password); }
+
+        if (params.isEmpty()) return false; // nothing to update
         
+        sql.setLength(sql.length() - 2); // remove last ", "
         sql.append(" WHERE id = ?");
+        params.add(userId);
+
         try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            int index = 1;
-            if (fullName != null && !fullName.isBlank()) ps.setString(index++, fullName);
-            if (email != null && !email.isBlank()) ps.setString(index++, email);
-            if (address != null && !address.isBlank()) ps.setString(index++, address);
-            if (phoneNumber != null && !phoneNumber.isBlank()) ps.setString(index++, phoneNumber);
-            if (password != null && !password.isBlank()) ps.setString(index++, password);
-            ps.setString(index, userId);
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
             return ps.executeUpdate() > 0;
         }
     }

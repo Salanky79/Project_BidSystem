@@ -127,14 +127,7 @@ public final class AuctionMapper {
       }
 
       // Map bid_count (if present in the ResultSet)
-      try {
-          int bidCount = rs.getInt("bid_count");
-          auction.setBidCount(bidCount);
-      } catch (SQLException e) {
-          // bid_count might not be in every query yet, so we ignore if it throws an exception (column not found).
-          // Actually, best practice is to check if column exists, but JDBC doesn't have an easy way.
-          // We'll just update all SELECT queries in AuctionDAOImpl to include bid_count.
-      }
+      auction.setBidCount(rs.getInt("bid_count"));
 
       return auction;
   }
@@ -157,6 +150,9 @@ public final class AuctionMapper {
 
   public static AuctionDetailDTO toDetailDTO(Auction auction, List<BidTransaction> transactions) {
       if (auction == null) return null;
+      if (auction.getItem() == null || auction.getSeller() == null) {
+          throw new IllegalArgumentException("Auction must have a valid item and seller");
+      }
       List<BidDTO> bidHistory = new ArrayList<>();
       DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
       if (transactions != null) {

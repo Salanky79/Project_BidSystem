@@ -15,14 +15,14 @@ import org.slf4j.LoggerFactory;
 /**
  * Luồng Server (Runnable) chuyên trách xử lý kết nối socket và thông điệp cho một Client cụ thể.
  */
-public class AuctionServer implements Runnable {
-  private static final Logger LOGGER = LoggerFactory.getLogger(AuctionServer.class);
+public class ClientConnectionHandler implements Runnable {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ClientConnectionHandler.class);
 
   private final Socket clientSocket;
   private final RequestDispatcher requestDispatcher;
   private final AuctionSubscriptionRegistry subscriptionRegistry;
 
-  public AuctionServer(
+  public ClientConnectionHandler(
       Socket clientSocket,
       RequestDispatcher requestDispatcher,
       AuctionSubscriptionRegistry subscriptionRegistry) {
@@ -93,13 +93,13 @@ public class AuctionServer implements Runnable {
             response.isSuccess(),
             elapsedMs);
 
+        session.send(response);
         if (response.isSuccess()) {
           if (request instanceof GetAuctionDetailRequest detailRequest) {
             subscriptionRegistry.subscribe(detailRequest.getAuctionId(), session);
           }
         }
-
-        session.send(response);
+        
         LOGGER.info(
             "Sent response: requestId={}, action={}, success={}, message={}",
             request.getRequestId(),

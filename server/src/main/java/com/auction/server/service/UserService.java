@@ -4,7 +4,7 @@ import com.auction.server.dao.BidTransactionDAO;
 import com.auction.server.dao.AuctionDAO;
 import com.auction.server.dao.UserDAO;
 import com.auction.server.mapper.UserMapper;
-import com.auction.server.util.DatabaseConnection;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import com.auction.server.util.PasswordUtil;
 import com.auction.share.DTO.ProfileBidTransactionDTO;
@@ -25,12 +25,14 @@ import java.util.List;
 
 /** Dịch vụ xử lý nghiệp vụ liên quan đến người dùng (đăng nhập, đăng ký, cập nhật thông tin). */
 public class UserService implements IUserService {
+  private final DataSource dataSource;
   private final UserDAO userDAO;
   private final BidTransactionDAO bidTransactionDAO;
   private final AuctionDAO auctionDAO;
   private final UserMapper userMapper;
 
-  public UserService(UserDAO userDAO, BidTransactionDAO bidTransactionDAO, AuctionDAO auctionDAO, UserMapper userMapper) {
+  public UserService(DataSource dataSource, UserDAO userDAO, BidTransactionDAO bidTransactionDAO, AuctionDAO auctionDAO, UserMapper userMapper) {
+    this.dataSource = dataSource;
     this.userDAO = userDAO;
     this.bidTransactionDAO = bidTransactionDAO;
     this.auctionDAO = auctionDAO;
@@ -39,7 +41,7 @@ public class UserService implements IUserService {
 
   public boolean register(User user)
       throws SQLException, ValidationException, DuplicateResourceException {
-    try (Connection conn = DatabaseConnection.getConnection()) {
+    try (Connection conn = dataSource.getConnection()) {
       if (userDAO.isUsernameTaken(conn, user.getUsername())) {
         throw new DuplicateResourceException("Username already exists.");
       }
@@ -56,7 +58,7 @@ public class UserService implements IUserService {
 
   public User login(String username, String password)
       throws SQLException, AuthenticationException, ValidationException {
-    try (Connection conn = DatabaseConnection.getConnection()) {
+    try (Connection conn = dataSource.getConnection()) {
       User user = userDAO.findByUsername(conn, username);
       if (user == null) {
         throw new AuthenticationException("Account does not exist.");
@@ -70,7 +72,7 @@ public class UserService implements IUserService {
 
 
   public User updateProfile(UpdateProfileRequest request) throws SQLException, ValidationException {
-    try (Connection conn = DatabaseConnection.getConnection()) {
+    try (Connection conn = dataSource.getConnection()) {
       conn.setAutoCommit(false);
       try {
           String hashedPassword = null;
@@ -95,7 +97,7 @@ public class UserService implements IUserService {
   }
 
   public ProfileDTO getProfile(String id) throws SQLException, ValidationException {
-    try (Connection conn = DatabaseConnection.getConnection()) {
+    try (Connection conn = dataSource.getConnection()) {
       User user = userDAO.findById(conn, id);
       if (user == null) {
         throw new ValidationException("User not found.");

@@ -15,7 +15,7 @@ public class BidCoordinator {
     }
 
     public boolean placeBidAndTriggerAuto(PlaceBidRequest request) throws SQLException, ValidationException {
-        boolean result = bidService.placeBid(request, false);
+        boolean result = bidService.placeBid(request);
         autoBidService.triggerAutoBid(request.getAuctionId(), request.getBidderId());
         return result;
     }
