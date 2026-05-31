@@ -1,5 +1,6 @@
 package com.auction.client.controller;
 
+import com.auction.client.service.AuctionService;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,8 +19,21 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import com.auction.client.utils.NotificationManager;
+
+import com.auction.client.utils.DateTimeUtils;
+import com.auction.client.controller.components.AuctionCountdownTimer;
+import com.auction.client.controller.components.BidHistoryChartManager;
 
 public class SellerAuctionDetailController {
+
+  private AuctionService auctionService;
+  private com.auction.client.network.SocketClient socketClient;
+
+  public void setServices(AuctionService auctionService, com.auction.client.network.SocketClient socketClient) {
+    this.auctionService = auctionService;
+    this.socketClient = socketClient;
+  }
 
   // ── HEADER ──────────────────────────────────────────────────
   @FXML private Button closeButton;
@@ -47,75 +61,92 @@ public class SellerAuctionDetailController {
   private double currentPrice;
   private double startingPrice = 0;
   private LocalDateTime endTime;
-  private Timeline countdownTimeline;
-  private static final int MAX_CHART_POINTS = 5;
-  // Persistent series – never replaced, only data points are added/removed
-  private final XYChart.Series<String, Number> chartSeries = new XYChart.Series<>();
+  private AuctionCountdownTimer countdownTimer;
+  private BidHistoryChartManager chartManager;
   private String startTimeISO; // real start time from server (ISO format)
   private java.util.List<com.auction.share.DTO.BidDTO> bidHistory = new java.util.ArrayList<>();
+  /** E2: Callback được gọi sau khi cancel auction thành công — để Dashboard invalidate cache */
+  private Runnable dashboardInvalidator;
+  private java.util.function.Consumer<com.auction.share.DTO.Response<?>> bidPushListener;
 
-  private static final DateTimeFormatter DISPLAY_FMT =
-      DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-  private static final DateTimeFormatter ISO_FMT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-  private static final DateTimeFormatter ALT_DB_FMT =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+  private void registerBidPushRefresh() {
+      if (bidPushListener != null && socketClient != null) {
+          socketClient.removePushListener(bidPushListener);
+      }
+      bidPushListener = response -> {
+          if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.BidUpdateEvent event) {
+              if (this.auctionId != null && this.auctionId.equals(event.getAuctionId())) {
+                  Platform.runLater(this::refreshData);
+              }
+          }
+      };
+      if (socketClient != null) {
+          socketClient.addPushListener(bidPushListener);
+      }
+  }
+
+  private void refreshData() {
+      if (auctionService == null) return;
+      auctionService.getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
+          if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
+              this.currentPrice = detail.getCurrentPrice();
+              if (currentHighBidLabel != null) {
+                  currentHighBidLabel.setText(String.format("%.0f VND", this.currentPrice));
+              }
+              if (totalBidsLabel != null) {
+                  int totalBids = detail.getBidHistory() != null ? detail.getBidHistory().size() : 0;
+                  totalBidsLabel.setText(String.valueOf(totalBids));
+              }
+              if (chartManager != null && detail.getBidHistory() != null) {
+                  chartManager.loadData(detail.getBidHistory(), startTimeISO, startingPrice, currentPrice);
+              }
+          }
+      }));
+  }
 
   @FXML
   public void initialize() {
     if (closeButton != null) {
       closeButton.setOnAction(
           e -> {
+            cleanup();
             Stage stage = (Stage) closeButton.getScene().getWindow();
             stage.close();
           });
     }
 
-    if (priceHistoryChart != null) {
-      NumberAxis yAxis = (NumberAxis) priceHistoryChart.getYAxis();
-      yAxis.setAutoRanging(true);
-      yAxis.setForceZeroInRange(false);
-      priceHistoryChart.getData().add(chartSeries);
-    }
+    countdownTimer = new AuctionCountdownTimer(endsInLabel);
+    chartManager = new BidHistoryChartManager(priceHistoryChart);
 
     if (cancelAuctionButton != null) {
       cancelAuctionButton.setOnAction(
           e -> {
-            Alert alert =
-                new Alert(
-                    Alert.AlertType.CONFIRMATION,
-                    "Are you sure you want to cancel this auction?",
-                    ButtonType.YES,
-                    ButtonType.NO);
-            alert
-                .showAndWait()
-                .ifPresent(
-                    res -> {
-                      if (res == ButtonType.YES) {
-                        com.auction.client.ClientContext.auctionService()
-                            .cancelAuction(
-                                auctionId,
-                                response ->
-                                    Platform.runLater(
-                                        () -> {
-                                          if (response != null && response.isSuccess()) {
-                                            cancelAuctionButton.setText("Cancelled");
-                                            cancelAuctionButton.setDisable(true);
-                                            if (endsInLabel != null)
-                                              endsInLabel.setText("Cancelled");
-                                            if (countdownTimeline != null) countdownTimeline.stop();
-                                          } else {
-                                            Alert error =
-                                                new Alert(
-                                                    Alert.AlertType.ERROR,
-                                                    "Failed to cancel auction: "
-                                                        + (response != null
-                                                            ? response.getMessage()
-                                                            : "Unknown error"));
-                                            error.show();
-                                          }
-                                        }));
-                      }
-                    });
+            // G2: Dùng NotificationManager thay Alert.CONFIRMATION
+            NotificationManager.showWarning("Đang hủy phiên đấu giá...");
+            if (auctionService == null) return;
+            auctionService
+                .cancelAuction(
+                    auctionId,
+                    response ->
+                        Platform.runLater(
+                            () -> {
+                              if (response != null && response.isSuccess()) {
+                                cancelAuctionButton.setText("Cancelled");
+                                cancelAuctionButton.setDisable(true);
+                                if (endsInLabel != null)
+                                  endsInLabel.setText("Cancelled");
+                                if (countdownTimer != null) countdownTimer.stop();
+                                // E2: Notify Dashboard to refresh
+                                if (dashboardInvalidator != null) dashboardInvalidator.run();
+                                NotificationManager.showSuccess("Đã hủy phiên đấu giá thành công!");
+                              } else {
+                                NotificationManager.showError(
+                                    "Không thể hủy: "
+                                        + (response != null
+                                            ? response.getMessage()
+                                            : "Unknown error"));
+                              }
+                            }));
           });
     }
 
@@ -124,11 +155,22 @@ public class SellerAuctionDetailController {
     }
   }
 
+  private void cleanup() {
+    if (countdownTimer != null) {
+      countdownTimer.stop();
+    }
+    if (bidPushListener != null && socketClient != null) {
+        socketClient.removePushListener(bidPushListener);
+        bidPushListener = null;
+    }
+  }
+
   private void handleSetBidStep() {
     if (bidStepField == null || bidStepField.getText().trim().isEmpty()) return;
     try {
       double step = Double.parseDouble(bidStepField.getText().trim());
-      com.auction.client.ClientContext.auctionService()
+      if (auctionService == null) return;
+      auctionService
           .setBidStep(
               auctionId,
               step,
@@ -136,23 +178,14 @@ public class SellerAuctionDetailController {
                   Platform.runLater(
                       () -> {
                         if (response != null && response.isSuccess()) {
-                          Alert success =
-                              new Alert(Alert.AlertType.INFORMATION, "Bid step updated to " + step);
-                          success.show();
+                          NotificationManager.showSuccess("Bid step updated to " + step);
                           bidStepField.clear();
                         } else {
-                          Alert error =
-                              new Alert(
-                                  Alert.AlertType.ERROR,
-                                  "Failed to update bid step: "
-                                      + (response != null
-                                          ? response.getMessage()
-                                          : "Unknown error"));
-                          error.show();
+                          NotificationManager.showError("Failed to update: " + (response != null ? response.getMessage() : "Unknown error"));
                         }
                       }));
     } catch (NumberFormatException e) {
-      new Alert(Alert.AlertType.ERROR, "Invalid bid step value!").show();
+      NotificationManager.showError("Invalid bid step value!");
     }
   }
 
@@ -167,6 +200,7 @@ public class SellerAuctionDetailController {
       String status,
       String auctionId) {
     this.auctionId = auctionId;
+    registerBidPushRefresh();
     this.currentPrice = price;
     this.startingPrice = price; // will be overridden if we later get real starting price
 
@@ -177,20 +211,13 @@ public class SellerAuctionDetailController {
     if (endTimeLabel != null) endTimeLabel.setText(time);
     if (startTimeLabel != null) startTimeLabel.setText("Loading...");
 
-    try {
-      this.endTime = LocalDateTime.parse(time, ISO_FMT);
-    } catch (Exception ex) {
-      try {
-        this.endTime = LocalDateTime.parse(time, DISPLAY_FMT);
-      } catch (Exception ignored) {
-        this.endTime = null;
-      }
-    }
-    startCountdown();
+    this.endTime = DateTimeUtils.parseDateTime(time);
+    if (countdownTimer != null) countdownTimer.start(this.endTime);
 
     // Fetch real detail from server to get startTime, bidHistory, etc.
-    com.auction.client.ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
-      if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
+    if (auctionService != null) {
+      auctionService.getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
+        if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
         this.currentPrice = detail.getCurrentPrice();
         this.startingPrice = detail.getStartingPrice();
         this.bidHistory = detail.getBidHistory() != null ? detail.getBidHistory() : new java.util.ArrayList<>();
@@ -201,14 +228,14 @@ public class SellerAuctionDetailController {
         // Update start/end time labels with real data from server (ISO format)
         this.startTimeISO = detail.getStartTime();
         if (detail.getStartTime() != null && startTimeLabel != null) {
-          startTimeLabel.setText(formatDateTimeForDisplay(detail.getStartTime()));
+          startTimeLabel.setText(DateTimeUtils.formatDateTimeForDisplay(detail.getStartTime()));
         }
         if (detail.getEndTime() != null) {
-          if (endTimeLabel != null) endTimeLabel.setText(formatDateTimeForDisplay(detail.getEndTime()));
-          LocalDateTime parsedEnd = parseDateTime(detail.getEndTime());
+          if (endTimeLabel != null) endTimeLabel.setText(DateTimeUtils.formatDateTimeForDisplay(detail.getEndTime()));
+          LocalDateTime parsedEnd = DateTimeUtils.parseDateTime(detail.getEndTime());
           if (parsedEnd != null) {
             this.endTime = parsedEnd;
-            startCountdown();
+            if (countdownTimer != null) countdownTimer.start(this.endTime);
           }
         }
 
@@ -224,106 +251,20 @@ public class SellerAuctionDetailController {
           }
         }
 
-        if (priceHistoryChart != null) {
-          loadChartData();
+        if (chartManager != null) {
+          chartManager.loadData(bidHistory, startTimeISO, startingPrice, currentPrice);
         }
       } else {
         // Fallback: load chart with what we have
-        if (priceHistoryChart != null) {
-          loadChartData();
+        if (chartManager != null) {
+          chartManager.loadData(bidHistory, startTimeISO, startingPrice, currentPrice);
         }
       }
     }));
-  }
-
-  private void loadChartData() {
-    if (priceHistoryChart == null) return;
-
-    chartSeries.getData().clear();
-
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM HH:mm");
-
-    // Collect qualifying bids sorted oldest-first
-    java.util.List<XYChart.Data<String, Number>> points = new java.util.ArrayList<>();
-
-    if (bidHistory != null && !bidHistory.isEmpty()) {
-      java.util.List<com.auction.share.DTO.BidDTO> sortedBids = new java.util.ArrayList<>(bidHistory);
-      sortedBids.sort((b1, b2) -> {
-        try {
-          return LocalDateTime.parse(b1.getTimestamp(), ISO_FMT)
-                             .compareTo(LocalDateTime.parse(b2.getTimestamp(), ISO_FMT));
-        } catch (Exception e) { return 0; }
-      });
-
-      for (com.auction.share.DTO.BidDTO bid : sortedBids) {
-        try {
-          LocalDateTime bidTime = LocalDateTime.parse(bid.getTimestamp(), ISO_FMT);
-          points.add(new XYChart.Data<>(bidTime.format(formatter), bid.getAmount()));
-        } catch (Exception ignored) {}
-      }
     }
-
-    // Always ensure at least a starting anchor
-    if (points.isEmpty()) {
-      String startLabel = "Start";
-      if (startTimeISO != null) {
-        try {
-          startLabel = LocalDateTime.parse(startTimeISO, ISO_FMT).format(formatter);
-        } catch (Exception ignored) {}
-      }
-      points.add(new XYChart.Data<>(startLabel, startingPrice > 0 ? startingPrice : currentPrice));
-    }
-
-    // Keep only the last MAX_CHART_POINTS entries
-    int from = Math.max(0, points.size() - MAX_CHART_POINTS);
-    chartSeries.getData().addAll(points.subList(from, points.size()));
   }
 
-  private void startCountdown() {
-    if (countdownTimeline != null) countdownTimeline.stop();
-    if (endTime == null) {
-      if (endsInLabel != null) endsInLabel.setText("N/A");
-      return;
-    }
-    countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> updateCountdown()));
-    countdownTimeline.setCycleCount(Animation.INDEFINITE);
-    countdownTimeline.play();
-    updateCountdown();
-  }
 
-  private void updateCountdown() {
-    if (endsInLabel == null) return;
-    LocalDateTime now = LocalDateTime.now();
-    if (now.isAfter(endTime)) {
-      endsInLabel.setText("Ended");
-      if (countdownTimeline != null) countdownTimeline.stop();
-      return;
-    }
-    long days = ChronoUnit.DAYS.between(now, endTime);
-    long hours = ChronoUnit.HOURS.between(now, endTime) % 24;
-    long minutes = ChronoUnit.MINUTES.between(now, endTime) % 60;
-    long seconds = ChronoUnit.SECONDS.between(now, endTime) % 60;
-    endsInLabel.setText(String.format("%dd %02dh %02dm %02ds", days, hours, minutes, seconds));
-  }
-
-  private static LocalDateTime parseDateTime(String raw) {
-    if (raw == null) return null;
-    String s = raw.trim();
-    if (s.isEmpty()) return null;
-
-    try { return LocalDateTime.parse(s, ISO_FMT); } catch (Exception ignored) {}
-    try { return LocalDateTime.parse(s, DISPLAY_FMT); } catch (Exception ignored) {}
-    try { return LocalDateTime.parse(s, ALT_DB_FMT); } catch (Exception ignored) {}
-    try { return LocalDateTime.parse(s.replace(' ', 'T'), ISO_FMT); } catch (Exception ignored) {}
-
-    return null;
-  }
-
-  private static String formatDateTimeForDisplay(String raw) {
-    LocalDateTime dt = parseDateTime(raw);
-    if (dt == null) return raw == null ? "N/A" : raw;
-    return dt.format(DISPLAY_FMT);
-  }
 
   public static void open(
       String icon,
@@ -342,11 +283,16 @@ public class SellerAuctionDetailController {
       Parent root = loader.load();
 
       SellerAuctionDetailController ctrl = loader.getController();
+      ctrl.setServices(
+          com.auction.client.ClientContext.auctionService(),
+          com.auction.client.ClientContext.socketClient()
+      );
       ctrl.setData(icon, category, name, price, bids, time, status, auctionId);
 
       Stage stage = new Stage();
       stage.setTitle("Seller Auction Management - " + name);
       stage.setScene(new Scene(root));
+      stage.setOnCloseRequest(e -> ctrl.cleanup());
       stage.show();
     } catch (IOException e) {
       e.printStackTrace();

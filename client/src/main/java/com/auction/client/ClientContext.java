@@ -5,9 +5,27 @@ import com.auction.client.service.AuctionService;
 import com.auction.client.service.BidService;
 import com.auction.client.service.UserService;
 
+import java.io.InputStream;
+import java.util.Properties;
+
 public final class ClientContext {
-  private static final String SERVER_HOST = "maglev.proxy.rlwy.net";
-  private static final int SERVER_PORT = 44658;
+  private static String SERVER_HOST = "localhost";
+  private static int SERVER_PORT = 12345;
+
+  static {
+    try (InputStream input = ClientContext.class.getClassLoader().getResourceAsStream("config.properties")) {
+      if (input != null) {
+        Properties prop = new Properties();
+        prop.load(input);
+        SERVER_HOST = prop.getProperty("server.host", "localhost");
+        SERVER_PORT = Integer.parseInt(prop.getProperty("server.port", "12345"));
+      } else {
+        System.err.println("Sorry, unable to find config.properties");
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
 
   private static final SocketClient SOCKET_CLIENT =
       new SocketClient(SERVER_HOST, SERVER_PORT);

@@ -28,7 +28,8 @@ public class DatabaseConnection {
     config.setUsername(dbUser);
     config.setPassword(dbPass);
 
-    config.setMaximumPoolSize(10); // giới hạn tối đa 10 kết nối cùng lúc đến DB
+    int poolSize = Integer.parseInt(AppConfig.getOrDefault("DB_POOL_SIZE", "20"));
+    config.setMaximumPoolSize(poolSize);
     config.addDataSourceProperty("cachePrepStmts", "true");
     config.addDataSourceProperty("prepStmtCacheSize", "250");
     config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");

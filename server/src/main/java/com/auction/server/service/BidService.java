@@ -7,6 +7,8 @@ import javax.sql.DataSource;
 import com.auction.share.DTO.BidUpdateEvent;
 import com.auction.share.DTO.PlaceBidRequest;
 import com.auction.share.exceptions.ValidationException;
+import com.auction.share.exceptions.ConcurrentBidException;
+import com.auction.share.exceptions.InsufficientBalanceException;
 import com.auction.share.models.auction.Auction;
 import com.auction.share.models.auction.BidTransaction;
 import com.auction.share.models.user.Bidder;
@@ -15,7 +17,6 @@ import java.util.Set;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class BidService implements IBidService {
@@ -23,7 +24,7 @@ public class BidService implements IBidService {
     private final AuctionDAO auctionDAO;
     private final BidTransactionDAO bidTransactionDAO;
     private final UserDAO userDAO;
-    private final BidBroadcastService bidBroadcastService;
+    private final BroadcastService bidBroadcastService;
 
 
     public BidService(
@@ -31,7 +32,7 @@ public class BidService implements IBidService {
             AuctionDAO auctionDAO,
             BidTransactionDAO bidTransactionDAO,
             UserDAO userDAO,
-            BidBroadcastService bidBroadcastService) {
+            BroadcastService bidBroadcastService) {
         this.dataSource = dataSource;
         this.auctionDAO = auctionDAO;
         this.bidTransactionDAO = bidTransactionDAO;
@@ -51,10 +52,10 @@ public class BidService implements IBidService {
 
             Bidder bidder = requireBidder(conn, req.getBidderId());
             if (req.getAmount() <= auction.getCurrentHighestBid()) {
-                throw new ValidationException("Bid amount must be higher than current highest bid.");
+                throw new ConcurrentBidException("Bid amount must be higher than current highest bid.");
             }
             if (req.getAmount() < auction.getCurrentHighestBid() + auction.getBidStep()) {
-                throw new ValidationException("Bid amount must be at least current price + bid step.");
+                throw new ConcurrentBidException("Bid amount must be at least current price + bid step.");
             }
 
             placeBidAndBroadcast(conn, auction, bidder, req.getAmount());
@@ -78,13 +79,13 @@ public class BidService implements IBidService {
                 }
                 
                 if (currentBalance - reservedInOtherRunningAuctions < requiredForThisBid) {
-                    throw new ValidationException("Insufficient balance.");
+                    throw new InsufficientBalanceException("Insufficient balance.");
                 }
 
                 // 3. Atomic check & update auction
                 boolean updated = auctionDAO.updateHighestBid(conn, auction.getId(), bidder.getId(), amount);
                 if (!updated) {
-                    throw new ValidationException(
+                    throw new ConcurrentBidException(
                             "Bid rejected: auction is not running, already ended, or current price changed.");
                 }
 
@@ -98,7 +99,7 @@ public class BidService implements IBidService {
                 // 5. Broadcast the new event
                 bidBroadcastService.broadcastBidUpdate(
                         new BidUpdateEvent(
-                                BidBroadcastService.BID_UPDATED,
+                                BroadcastService.BID_UPDATED,
                                 updatedAuction.getId(),
                                 bidder.getId(),
                                 bidder.getFullName(),

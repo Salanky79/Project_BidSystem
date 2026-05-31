@@ -20,9 +20,17 @@ public class FrameController {
   }
 
   protected void changeView(String fxmlFile) {
+    changeView(fxmlFile, null);
+  }
+
+  protected void changeView(String fxmlFile, java.util.function.Consumer<Object> controllerConfigurator) {
     try {
       FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
       Node newNode = loader.load();
+
+      if (controllerConfigurator != null) {
+          controllerConfigurator.accept(loader.getController());
+      }
 
       scrollContent.setContent(newNode);
       onViewChanged(newNode);
@@ -43,6 +51,10 @@ public class FrameController {
       FXMLLoader loader =
           new FXMLLoader(getClass().getResource("/com/auction/client/view/Login.fxml"));
       Parent loginRoot = loader.load();
+
+      if (loader.getController() instanceof LoginController loginCtrl) {
+        loginCtrl.setUserService(com.auction.client.ClientContext.userService());
+      }
 
       Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
       Scene scene = new Scene(loginRoot);

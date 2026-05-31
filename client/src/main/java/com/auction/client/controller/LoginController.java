@@ -22,7 +22,11 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 public class LoginController {
-  private final UserService userService = ClientContext.userService();
+  private UserService userService;
+
+  public void setUserService(UserService userService) {
+    this.userService = userService;
+  }
 
   @FXML private TextField usernameField;
 
@@ -124,6 +128,9 @@ public class LoginController {
       FXMLLoader loader =
           new FXMLLoader(getClass().getResource("/com/auction/client/view/SignupView.fxml"));
       Parent loginRoot = loader.load();
+      if (loader.getController() instanceof SignupController signupCtrl) {
+          signupCtrl.setUserService(this.userService);
+      }
       // tạo scene mới ( signup ) => gán vào stage hiện tại
       Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
       Scene scene = new Scene(loginRoot);

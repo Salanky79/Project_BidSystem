@@ -14,9 +14,9 @@ public class AuctionSummaryDTO implements Serializable {
   private final String status;
   private final String startTime;
   private final String endTime;
-  // Số lượt đặt giá – được tính sẵn phía server, tránh N+1 query từ client
   private final int bidCount;
   private final String imageUrl;
+  private final String highestBidderName;
 
   public AuctionSummaryDTO(
       String auctionId,
@@ -28,7 +28,8 @@ public class AuctionSummaryDTO implements Serializable {
       String startTime,
       String endTime,
       int bidCount,
-      String imageUrl) {
+      String imageUrl,
+      String highestBidderName) {
     this.auctionId = auctionId;
     this.itemName = itemName;
     this.category = category;
@@ -39,6 +40,7 @@ public class AuctionSummaryDTO implements Serializable {
     this.endTime = endTime;
     this.bidCount = bidCount;
     this.imageUrl = imageUrl;
+    this.highestBidderName = highestBidderName;
   }
 
 
@@ -80,5 +82,9 @@ public class AuctionSummaryDTO implements Serializable {
 
   public String getImageUrl() {
     return imageUrl;
+  }
+
+  public String getHighestBidderName() {
+    return highestBidderName;
   }
 }

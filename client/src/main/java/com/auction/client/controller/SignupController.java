@@ -22,7 +22,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class SignupController {
-  private final UserService userService = ClientContext.userService();
+  private UserService userService;
+
+  public void setUserService(UserService userService) {
+    this.userService = userService;
+  }
 
   @FXML private TextField fullnameField;
   @FXML private TextField usernameField;
@@ -167,11 +171,14 @@ public class SignupController {
           response ->
               Platform.runLater(
                   () -> {
-                    if (response.isSuccess()) {
+                    if (response != null && response.isSuccess()) {
                       openDashboard(role, fullName);
                     } else {
+                      String msg = (response != null && response.getMessage() != null)
+                          ? response.getMessage()
+                          : "Không thể kết nối Server!";
                       statusLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #cc3333;");
-                      statusLabel.setText(response.getMessage());
+                      statusLabel.setText(msg);
                     }
                   }));
     } catch (ValidationException e) {
@@ -184,6 +191,9 @@ public class SignupController {
       FXMLLoader loader =
           new FXMLLoader(getClass().getResource("/com/auction/client/view/Login.fxml"));
       Parent loginRoot = loader.load();
+      if (loader.getController() instanceof LoginController loginCtrl) {
+          loginCtrl.setUserService(this.userService);
+      }
 
       Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
       stage.setScene(new Scene(loginRoot));

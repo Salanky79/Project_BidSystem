@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.auction.server.dao.UserDAO;
+import javax.sql.DataSource;
 
 @ExtendWith(MockitoExtension.class)
 class AutoBidServiceTest {
@@ -42,10 +43,12 @@ class AutoBidServiceTest {
     private AuctionQueryService auctionQueryService;
     @Mock
     private UserDAO userDAO;
+    @Mock
+    private DataSource dataSource;
 
     @Test
     void register_invalidMaxBid_throwsValidation() {
-        AutoBidService service = new AutoBidService(registry, bidService, auctionQueryService, userDAO);
+        AutoBidService service = new AutoBidService(dataSource, registry, bidService, auctionQueryService, userDAO);
 
         RegisterAutoBidRequest req = new RegisterAutoBidRequest("a-1", 0, 10, "b-1");
         assertThrows(ValidationException.class, () -> service.register(req));
@@ -54,7 +57,7 @@ class AutoBidServiceTest {
 
     @Test
     void register_invalidIncrement_throwsValidation() {
-        AutoBidService service = new AutoBidService(registry, bidService, auctionQueryService, userDAO);
+        AutoBidService service = new AutoBidService(dataSource, registry, bidService, auctionQueryService, userDAO);
 
         RegisterAutoBidRequest req = new RegisterAutoBidRequest("a-1", 200, 0, "b-1");
         assertThrows(ValidationException.class, () -> service.register(req));
@@ -63,7 +66,7 @@ class AutoBidServiceTest {
 
     @Test
     void triggerAutoBid_skipLastBidder() throws Exception {
-        AutoBidService service = new AutoBidService(registry, bidService, auctionQueryService, userDAO);
+        AutoBidService service = new AutoBidService(dataSource, registry, bidService, auctionQueryService, userDAO);
         Auction auction = org.mockito.Mockito.spy(runningAuction(100));
 
         when(auctionQueryService.getAuctionById("a-1")).thenReturn(auction);
@@ -79,19 +82,19 @@ class AutoBidServiceTest {
             bidder.setID(req.getBidderId());
             auction.setHighestBid(bidder, req.getAmount());
             return true;
-        }).when(bidService).placeBid(any(PlaceBidRequest.class), eq(false));
+        }).when(bidService).placeBid(any(PlaceBidRequest.class));
 
         service.processAutoBid("a-1", "b-1");
 
         ArgumentCaptor<PlaceBidRequest> captor = ArgumentCaptor.forClass(PlaceBidRequest.class);
-        verify(bidService, times(1)).placeBid(captor.capture(), eq(false));
+        verify(bidService, times(1)).placeBid(captor.capture());
         assertEquals("b-2", captor.getValue().getBidderId());
         assertEquals(150.0, captor.getValue().getAmount(), 0.001);
     }
 
     @Test
     void triggerAutoBid_cancelWhenExceedMaxBid() throws Exception {
-        AutoBidService service = new AutoBidService(registry, bidService, auctionQueryService, userDAO);
+        AutoBidService service = new AutoBidService(dataSource, registry, bidService, auctionQueryService, userDAO);
         Auction auction = org.mockito.Mockito.spy(runningAuction(100));
 
         when(auctionQueryService.getAuctionById("a-1")).thenReturn(auction);
@@ -104,12 +107,12 @@ class AutoBidServiceTest {
         service.processAutoBid("a-1", "b-1");
 
         verify(registry).cancel("a-1", "b-2");
-        verify(bidService, never()).placeBid(any(PlaceBidRequest.class), eq(false));
+        verify(bidService, never()).placeBid(any(PlaceBidRequest.class));
     }
 
     @Test
     void triggerAutoBid_stopWhenAuctionClosed() throws Exception {
-        AutoBidService service = new AutoBidService(registry, bidService, auctionQueryService, userDAO);
+        AutoBidService service = new AutoBidService(dataSource, registry, bidService, auctionQueryService, userDAO);
         Auction auction = org.mockito.Mockito.spy(runningAuction(100));
 
         when(auctionQueryService.getAuctionById("a-1")).thenReturn(auction);
@@ -118,7 +121,7 @@ class AutoBidServiceTest {
         service.processAutoBid("a-1", "b-1");
 
         verify(registry, never()).getConfigs(any());
-        verify(bidService, never()).placeBid(any(PlaceBidRequest.class), eq(false));
+        verify(bidService, never()).placeBid(any(PlaceBidRequest.class));
     }
 
     private static Auction runningAuction(double currentPrice) {

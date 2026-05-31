@@ -25,7 +25,16 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 public class SellController implements Initializable {
-  private final AuctionService auctionService = ClientContext.auctionService();
+  private AuctionService auctionService;
+  private Runnable onSuccessCallback;
+
+  public void setAuctionService(AuctionService auctionService) {
+      this.auctionService = auctionService;
+  }
+
+  public void setOnSuccessCallback(Runnable callback) {
+    this.onSuccessCallback = callback;
+  }
 
   @FXML private TextField name;
   @FXML private ComboBox<String> category;
@@ -161,11 +170,37 @@ public class SellController implements Initializable {
   }
 
   private boolean validateInputs() {
-    return !name.getText().trim().isEmpty()
-        && category.getValue() != null
-        && !startingprice.getText().trim().isEmpty()
-        && enddate.getValue() != null
-        && startdate.getValue() != null;
+    if (name.getText().trim().isEmpty()) {
+      showError("Tên sản phẩm không được để trống!");
+      return false;
+    }
+    if (category.getValue() == null) {
+      showError("Vui lòng chọn danh mục!");
+      return false;
+    }
+    if (startingprice.getText().trim().isEmpty()) {
+      showError("Vui lòng nhập giá khởi điểm!");
+      return false;
+    }
+    try {
+      double price = Double.parseDouble(startingprice.getText().trim());
+      if (price <= 0) {
+        showError("Giá khởi điểm phải lớn hơn 0!");
+        return false;
+      }
+    } catch (NumberFormatException e) {
+      showError("Giá khởi điểm không hợp lệ!");
+      return false;
+    }
+    if (startdate.getValue() == null) {
+      showError("Vui lòng chọn ngày bắt đầu!");
+      return false;
+    }
+    if (enddate.getValue() == null) {
+      showError("Vui lòng chọn ngày kết thúc!");
+      return false;
+    }
+    return true;
   }
 
   private void showError(String message) {
@@ -222,78 +257,85 @@ public class SellController implements Initializable {
   private void submitAuction() {
     String listingName = name.getText().trim();
     String listingCategory = category.getValue();
-    String listingPrice = startingprice.getText().trim();
+    String listingPriceStr = startingprice.getText().trim();
     LocalDate endDate = enddate.getValue();
     LocalDate startDate = startdate.getValue();
     String listingDesc = description.getText().trim();
 
     if (!validateInputs()) {
-      showError("Please fill out the entire form.");
       return;
     }
 
+    double listingPrice;
+    try {
+      listingPrice = Double.parseDouble(listingPriceStr);
+    } catch (NumberFormatException e) {
+      showError("Giá khởi điểm không hợp lệ!");
+      return;
+    }
     String eHH = endHour.getValue() != null ? endHour.getValue() : "23";
     String emm = endMinute.getValue() != null ? endMinute.getValue() : "59";
     String sHH = startHour.getValue() != null ? startHour.getValue() : "00";
     String smm = startMinute.getValue() != null ? startMinute.getValue() : "00";
 
-    String startTimeStr =
-        startDate
-            .atTime(Integer.parseInt(sHH), Integer.parseInt(smm))
-            .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-    String endTimeStr =
-        endDate
-            .atTime(Integer.parseInt(eHH), Integer.parseInt(emm))
-            .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-
-    byte[] imageBytes = null;
-    String imageName = null;
-
-    if (selectedImageFile != null) {
-      if (selectedImageFile.length() > 5 * 1024 * 1024) {
-        showError("Kích thước ảnh vượt quá giới hạn cho phép (tối đa 5MB)!");
-        return;
-      }
-      try {
-        imageBytes = java.nio.file.Files.readAllBytes(selectedImageFile.toPath());
-        imageName = selectedImageFile.getName();
-      } catch (java.io.IOException e) {
-        showError("Không thể đọc tệp hình ảnh đã chọn!");
-        return;
-      }
-    }
+    LocalDateTime startTime = startDate.atTime(Integer.parseInt(sHH), Integer.parseInt(smm));
+    LocalDateTime endTime = endDate.atTime(Integer.parseInt(eHH), Integer.parseInt(emm));
 
     // Disable button to prevent double-click or multiple submissions
     addButton.setDisable(true);
     addButton.setText("Adding...");
 
+    if (selectedImageFile != null) {
+      if (selectedImageFile.length() > 5 * 1024 * 1024) {
+        showError("Kích thước ảnh vượt quá giới hạn cho phép (tối đa 5MB)!");
+        addButton.setDisable(false);
+        addButton.setText("Add");
+        return;
+      }
+      java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+        try {
+          return java.nio.file.Files.readAllBytes(selectedImageFile.toPath());
+        } catch (java.io.IOException e) {
+          throw new RuntimeException(e);
+        }
+      }).thenAcceptAsync(bytes -> {
+        // C1: Chạy trên background thread (ForkJoinPool) — KHÔNG dùng Platform::runLater ở đây
+        // để tránh socket I/O block JavaFX thread
+        doSubmitAuction(listingName, listingDesc, listingCategory, listingPrice, startTime, endTime, bytes, selectedImageFile.getName());
+      }).exceptionally(e -> {
+        Platform.runLater(() -> {
+          showError("Không thể đọc tệp hình ảnh đã chọn!");
+          addButton.setDisable(false);
+          addButton.setText("Add");
+        });
+        return null;
+      });
+    } else {
+      doSubmitAuction(listingName, listingDesc, listingCategory, listingPrice, startTime, endTime, null, null);
+    }
+  }
+
+  private void doSubmitAuction(String listingName, String listingDesc, String listingCategory, double listingPrice, LocalDateTime startTime, LocalDateTime endTime, byte[] imageBytes, String imageName) {
     try {
-      auctionService.createAuction(
-          listingName,
-          listingDesc,
-          listingCategory,
-          listingPrice,
-          startTimeStr,
-          endTimeStr,
-          imageBytes,
-          imageName,
-          response ->
-              Platform.runLater(
-                  () -> {
-                    addButton.setDisable(false);
-                    addButton.setText("Add");
-                    if (response != null && response.isSuccess()) {
-                      showSuccess();
-                      clearFields();
-                    } else {
-                      showError(
-                          response != null ? response.getMessage() : "Server connection failed.");
-                    }
-                  }));
+      auctionService.createAuction(listingName, listingDesc, listingCategory, listingPrice, startTime, endTime, imageBytes, imageName, response -> Platform.runLater(() -> {
+        addButton.setDisable(false);
+        addButton.setText("Add");
+        if (response != null && response.isSuccess()) {
+          showSuccess();
+          clearFields();
+          if (onSuccessCallback != null) {
+              onSuccessCallback.run();
+          }
+        } else {
+          showError(response != null ? response.getMessage() : "Server connection failed.");
+        }
+      }));
     } catch (ValidationException e) {
-      addButton.setDisable(false);
-      addButton.setText("Add");
-      showError(e.getMessage());
+      Platform.runLater(() -> {
+        addButton.setDisable(false);
+        addButton.setText("Add");
+        showError(e.getMessage());
+      });
     }
   }
 

@@ -25,12 +25,12 @@ public class AuctionService {
       String itemName,
       String description,
       String category,
-      String startingPriceStr,
-      String startTimeStr,
-      String endTimeStr,
+      double startingPrice,
+      LocalDateTime startTime,
+      LocalDateTime endTime,
       Consumer<Response<?>> onResponse)
       throws ValidationException {
-    createAuction(itemName, description, category, startingPriceStr, startTimeStr, endTimeStr, null, null, onResponse);
+    createAuction(itemName, description, category, startingPrice, startTime, endTime, null, null, onResponse);
   }
 
   /** Tạo một phiên đấu giá mới kèm theo ảnh. */
@@ -38,39 +38,24 @@ public class AuctionService {
       String itemName,
       String description,
       String category,
-      String startingPriceStr,
-      String startTimeStr,
-      String endTimeStr,
+      double startingPrice,
+      LocalDateTime startTime,
+      LocalDateTime endTime,
       byte[] imageBytes,
       String imageName,
       Consumer<Response<?>> onResponse)
       throws ValidationException {
-    if (itemName == null || itemName.trim().isEmpty()) {
-      throw new ValidationException("Tên sản phẩm không được để trống!");
+    // Bỏ UI-rule validation (itemName/category empty) — SellController đã kiểm tra
+    // Chỉ giữ business-rule validation
+    if (startingPrice <= 0) {
+      throw new ValidationException("Giá khởi điểm phải lớn hơn 0!");
     }
-    if (category == null || category.trim().isEmpty()) {
-      throw new ValidationException("Danh mục không được để trống!");
-    }
-
-    double startingPrice;
-    try {
-      startingPrice = Double.parseDouble(startingPriceStr);
-      if (startingPrice <= 0) {
-        throw new ValidationException("Giá khởi điểm phải lớn hơn 0!");
-      }
-    } catch (NumberFormatException e) {
-      throw new ValidationException("Giá khởi điểm không hợp lệ!");
+    if (endTime.isBefore(startTime)) {
+      throw new ValidationException("Thời gian kết thúc phải sau thời gian bắt đầu!");
     }
 
-    try {
-      LocalDateTime startTime = LocalDateTime.parse(startTimeStr, FORMATTER);
-      LocalDateTime endTime = LocalDateTime.parse(endTimeStr, FORMATTER);
-      if (endTime.isBefore(startTime)) {
-        throw new ValidationException("Thời gian kết thúc phải sau thời gian bắt đầu!");
-      }
-    } catch (DateTimeParseException e) {
-      throw new ValidationException("Định dạng thời gian không hợp lệ!");
-    }
+    String startTimeStr = startTime.format(FORMATTER);
+    String endTimeStr = endTime.format(FORMATTER);
 
     CreateAuctionRequest request =
         new CreateAuctionRequest(

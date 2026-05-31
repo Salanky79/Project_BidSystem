@@ -5,6 +5,8 @@ import com.auction.share.DTO.CancelAutoBidRequest;
 import com.auction.share.DTO.PlaceBidRequest;
 import com.auction.share.DTO.RegisterAutoBidRequest;
 import com.auction.share.exceptions.ValidationException;
+import com.auction.share.exceptions.ConcurrentBidException;
+import com.auction.share.exceptions.InsufficientBalanceException;
 import com.auction.share.models.auction.Auction;
 import com.auction.server.util.DatabaseConnection;
 import javax.sql.DataSource;
@@ -23,7 +25,7 @@ import com.auction.share.models.user.User;
 import com.auction.share.models.user.Bidder;
 
 /** Dịch vụ xử lý logic đặt giá tự động (Auto-bid), tự động ra giá thay người dùng. */
-public class AutoBidService {
+public class AutoBidService implements IAutoBidService {
   private static final int MAX_STEPS_PER_TRIGGER = 50;
 
     private final DataSource dataSource;
@@ -151,6 +153,12 @@ public class AutoBidService {
                     Thread.currentThread().interrupt();
                     return;
                 }
+            } catch (ConcurrentBidException e) {
+                continue;
+            } catch (InsufficientBalanceException e) {
+                registry.cancel(candidate.getAuctionId(), candidate.getBidderId());
+            } catch (SQLException e) {
+                return;
             } catch (Exception e) {
                 registry.cancel(candidate.getAuctionId(), candidate.getBidderId());
                 return;

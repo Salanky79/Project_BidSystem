@@ -3,6 +3,7 @@ package com.auction.client.controller;
 import com.auction.client.ClientContext;
 import com.auction.client.service.AuctionService;
 
+import com.auction.client.utils.CategoryUtils;
 import com.auction.share.DTO.AuctionSummaryDTO;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,9 +19,13 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
-public class HomeController extends HomeFrameController {
+public class HomeController {
 
-  private final AuctionService auctionService = ClientContext.auctionService();
+  private AuctionService auctionService;
+
+  public void setAuctionService(AuctionService auctionService) {
+    this.auctionService = auctionService;
+  }
 
   // ── FXML bindings ──────────────────────────────────────────────────────────
   @FXML private GridPane auctionGrid;
@@ -158,7 +163,7 @@ public class HomeController extends HomeFrameController {
           HBox node = loader.load();
           ItemCardController cardController = loader.getController();
           cardController.setData(
-              iconForCategory(dto.getCategory()),
+              CategoryUtils.iconFor(dto.getCategory()),
               dto.getCategory(),
               dto.getItemName(),
               dto.getCurrentPrice(),
@@ -167,7 +172,8 @@ public class HomeController extends HomeFrameController {
               dto.getEndTime(),
               dto.getStatus(),
               dto.getAuctionId(),
-              dto.getImageUrl());
+              dto.getImageUrl(),
+              dto.getHighestBidderName());
           return node;
         } catch (IOException e) {
           e.printStackTrace();
@@ -188,10 +194,14 @@ public class HomeController extends HomeFrameController {
   // ── Filter helpers ────────────────────────────────────────────────────────
   /** Status filter: used by sidebar navigation (All / Active …). */
   private boolean matchesStatusFilter(String filterStatus, String status, String auctionId) {
-    if ("CANCELED".equalsIgnoreCase(status) || "Draft".equalsIgnoreCase(status)) {
+    com.auction.share.enums.AuctionStatus auctionStatus = com.auction.share.enums.AuctionStatus.from(status);
+    if (!auctionStatus.isVisible()) {
       return false;
     }
-    return "All".equalsIgnoreCase(filterStatus) || status.equalsIgnoreCase(filterStatus);
+    if ("All".equalsIgnoreCase(filterStatus)) {
+      return true;
+    }
+    return auctionStatus == com.auction.share.enums.AuctionStatus.from(filterStatus);
   }
 
   /**
@@ -224,16 +234,4 @@ public class HomeController extends HomeFrameController {
     }
   }
 
-  private String iconForCategory(String category) {
-    if (category == null) return "📦";
-    return switch (category) {
-      case "Antique" -> "🏺";
-      case "Art" -> "🖼";
-      case "Electronic" -> "📱";
-      case "Jewelry" -> "💍";
-      case "RealEstate" -> "🏠";
-      case "Vehicle" -> "🚗";
-      default -> "📦";
-    };
-  }
 }

@@ -14,6 +14,6 @@ public interface UserDAO {
     boolean updateProfile(Connection conn, String userId, String fullName, String email, String address, String phoneNumber, String password) throws SQLException;
 
     double findBalanceForUpdate(Connection conn, String userId) throws SQLException;
-    int deductWinningBidders(Connection conn, Timestamp endTime) throws SQLException;
-    int creditSellers(Connection conn, Timestamp endTime) throws SQLException;
+    int deductWinningBidders(Connection conn, java.util.List<String> auctionIds) throws SQLException;
+    int creditSellers(Connection conn, java.util.List<String> auctionIds) throws SQLException;
 }

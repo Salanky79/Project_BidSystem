@@ -30,12 +30,12 @@ class BidCoordinatorTest {
     @Test
     void placeBidAndTriggerAuto_success() throws SQLException, ValidationException {
         PlaceBidRequest request = new PlaceBidRequest("auc-1", "bidder-1", 100.0);
-        when(bidService.placeBid(request, false)).thenReturn(true);
+        when(bidService.placeBid(request)).thenReturn(true);
 
         boolean result = bidCoordinator.placeBidAndTriggerAuto(request);
 
         assertTrue(result);
-        verify(bidService).placeBid(request, false);
+        verify(bidService).placeBid(request);
         verify(autoBidService).triggerAutoBid("auc-1", "bidder-1");
     }
 }

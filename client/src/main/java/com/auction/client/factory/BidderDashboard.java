@@ -16,8 +16,15 @@ public class BidderDashboard implements DashboardProduct {
     if (controller != null) {
       controller.handleHome(); // Load Home.fxml inside HomeFrame and fetch auctions
     }
-
-    return new Scene(root);
+    Scene scene = new Scene(root);
+    if (controller != null) {
+      scene.windowProperty().addListener((obs, oldWin, newWin) -> {
+        if (newWin instanceof javafx.stage.Stage stage) {
+          stage.setOnCloseRequest(e -> controller.cleanup());
+        }
+      });
+    }
+    return scene;
   }
 
   @Override

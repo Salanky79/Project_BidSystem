@@ -1,7 +1,7 @@
 package com.auction.server.controller;
 
 import com.auction.server.service.IAuctionService;
-import com.auction.server.service.AutoBidService;
+import com.auction.server.service.IAutoBidService;
 import com.auction.share.DTO.*;
 import com.auction.server.mapper.AuctionMapper;
 import com.auction.share.exceptions.ValidationException;
@@ -15,14 +15,14 @@ import java.util.List;
  */
 public class AuctionController {
   private final IAuctionService auctionService;
-  private final AutoBidService autoBidService;
+  private final IAutoBidService autoBidService;
   private final com.auction.server.service.BidCoordinator bidCoordinator;
   private final com.auction.server.service.AuctionQueryService auctionQueryService;
 
   // khởi tạo controller với các service tương ứng
   public AuctionController(
       IAuctionService auctionService,
-      AutoBidService autoBidService,
+      IAutoBidService autoBidService,
       com.auction.server.service.BidCoordinator bidCoordinator,
       com.auction.server.service.AuctionQueryService auctionQueryService) {
     this.auctionService = auctionService;

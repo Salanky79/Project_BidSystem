@@ -120,40 +120,46 @@ public class UserDAOImpl implements UserDAO {
         return 0.0;
     }
 
-    public int deductWinningBidders(Connection conn, java.sql.Timestamp endTime) throws SQLException {
+    public int deductWinningBidders(Connection conn, List<String> auctionIds) throws SQLException {
+        if (auctionIds == null || auctionIds.isEmpty()) return 0;
+        String placeholders = String.join(",", java.util.Collections.nCopies(auctionIds.size(), "?"));
         String sql = """
                 UPDATE users u
                 JOIN (
                     SELECT highest_bidder_id, SUM(current_price) AS total_amount
                     FROM auctions
-                    WHERE status = 'RUNNING'
-                      AND end_time <= ?
+                    WHERE id IN (%s)
                       AND highest_bidder_id IS NOT NULL
                     GROUP BY highest_bidder_id
                 ) win ON u.id = win.highest_bidder_id
                 SET u.balance = u.balance - win.total_amount
-                """;
+                """.formatted(placeholders);
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setTimestamp(1, endTime);
+            for (int i = 0; i < auctionIds.size(); i++) {
+                ps.setString(i + 1, auctionIds.get(i));
+            }
             return ps.executeUpdate();
         }
     }
 
-    public int creditSellers(Connection conn, java.sql.Timestamp endTime) throws SQLException {
+    public int creditSellers(Connection conn, List<String> auctionIds) throws SQLException {
+        if (auctionIds == null || auctionIds.isEmpty()) return 0;
+        String placeholders = String.join(",", java.util.Collections.nCopies(auctionIds.size(), "?"));
         String sql = """
                 UPDATE users u
                 JOIN (
                     SELECT seller_id, SUM(current_price) AS total_amount
                     FROM auctions
-                    WHERE status = 'RUNNING'
-                      AND end_time <= ?
+                    WHERE id IN (%s)
                       AND highest_bidder_id IS NOT NULL
                     GROUP BY seller_id
                 ) sold ON u.id = sold.seller_id
                 SET u.balance = u.balance + sold.total_amount
-                """;
+                """.formatted(placeholders);
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setTimestamp(1, endTime);
+            for (int i = 0; i < auctionIds.size(); i++) {
+                ps.setString(i + 1, auctionIds.get(i));
+            }
             return ps.executeUpdate();
         }
     }

@@ -28,7 +28,7 @@ public interface AuctionDAO {
     boolean updateBidStep(Connection conn, String auctionId, double step) throws SQLException;
     
     int markOpenAuctionsAsRunning(Connection conn) throws SQLException;
-    int finishAuctions(Connection conn, Timestamp endTime) throws SQLException;
+    int finishAuctions(Connection conn, List<String> auctionIds) throws SQLException;
     
     List<String> findEndedRunningAuctionIds(Connection conn, LocalDateTime now) throws SQLException;
 }

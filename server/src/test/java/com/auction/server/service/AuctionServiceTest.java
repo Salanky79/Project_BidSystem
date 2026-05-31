@@ -18,8 +18,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
-import com.auction.server.util.DatabaseConnection;
 import static org.mockito.Mockito.mock;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -41,17 +41,14 @@ class AuctionServiceTest {
     @Mock
     private UserDAO userDAO;
 
+    @Mock
+    private DataSource dataSource;
     private Connection mockConn;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         mockConn = mock(Connection.class);
-        DatabaseConnection.setTestConnection(mockConn);
-    }
-
-    @AfterEach
-    void tearDown() {
-        DatabaseConnection.setTestConnection(null);
+        when(dataSource.getConnection()).thenReturn(mockConn);
     }
 
     @Test
@@ -59,7 +56,7 @@ class AuctionServiceTest {
         Seller seller = seller("seller-1");
         when(userDAO.findById(any(Connection.class), eq("seller-1"))).thenReturn(seller);
 
-        AuctionService service = new AuctionService(auctionDAO, itemDAO, userDAO);
+        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO);
         LocalDateTime start = LocalDateTime.now().plusHours(2);
         LocalDateTime end = LocalDateTime.now().plusHours(1);
         CreateAuctionRequest request = createRequest("seller-1", start, end);
@@ -72,7 +69,7 @@ class AuctionServiceTest {
         Bidder bidder = new Bidder("b", "p", "Bidder", "090", "b@mail.com", "HN");
         when(userDAO.findById(any(Connection.class), eq("seller-1"))).thenReturn(bidder);
 
-        AuctionService service = new AuctionService(auctionDAO, itemDAO, userDAO);
+        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO);
         CreateAuctionRequest request = createRequest("seller-1", LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(2));
 
         assertThrows(ValidationException.class, () -> service.createAuction(request));
@@ -85,7 +82,7 @@ class AuctionServiceTest {
         when(itemDAO.saveItem(any(Connection.class), any(Item.class))).thenReturn(true);
         when(auctionDAO.saveAuction(any(Connection.class), any(Auction.class))).thenReturn(true);
 
-        AuctionService service = new AuctionService(auctionDAO, itemDAO, userDAO);
+        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO);
         CreateAuctionRequest request = createRequest("seller-1", LocalDateTime.now().plusMinutes(1), LocalDateTime.now().plusHours(2));
 
         service.createAuction(request);

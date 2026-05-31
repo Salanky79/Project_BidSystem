@@ -12,4 +12,9 @@ public class AppConfig {
         }
         return dotenv.get(key);
     }
+
+    public static String getOrDefault(String key, String defaultValue) {
+        String value = get(key);
+        return value != null && !value.isBlank() ? value : defaultValue;
+    }
 }

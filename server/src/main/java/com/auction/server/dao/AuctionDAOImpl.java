@@ -14,6 +14,40 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 public class AuctionDAOImpl implements AuctionDAO {
+    private static final int SNIPE_THRESHOLD_SECONDS = 10;
+    private static final int SNIPE_EXTENSION_SECONDS = 30;
+
+
+    private List<Auction> queryAuctions(Connection conn, String whereAndOrderClause, Object... params) throws SQLException {
+        List<Auction> list = new ArrayList<>();
+        String sql = """
+            SELECT a.id, a.item_id, a.seller_id, a.current_price, a.highest_bidder_id, a.start_time, a.end_time, a.bid_step, a.status, a.bid_count,
+                   i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category, i.image_url AS item_image_url,
+                   s.username AS seller_username, s.fullname AS seller_fullname, s.phoneNumber AS seller_phoneNumber, s.email AS seller_email, s.address AS seller_address, s.balance AS seller_balance,
+                   b.username AS bidder_username, b.fullname AS bidder_fullname, b.phoneNumber AS bidder_phoneNumber, b.email AS bidder_email, b.address AS bidder_address, b.balance AS bidder_balance
+            FROM auctions a
+            JOIN items i ON a.item_id = i.id
+            JOIN users s ON a.seller_id = s.id
+            LEFT JOIN users b ON a.highest_bidder_id = b.id
+            """ + (whereAndOrderClause != null ? whereAndOrderClause : "");
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (params != null) {
+                for (int i = 0; i < params.length; i++) {
+                    ps.setObject(i + 1, params[i]);
+                }
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Auction auction = AuctionMapper.extractAuctionFromDB(rs);
+                    if (auction != null) {
+                        list.add(auction);
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
     public AuctionDAOImpl() {}
 
     public boolean saveAuction(Connection conn, Auction auction) throws SQLException {
@@ -51,143 +85,27 @@ public class AuctionDAOImpl implements AuctionDAO {
     }
 
     public Auction findById(Connection conn, String id) throws SQLException {
-        String sql = """
-                SELECT a.id, a.item_id, a.seller_id, a.current_price, a.highest_bidder_id, a.start_time, a.end_time, a.bid_step, a.status, a.bid_count,
-                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category, i.image_url AS item_image_url,
-                       s.username AS seller_username, s.fullname AS seller_fullname, s.phoneNumber AS seller_phoneNumber, s.email AS seller_email, s.address AS seller_address, s.balance AS seller_balance,
-                       b.username AS bidder_username, b.fullname AS bidder_fullname, b.phoneNumber AS bidder_phoneNumber, b.email AS bidder_email, b.address AS bidder_address, b.balance AS bidder_balance
-                FROM auctions a
-                JOIN items i ON a.item_id = i.id
-                JOIN users s ON a.seller_id = s.id
-                LEFT JOIN users b ON a.highest_bidder_id = b.id
-                WHERE a.id = ?
-                """;
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return AuctionMapper.extractAuctionFromDB(rs);
-                }
-            }
-        }
-        return null;
+        List<Auction> list = queryAuctions(conn, "WHERE a.id = ?", id);
+        return list.isEmpty() ? null : list.get(0);
     }
 
 
     public List<Auction> findAll(Connection conn) throws SQLException {
-        List<Auction> list = new ArrayList<>();
-        String sql = """
-                SELECT a.id, a.item_id, a.seller_id, a.current_price, a.highest_bidder_id, a.start_time, a.end_time, a.bid_step, a.status, a.bid_count,
-                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category, i.image_url AS item_image_url,
-                       s.username AS seller_username, s.fullname AS seller_fullname, s.phoneNumber AS seller_phoneNumber, s.email AS seller_email, s.address AS seller_address, s.balance AS seller_balance,
-                       b.username AS bidder_username, b.fullname AS bidder_fullname, b.phoneNumber AS bidder_phoneNumber, b.email AS bidder_email, b.address AS bidder_address, b.balance AS bidder_balance
-                FROM auctions a
-                JOIN items i ON a.item_id = i.id
-                JOIN users s ON a.seller_id = s.id
-                LEFT JOIN users b ON a.highest_bidder_id = b.id
-                ORDER BY a.start_time DESC
-                """;
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-             
-            while (rs.next()) {
-                Auction auction = AuctionMapper.extractAuctionFromDB(rs);
-                if (auction != null) {
-                    list.add(auction);
-                }
-            }
-        }
-        return list;
+        return queryAuctions(conn, "ORDER BY a.start_time DESC");
     }
 
     public List<Auction> findByStatus(Connection conn, AuctionStatus status) throws SQLException {
-        List<Auction> list = new ArrayList<>();
-        String sql = """
-                SELECT a.id, a.item_id, a.seller_id, a.current_price, a.highest_bidder_id, a.start_time, a.end_time, a.bid_step, a.status, a.bid_count,
-                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category, i.image_url AS item_image_url,
-                       s.username AS seller_username, s.fullname AS seller_fullname, s.phoneNumber AS seller_phoneNumber, s.email AS seller_email, s.address AS seller_address, s.balance AS seller_balance,
-                       b.username AS bidder_username, b.fullname AS bidder_fullname, b.phoneNumber AS bidder_phoneNumber, b.email AS bidder_email, b.address AS bidder_address, b.balance AS bidder_balance
-                FROM auctions a
-                JOIN items i ON a.item_id = i.id
-                JOIN users s ON a.seller_id = s.id
-                LEFT JOIN users b ON a.highest_bidder_id = b.id
-                WHERE a.status = ?
-                ORDER BY a.start_time DESC
-                """;
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, status.name());
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Auction auction = AuctionMapper.extractAuctionFromDB(rs);
-                    if (auction != null) {
-                        list.add(auction);
-                    }
-                }
-            }
-        }
-        return list;
+        return queryAuctions(conn, "WHERE a.status = ? ORDER BY a.start_time DESC", status.name());
     }
 
     /** Lấy tất cả auction của một seller cụ thể */
     public List<Auction> findBySeller(Connection conn, String sellerId) throws SQLException {
-        List<Auction> list = new ArrayList<>();
-        String sql = """
-                SELECT a.id, a.item_id, a.seller_id, a.current_price, a.highest_bidder_id, a.start_time, a.end_time, a.bid_step, a.status, a.bid_count,
-                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category, i.image_url AS item_image_url,
-                       s.username AS seller_username, s.fullname AS seller_fullname, s.phoneNumber AS seller_phoneNumber, s.email AS seller_email, s.address AS seller_address, s.balance AS seller_balance,
-                       b.username AS bidder_username, b.fullname AS bidder_fullname, b.phoneNumber AS bidder_phoneNumber, b.email AS bidder_email, b.address AS bidder_address, b.balance AS bidder_balance
-                FROM auctions a
-                JOIN items i ON a.item_id = i.id
-                JOIN users s ON a.seller_id = s.id
-                LEFT JOIN users b ON a.highest_bidder_id = b.id
-                WHERE a.seller_id = ?
-                ORDER BY a.start_time DESC
-                """;
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, sellerId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Auction auction = AuctionMapper.extractAuctionFromDB(rs);
-                    if (auction != null) {
-                        list.add(auction);
-                    }
-                }
-            }
-        }
-        return list;
+        return queryAuctions(conn, "WHERE a.seller_id = ? ORDER BY a.start_time DESC", sellerId);
     }
 
     /** Lấy auction của seller cụ thể lọc theo status */
     public List<Auction> findBySellerAndStatus(Connection conn, String sellerId, AuctionStatus status) throws SQLException {
-        List<Auction> list = new ArrayList<>();
-        String sql = """
-                SELECT a.id, a.item_id, a.seller_id, a.current_price, a.highest_bidder_id, a.start_time, a.end_time, a.bid_step, a.status, a.bid_count,
-                       i.name AS item_name, i.description AS item_description, i.starting_price AS item_starting_price, i.category AS item_category, i.image_url AS item_image_url,
-                       s.username AS seller_username, s.fullname AS seller_fullname, s.phoneNumber AS seller_phoneNumber, s.email AS seller_email, s.address AS seller_address, s.balance AS seller_balance,
-                       b.username AS bidder_username, b.fullname AS bidder_fullname, b.phoneNumber AS bidder_phoneNumber, b.email AS bidder_email, b.address AS bidder_address, b.balance AS bidder_balance
-                FROM auctions a
-                JOIN items i ON a.item_id = i.id
-                JOIN users s ON a.seller_id = s.id
-                LEFT JOIN users b ON a.highest_bidder_id = b.id
-                WHERE a.seller_id = ? AND a.status = ?
-                ORDER BY a.start_time DESC
-                """;
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, sellerId);
-            ps.setString(2, status.name());
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Auction auction = AuctionMapper.extractAuctionFromDB(rs);
-                    if (auction != null) {
-                        list.add(auction);
-                    }
-                }
-            }
-        }
-        return list;
+        return queryAuctions(conn, "WHERE a.seller_id = ? AND a.status = ? ORDER BY a.start_time DESC", sellerId, status.name());
     }
 
 
@@ -230,10 +148,10 @@ public class AuctionDAOImpl implements AuctionDAO {
                     a.highest_bidder_id = ?,
                     a.bid_count = a.bid_count + 1,
                     a.end_time = CASE
-                        WHEN TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP, a.end_time) <= 10
+                        WHEN TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP, a.end_time) <= %d
                              AND TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP, a.end_time) >= 0
                              AND (a.highest_bidder_id IS NULL OR a.highest_bidder_id <> ?)
-                        THEN DATE_ADD(a.end_time, INTERVAL 30 SECOND)
+                        THEN DATE_ADD(a.end_time, INTERVAL %d SECOND)
                         ELSE a.end_time
                     END
                 WHERE a.id = ?
@@ -241,7 +159,7 @@ public class AuctionDAOImpl implements AuctionDAO {
                   AND a.start_time <= CURRENT_TIMESTAMP
                   AND a.end_time > CURRENT_TIMESTAMP
                   AND ? >= (a.current_price + a.bid_step)
-             """;
+             """.formatted(SNIPE_THRESHOLD_SECONDS, SNIPE_EXTENSION_SECONDS);
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDouble(1, amount);
             ps.setString(2, bidderId);
@@ -277,17 +195,21 @@ public class AuctionDAOImpl implements AuctionDAO {
         }
     }
 
-    public int finishAuctions(Connection conn, java.sql.Timestamp endTime) throws SQLException {
+    public int finishAuctions(Connection conn, List<String> auctionIds) throws SQLException {
+        if (auctionIds == null || auctionIds.isEmpty()) return 0;
+        String placeholders = String.join(",", java.util.Collections.nCopies(auctionIds.size(), "?"));
         String finishSql = """
                 UPDATE auctions
                 SET status = ?
-                WHERE status = ?
-                  AND end_time <= ?
-                """;
+                WHERE id IN (%s)
+                  AND status = ?
+                """.formatted(placeholders);
         try (PreparedStatement finishPs = conn.prepareStatement(finishSql)) {
             finishPs.setString(1, AuctionStatus.FINISHED.name());
-            finishPs.setString(2, AuctionStatus.RUNNING.name());
-            finishPs.setTimestamp(3, endTime);
+            for (int i = 0; i < auctionIds.size(); i++) {
+                finishPs.setString(i + 2, auctionIds.get(i));
+            }
+            finishPs.setString(auctionIds.size() + 2, AuctionStatus.RUNNING.name());
             return finishPs.executeUpdate();
         }
     }

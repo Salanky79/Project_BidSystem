@@ -17,8 +17,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.AfterEach;
-import com.auction.server.util.DatabaseConnection;
 import static org.mockito.Mockito.mock;
+import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -43,6 +43,9 @@ class UserServiceTest {
     @Mock
     private com.auction.server.dao.AuctionDAO auctionDAO;
 
+    @Mock
+    private DataSource dataSource;
+
     private UserMapper userMapper;
 
     private UserService userService;
@@ -52,14 +55,9 @@ class UserServiceTest {
     @BeforeEach
     void setUp() throws Exception {
         userMapper = new UserMapper();
-        userService = new UserService(userDAO, bidTransactionDAO, auctionDAO, userMapper);
+        userService = new UserService(dataSource, userDAO, bidTransactionDAO, auctionDAO, userMapper);
         mockConn = mock(Connection.class);
-        DatabaseConnection.setTestConnection(mockConn);
-    }
-
-    @AfterEach
-    void tearDown() {
-        DatabaseConnection.setTestConnection(null);
+        when(dataSource.getConnection()).thenReturn(mockConn);
     }
 
     @Test

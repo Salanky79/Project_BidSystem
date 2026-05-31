@@ -4,7 +4,7 @@ import com.auction.server.mapper.UserMapper;
 import com.auction.server.network.AuctionSubscriptionRegistry;
 import com.auction.server.network.ClientSession;
 import com.auction.server.service.IAuctionService;
-import com.auction.server.service.AutoBidService;
+import com.auction.server.service.IAutoBidService;
 import com.auction.server.service.IUserService;
 import com.auction.server.service.BidCoordinator;
 import com.auction.server.service.AuctionQueryService;
@@ -25,7 +25,7 @@ public class RequestDispatcher {
     public RequestDispatcher(
             IUserService userService,
             IAuctionService auctionService,
-            AutoBidService autoBidService,
+            IAutoBidService autoBidService,
             BidCoordinator bidCoordinator,
             AuctionQueryService auctionQueryService,
             AuctionSubscriptionRegistry subscriptionRegistry) {

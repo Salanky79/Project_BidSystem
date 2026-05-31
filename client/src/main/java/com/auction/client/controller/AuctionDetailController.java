@@ -1,6 +1,6 @@
 package com.auction.client.controller;
 
-import com.auction.client.ClientContext;
+import com.auction.client.network.SocketClient;
 import com.auction.client.service.BidService;
 import com.auction.share.DTO.AuctionDetailDTO;
 import com.auction.share.DTO.BidDTO;
@@ -20,17 +20,15 @@ import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
+import com.auction.client.controller.components.*;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -43,11 +41,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static com.auction.client.ClientContext.socketClient;
+import com.auction.client.utils.DateTimeUtils;
+
+import com.auction.client.service.AuctionService;
 
 public class AuctionDetailController {
 
-    private final BidService bidService = ClientContext.bidService();
+    private BidService bidService;
+    private AuctionService auctionService;
+    private SocketClient socketClient;
+
+    public void setServices(BidService bidService, AuctionService auctionService, SocketClient socketClient) {
+        this.bidService = bidService;
+        this.auctionService = auctionService;
+        this.socketClient = socketClient;
+    }
 
     // ── HEADER ──────────────────────────────────────────────────
     @FXML private Label  productTitleLabel;
@@ -88,57 +96,25 @@ public class AuctionDetailController {
     private String        auctionId;
     private String        icon;
     private LocalDateTime endTime;
-    private Timeline      countdownTimeline;
+    private AuctionCountdownTimer countdownTimer;
+    // C3: Guard tránh concurrent refreshAuctionDetail() ghi đè nhau khi user bid nhanh
+    private boolean isRefreshing = false;
+    private BidHistoryChartManager chartManager;
     private boolean       autoBidEnabled = false;
     private List<BidDTO> bidHistory = new ArrayList<>();
     private double        startingPrice = 0;
-    private static final int  MAX_CHART_POINTS = 5;
-    private static final DateTimeFormatter CHART_FMT =
-            DateTimeFormatter.ofPattern("dd/MM HH:mm");
-    // Persistent series – never replaced, only data points are added/removed
-    private final XYChart.Series<String, Number> chartSeries = new XYChart.Series<>();
     private String startTimeISO; // real start time from server (ISO format)
     private Consumer<Response<?>> bidPushListener;
     private int lastProcessedBidCount = -1;
-
-    private static final DateTimeFormatter DISPLAY_FMT =
-            DateTimeFormatter.ofPattern("dd/MM/yy HH:mm");
-    private static final DateTimeFormatter LEGACY_DISPLAY_FMT =
-            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    private static final DateTimeFormatter ISO_FMT =
-            DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-    private static final DateTimeFormatter ALT_DB_FMT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-    private static LocalDateTime parseDateTime(String raw) {
-        if (raw == null) return null;
-        String s = raw.trim();
-        if (s.isEmpty()) return null;
-
-        try { return LocalDateTime.parse(s, ISO_FMT); } catch (Exception ignored) {}
-        try { return LocalDateTime.parse(s, LEGACY_DISPLAY_FMT); } catch (Exception ignored) {}
-        try { return LocalDateTime.parse(s, DISPLAY_FMT); } catch (Exception ignored) {}
-        try { return LocalDateTime.parse(s, ALT_DB_FMT); } catch (Exception ignored) {}
-        try { return LocalDateTime.parse(s.replace(' ', 'T'), ISO_FMT); } catch (Exception ignored) {}
-
-        return null;
-    }
-
-    private static String formatDateTimeForDisplay(String raw) {
-        LocalDateTime dt = parseDateTime(raw);
-        if (dt == null) return raw == null ? "N/A" : raw;
-        return dt.format(DISPLAY_FMT);
-    }
 
     // ─────────────────────────────────────────────────────────────
     @FXML
     public void initialize() {
         // Close button
         closeButton.setOnAction(e -> {
-            if (bidPushListener != null) {
-                socketClient().removePushListener(bidPushListener);
-            }
+            cleanup();
             Stage stage = (Stage) closeButton.getScene().getWindow();
+            openStages.remove(this.auctionId);
             stage.close();
         });
 
@@ -149,20 +125,23 @@ public class AuctionDetailController {
 
 
 
-        // Configure Y-axis: auto-range without forcing zero so the chart
-        // zooms in near the actual bid prices instead of compressing them.
-        if (priceHistoryChart != null) {
-            NumberAxis yAxis = (NumberAxis) priceHistoryChart.getYAxis();
-            yAxis.setAutoRanging(true);
-            yAxis.setForceZeroInRange(false);
-            // Attach the persistent series once
-            priceHistoryChart.getData().add(chartSeries);
+        countdownTimer = new AuctionCountdownTimer(endsInLabel);
+        countdownTimer.setOnEndedAction(() -> refreshAuctionDetail());
+
+        chartManager = new BidHistoryChartManager(priceHistoryChart);
+        if (chartManager != null) {
+            chartManager.loadData(bidHistory, startTimeISO, startingPrice, currentPrice);
         }
+    }
 
-        // Default chart data – populated after setData() provides bidHistory
-        loadChartData();
-
-
+    private void cleanup() {
+        if (bidPushListener != null && socketClient != null) {
+            socketClient.removePushListener(bidPushListener);
+            bidPushListener = null;
+        }
+        if (countdownTimer != null) {
+            countdownTimer.stop();
+        }
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -179,6 +158,11 @@ public class AuctionDetailController {
             String status,
             String auctionId
     ) {
+        if (auctionId == null || auctionId.isBlank()) {
+            System.err.println("AuctionDetailController: auctionId is null or blank!");
+            return;
+        }
+
         this.currentPrice = price;
         this.bidStep      = bidStep;
         this.totalBids    = bids;
@@ -188,7 +172,7 @@ public class AuctionDetailController {
         productTitleLabel.setText(name);
         currentPriceLabel.setText(String.format("%.0f VND", price));
         totalBidsLabel.setText(String.valueOf(bids));
-        endTimeLabel.setText(formatDateTimeForDisplay(time));
+        endTimeLabel.setText(DateTimeUtils.formatDateTimeForDisplay(time));
         startTimeLabel.setText("Loading...");
         sellerNameLabel.setText("Unknown");
         descriptionLabel.setText("Loading description...");
@@ -199,8 +183,8 @@ public class AuctionDetailController {
         resetAutoBidState();
 
         // Parse end time for countdown
-        this.endTime = parseDateTime(time);
-        startCountdown();
+        this.endTime = DateTimeUtils.parseDateTime(time);
+        if (countdownTimer != null) countdownTimer.start(this.endTime);
 
         refreshAuctionDetail();
         registerBidPushRefresh();
@@ -211,6 +195,9 @@ public class AuctionDetailController {
     // ─────────────────────────────────────────────────────────────
     // Static factory – opens a new Stage with AuctionDetailv2.fxml
     // ─────────────────────────────────────────────────────────────
+    // Track các Stage đang mở theo auctionId
+    private static final java.util.Map<String, Stage> openStages = java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
+
     public static void open(
             String icon,
             String category,
@@ -222,6 +209,13 @@ public class AuctionDetailController {
             String status,
             String auctionId
     ) {
+        // Nếu đã mở rồi → focus cửa sổ cũ, không tạo mới
+        Stage existingStage = openStages.get(auctionId);
+        if (existingStage != null && existingStage.isShowing()) {
+            existingStage.requestFocus();
+            return;
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(
                     AuctionDetailController.class.getResource(
@@ -230,13 +224,22 @@ public class AuctionDetailController {
             Parent root = loader.load();
 
             AuctionDetailController ctrl = loader.getController();
+            ctrl.setServices(com.auction.client.ClientContext.bidService(), com.auction.client.ClientContext.auctionService(), com.auction.client.ClientContext.socketClient());
             ctrl.setData(icon, category, name, price, bidStep, bids, time, status, auctionId);
 
             Stage stage = new Stage();
             stage.setTitle("Auction – " + name);
             stage.setScene(new Scene(root));
+            
+            // Đăng ký vào map
+            openStages.put(auctionId, stage);
+
+            stage.setOnCloseRequest(event -> {
+                ctrl.cleanup();
+                openStages.remove(auctionId); // Dọn khỏi map khi đóng
+            });
             stage.show();
-        } catch (IOException e) {
+        } catch (java.io.IOException e) {
             e.printStackTrace();
             System.err.println("Error loading AuctionDetailv2.fxml");
         }
@@ -250,24 +253,21 @@ public class AuctionDetailController {
         if (input.isEmpty()) return;
 
         try {
-            bidService.placeBid(this.auctionId, input, currentPrice, response ->
+            double amount = Double.parseDouble(input);
+            bidService.placeBid(this.auctionId, amount, currentPrice, response ->
                 Platform.runLater(() -> {
                     if (response != null && response.isSuccess()) {
-                        currentPrice = Double.parseDouble(input);
-                        totalBids++;
-                        currentPriceLabel.setText(String.format("%.0f VND", currentPrice));
-                        totalBidsLabel.setText(String.valueOf(totalBids));
-                        minBidLabel.setText(String.format("Minimum bid: %.0f VND", currentPrice + bidStep));
+                        // A1: Server là nguồn sự thật duy nhất — không tự cập nhật giá
+                        // Auto-bid có thể đã xử lý sau khi server nhận lệnh, giá thực > giá user nhập
                         bidInputField.clear();
-
-                        bidHistory.add(new com.auction.share.DTO.BidDTO("You", currentPrice, LocalDateTime.now().format(ISO_FMT)));
-                        // Append a live point to the chart without clearing existing data
-                        appendChartPoint(currentPrice);
+                        refreshAuctionDetail();
                     } else {
                         showBidError(response != null ? response.getMessage() : "Lỗi kết nối máy chủ");
                     }
                 })
             );
+        } catch (NumberFormatException e) {
+            showBidError("Giá bid không hợp lệ, vui lòng nhập số.");
         } catch (ValidationException e) {
             showBidError(e.getMessage());
         }
@@ -275,10 +275,18 @@ public class AuctionDetailController {
 
     private void handleEnableAutoBid() {
         try {
+            String maxStr = autoBidMaxInputField.getText().trim();
+            String incStr = autoBidIncrementInputField.getText().trim();
+            if (maxStr.isEmpty() || incStr.isEmpty()) {
+                showAutoBidError("Vui lòng nhập đầy đủ giá tối đa và bước nhảy.");
+                return;
+            }
+            double maxBid = Double.parseDouble(maxStr);
+            double increment = Double.parseDouble(incStr);
             bidService.setAutoBid(
                     this.auctionId,
-                    autoBidMaxInputField.getText().trim(),
-                    autoBidIncrementInputField.getText().trim(),
+                    maxBid,
+                    increment,
                     currentPrice,
                     response -> Platform.runLater(() -> {
                         if (response != null && response.isSuccess()) {
@@ -291,6 +299,8 @@ public class AuctionDetailController {
                         }
                     })
             );
+        } catch (NumberFormatException e) {
+            showAutoBidError("Auto-bid không hợp lệ, vui lòng nhập số.");
         } catch (ValidationException e) {
             showAutoBidError(e.getMessage());
         }
@@ -319,99 +329,7 @@ public class AuctionDetailController {
     // Price-history chart
     // ─────────────────────────────────────────────────────────────
 
-    /**
-     * (Re)builds the chart from bidHistory.
-     * Always keeps at most MAX_CHART_POINTS points.
-     */
-    private void loadChartData() {
-        chartSeries.getData().clear();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM HH:mm");
-
-        // Collect qualifying bids sorted oldest-first
-        java.util.List<XYChart.Data<String, Number>> points = new java.util.ArrayList<>();
-
-        if (bidHistory != null && !bidHistory.isEmpty()) {
-            java.util.List<com.auction.share.DTO.BidDTO> sortedBids = new java.util.ArrayList<>(bidHistory);
-            sortedBids.sort((b1, b2) -> {
-                try {
-                    return LocalDateTime.parse(b1.getTimestamp(), ISO_FMT)
-                                       .compareTo(LocalDateTime.parse(b2.getTimestamp(), ISO_FMT));
-                } catch (Exception e) { return 0; }
-            });
-
-            for (com.auction.share.DTO.BidDTO bid : sortedBids) {
-                try {
-                    LocalDateTime bidTime = LocalDateTime.parse(bid.getTimestamp(), ISO_FMT);
-                    points.add(new XYChart.Data<>(bidTime.format(formatter), bid.getAmount()));
-                } catch (Exception ignored) {}
-            }
-        }
-
-        // Always ensure at least a starting anchor
-        if (points.isEmpty()) {
-            String startLabel = "Start";
-            if (startTimeISO != null) {
-                try {
-                    startLabel = LocalDateTime.parse(startTimeISO, ISO_FMT).format(formatter);
-                } catch (Exception ignored) {}
-            }
-            points.add(new XYChart.Data<>(startLabel, startingPrice > 0 ? startingPrice : currentPrice));
-        }
-
-        // Keep only the last MAX_CHART_POINTS entries
-        int from = Math.max(0, points.size() - MAX_CHART_POINTS);
-        chartSeries.getData().addAll(points.subList(from, points.size()));
-    }
-
-    /**
-     * Appends a single live price point captured at the moment currentPrice changes.
-     * Automatically trims the oldest point when the count exceeds MAX_CHART_POINTS.
-     */
-    private void appendChartPoint(double price) {
-        String label = LocalDateTime.now().format(CHART_FMT);
-        chartSeries.getData().add(new XYChart.Data<>(label, price));
-        while (chartSeries.getData().size() > MAX_CHART_POINTS) {
-            chartSeries.getData().remove(0);
-        }
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // Countdown timer
-    // ─────────────────────────────────────────────────────────────
-    private void startCountdown() {
-        if (countdownTimeline != null) countdownTimeline.stop();
-        if (endTime == null) {
-            endsInLabel.setText("N/A");
-            return;
-        }
-        countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> updateCountdown()));
-        countdownTimeline.setCycleCount(Animation.INDEFINITE);
-        countdownTimeline.play();
-        updateCountdown();
-    }
-
-    private void updateCountdown() {
-        LocalDateTime now = LocalDateTime.now();
-        if (now.isAfter(endTime)) {
-            endsInLabel.setText("Ended");
-            if (countdownTimeline != null) countdownTimeline.stop();
-            // Fetch final details from server to populate winner
-            com.auction.client.ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
-                if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
-                    showWinnerInfo(detail);
-                } else {
-                    showWinnerInfo(null);
-                }
-            }));
-            return;
-        }
-        long days    = ChronoUnit.DAYS.between(now, endTime);
-        long hours   = ChronoUnit.HOURS.between(now, endTime) % 24;
-        long minutes = ChronoUnit.MINUTES.between(now, endTime) % 60;
-        long seconds = ChronoUnit.SECONDS.between(now, endTime) % 60;
-        endsInLabel.setText(String.format("%02d:%02d:%02d:%02d", days, hours, minutes, seconds));
-    }
 
     // ─────────────────────────────────────────────────────────────
     // Helpers
@@ -436,74 +354,99 @@ public class AuctionDetailController {
 
     private void registerBidPushRefresh() {
         if (bidPushListener != null) {
-            socketClient().removePushListener(bidPushListener);
+            socketClient.removePushListener(bidPushListener);
         }
         bidPushListener = response -> {
-            if (response != null
-                    && response.isSuccess()
-                    && "BID_UPDATED".equals(response.getMessage())
-                    && response.getData() instanceof BidUpdateEvent event
-                    && auctionId != null
-                    && auctionId.equals(event.getAuctionId())) {
-                Platform.runLater(() -> applyBidUpdate(event));
+            if (response != null && response.isSuccess() && response.getData() instanceof BidUpdateEvent event) {
+                if (this.auctionId != null && this.auctionId.equals(event.getAuctionId())) {
+                    Platform.runLater(() -> applyBidUpdate(event));
+                }
             }
         };
-        socketClient().addPushListener(bidPushListener);
+        if (socketClient != null) {
+            socketClient.addPushListener(bidPushListener);
+        }
     }
 
     private void refreshAuctionDetail() {
-        ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
-            if (response != null && response.isSuccess() && response.getData() instanceof AuctionDetailDTO detail) {
-                this.currentPrice = detail.getCurrentPrice();
-                this.bidStep = detail.getBidStep();
-                this.totalBids = detail.getBidHistory() != null ? detail.getBidHistory().size() : this.totalBids;
+        if (isRefreshing) return;
+        isRefreshing = true;
+        if (auctionService == null) {
+            isRefreshing = false;
+            return;
+        }
+        auctionService.getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
+            isRefreshing = false;
+            if (response == null || !response.isSuccess()) return;
+            if (!(response.getData() instanceof AuctionDetailDTO detail)) return;
 
-                this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));
-                this.totalBidsLabel.setText(String.valueOf(this.totalBids));
-                this.minBidLabel.setStyle(""); // clear style lỗi nếu có
-                this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
-                this.sellerNameLabel.setText(detail.getSellerName());
-                this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description provided.");
-                this.lastProcessedBidCount = detail.getBidCount();
+            updatePriceInfo(detail);
+            updateTimeInfo(detail);
+            updateProductImage(detail);
+            updateBidHistory(detail);
 
-                // Load ảnh sản phẩm từ Cloudinary nếu có
-                if (detail.getImageUrl() != null && !detail.getImageUrl().isBlank()) {
-                    ImageView imageView = new ImageView();
-                    imageView.setFitWidth(280);
-                    imageView.setFitHeight(280);
-                    imageView.setPreserveRatio(true);
-                    
-                    Image image = new Image(detail.getImageUrl(), 280, 280, true, true, true);
-                    imageView.setImage(image);
-                    
-                    productIconLabel.setGraphic(imageView);
-                    productIconLabel.setText("");
-                } else {
-                    productIconLabel.setGraphic(null);
-                    if (icon != null) {
-                        productIconLabel.setText(icon);
-                    }
-                }
-
-                this.bidHistory = detail.getBidHistory() != null ? detail.getBidHistory() : new java.util.ArrayList<>();
-                this.startingPrice = detail.getStartingPrice();
-
-                this.startTimeISO = detail.getStartTime();
-                if (detail.getStartTime() != null) {
-                    this.startTimeLabel.setText(formatDateTimeForDisplay(detail.getStartTime()));
-                }
-                if (detail.getEndTime() != null) {
-                    this.endTimeLabel.setText(formatDateTimeForDisplay(detail.getEndTime()));
-                    this.endTime = parseDateTime(detail.getEndTime());
-                }
-
-                loadChartData();
-
-                if ("FINISHED".equals(detail.getStatus()) || (this.endTime != null && LocalDateTime.now().isAfter(this.endTime))) {
-                    showWinnerInfo(detail);
-                }
+            if (isAuctionEnded(detail)) {
+                showWinnerInfo(detail);
             }
         }));
+    }
+
+    private void updatePriceInfo(AuctionDetailDTO detail) {
+        this.currentPrice = detail.getCurrentPrice();
+        this.bidStep = detail.getBidStep();
+        this.totalBids = detail.getBidHistory() != null ? detail.getBidHistory().size() : this.totalBids;
+        this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));
+        this.totalBidsLabel.setText(String.valueOf(this.totalBids));
+        this.minBidLabel.setStyle("");
+        this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
+        this.sellerNameLabel.setText(detail.getSellerName());
+        this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description.");
+        this.lastProcessedBidCount = detail.getBidCount();
+    }
+
+    private void updateTimeInfo(AuctionDetailDTO detail) {
+        this.startTimeISO = detail.getStartTime();
+        if (detail.getStartTime() != null) {
+            this.startTimeLabel.setText(DateTimeUtils.formatDateTimeForDisplay(detail.getStartTime()));
+        }
+        if (detail.getEndTime() != null) {
+            this.endTimeLabel.setText(DateTimeUtils.formatDateTimeForDisplay(detail.getEndTime()));
+            this.endTime = DateTimeUtils.parseDateTime(detail.getEndTime());
+        }
+    }
+
+    private void updateProductImage(AuctionDetailDTO detail) {
+        if (detail.getImageUrl() != null && !detail.getImageUrl().isBlank()) {
+            String currentUrl = productIconLabel.getGraphic() instanceof ImageView iv
+                ? (String) iv.getUserData() : null;
+            if (!detail.getImageUrl().equals(currentUrl)) {
+                ImageView imageView = new ImageView();
+                imageView.setFitWidth(280);
+                imageView.setFitHeight(280);
+                imageView.setPreserveRatio(true);
+                imageView.setUserData(detail.getImageUrl());
+                imageView.setImage(new javafx.scene.image.Image(detail.getImageUrl(), 280, 280, true, true, true));
+                productIconLabel.setGraphic(imageView);
+                productIconLabel.setText("");
+            }
+        } else {
+            productIconLabel.setGraphic(null);
+            if (icon != null) productIconLabel.setText(icon);
+        }
+    }
+
+    private void updateBidHistory(AuctionDetailDTO detail) {
+        this.bidHistory = detail.getBidHistory() != null
+            ? detail.getBidHistory() : new ArrayList<>();
+        this.startingPrice = detail.getStartingPrice();
+        if (chartManager != null) {
+            chartManager.loadData(bidHistory, startTimeISO, startingPrice, currentPrice);
+        }
+    }
+
+    private boolean isAuctionEnded(AuctionDetailDTO detail) {
+        return "FINISHED".equals(detail.getStatus())
+            || (this.endTime != null && LocalDateTime.now().isAfter(this.endTime));
     }
 
     private void applyBidUpdate(BidUpdateEvent event) {
@@ -537,7 +480,7 @@ public class AuctionDetailController {
             this.bidHistory.add(new BidDTO(event.getBidderName(), event.getAmount(), event.getBidTime()));
             this.totalBids = this.bidHistory.size();
             this.totalBidsLabel.setText(String.valueOf(this.totalBids));
-            appendChartPoint(this.currentPrice);
+            if (chartManager != null) chartManager.appendPoint(this.currentPrice);
         }
 
         if (winnerNameLabel != null) {

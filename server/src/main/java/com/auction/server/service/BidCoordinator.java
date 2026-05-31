@@ -7,9 +7,9 @@ import java.sql.SQLException;
 
 public class BidCoordinator {
     private final BidService bidService;
-    private final AutoBidService autoBidService;
+    private final IAutoBidService autoBidService;
 
-    public BidCoordinator(BidService bidService, AutoBidService autoBidService) {
+    public BidCoordinator(BidService bidService, IAutoBidService autoBidService) {
         this.bidService = bidService;
         this.autoBidService = autoBidService;
     }

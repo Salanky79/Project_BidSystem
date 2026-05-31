@@ -11,9 +11,9 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BidBroadcastService {
+public class BroadcastService {
   public static final String BID_UPDATED = "BID_UPDATED";
-  private static final Logger LOGGER = LoggerFactory.getLogger(BidBroadcastService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(BroadcastService.class);
 
   private final AuctionSubscriptionRegistry subscriptionRegistry;
 
@@ -24,7 +24,7 @@ public class BidBroadcastService {
       new ThreadPoolExecutor.CallerRunsPolicy()
   );
 
-  public BidBroadcastService(AuctionSubscriptionRegistry subscriptionRegistry) {
+  public BroadcastService(AuctionSubscriptionRegistry subscriptionRegistry) {
     this.subscriptionRegistry = subscriptionRegistry;
   }
 
@@ -48,6 +48,17 @@ public class BidBroadcastService {
       }
     } catch (Exception e) {
       LOGGER.error("Broadcast failed entirely for auction {}", event.getAuctionId(), e);
+    }
+  }
+  public void shutdown() {
+    broadcastExecutor.shutdown();
+    try {
+      if (!broadcastExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+        broadcastExecutor.shutdownNow();
+      }
+    } catch (InterruptedException e) {
+      broadcastExecutor.shutdownNow();
+      Thread.currentThread().interrupt();
     }
   }
 }

@@ -16,7 +16,7 @@ import com.auction.server.service.*;
 import com.auction.server.util.CloudinaryService;
 import com.auction.server.util.DatabaseConnection;
 import com.zaxxer.hikari.HikariDataSource;
-import javax.sql.DataSource;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -54,7 +54,7 @@ public class ServerApplication {
 
     // === Network / Broadcast Service Layer ===
     AuctionSubscriptionRegistry subscriptionRegistry = new AuctionSubscriptionRegistry();
-    BidBroadcastService bidBroadcastService = new BidBroadcastService(subscriptionRegistry);
+    BroadcastService bidBroadcastService = new BroadcastService(subscriptionRegistry);
     
     BidService bidService = new BidService(dataSource, auctionDao, bidTransactionDao, userDao, bidBroadcastService);
     
@@ -84,6 +84,7 @@ public class ServerApplication {
     } finally {
       auctionStatusScheduler.shutdown();
       autoBidService.shutdown();
+      bidBroadcastService.shutdown();
       backgroundExecutor.shutdownNow();
       clientExecutor.shutdown();
       dataSource.close();

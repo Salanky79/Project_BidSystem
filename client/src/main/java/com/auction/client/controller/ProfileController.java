@@ -23,7 +23,12 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 public class ProfileController implements Initializable {
-  private final UserService userService = ClientContext.userService();
+  private UserService userService;
+
+  public void setUserService(UserService userService) {
+    this.userService = userService;
+    loadProfileData();
+  }
 
   @FXML private Label nameLabel;
   @FXML private TextField nameField;
@@ -44,7 +49,6 @@ public class ProfileController implements Initializable {
   @Override
   public void initialize(URL url, ResourceBundle rb) {
     setupTableColumns();
-    loadProfileData();
     editButton.setOnAction(event -> handleEditAction());
     setFieldsEditable(false);
   }
@@ -120,14 +124,19 @@ public class ProfileController implements Initializable {
                       bindUser(userDTO);
                       finishEditing();
                     } else {
-                      System.out.println(
-                          "Failed to update profile: "
-                              + (response != null ? response.getMessage() : "Unknown error"));
+                      showError(response != null ? response.getMessage() : "Unknown error");
                     }
                   }));
     } catch (ValidationException e) {
-      System.out.println("Invalid profile data: " + e.getMessage());
+      showError(e.getMessage());
     }
+  }
+
+  private void showError(String message) {
+    editButton.setText("Lỗi: " + message);
+    editButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white;");
+    new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3))
+        .setOnFinished(e -> finishEditing());
   }
 
   private void finishEditing() {

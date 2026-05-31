@@ -1,7 +1,9 @@
 package com.auction.client.controller;
 
-import com.auction.client.ClientContext;
+import com.auction.client.service.AuctionService;
+import com.auction.client.utils.CategoryUtils;
 import com.auction.share.DTO.AuctionSummaryDTO;
+import com.auction.share.enums.AuctionStatus;
 import java.io.IOException;
 import java.util.List;
 import javafx.application.Platform;
@@ -19,6 +21,12 @@ import javafx.scene.layout.HBox;
 public class SellerDashboardController {
 
 
+
+  private AuctionService auctionService;
+
+  public void setAuctionService(AuctionService auctionService) {
+    this.auctionService = auctionService;
+  }
 
   // ===== FILTER BUTTONS =====
   @FXML private Button btnFilterAll;
@@ -69,54 +77,38 @@ public class SellerDashboardController {
 
 
 
+
+
+
+  // D1: Cache dữ liệu local để chuyển tab filter mượt mà, không spam API liên tục
+  private List<AuctionSummaryDTO> allAuctions = null;
+  private final java.util.Map<String, javafx.scene.Node> cardCache = new java.util.HashMap<>();
+
   // ===== LOAD CARDS =====
 
   private void loadAuctionCards(String filterStatus) {
-    ClientContext.auctionService()
+    if (allAuctions != null) {
+      renderGrid(filterStatus);
+      return;
+    }
+
+    if (auctionService == null) return;
+    auctionService
         .getSellerAuctions(
             null,
             response -> {
               Platform.runLater(
                   () -> {
-                    auctionGrid.getChildren().clear();
                     if (response != null
                         && response.isSuccess()
                         && response.getData() instanceof List<?> list) {
-                      int col = 0, row = 0;
+                      allAuctions = new java.util.ArrayList<>();
                       for (Object obj : list) {
-                      if (obj instanceof AuctionSummaryDTO dto) {
-                          if (!matchesFilter(filterStatus, dto.getStatus())) continue;
-                          try {
-                            FXMLLoader loader =
-                                new FXMLLoader(
-                                    getClass()
-                                        .getResource(
-                                            "/com/auction/client/view/SellerItemCard.fxml"));
-                            HBox card = loader.load();
-                            SellerItemCardController ctrl = loader.getController();
-
-                            ctrl.setData(
-                                iconForCategory(dto.getCategory()),
-                                dto.getCategory(),
-                                dto.getItemName(),
-                                dto.getCurrentPrice(),
-                                0, // bids
-                                dto.getEndTime(),
-                                dto.getStatus(),
-                                dto.getAuctionId(),
-                                dto.getImageUrl());
-
-                            auctionGrid.add(card, col++, row);
-                            GridPane.setMargin(card, new Insets(10));
-                            if (col == 2) {
-                              col = 0;
-                              row++;
-                            }
-                          } catch (IOException e) {
-                            e.printStackTrace();
-                          }
+                        if (obj instanceof AuctionSummaryDTO dto) {
+                          allAuctions.add(dto);
                         }
                       }
+                      renderGrid(filterStatus);
                     } else {
                       System.out.println("Failed to load seller auctions.");
                     }
@@ -124,36 +116,62 @@ public class SellerDashboardController {
             });
   }
 
-  private boolean matchesFilter(String filter, String status) {
-    if ("Active".equalsIgnoreCase(filter)
-        && ("Active".equalsIgnoreCase(status)
-            || "RUNNING".equalsIgnoreCase(status)
-            || "OPEN".equalsIgnoreCase(status)
-            || "In Queue".equalsIgnoreCase(status))) {
-      return true;
+  private void renderGrid(String filterStatus) {
+    auctionGrid.getChildren().clear();
+    if (allAuctions == null) return;
+
+    int col = 0, row = 0;
+    for (AuctionSummaryDTO dto : allAuctions) {
+      if (!matchesFilter(filterStatus, dto.getStatus())) continue;
+
+      try {
+        javafx.scene.Node card = cardCache.get(dto.getAuctionId());
+        if (card == null) {
+          FXMLLoader loader =
+              new FXMLLoader(
+                  getClass()
+                      .getResource(
+                          "/com/auction/client/view/SellerItemCard.fxml"));
+          card = loader.load();
+          SellerItemCardController ctrl = loader.getController();
+
+          ctrl.setData(
+              CategoryUtils.iconFor(dto.getCategory()),
+              dto.getCategory(),
+              dto.getItemName(),
+              dto.getCurrentPrice(),
+              0, // bids
+              dto.getEndTime(),
+              dto.getStatus(),
+              dto.getAuctionId(),
+              dto.getImageUrl());
+          cardCache.put(dto.getAuctionId(), card);
+        }
+
+        auctionGrid.add(card, col++, row);
+        GridPane.setMargin(card, new Insets(10));
+        if (col == 2) {
+          col = 0;
+          row++;
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
-    if ("Ended".equalsIgnoreCase(filter)
-        && ("End".equalsIgnoreCase(status) || "FINISHED".equalsIgnoreCase(status))) {
-      return true;
-    }
-    if ("Draft".equalsIgnoreCase(status) || "CANCELED".equalsIgnoreCase(status)) {
-      return false;
-    }
-    return "All".equalsIgnoreCase(filter) || status.equalsIgnoreCase(filter);
   }
 
-  private String iconForCategory(String category) {
-    if (category == null) return "📦";
-    return switch (category) {
-      case "Electronic" -> "📱";
-      case "Watch" -> "⌚";
-      case "Hand Bag", "Clothing" -> "👜";
-      case "Car" -> "🚗";
-      case "Art" -> "🖼";
-      case "Jewelry" -> "💍";
-      default -> "📦";
+  // B3: Dùng AuctionStatus enum thay vì so sánh magic string trực tiếp
+  private boolean matchesFilter(String filter, String statusRaw) {
+    if ("All".equalsIgnoreCase(filter)) return true;
+    AuctionStatus status = com.auction.share.enums.AuctionStatus.from(statusRaw);
+    return switch (filter) {
+      case "Active" -> status.isActive();
+      case "Ended"  -> status == com.auction.share.enums.AuctionStatus.FINISHED;
+      default       -> status.getDisplayName().equalsIgnoreCase(filter);
     };
   }
+
+
 
   // ===== STYLE HELPERS =====
 

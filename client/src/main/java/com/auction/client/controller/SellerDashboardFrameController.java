@@ -12,7 +12,6 @@ import javafx.scene.layout.VBox;
 public class SellerDashboardFrameController extends FrameController {
 
   @FXML private Label usernameLabel;
-  @FXML private ScrollPane scrollContent;
 
   // Sidebar buttons – cần fx:id để highlight
   @FXML private Button btnHome;
@@ -80,13 +79,25 @@ public class SellerDashboardFrameController extends FrameController {
 
   @FXML
   public void handleProfile() {
-    changeView("/com/auction/client/view/profile.fxml");
+    changeView("/com/auction/client/view/profile.fxml", obj -> {
+        if (obj instanceof com.auction.client.controller.ProfileController profileCtrl) {
+            profileCtrl.setUserService(com.auction.client.ClientContext.userService());
+        }
+    });
     highlightButton("Profile");
   }
 
   @FXML
   public void handleSell() {
-    changeView("/com/auction/client/view/Sell.fxml");
+    changeView("/com/auction/client/view/Sell.fxml", controller -> {
+        if (controller instanceof SellController sellController) {
+            sellController.setAuctionService(com.auction.client.ClientContext.auctionService());
+            sellController.setOnSuccessCallback(() -> {
+                loadView("/com/auction/client/view/SellerDashboard.fxml");
+                highlightButton("Home");
+            });
+        }
+    });
   }
 
   // ===== HELPERS =====
@@ -103,6 +114,7 @@ public class SellerDashboardFrameController extends FrameController {
       scrollContent.setContent(view);
 
       SellerListController ctrl = loader.getController();
+      ctrl.setAuctionService(com.auction.client.ClientContext.auctionService());
       ctrl.loadItems(mode);
     } catch (IOException e) {
       e.printStackTrace();
@@ -115,6 +127,10 @@ public class SellerDashboardFrameController extends FrameController {
     try {
       FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
       VBox view = loader.load();
+      Object ctrl = loader.getController();
+      if (ctrl instanceof SellerDashboardController sdc) {
+        sdc.setAuctionService(com.auction.client.ClientContext.auctionService());
+      }
       scrollContent.setContent(view);
     } catch (IOException e) {
       e.printStackTrace();

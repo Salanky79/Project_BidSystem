@@ -11,6 +11,10 @@ import javafx.scene.image.ImageView;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.auction.client.utils.CardImageLoader;
+import com.auction.client.utils.DateTimeUtils;
+import com.auction.share.enums.AuctionStatus;
+
 public class ItemCardController {
 
   @FXML private HBox cardRoot;
@@ -33,15 +37,7 @@ public class ItemCardController {
   private String time;
   private String auctionId;
 
-  // Formatter để hiển thị thời gian dạng dd/MM/yy HH:mm (theo yêu cầu)
-  private static final DateTimeFormatter DISPLAY_FMT =
-      DateTimeFormatter.ofPattern("dd/MM/yy HH:mm");
-  private static final DateTimeFormatter ISO_FMT =
-      DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-  private static final DateTimeFormatter ALT_DB_FMT =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-  private static final DateTimeFormatter LEGACY_DISPLAY_FMT =
-      DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
 
   public void setData(
       String icon,
@@ -53,7 +49,7 @@ public class ItemCardController {
       String time,
       String status,
       String auctionId) {
-    setData(icon, category, name, price, bidStep, bids, time, status, auctionId, null);
+    setData(icon, category, name, price, bidStep, bids, time, status, auctionId, null, null);
   }
 
   public void setData(
@@ -66,7 +62,8 @@ public class ItemCardController {
       String time,
       String status,
       String auctionId,
-      String imageUrl) {
+      String imageUrl,
+      String highestBidderName) {
     statusLabel.setText(status);
     categoryLabel.setText(category);
     nameLabel.setText(name);
@@ -81,37 +78,8 @@ public class ItemCardController {
     this.status = status;
     this.auctionId = auctionId;
 
-    // Load ảnh sản phẩm từ Cloudinary
-    if (imageUrl != null && !imageUrl.isBlank()) {
-      iconLabel.setVisible(false);
-      ImageView imageView = new ImageView();
-      imageView.setFitWidth(160);
-      imageView.setFitHeight(160);
-      imageView.setPreserveRatio(false); // fill to fit card border
-      
-      // Load ảnh bất đồng bộ ngầm (background loading = true)
-      Image image = new Image(imageUrl, 160, 160, false, true, true);
-      imageView.setImage(image);
-      
-      // Clip ảnh bo tròn góc trên bên trái và dưới bên trái khớp với CSS StackPane
-      javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(160, 160);
-      clip.setArcWidth(24); // khớp với border-radius: 12 của StackPane
-      clip.setArcHeight(24);
-      imageView.setClip(clip);
-
-      // Thêm imageView vào làm con đầu tiên của StackPane (sau statusLabel)
-      if (itemcard != null) {
-        // Xóa các ImageView cũ nếu có (để tránh chồng chéo khi render lại)
-        itemcard.getChildren().removeIf(node -> node instanceof ImageView);
-        itemcard.getChildren().add(0, imageView);
-      }
-    } else {
-      iconLabel.setVisible(true);
-      iconLabel.setText(icon);
-      if (itemcard != null) {
-        itemcard.getChildren().removeIf(node -> node instanceof ImageView);
-      }
-    }
+    // Load ảnh sản phẩm từ Cloudinary (có error handler fallback)
+    CardImageLoader.load(itemcard, iconLabel, imageUrl, icon, 160, 24);
 
     // Format số tiền
     priceLabel.setText(String.format("%,.0f VND", price));
@@ -121,23 +89,13 @@ public class ItemCardController {
 
     // Hiển thị thời gian kết thúc hoặc người thắng cuộc nếu đã kết thúc
     if ("FINISHED".equalsIgnoreCase(status) || "End".equalsIgnoreCase(status)) {
-      timeLabel.setText("Winner: Loading...");
-      com.auction.client.ClientContext.auctionService().getAuctionDetail(this.auctionId, response -> {
-        if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.AuctionDetailDTO detail) {
-          String winnerName = detail.getHighestBidderName();
-          javafx.application.Platform.runLater(() -> {
-            if (timeLabel != null) {
-              if (winnerName != null && !winnerName.trim().isEmpty()) {
-                timeLabel.setText("Winner: " + winnerName);
-              } else {
-                timeLabel.setText("Winner: None (No bids)");
-              }
-            }
-          });
-        }
-      });
+      if (highestBidderName != null && !highestBidderName.trim().isEmpty()) {
+        timeLabel.setText("Winner: " + highestBidderName);
+      } else {
+        timeLabel.setText("Winner: None (No bids)");
+      }
     } else {
-      timeLabel.setText("Ending In : " + formatDateTimeForDisplay(time));
+      timeLabel.setText("Ending In : " + DateTimeUtils.formatDateTimeForDisplay(time));
     }
 
     if (cardRoot != null) {
@@ -145,49 +103,13 @@ public class ItemCardController {
     }
 
     // Set màu cho status
-    if (status.equals("Active") || status.equals("RUNNING")) {
-      statusLabel.setStyle(
-          "-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;"
-              + " -fx-background-radius: 5px; -fx-padding: 2 5 2 5;");
-    } else if (status.equals("End") || status.equals("FINISHED")) {
-      statusLabel.setStyle(
-          "-fx-background-color: #FF3737; -fx-text-fill: white; -fx-font-weight: bold;"
-              + " -fx-background-radius: 5px; -fx-padding: 2 5 2 5;");
-    } else if (status.equals("In Queue") || status.equals("OPEN")) {
-      statusLabel.setStyle(
-          "-fx-background-color: #4C8CE4; -fx-text-fill: white; -fx-font-weight: bold;"
-              + " -fx-background-radius: 5px; -fx-padding: 2 5 2 5;");
-    } else if (status.equals("CANCELED")) {
-      statusLabel.setStyle(
-          "-fx-background-color: #605B51; -fx-text-fill: white; -fx-font-weight: bold;"
-              + " -fx-background-radius: 5px; -fx-padding: 2 5 2 5;");
-    }
+    AuctionStatus auctionStatus = AuctionStatus.from(status);
+    statusLabel.setStyle(auctionStatus.getBadgeStyle());
   }
 
   @FXML
   private void handleCardClick() {
     AuctionDetailController.open(
         icon, category, name, price, bidStep, bids, time, status, auctionId);
-  }
-
-  private static LocalDateTime parseDateTime(String raw) {
-    if (raw == null) return null;
-    String s = raw.trim();
-    if (s.isEmpty()) return null;
-
-    try { return LocalDateTime.parse(s, ISO_FMT); } catch (Exception ignored) {}
-    try { return LocalDateTime.parse(s, LEGACY_DISPLAY_FMT); } catch (Exception ignored) {}
-    try { return LocalDateTime.parse(s, DISPLAY_FMT); } catch (Exception ignored) {}
-    try { return LocalDateTime.parse(s, ALT_DB_FMT); } catch (Exception ignored) {}
-    try { return LocalDateTime.parse(s.replace(' ', 'T'), ISO_FMT); } catch (Exception ignored) {}
-
-    return null;
-  }
-
-  /** Hiển thị thời gian theo format dd/MM/yy HH:mm. */
-  private static String formatDateTimeForDisplay(String raw) {
-    LocalDateTime dt = parseDateTime(raw);
-    if (dt == null) return raw == null ? "N/A" : raw;
-    return dt.format(DISPLAY_FMT);
   }
 }

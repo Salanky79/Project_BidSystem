@@ -134,6 +134,7 @@ public final class AuctionMapper {
 
   public static AuctionSummaryDTO toSummaryDTO(Auction auction) {
       if (auction == null) return null;
+      String highestBidderName = auction.getHighestBidder() != null ? auction.getHighestBidder().getFullName() : null;
       return new AuctionSummaryDTO(
           auction.getId(),
           auction.getItem().getName(),
@@ -144,7 +145,8 @@ public final class AuctionMapper {
           auction.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
           auction.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
           auction.getBidCount(),
-          auction.getItem().getImageUrl()
+          auction.getItem().getImageUrl(),
+          highestBidderName
       );
   }
 

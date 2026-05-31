@@ -1,7 +1,7 @@
 package com.auction.client.controller;
 
-import com.auction.client.ClientContext;
 import com.auction.client.service.AuctionService;
+import com.auction.client.utils.CategoryUtils;
 import com.auction.share.DTO.AuctionSummaryDTO;
 import java.io.IOException;
 import java.util.List;
@@ -22,7 +22,11 @@ public class SellerListController {
   @FXML private Label emptyIcon;
   @FXML private Label emptyMessage;
 
-  private final AuctionService auctionService = ClientContext.auctionService();
+  private AuctionService auctionService;
+
+  public void setAuctionService(AuctionService auctionService) {
+    this.auctionService = auctionService;
+  }
 
   public void loadItems(String mode) {
     titleLabel.setText(labelFor(mode));
@@ -30,6 +34,7 @@ public class SellerListController {
     showLoading(true);
     cardList.getChildren().clear();
 
+    if (auctionService == null) return;
     auctionService.getSellerAuctions(
         null,
         response ->
@@ -66,13 +71,14 @@ public class SellerListController {
   }
 
   private boolean matchesMode(String mode, AuctionSummaryDTO dto) {
-    if ("CANCELED".equals(dto.getStatus()) && !"Sold".equals(mode)) {
+    com.auction.share.enums.AuctionStatus status = com.auction.share.enums.AuctionStatus.from(dto.getStatus());
+    if (status == com.auction.share.enums.AuctionStatus.CANCELED && !"Sold".equals(mode)) {
       return false;
     }
 
     return switch (mode) {
-      case "Active" -> "OPEN".equals(dto.getStatus()) || "RUNNING".equals(dto.getStatus());
-      case "Sold" -> "FINISHED".equals(dto.getStatus()) || "CANCELED".equals(dto.getStatus());
+      case "Active" -> status.isActive();
+      case "Sold" -> status == com.auction.share.enums.AuctionStatus.FINISHED || status == com.auction.share.enums.AuctionStatus.CANCELED;
       default -> true;
     };
   }
@@ -86,7 +92,7 @@ public class SellerListController {
       SellerItemCardController ctrl = loader.getController();
       ctrl.setRefreshCallback(refreshCallback);
       ctrl.setData(
-          iconForCategory(dto.getCategory()),
+          CategoryUtils.iconFor(dto.getCategory()),
           dto.getCategory(),
           dto.getItemName(),
           dto.getCurrentPrice(),
@@ -149,16 +155,5 @@ public class SellerListController {
     };
   }
 
-  private String iconForCategory(String category) {
-    if (category == null) return "📦";
-    return switch (category) {
-      case "Electronic" -> "📱";
-      case "Watch", "WATCH" -> "⌚";
-      case "Hand Bag", "Clothing" -> "👜";
-      case "Car", "Vehicle" -> "🚗";
-      case "Art" -> "🖼";
-      case "Jewelry" -> "💍";
-      default -> "📦";
-    };
-  }
+
 }

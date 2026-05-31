@@ -126,9 +126,9 @@ public class AuctionService implements ISchedulableAuctionService {
                     conn.commit();
                     return endedIds;
                 }
-                userDAO.deductWinningBidders(conn, now);
-                userDAO.creditSellers(conn, now);
-                auctionDAO.finishAuctions(conn, now);
+                userDAO.deductWinningBidders(conn, endedIds);
+                userDAO.creditSellers(conn, endedIds);
+                auctionDAO.finishAuctions(conn, endedIds);
                 conn.commit();
                 return endedIds;
             } catch (SQLException e) {
