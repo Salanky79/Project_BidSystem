@@ -109,7 +109,7 @@ public class AuctionDAOImpl implements AuctionDAO {
     }
 
 
-    public double sumAuctionCurrentPrices(Connection conn, String bidderId, Set<String> excludedAuctionIds) throws SQLException {
+    public double sumAuctionCurrentPrices(Connection conn, String bidderId, String excludedAuctionId) throws SQLException {
         StringBuilder sql = new StringBuilder("""
                 SELECT COALESCE(SUM(current_price), 0) AS total_amount
                 FROM auctions
@@ -117,21 +117,21 @@ public class AuctionDAOImpl implements AuctionDAO {
                   AND highest_bidder_id = ?
                 """);
 
-        if (excludedAuctionIds != null && !excludedAuctionIds.isEmpty()) {
-            sql.append(" AND id NOT IN (");
-            sql.append("?,".repeat(excludedAuctionIds.size()));
-            sql.setLength(sql.length() - 1);
-            sql.append(")");
+        boolean hasExcludedAuction =
+                excludedAuctionId != null && !excludedAuctionId.isEmpty();
+
+        if (hasExcludedAuction) {
+            sql.append(" AND id <> ?");
         }
 
         try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int index = 1;
+
             ps.setString(index++, AuctionStatus.RUNNING.name());
             ps.setString(index++, bidderId);
-            if (excludedAuctionIds != null) {
-                for (String auctionId : excludedAuctionIds) {
-                    ps.setString(index++, auctionId);
-                }
+
+            if (hasExcludedAuction) {
+                ps.setString(index, excludedAuctionId);
             }
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? rs.getDouble("total_amount") : 0.0;

@@ -74,9 +74,15 @@ public class SellerAuctionDetailController {
           socketClient.removePushListener(bidPushListener);
       }
       bidPushListener = response -> {
-          if (response != null && response.isSuccess() && response.getData() instanceof com.auction.share.DTO.BidUpdateEvent event) {
-              if (this.auctionId != null && this.auctionId.equals(event.getAuctionId())) {
-                  Platform.runLater(this::refreshData);
+          if (response != null && response.isSuccess()) {
+              if (response.getData() instanceof com.auction.share.DTO.BidUpdateEvent event) {
+                  if (this.auctionId != null && this.auctionId.equals(event.getAuctionId())) {
+                      Platform.runLater(this::refreshData);
+                  }
+              } else if ("AUCTION_CANCELLED".equals(response.getMessage()) && response.getData() instanceof String cancelledId) {
+                  if (this.auctionId != null && this.auctionId.equals(cancelledId)) {
+                      Platform.runLater(this::refreshData);
+                  }
               }
           }
       };
@@ -274,7 +280,8 @@ public class SellerAuctionDetailController {
       int bids,
       String time,
       String status,
-      String auctionId) {
+      String auctionId,
+      Runnable dashboardInvalidator) {
     try {
       FXMLLoader loader =
           new FXMLLoader(
@@ -283,6 +290,7 @@ public class SellerAuctionDetailController {
       Parent root = loader.load();
 
       SellerAuctionDetailController ctrl = loader.getController();
+      ctrl.dashboardInvalidator = dashboardInvalidator;
       ctrl.setServices(
           com.auction.client.ClientContext.auctionService(),
           com.auction.client.ClientContext.socketClient()

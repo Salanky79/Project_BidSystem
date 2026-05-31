@@ -40,5 +40,4 @@ public class ItemDAOImpl implements ItemDAO {
         return null;
     }
 
-    // findById without connection was removed
 }

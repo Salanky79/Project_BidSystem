@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Dịch vụ xử lý Command liên quan đến phiên đấu giá (tạo, hủy, thay đổi cấu hình).
  */
-public class AuctionService implements ISchedulableAuctionService {
+public class AuctionService implements IAuctionService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuctionService.class);
     private final DataSource dataSource;
     private final AuctionDAO auctionDAO;
@@ -40,14 +40,12 @@ public class AuctionService implements ISchedulableAuctionService {
             DataSource dataSource,
             AuctionDAO auctionDAO,
             ItemDAO itemDAO,
-            UserDAO userDAO) {
+            UserDAO userDAO,
+            ImageStorage imageStorage) {
         this.dataSource = dataSource;
         this.auctionDAO = auctionDAO;
         this.itemDAO = itemDAO;
         this.userDAO = userDAO;
-    }
-
-    public void setImageStorage(ImageStorage imageStorage) {
         this.imageStorage = imageStorage;
     }
 
@@ -114,12 +112,12 @@ public class AuctionService implements ISchedulableAuctionService {
         }
     }
 
-    public List<String> finishAuctionsAndGetIds() throws SQLException {
+    public List<String> updateAuctionStatusesAndGetFinishedIds() throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
             try {
                 auctionDAO.markOpenAuctionsAsRunning(conn);
-                
+
                 Timestamp now = Timestamp.valueOf(LocalDateTime.now());
                 List<String> endedIds = auctionDAO.findEndedRunningAuctionIds(conn, now.toLocalDateTime());
                 if (endedIds.isEmpty()) {

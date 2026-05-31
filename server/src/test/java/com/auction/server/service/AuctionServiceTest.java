@@ -4,6 +4,7 @@ import com.auction.server.dao.AuctionDAO;
 import com.auction.server.dao.BidTransactionDAO;
 import com.auction.server.dao.ItemDAO;
 import com.auction.server.dao.UserDAO;
+import com.auction.server.util.ImageStorage;
 import com.auction.share.DTO.CreateAuctionRequest;
 import com.auction.share.DTO.PlaceBidRequest;
 import com.auction.share.enums.Category;
@@ -40,6 +41,8 @@ class AuctionServiceTest {
     private ItemDAO itemDAO;
     @Mock
     private UserDAO userDAO;
+    @Mock
+    private ImageStorage imageStorage;
 
     @Mock
     private DataSource dataSource;
@@ -56,7 +59,7 @@ class AuctionServiceTest {
         Seller seller = seller("seller-1");
         when(userDAO.findById(any(Connection.class), eq("seller-1"))).thenReturn(seller);
 
-        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO);
+        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO, imageStorage);
         LocalDateTime start = LocalDateTime.now().plusHours(2);
         LocalDateTime end = LocalDateTime.now().plusHours(1);
         CreateAuctionRequest request = createRequest("seller-1", start, end);
@@ -69,7 +72,7 @@ class AuctionServiceTest {
         Bidder bidder = new Bidder("b", "p", "Bidder", "090", "b@mail.com", "HN");
         when(userDAO.findById(any(Connection.class), eq("seller-1"))).thenReturn(bidder);
 
-        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO);
+        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO, imageStorage);
         CreateAuctionRequest request = createRequest("seller-1", LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(2));
 
         assertThrows(ValidationException.class, () -> service.createAuction(request));
@@ -82,7 +85,7 @@ class AuctionServiceTest {
         when(itemDAO.saveItem(any(Connection.class), any(Item.class))).thenReturn(true);
         when(auctionDAO.saveAuction(any(Connection.class), any(Auction.class))).thenReturn(true);
 
-        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO);
+        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO, imageStorage);
         CreateAuctionRequest request = createRequest("seller-1", LocalDateTime.now().plusMinutes(1), LocalDateTime.now().plusHours(2));
 
         service.createAuction(request);

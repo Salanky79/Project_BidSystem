@@ -49,9 +49,12 @@ class RequestDispatcherTest {
     @Mock
     private AuctionSubscriptionRegistry subscriptionRegistry;
 
+    @Mock
+    private com.auction.server.service.BroadcastService broadcastService;
+
     @Test
     void handle_nullAction_returnsFailResponse() {
-        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry, broadcastService);
 
         Response<?> response = handler.handle(new RawRequest(null), null);
 
@@ -61,7 +64,7 @@ class RequestDispatcherTest {
 
     @Test
     void handle_requestIdPropagated() throws Exception {
-        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry, broadcastService);
         Bidder bidder = new Bidder("alice", "pwd", "Alice", "090", "alice@mail.com", "HCM");
         bidder.setID("u-1");
         when(userService.login("alice", "pwd")).thenReturn(bidder);
@@ -76,7 +79,7 @@ class RequestDispatcherTest {
 
     @Test
     void handle_classCastException_returnsFailResponse() {
-        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry, broadcastService);
 
         Response<?> response = handler.handle(new RawRequest(Action.LOGIN), null);
 
@@ -86,7 +89,7 @@ class RequestDispatcherTest {
 
     @Test
     void handle_login_routesToUserController() throws Exception {
-        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry, broadcastService);
         Bidder bidder = new Bidder("alice", "pwd", "Alice", "090", "alice@mail.com", "HCM");
         bidder.setID("u-1");
         when(userService.login("alice", "pwd")).thenReturn(bidder);
@@ -99,7 +102,7 @@ class RequestDispatcherTest {
 
     @Test
     void handle_unsubscribe_nullAuctionId_unsubscribeAll() throws Exception {
-        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry);
+        RequestDispatcher handler = new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry, broadcastService);
         ClientSession session = new ClientSession(new ObjectOutputStream(new ByteArrayOutputStream()));
 
         Response<?> response = handler.handle(new UnsubscribeAuctionRequest(null), session);

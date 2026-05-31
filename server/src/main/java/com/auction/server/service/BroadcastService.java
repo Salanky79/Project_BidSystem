@@ -4,6 +4,7 @@ import com.auction.server.network.AuctionSubscriptionRegistry;
 import com.auction.share.DTO.BidUpdateEvent;
 import com.auction.share.DTO.Response;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -11,8 +12,9 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BroadcastService {
+public class BroadcastService implements AuctionLifecycleCleaner {
   public static final String BID_UPDATED = "BID_UPDATED";
+  public static final String AUCTION_FINISHED = "AUCTION_FINISHED";
   private static final Logger LOGGER = LoggerFactory.getLogger(BroadcastService.class);
 
   private final AuctionSubscriptionRegistry subscriptionRegistry;
@@ -50,6 +52,55 @@ public class BroadcastService {
       LOGGER.error("Broadcast failed entirely for auction {}", event.getAuctionId(), e);
     }
   }
+
+  public void broadcastAuctionCancelled(String auctionId) {
+    try {
+      Response<String> pushMessage = Response.success("AUCTION_CANCELLED", auctionId);
+      for (com.auction.server.network.ClientSession session :
+          subscriptionRegistry.getSubscribers(auctionId)) {
+        broadcastExecutor.submit(
+            () -> {
+              try {
+                session.send(pushMessage);
+              } catch (IOException e) {
+                LOGGER.warn("Failed to push cancel to session, removing: {}", e.getMessage());
+                subscriptionRegistry.unsubscribeAll(session);
+              }
+            });
+      }
+    } catch (Exception e) {
+      LOGGER.error("Broadcast cancel failed entirely for auction {}", auctionId, e);
+    }
+  }
+
+  public void broadcastAuctionFinished(String auctionId) {
+    try {
+      Response<String> pushMessage = Response.success(AUCTION_FINISHED, auctionId);
+      for (com.auction.server.network.ClientSession session :
+          subscriptionRegistry.getSubscribers(auctionId)) {
+        broadcastExecutor.submit(
+            () -> {
+              try {
+                session.send(pushMessage);
+              } catch (IOException e) {
+                LOGGER.warn("Failed to push finish to session, removing: {}", e.getMessage());
+                subscriptionRegistry.unsubscribeAll(session);
+              }
+            });
+      }
+    } catch (Exception e) {
+      LOGGER.error("Broadcast finish failed entirely for auction {}", auctionId, e);
+    }
+  }
+
+  @Override
+  public void onAuctionsFinished(List<String> auctionIds) {
+    if (auctionIds == null) return;
+    for (String id : auctionIds) {
+      broadcastAuctionFinished(id);
+    }
+  }
+
   public void shutdown() {
     broadcastExecutor.shutdown();
     try {

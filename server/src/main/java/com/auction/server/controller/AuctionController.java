@@ -18,17 +18,20 @@ public class AuctionController {
   private final IAutoBidService autoBidService;
   private final com.auction.server.service.BidCoordinator bidCoordinator;
   private final com.auction.server.service.AuctionQueryService auctionQueryService;
+  private final com.auction.server.service.BroadcastService broadcastService;
 
   // khởi tạo controller với các service tương ứng
   public AuctionController(
       IAuctionService auctionService,
       IAutoBidService autoBidService,
       com.auction.server.service.BidCoordinator bidCoordinator,
-      com.auction.server.service.AuctionQueryService auctionQueryService) {
+      com.auction.server.service.AuctionQueryService auctionQueryService,
+      com.auction.server.service.BroadcastService broadcastService) {
     this.auctionService = auctionService;
     this.autoBidService = autoBidService;
     this.bidCoordinator = bidCoordinator;
     this.auctionQueryService = auctionQueryService;
+    this.broadcastService = broadcastService;
   }
 
   // xử lý logic tạo phiên đấu giá và chuẩn bị DTO trả về cho client
@@ -54,6 +57,7 @@ public class AuctionController {
     validateRequiredText(request.getAuctionId(), "Auction ID is required.");
     validateRequiredText(requesterUserId, "Authentication required.");
     auctionService.cancelAuction(request.getAuctionId(), requesterUserId);
+    broadcastService.broadcastAuctionCancelled(request.getAuctionId());
     return Response.success("Auction canceled successfully.", true);
   }
 

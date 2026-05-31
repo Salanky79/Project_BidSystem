@@ -28,10 +28,11 @@ public class RequestDispatcher {
             IAutoBidService autoBidService,
             BidCoordinator bidCoordinator,
             AuctionQueryService auctionQueryService,
-            AuctionSubscriptionRegistry subscriptionRegistry) {
+            AuctionSubscriptionRegistry subscriptionRegistry,
+            com.auction.server.service.BroadcastService bidBroadcastService) {
         
         UserController userController = new UserController(userService, new UserMapper());
-        AuctionController auctionController = new AuctionController(auctionService, autoBidService, bidCoordinator, auctionQueryService);
+        AuctionController auctionController = new AuctionController(auctionService, autoBidService, bidCoordinator, auctionQueryService, bidBroadcastService);
         this.subscriptionRegistry = subscriptionRegistry;
 
         // Đăng ký các processors

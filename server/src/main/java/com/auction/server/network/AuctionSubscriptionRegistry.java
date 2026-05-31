@@ -4,10 +4,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
-import com.auction.server.service.AuctionLifecycleListener;
+import com.auction.server.service.AuctionLifecycleCleaner;
 
 /** Sổ đăng ký (Registry) quản lý các phiên bản Client đang theo dõi realtime từng phiên đấu giá. */
-public class AuctionSubscriptionRegistry implements AuctionLifecycleListener {
+public class AuctionSubscriptionRegistry implements AuctionLifecycleCleaner {
   private final Map<String, Set<ClientSession>> subscribersByAuction = new ConcurrentHashMap<>();
   private final Map<ClientSession, Set<String>> auctionsBySession = new ConcurrentHashMap<>();
 

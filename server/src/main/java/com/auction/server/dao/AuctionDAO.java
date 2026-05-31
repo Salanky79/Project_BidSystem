@@ -21,7 +21,7 @@ public interface AuctionDAO {
     List<Auction> findBySeller(Connection conn, String sellerId) throws SQLException;
     List<Auction> findBySellerAndStatus(Connection conn, String sellerId, AuctionStatus status) throws SQLException;
     
-    double sumAuctionCurrentPrices(Connection conn, String bidderId, Set<String> excludedAuctionIds) throws SQLException;
+    double sumAuctionCurrentPrices(Connection conn, String bidderId, String excludedAuctionId) throws SQLException;
     
     boolean updateHighestBid(Connection conn, String id, String bidderId, double amount) throws SQLException;
     

@@ -13,39 +13,40 @@ import org.slf4j.LoggerFactory;
  */
 public class AuctionStatusScheduler implements Runnable {
   private static final Logger LOGGER = LoggerFactory.getLogger(AuctionStatusScheduler.class);
-  private final ISchedulableAuctionService auctionService;
-  private final List<AuctionLifecycleListener> listeners = new CopyOnWriteArrayList<>();
+  private final IAuctionService auctionService;
+  private final List<AuctionLifecycleCleaner> listeners = new CopyOnWriteArrayList<>();
   private final long intervalMillis;
-  private final AtomicBoolean running = new AtomicBoolean(false);
+  private volatile boolean running = false;
 
   public AuctionStatusScheduler(
-      ISchedulableAuctionService auctionService,
+      IAuctionService auctionService,
       long intervalMillis) {
     this.auctionService = auctionService;
     this.intervalMillis = intervalMillis;
   }
 
-  public void addListener(AuctionLifecycleListener listener) {
+  public void addListener(AuctionLifecycleCleaner listener) {
     if (listener != null) {
       listeners.add(listener);
     }
   }
 
   public void shutdown() {
-    running.set(false);
+    this.running = false;
   }
 
   @Override
   public void run() {
-    if (!running.compareAndSet(false, true)) {
+    if (running) {
       throw new IllegalStateException("Scheduler already running");
     }
     try {
-      while (running.get() && !Thread.currentThread().isInterrupted()) {
+      running = true;
+      while (running && !Thread.currentThread().isInterrupted()) {
         try {
-          List<String> finishedIds = auctionService.finishAuctionsAndGetIds();
-          if (finishedIds != null && !finishedIds.isEmpty()) {
-            listeners.forEach(l -> l.onAuctionsFinished(finishedIds));
+          List<String> finishedIds = auctionService.updateAuctionStatusesAndGetFinishedIds();
+          if (!finishedIds.isEmpty()) {
+            notifyListeners(finishedIds);
           }
           Thread.sleep(intervalMillis);
         } catch (SQLException e) {
@@ -62,7 +63,17 @@ public class AuctionStatusScheduler implements Runnable {
         }
       }
     } finally {
-      running.set(false);
+      this.running = false;
+    }
+  }
+
+  private void notifyListeners(List<String> finishedIds) {
+    for (AuctionLifecycleCleaner listener : listeners) {
+      try {
+        listener.onAuctionsFinished(finishedIds);
+      } catch (Exception e) {
+        LOGGER.error("Listener failed", e);
+      }
     }
   }
 }

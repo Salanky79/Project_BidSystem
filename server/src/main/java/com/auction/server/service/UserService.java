@@ -105,7 +105,7 @@ public class UserService implements IUserService {
       UserDTO baseUserDTO = userMapper.fromUserToUserDTO(user);
       double availableBalance =
           baseUserDTO.getBalance()
-              - auctionDAO.sumAuctionCurrentPrices(conn, user.getId(), Collections.emptySet());
+              - auctionDAO.sumAuctionCurrentPrices(conn, user.getId(), null);
       UserDTO userDTO =
           new UserDTO(
               baseUserDTO.getId(),

@@ -234,4 +234,8 @@ public class HomeController {
     }
   }
 
+  public String getCurrentStatusFilter() {
+    return currentStatusFilter;
+  }
+
 }

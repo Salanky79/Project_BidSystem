@@ -58,44 +58,38 @@ public class BidService implements IBidService {
                 throw new ConcurrentBidException("Bid amount must be at least current price + bid step.");
             }
 
-            placeBidAndBroadcast(conn, auction, bidder, req.getAmount());
-            return true;
-        }
-    }
+            BidTransaction transaction = new BidTransaction(auction, bidder, req.getAmount());
 
-    private void placeBidAndBroadcast(Connection conn, Auction auction, Bidder bidder, double amount) throws SQLException, ValidationException {
-        BidTransaction transaction = new BidTransaction(auction, bidder, amount);
-
-        conn.setAutoCommit(false);
-        try {
+            conn.setAutoCommit(false);
+            try {
                 // 1. Lock user balance row to prevent double-spending
                 double currentBalance = userDAO.findBalanceForUpdate(conn, bidder.getId());
-                
+
                 // 2. Check if user has enough balance considering reserved amounts in other running auctions
-                double reservedInOtherRunningAuctions = auctionDAO.sumAuctionCurrentPrices(conn, bidder.getId(), Set.of(auction.getId()));
-                double requiredForThisBid = amount;
+                double reservedInOtherRunningAuctions = auctionDAO.sumAuctionCurrentPrices(conn, bidder.getId(), auction.getId());
+                double requiredForThisBid = req.getAmount();
                 if (auction.getHighestBidder() != null && bidder.getId().equals(auction.getHighestBidder().getId())) {
-                    requiredForThisBid = amount - auction.getCurrentHighestBid();
+                    requiredForThisBid = req.getAmount() - auction.getCurrentHighestBid();
                 }
-                
+
                 if (currentBalance - reservedInOtherRunningAuctions < requiredForThisBid) {
                     throw new InsufficientBalanceException("Insufficient balance.");
                 }
 
                 // 3. Atomic check & update auction
-                boolean updated = auctionDAO.updateHighestBid(conn, auction.getId(), bidder.getId(), amount);
+                boolean updated = auctionDAO.updateHighestBid(conn, auction.getId(), bidder.getId(), req.getAmount());
                 if (!updated) {
                     throw new ConcurrentBidException(
                             "Bid rejected: auction is not running, already ended, or current price changed.");
                 }
 
                 bidTransactionDAO.saveBidTransaction(conn, transaction);
-                
+
                 // 4. Re-fetch auction within the same transaction to get the exact bid_count and end_time
                 Auction updatedAuction = auctionDAO.findById(conn, auction.getId());
 
                 conn.commit();
-                
+
                 // 5. Broadcast the new event
                 bidBroadcastService.broadcastBidUpdate(
                         new BidUpdateEvent(
@@ -103,17 +97,20 @@ public class BidService implements IBidService {
                                 updatedAuction.getId(),
                                 bidder.getId(),
                                 bidder.getFullName(),
-                                amount,
-                                amount,
+                                req.getAmount(),
+                                req.getAmount(),
                                 transaction.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                                 updatedAuction.getBidCount()));
-        } catch (SQLException | ValidationException e) {
-            conn.rollback();
-            throw e;
-        } finally {
-            conn.setAutoCommit(true);
+            } catch (SQLException | ValidationException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+            return true;
         }
     }
+
 
     private Bidder requireBidder(Connection conn, String bidderId) throws SQLException, ValidationException {
         User bidderUser = userDAO.findById(conn, bidderId);

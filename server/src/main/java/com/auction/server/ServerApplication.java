@@ -47,8 +47,7 @@ public class ServerApplication {
     // === Core Service Layer ===
     UserService userService = new UserService(dataSource, userDao, bidTransactionDao, auctionDao, userMapper);
     
-    AuctionService auctionService = new AuctionService(dataSource, auctionDao, itemDao, userDao);
-    auctionService.setImageStorage(new CloudinaryService());
+    AuctionService auctionService = new AuctionService(dataSource, auctionDao, itemDao, userDao,new CloudinaryService());
     
     AuctionQueryService auctionQueryService = new AuctionQueryService(dataSource, auctionDao, bidTransactionDao);
 
@@ -63,6 +62,7 @@ public class ServerApplication {
     
     // === Background Schedulers ===
     AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionService, 2000L);
+    auctionStatusScheduler.addListener(bidBroadcastService);
     auctionStatusScheduler.addListener(subscriptionRegistry);
     auctionStatusScheduler.addListener(autoBidRegistry);
     // chạy ngầm bộ đếm thời gian đấu giá (cập nhật trạng thái liên tục)
@@ -71,7 +71,7 @@ public class ServerApplication {
     // === Controllers / Request Dispatching ===
     BidCoordinator bidCoordinator = new com.auction.server.service.BidCoordinator(bidService, autoBidService);
     RequestDispatcher requestDispatcher =
-        new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry);
+        new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry, bidBroadcastService);
 
     try (ServerSocket serverSocket = new ServerSocket(port)) {
       System.out.println("Server start on port: " + port);

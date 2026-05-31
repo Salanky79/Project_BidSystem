@@ -13,11 +13,6 @@ public class CloudinaryService implements ImageStorage {
   private final Cloudinary cloudinary;
 
   public CloudinaryService() {
-    String cloudinaryUrl = AppConfig.get("CLOUDINARY_URL");
-    if (cloudinaryUrl != null && !cloudinaryUrl.isBlank()) {
-      LOGGER.info("Initializing Cloudinary using CLOUDINARY_URL environment variable.");
-      this.cloudinary = new Cloudinary(cloudinaryUrl);
-    } else {
       String cloudName = AppConfig.get("CLOUDINARY_CLOUD_NAME");
       String apiKey = AppConfig.get("CLOUDINARY_API_KEY");
       String apiSecret = AppConfig.get("CLOUDINARY_API_SECRET");
@@ -35,7 +30,6 @@ public class CloudinaryService implements ImageStorage {
         config.put("api_secret", apiSecret);
         this.cloudinary = new Cloudinary(config);
       }
-    }
   }
 
   /**

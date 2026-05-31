@@ -7,9 +7,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /** Bộ nhớ tạm (In-memory Registry) lưu trữ danh sách cài đặt Auto-bid của tất cả user. */
-public class AutoBidRegistry implements AuctionLifecycleListener {
-  private final Map<String, ConcurrentHashMap<String, AutoBidConfig>> configsByAuction =
-      new ConcurrentHashMap<>();
+public class AutoBidRegistry implements AuctionLifecycleCleaner {
+  private final Map<String, ConcurrentHashMap<String, AutoBidConfig>> configsByAuction = new ConcurrentHashMap<>();
 
   public void register(AutoBidConfig config) {
     configsByAuction

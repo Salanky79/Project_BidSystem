@@ -30,13 +30,21 @@ public class HomeFrameController extends FrameController {
     @FXML
     public void initialize() {
         refreshCurrentBudget();
-    bidPushListener = response -> {
-            if (response != null
-                    && response.isSuccess()
-                    && response.getData() instanceof BidUpdateEvent
-                    && "BID_UPDATED".equals(response.getMessage())) {
-                refreshCurrentBudget();
-                NotificationManager.showInfo("Có giá thầu mới!");
+        bidPushListener = response -> {
+            if (response != null && response.isSuccess()) {
+                if (response.getData() instanceof BidUpdateEvent
+                        && "BID_UPDATED".equals(response.getMessage())) {
+                    refreshCurrentBudget();
+                    NotificationManager.showInfo("Có giá thầu mới!");
+                } else if ("AUCTION_FINISHED".equals(response.getMessage())
+                        && response.getData() instanceof String finishedId) {
+                    javafx.application.Platform.runLater(() -> {
+                        refreshCurrentBudget();
+                        if (currentHomeController != null) {
+                            currentHomeController.loadAuction(currentHomeController.getCurrentStatusFilter());
+                        }
+                    });
+                }
             }
         };
         ClientContext.socketClient().addPushListener(bidPushListener);

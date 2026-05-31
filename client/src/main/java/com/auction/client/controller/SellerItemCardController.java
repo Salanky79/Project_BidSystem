@@ -105,6 +105,6 @@ public class SellerItemCardController {
 
   @FXML
   private void handleCardClick() {
-    SellerAuctionDetailController.open(icon, category, name, price, bids, time, status, auctionId);
+    SellerAuctionDetailController.open(icon, category, name, price, bids, time, status, auctionId, refreshCallback);
   }
 }

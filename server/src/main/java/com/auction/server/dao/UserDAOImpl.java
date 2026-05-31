@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Collections.nCopies;
+
 public class UserDAOImpl implements UserDAO {
     // LƯU TÀI KHOẢN MỚI
     public boolean saveUser(Connection conn, User user) throws SQLException {
@@ -122,7 +124,7 @@ public class UserDAOImpl implements UserDAO {
 
     public int deductWinningBidders(Connection conn, List<String> auctionIds) throws SQLException {
         if (auctionIds == null || auctionIds.isEmpty()) return 0;
-        String placeholders = String.join(",", java.util.Collections.nCopies(auctionIds.size(), "?"));
+        String placeholders = String.join(",", nCopies(auctionIds.size(), "?"));
         String sql = """
                 UPDATE users u
                 JOIN (
@@ -144,7 +146,7 @@ public class UserDAOImpl implements UserDAO {
 
     public int creditSellers(Connection conn, List<String> auctionIds) throws SQLException {
         if (auctionIds == null || auctionIds.isEmpty()) return 0;
-        String placeholders = String.join(",", java.util.Collections.nCopies(auctionIds.size(), "?"));
+        String placeholders = String.join(",", nCopies(auctionIds.size(), "?"));
         String sql = """
                 UPDATE users u
                 JOIN (

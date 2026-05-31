@@ -64,12 +64,6 @@ public class AuctionQueryService {
     }
 
     private List<Auction> resolveAuctionsByFilter(Connection conn, ListAuctionRequest req) throws SQLException {
-        if (req == null) {
-            return auctionDAO.findAll(conn).stream()
-                    .filter(a -> a.getStatus() != AuctionStatus.CANCELED)
-                    .collect(Collectors.toList());
-        }
-
         String sellerId = req.getSellerId();
         String statusStr = req.getStatus();
         boolean hasSeller = sellerId != null && !sellerId.isBlank();

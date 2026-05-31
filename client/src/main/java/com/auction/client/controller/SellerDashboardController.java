@@ -26,6 +26,7 @@ public class SellerDashboardController {
 
   public void setAuctionService(AuctionService auctionService) {
     this.auctionService = auctionService;
+    loadAuctionCards("All");
   }
 
   // ===== FILTER BUTTONS =====
@@ -84,9 +85,16 @@ public class SellerDashboardController {
   private List<AuctionSummaryDTO> allAuctions = null;
   private final java.util.Map<String, javafx.scene.Node> cardCache = new java.util.HashMap<>();
 
+  private String currentFilterStatus = "All";
+
+  private String getCurrentFilterStatus() {
+      return currentFilterStatus;
+  }
+
   // ===== LOAD CARDS =====
 
   private void loadAuctionCards(String filterStatus) {
+    this.currentFilterStatus = filterStatus;
     if (allAuctions != null) {
       renderGrid(filterStatus);
       return;
@@ -134,6 +142,12 @@ public class SellerDashboardController {
                           "/com/auction/client/view/SellerItemCard.fxml"));
           card = loader.load();
           SellerItemCardController ctrl = loader.getController();
+
+          ctrl.setRefreshCallback(() -> {
+            allAuctions = null;
+            cardCache.clear();
+            loadAuctionCards(getCurrentFilterStatus());
+          });
 
           ctrl.setData(
               CategoryUtils.iconFor(dto.getCategory()),

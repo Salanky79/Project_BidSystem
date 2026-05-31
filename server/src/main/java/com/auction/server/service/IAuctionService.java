@@ -6,9 +6,11 @@ import com.auction.share.exceptions.ValidationException;
 import com.auction.share.models.auction.Auction;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public interface IAuctionService {
     Auction createAuction(CreateAuctionRequest request) throws SQLException, ValidationException;
     void cancelAuction(String auctionId, String requesterUserId) throws SQLException, ValidationException;
     boolean setBidStep(SetBidStepRequest request) throws SQLException, ValidationException;
+    List<String> updateAuctionStatusesAndGetFinishedIds() throws SQLException;
 }

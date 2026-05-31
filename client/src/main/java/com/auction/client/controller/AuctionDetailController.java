@@ -357,9 +357,19 @@ public class AuctionDetailController {
             socketClient.removePushListener(bidPushListener);
         }
         bidPushListener = response -> {
-            if (response != null && response.isSuccess() && response.getData() instanceof BidUpdateEvent event) {
-                if (this.auctionId != null && this.auctionId.equals(event.getAuctionId())) {
-                    Platform.runLater(() -> applyBidUpdate(event));
+            if (response != null && response.isSuccess()) {
+                if (response.getData() instanceof BidUpdateEvent event) {
+                    if (this.auctionId != null && this.auctionId.equals(event.getAuctionId())) {
+                        Platform.runLater(() -> applyBidUpdate(event));
+                    }
+                } else if ("AUCTION_CANCELLED".equals(response.getMessage()) && response.getData() instanceof String cancelledId) {
+                    if (this.auctionId != null && this.auctionId.equals(cancelledId)) {
+                        Platform.runLater(this::refreshAuctionDetail);
+                    }
+                } else if ("AUCTION_FINISHED".equals(response.getMessage()) && response.getData() instanceof String finishedId) {
+                    if (this.auctionId != null && this.auctionId.equals(finishedId)) {
+                        Platform.runLater(this::refreshAuctionDetail);
+                    }
                 }
             }
         };
@@ -386,6 +396,12 @@ public class AuctionDetailController {
             updateBidHistory(detail);
 
             if (isAuctionEnded(detail)) {
+                if (countdownTimer != null) countdownTimer.stop();
+                if ("CANCELED".equals(detail.getStatus())) {
+                    endsInLabel.setText("Cancelled");
+                    placeBidButton.setDisable(true);
+                    enableAutoBidButton.setDisable(true);
+                }
                 showWinnerInfo(detail);
             }
         }));
@@ -446,6 +462,7 @@ public class AuctionDetailController {
 
     private boolean isAuctionEnded(AuctionDetailDTO detail) {
         return "FINISHED".equals(detail.getStatus())
+            || "CANCELED".equals(detail.getStatus())
             || (this.endTime != null && LocalDateTime.now().isAfter(this.endTime));
     }
 
@@ -501,7 +518,9 @@ public class AuctionDetailController {
             winnerSpacer.setManaged(true);
             winnerCard.setVisible(true);
             winnerCard.setManaged(true);
-            if (detail != null && detail.getHighestBidderName() != null && !detail.getHighestBidderName().trim().isEmpty()) {
+            if (detail != null && "CANCELED".equals(detail.getStatus())) {
+                winnerNameLabel.setText("Auction Cancelled");
+            } else if (detail != null && detail.getHighestBidderName() != null && !detail.getHighestBidderName().trim().isEmpty()) {
                 winnerNameLabel.setText(detail.getHighestBidderName());
             } else {
                 winnerNameLabel.setText("No winner identified (No bids)");
