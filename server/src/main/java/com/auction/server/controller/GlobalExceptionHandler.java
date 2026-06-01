@@ -21,12 +21,12 @@ public class GlobalExceptionHandler {
 
     public Response<?> handle(Exception e, String action) {
         return handlers.entrySet().stream()
-            .filter(entry -> entry.getKey().isInstance(e))
-            .findFirst()
-            .map(entry -> entry.getValue().apply(e))
-            .orElseGet(() -> {
-                LOGGER.error("Unhandled request processing error for action={}", action, e);
-                return Response.fail("An internal error occurred.");
-            });
+                .filter(entry -> entry.getKey().isInstance(e)) // 1. Tìm xem lỗi ném ra thuộc nhóm lỗi nào đã đăng ký
+                .findFirst()                                   // 2. Lấy bộ xử lý đầu tiên khớp
+                .map(entry -> entry.getValue().apply(e))       // 3. Thực thi hàm xử lý lỗi
+                .orElseGet(() -> {                             // 4. Nếu lỗi lạ (chưa đăng ký), chạy khối mặc định này
+                    LOGGER.error("Unhandled request processing error for action={}", action, e);
+                    return Response.fail("An internal error occurred.");
+                });
     }
 }

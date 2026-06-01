@@ -6,7 +6,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 
 public class SellerDashboardFrameController extends FrameController {
@@ -46,7 +45,11 @@ public class SellerDashboardFrameController extends FrameController {
 
   @FXML
   public void initialize() {
-    loadView("/com/auction/client/view/SellerDashboard.fxml");
+    changeView("/com/auction/client/view/SellerDashboard.fxml", controller -> {
+      if (controller instanceof SellerDashboardController sdc) {
+        sdc.setAuctionService(com.auction.client.ClientContext.auctionService());
+      }
+    });
     highlightButton("Home");
   }
 
@@ -61,7 +64,11 @@ public class SellerDashboardFrameController extends FrameController {
 
   @FXML
   public void handleHome() {
-    loadView("/com/auction/client/view/SellerDashboard.fxml");
+    changeView("/com/auction/client/view/SellerDashboard.fxml", controller -> {
+      if (controller instanceof SellerDashboardController sdc) {
+        sdc.setAuctionService(com.auction.client.ClientContext.auctionService());
+      }
+    });
     highlightButton("Home");
   }
 
@@ -80,9 +87,9 @@ public class SellerDashboardFrameController extends FrameController {
   @FXML
   public void handleProfile() {
     changeView("/com/auction/client/view/profile.fxml", obj -> {
-        if (obj instanceof com.auction.client.controller.ProfileController profileCtrl) {
-            profileCtrl.setUserService(com.auction.client.ClientContext.userService());
-        }
+      if (obj instanceof ProfileController profileCtrl) {
+        profileCtrl.setUserService(com.auction.client.ClientContext.userService());
+      }
     });
     highlightButton("Profile");
   }
@@ -90,13 +97,17 @@ public class SellerDashboardFrameController extends FrameController {
   @FXML
   public void handleSell() {
     changeView("/com/auction/client/view/Sell.fxml", controller -> {
-        if (controller instanceof SellController sellController) {
-            sellController.setAuctionService(com.auction.client.ClientContext.auctionService());
-            sellController.setOnSuccessCallback(() -> {
-                loadView("/com/auction/client/view/SellerDashboard.fxml");
-                highlightButton("Home");
-            });
-        }
+      if (controller instanceof SellController sellController) {
+        sellController.setAuctionService(com.auction.client.ClientContext.auctionService());
+        sellController.setOnSuccessCallback(() -> {
+          changeView("/com/auction/client/view/SellerDashboard.fxml", sdCtrl -> {
+            if (sdCtrl instanceof SellerDashboardController sdc) {
+              sdc.setAuctionService(com.auction.client.ClientContext.auctionService());
+            }
+          });
+          highlightButton("Home");
+        });
+      }
     });
   }
 
@@ -122,35 +133,24 @@ public class SellerDashboardFrameController extends FrameController {
     }
   }
 
-  /** Load một FXML đơn giản (không cần gọi thêm method) vào scrollContent. */
-  private void loadView(String fxmlPath) {
-    try {
-      FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-      VBox view = loader.load();
-      Object ctrl = loader.getController();
-      if (ctrl instanceof SellerDashboardController sdc) {
-        sdc.setAuctionService(com.auction.client.ClientContext.auctionService());
-      }
-      scrollContent.setContent(view);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
   /** Highlight đúng button trên sidebar tương ứng với màn hình đang hiển thị. */
   private void highlightButton(String active) {
     // Top-level buttons (không indent)
-    if (btnHome != null)
+    if (btnHome != null) {
       btnHome.setStyle("Home".equals(active) ? STYLE_SIDEBAR_ACTIVE : STYLE_SIDEBAR_INACTIVE);
-    if (btnProfile != null)
+    }
+    if (btnProfile != null) {
       btnProfile.setStyle("Profile".equals(active) ? STYLE_SIDEBAR_ACTIVE : STYLE_SIDEBAR_INACTIVE);
+    }
 
     // Indented sub-buttons
-    if (btnActive != null)
+    if (btnActive != null) {
       btnActive.setStyle(
           "Active".equals(active) ? STYLE_SIDEBAR_ACTIVE_INDENT : STYLE_SIDEBAR_INACTIVE_INDENT);
-    if (btnSold != null)
+    }
+    if (btnSold != null) {
       btnSold.setStyle(
           "Sold".equals(active) ? STYLE_SIDEBAR_ACTIVE_INDENT : STYLE_SIDEBAR_INACTIVE_INDENT);
+    }
   }
 }

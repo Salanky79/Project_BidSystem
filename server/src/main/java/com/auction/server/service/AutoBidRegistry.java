@@ -28,17 +28,6 @@ public class AutoBidRegistry implements AuctionLifecycleCleaner {
     return removed != null;
   }
 
-  public void cancelAll(String bidderId) {
-    for (Map.Entry<String, ConcurrentHashMap<String, AutoBidConfig>> entry :
-        configsByAuction.entrySet()) {
-      ConcurrentHashMap<String, AutoBidConfig> byBidder = entry.getValue();
-      byBidder.remove(bidderId);
-      if (byBidder.isEmpty()) {
-        configsByAuction.remove(entry.getKey(), byBidder);
-      }
-    }
-  }
-
   public void clearAuction(String auctionId) {
     if (auctionId == null || auctionId.isBlank()) {
       return;

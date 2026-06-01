@@ -24,73 +24,64 @@ public class UserService {
   // }
   // onResponse là callback chạy từ login controller
   // async + callback => tránh tình trạng UI bị đơ
-  public void login(LoginRequest request, Consumer<Response<?>> onResponse)
+  public void login(String username, String password, Consumer<Response<?>> onResponse)
       throws ValidationException {
-    if (request == null) {
-      throw new ValidationException("Request is required.");
-    }
-    String username = request.getUsername();
-    String password = request.getPassword();
     if (username == null || username.trim().isEmpty() || password == null || password.isEmpty()) {
       throw new ValidationException("Username va Password khong duoc de trong!");
     }
 
-    // ngay sau khi server trả kết quả thì hàm này sẽ chạy ( đợi kết quả )
-    socketClient.send(
-        request,
-        response -> {
-          if (onResponse != null) {
-            onResponse.accept(response);
-          }
-        });
+    LoginRequest request = new LoginRequest(username, password);
+    socketClient.send(request, onResponse);
   }
 
-  public void signup(RegisterRequest request, Consumer<Response<?>> onResponse)
+  public void signup(
+      String username,
+      String password,
+      String fullName,
+      String role,
+      String phoneNumber,
+      String email,
+      String address,
+      Consumer<Response<?>> onResponse)
       throws ValidationException {
-    if (request == null) {
-      throw new ValidationException("Request is required.");
-    }
 
-    if (request.getFullName() == null || request.getFullName().trim().isEmpty()) {
+    if (fullName == null || fullName.trim().isEmpty()) {
       throw new ValidationException("Ho ten khong duoc de trong!");
     }
-    if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+    if (username == null || username.trim().isEmpty()) {
       throw new ValidationException("Username khong duoc de trong!");
     }
-    if (request.getPassword() == null || request.getPassword().isEmpty()) {
+    if (password == null || password.isEmpty()) {
       throw new ValidationException("Password khong duoc de trong!");
     }
-    if (request.getRole() == null || request.getRole().trim().isEmpty()) {
+    if (role == null || role.trim().isEmpty()) {
       throw new ValidationException("Vai tro khong hop le!");
     }
 
-    if (request.getPhoneNumber() == null || request.getPhoneNumber().trim().isEmpty()) {
+    if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
       throw new ValidationException("So dien thoai khong duoc de trong!");
     }
-    if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+    if (email == null || email.trim().isEmpty()) {
       throw new ValidationException("Email khong duoc de trong!");
     }
-    if (request.getAddress() == null || request.getAddress().isBlank()) {
+    if (address == null || address.isBlank()) {
       throw new ValidationException("Dia chi khong hop le!");
     }
 
-    String normalizedPhone = request.getPhoneNumber().trim();
+    String normalizedPhone = phoneNumber.trim();
     if (!normalizedPhone.matches("^0\\d{8,10}$")) {
       throw new ValidationException("So dien thoai khong hop le!");
     }
 
-    String normalizedEmail = request.getEmail().trim();
+    String normalizedEmail = email.trim();
     if (!normalizedEmail.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
       throw new ValidationException("Email khong hop le!");
     }
 
-    socketClient.send(
-        request,
-        response -> {
-          if (onResponse != null) {
-            onResponse.accept(response);
-          }
-        });
+    RegisterRequest request =
+        new RegisterRequest(
+            username.trim(), password, fullName.trim(), role.trim(), normalizedPhone, normalizedEmail, address.trim());
+    socketClient.send(request, onResponse);
   }
 
   public void getProfile(Consumer<Response<?>> onResponse) {

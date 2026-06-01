@@ -135,8 +135,9 @@ public class ProfileController implements Initializable {
   private void showError(String message) {
     editButton.setText("Lỗi: " + message);
     editButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white;");
-    new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3))
-        .setOnFinished(e -> finishEditing());
+    javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+    pause.setOnFinished(e -> finishEditing());
+    pause.play();
   }
 
   private void finishEditing() {

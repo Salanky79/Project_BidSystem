@@ -1,6 +1,8 @@
 package com.auction.client.controller;
 
 import java.io.IOException;
+import java.util.function.Consumer;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,7 +25,7 @@ public class FrameController {
     changeView(fxmlFile, null);
   }
 
-  protected void changeView(String fxmlFile, java.util.function.Consumer<Object> controllerConfigurator) {
+  protected void changeView(String fxmlFile, Consumer<Object> controllerConfigurator) {
     try {
       FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
       Node newNode = loader.load();
@@ -47,23 +49,7 @@ public class FrameController {
   protected void onViewChanged(Node newNode) {}
 
   protected void showLogin(ActionEvent event) {
-    try {
-      FXMLLoader loader =
-          new FXMLLoader(getClass().getResource("/com/auction/client/view/Login.fxml"));
-      Parent loginRoot = loader.load();
-
-      if (loader.getController() instanceof LoginController loginCtrl) {
-        loginCtrl.setUserService(com.auction.client.ClientContext.userService());
-      }
-
-      Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-      Scene scene = new Scene(loginRoot);
-      stage.setScene(scene);
-      stage.centerOnScreen();
-      stage.show();
-    } catch (IOException e) {
-      e.printStackTrace();
-      System.out.println("Error: Login.fxml file not found.");
-    }
+    Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+    com.auction.client.factory.DashboardNavigator.showLogin(stage);
   }
 }

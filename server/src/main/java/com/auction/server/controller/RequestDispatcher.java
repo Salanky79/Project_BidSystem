@@ -1,12 +1,12 @@
 package com.auction.server.controller;
 
 import com.auction.server.mapper.UserMapper;
-import com.auction.server.network.AuctionSubscriptionRegistry;
+import com.auction.server.service.AuctionSubscriptionRegistry;
 import com.auction.server.network.ClientSession;
 import com.auction.server.service.IAuctionService;
 import com.auction.server.service.IAutoBidService;
 import com.auction.server.service.IUserService;
-import com.auction.server.service.BidCoordinator;
+import com.auction.server.service.IBidService;
 import com.auction.server.service.AuctionQueryService;
 import com.auction.share.DTO.*;
 import org.slf4j.Logger;
@@ -26,13 +26,13 @@ public class RequestDispatcher {
             IUserService userService,
             IAuctionService auctionService,
             IAutoBidService autoBidService,
-            BidCoordinator bidCoordinator,
+            IBidService bidService,
             AuctionQueryService auctionQueryService,
             AuctionSubscriptionRegistry subscriptionRegistry,
             com.auction.server.service.BroadcastService bidBroadcastService) {
         
         UserController userController = new UserController(userService, new UserMapper());
-        AuctionController auctionController = new AuctionController(auctionService, autoBidService, bidCoordinator, auctionQueryService, bidBroadcastService);
+        AuctionController auctionController = new AuctionController(auctionService, autoBidService, bidService, auctionQueryService, bidBroadcastService);
         this.subscriptionRegistry = subscriptionRegistry;
 
         // Đăng ký các processors

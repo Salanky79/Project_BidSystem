@@ -164,10 +164,8 @@ public class SignupController {
         throw new ValidationException("Mat khau xac nhan khong khop!");
       }
 
-      RegisterRequest request =
-          new RegisterRequest(username, password, fullName, role, phoneNumber, email, address);
       userService.signup(
-          request,
+          username, password, fullName, role, phoneNumber, email, address,
           response ->
               Platform.runLater(
                   () -> {
@@ -187,21 +185,8 @@ public class SignupController {
   }
 
   public void handleLogin(ActionEvent event) {
-    try {
-      FXMLLoader loader =
-          new FXMLLoader(getClass().getResource("/com/auction/client/view/Login.fxml"));
-      Parent loginRoot = loader.load();
-      if (loader.getController() instanceof LoginController loginCtrl) {
-          loginCtrl.setUserService(this.userService);
-      }
-
-      Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-      stage.setScene(new Scene(loginRoot));
-      stage.centerOnScreen();
-      stage.show();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+    com.auction.client.factory.DashboardNavigator.showLogin(stage);
   }
 
   public void selectSeller() {

@@ -1,6 +1,7 @@
 package com.auction.client.controller;
 
 
+import com.auction.client.factory.DashboardNavigator;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -109,7 +110,7 @@ public class ItemCardController {
 
   @FXML
   private void handleCardClick() {
-    AuctionDetailController.open(
+    DashboardNavigator.openBidderDetail(
         icon, category, name, price, bidStep, bids, time, status, auctionId);
   }
 }

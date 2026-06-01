@@ -16,7 +16,7 @@ import java.util.List;
 public class AuctionController {
   private final IAuctionService auctionService;
   private final IAutoBidService autoBidService;
-  private final com.auction.server.service.BidCoordinator bidCoordinator;
+  private final com.auction.server.service.IBidService bidService;
   private final com.auction.server.service.AuctionQueryService auctionQueryService;
   private final com.auction.server.service.BroadcastService broadcastService;
 
@@ -24,12 +24,12 @@ public class AuctionController {
   public AuctionController(
       IAuctionService auctionService,
       IAutoBidService autoBidService,
-      com.auction.server.service.BidCoordinator bidCoordinator,
+      com.auction.server.service.IBidService bidService,
       com.auction.server.service.AuctionQueryService auctionQueryService,
       com.auction.server.service.BroadcastService broadcastService) {
     this.auctionService = auctionService;
     this.autoBidService = autoBidService;
-    this.bidCoordinator = bidCoordinator;
+    this.bidService = bidService;
     this.auctionQueryService = auctionQueryService;
     this.broadcastService = broadcastService;
   }
@@ -69,7 +69,7 @@ public class AuctionController {
       throw new ValidationException("Bid amount must be greater than 0.");
     }
 
-    boolean success = bidCoordinator.placeBidAndTriggerAuto(request);
+    boolean success = bidService.placeBid(request, true);
     return Response.success("Bid placed successfully.", success);
   }
 
@@ -119,6 +119,9 @@ public class AuctionController {
     }
 
     boolean success = auctionService.setBidStep(request);
+    if (success) {
+      broadcastService.broadcastBidStepUpdated(request.getAuctionId(), request.getBidStep());
+    }
     return Response.success("Bid step updated successfully.", success);
   }
 

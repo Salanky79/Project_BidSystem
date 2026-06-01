@@ -1,6 +1,5 @@
-package com.auction.client.controller.components;
+package com.auction.client.utils;
 
-import com.auction.client.utils.DateTimeUtils;
 import com.auction.share.DTO.BidDTO;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;

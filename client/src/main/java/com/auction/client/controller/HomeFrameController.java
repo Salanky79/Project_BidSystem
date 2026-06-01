@@ -25,7 +25,7 @@ public class HomeFrameController extends FrameController {
     private javafx.scene.control.Label budgetLabel;
 
     private Consumer<Response<?>> bidPushListener;
-    private SocketClient.ConnectionStateListener connectionStateListener;
+
 
     @FXML
     public void initialize() {
@@ -49,21 +49,7 @@ public class HomeFrameController extends FrameController {
         };
         ClientContext.socketClient().addPushListener(bidPushListener);
 
-        // D3: Lắng nghe trạng thái kết nối để hiển thị banner
-        connectionStateListener = new SocketClient.ConnectionStateListener() {
-                @Override
-                public void onDisconnected() {
-                    if (budgetLabel != null)
-                        NotificationManager.showWarning("⚠ Mất kết nối — đang thử lại...");
-                }
-                @Override
-                public void onReconnected() {
-                    if (budgetLabel != null)
-                        NotificationManager.showSuccess("✔ Đã kết nối lại!");
-                    refreshCurrentBudget();
-                }
-            };
-        ClientContext.socketClient().addConnectionStateListener(connectionStateListener);
+
 
     }
 
@@ -95,10 +81,7 @@ public class HomeFrameController extends FrameController {
             ClientContext.socketClient().removePushListener(bidPushListener);
             bidPushListener = null;
         }
-        if (connectionStateListener != null) {
-            ClientContext.socketClient().removeConnectionStateListener(connectionStateListener);
-            connectionStateListener = null;
-        }
+
     }
 
     public void handleLogout(ActionEvent event) {

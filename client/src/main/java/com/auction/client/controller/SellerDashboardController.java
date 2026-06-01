@@ -42,8 +42,7 @@ public class SellerDashboardController {
 
   @FXML
   public void initialize() {
-    // Load auction cards vào grid
-    loadAuctionCards("All");
+    // Cards will be loaded dynamically when setAuctionService is called
   }
 
   // ===== FILTER HANDLERS =====

@@ -94,7 +94,7 @@ public class LoginController {
       // gọi userService
       // chạy Background Thread ( ko chạy trên JavaFX Application Thread => bị đơ)
       userService.login(
-          new LoginRequest(username, password),
+          username, password,
           response ->
               Platform.runLater(
                   () -> {
@@ -124,22 +124,7 @@ public class LoginController {
   }
 
   public void handleSignup(ActionEvent event) {
-    try {
-      FXMLLoader loader =
-          new FXMLLoader(getClass().getResource("/com/auction/client/view/SignupView.fxml"));
-      Parent loginRoot = loader.load();
-      if (loader.getController() instanceof SignupController signupCtrl) {
-          signupCtrl.setUserService(this.userService);
-      }
-      // tạo scene mới ( signup ) => gán vào stage hiện tại
-      Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-      Scene scene = new Scene(loginRoot);
-      stage.setScene(scene);
-      stage.centerOnScreen();
-      stage.show();
-    } catch (IOException e) {
-      e.printStackTrace();
-      System.out.println("Loi: Khong tim thay file SignupView.fxml!");
-    }
+    Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+    com.auction.client.factory.DashboardNavigator.showSignup(stage);
   }
 }

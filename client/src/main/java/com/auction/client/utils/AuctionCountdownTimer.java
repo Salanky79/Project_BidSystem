@@ -1,4 +1,4 @@
-package com.auction.client.controller.components;
+package com.auction.client.utils;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;

@@ -1,10 +1,11 @@
-package com.auction.server.network;
+package com.auction.server.service;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
-import com.auction.server.service.AuctionLifecycleCleaner;
+
+import com.auction.server.network.ClientSession;
 
 /** Sổ đăng ký (Registry) quản lý các phiên bản Client đang theo dõi realtime từng phiên đấu giá. */
 public class AuctionSubscriptionRegistry implements AuctionLifecycleCleaner {

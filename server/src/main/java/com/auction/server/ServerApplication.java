@@ -11,7 +11,7 @@ import com.auction.server.dao.ItemDAOImpl;
 import com.auction.server.dao.UserDAOImpl;
 import com.auction.server.mapper.UserMapper;
 import com.auction.server.network.ClientConnectionHandler;
-import com.auction.server.network.AuctionSubscriptionRegistry;
+import com.auction.server.service.AuctionSubscriptionRegistry;
 import com.auction.server.service.*;
 import com.auction.server.util.CloudinaryService;
 import com.auction.server.util.DatabaseConnection;
@@ -58,7 +58,9 @@ public class ServerApplication {
     BidService bidService = new BidService(dataSource, auctionDao, bidTransactionDao, userDao, bidBroadcastService);
     
     AutoBidRegistry autoBidRegistry = new AutoBidRegistry();
-    AutoBidService autoBidService = new AutoBidService(dataSource, autoBidRegistry, bidService, auctionQueryService, userDao);
+    AutoBidService autoBidService = new AutoBidService(
+        dataSource, autoBidRegistry, bidService, userDao, auctionDao);
+    bidService.setAutoBidService(autoBidService);
     
     // === Background Schedulers ===
     AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionService, 2000L);
@@ -69,9 +71,8 @@ public class ServerApplication {
     backgroundExecutor.submit(auctionStatusScheduler);
 
     // === Controllers / Request Dispatching ===
-    BidCoordinator bidCoordinator = new com.auction.server.service.BidCoordinator(bidService, autoBidService);
     RequestDispatcher requestDispatcher =
-        new RequestDispatcher(userService, auctionService, autoBidService, bidCoordinator, auctionQueryService, subscriptionRegistry, bidBroadcastService);
+        new RequestDispatcher(userService, auctionService, autoBidService, bidService, auctionQueryService, subscriptionRegistry, bidBroadcastService);
 
     try (ServerSocket serverSocket = new ServerSocket(port)) {
       System.out.println("Server start on port: " + port);

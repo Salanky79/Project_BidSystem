@@ -25,6 +25,7 @@ public class BidService implements IBidService {
     private final BidTransactionDAO bidTransactionDAO;
     private final UserDAO userDAO;
     private final BroadcastService bidBroadcastService;
+    private IAutoBidService autoBidService;
 
 
     public BidService(
@@ -40,9 +41,13 @@ public class BidService implements IBidService {
         this.bidBroadcastService = bidBroadcastService;
     }
 
+    @Override
+    public void setAutoBidService(IAutoBidService autoBidService) {
+        this.autoBidService = autoBidService;
+    }
 
 
-    public boolean placeBid(PlaceBidRequest req) throws SQLException, ValidationException {
+    public boolean placeBid(PlaceBidRequest req, boolean triggerAuto) throws SQLException, ValidationException {
         try (Connection conn = dataSource.getConnection()) {
             Auction auction = auctionDAO.findById(conn, req.getAuctionId());
             if (auction == null || !auction.isRunning()) {
@@ -101,6 +106,11 @@ public class BidService implements IBidService {
                                 req.getAmount(),
                                 transaction.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                                 updatedAuction.getBidCount()));
+
+                // 6. Trigger Auto Bid if required
+                if (triggerAuto && autoBidService != null) {
+                    autoBidService.triggerAutoBid(updatedAuction.getId(), bidder.getId());
+                }
             } catch (SQLException | ValidationException e) {
                 conn.rollback();
                 throw e;

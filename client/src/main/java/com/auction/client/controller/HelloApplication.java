@@ -10,15 +10,8 @@ import javafx.stage.Stage;
 public class HelloApplication extends Application {
   @Override
   public void start(Stage stage) throws IOException {
-    FXMLLoader fxmlLoader =
-        new FXMLLoader(HelloApplication.class.getResource("/com/auction/client/view/Login.fxml"));
-    Scene scene = new Scene(fxmlLoader.load());
-    if (fxmlLoader.getController() instanceof com.auction.client.controller.LoginController loginCtrl) {
-        loginCtrl.setUserService(ClientContext.userService());
-    }
     stage.setTitle("HanoiBid");
-    stage.setScene(scene);
-    stage.show();
+    com.auction.client.factory.DashboardNavigator.showLogin(stage);
   }
 
   @Override

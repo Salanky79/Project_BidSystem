@@ -2,48 +2,22 @@ package com.auction.client.controller;
 
 import com.auction.client.network.SocketClient;
 import com.auction.client.service.BidService;
+import com.auction.client.service.AuctionService;
+import com.auction.client.utils.AuctionCountdownTimer;
+import com.auction.client.utils.BidHistoryChartManager;
+import com.auction.client.service.AuctionPushRegistry;
 import com.auction.share.DTO.AuctionDetailDTO;
-import com.auction.share.DTO.BidDTO;
 import com.auction.share.DTO.BidUpdateEvent;
-import com.auction.share.DTO.Response;
 import com.auction.share.exceptions.ValidationException;
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
+import com.auction.client.utils.DateTimeUtils;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import com.auction.client.controller.components.*;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Region;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-import javafx.util.Duration;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
-import com.auction.client.utils.DateTimeUtils;
-
-import com.auction.client.service.AuctionService;
+import javafx.stage.Stage;
 
 public class AuctionDetailController {
 
@@ -87,25 +61,14 @@ public class AuctionDetailController {
     @FXML private Button    cancelAutoBidButton;
     @FXML private Label     autoBidStatusLabel;
 
-
-
-    // ── State ────────────────────────────────────────────────────
-    private double        currentPrice;
-    private double        bidStep;
-    private int           totalBids;
-    private String        auctionId;
-    private String        icon;
-    private LocalDateTime endTime;
+    // ── Visual/Countdown / Chart state ────────────────────────────
     private AuctionCountdownTimer countdownTimer;
-    // C3: Guard tránh concurrent refreshAuctionDetail() ghi đè nhau khi user bid nhanh
-    private boolean isRefreshing = false;
     private BidHistoryChartManager chartManager;
-    private boolean       autoBidEnabled = false;
-    private List<BidDTO> bidHistory = new ArrayList<>();
-    private double        startingPrice = 0;
-    private String startTimeISO; // real start time from server (ISO format)
-    private Consumer<Response<?>> bidPushListener;
-    private int lastProcessedBidCount = -1;
+
+
+    // ── ViewModel & PushHandler ──────────────────────────────────
+    private final AuctionDetailViewModel viewModel = new AuctionDetailViewModel();
+    private AuctionPushRegistry pushHandler;
 
     // ─────────────────────────────────────────────────────────────
     @FXML
@@ -114,30 +77,23 @@ public class AuctionDetailController {
         closeButton.setOnAction(e -> {
             cleanup();
             Stage stage = (Stage) closeButton.getScene().getWindow();
-            openStages.remove(this.auctionId);
             stage.close();
         });
 
-        // Place Bid button
+        // Event handlers
         placeBidButton.setOnAction(e -> handlePlaceBid());
         enableAutoBidButton.setOnAction(e -> handleEnableAutoBid());
         cancelAutoBidButton.setOnAction(e -> handleCancelAutoBid());
-
-
 
         countdownTimer = new AuctionCountdownTimer(endsInLabel);
         countdownTimer.setOnEndedAction(() -> refreshAuctionDetail());
 
         chartManager = new BidHistoryChartManager(priceHistoryChart);
-        if (chartManager != null) {
-            chartManager.loadData(bidHistory, startTimeISO, startingPrice, currentPrice);
-        }
     }
 
-    private void cleanup() {
-        if (bidPushListener != null && socketClient != null) {
-            socketClient.removePushListener(bidPushListener);
-            bidPushListener = null;
+    public void cleanup() {
+        if (pushHandler != null) {
+            pushHandler.unregister();
         }
         if (countdownTimer != null) {
             countdownTimer.stop();
@@ -145,7 +101,7 @@ public class AuctionDetailController {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // Public API – called by the opener (ItemCardController etc.)
+    // Public API – called by the opener (DashboardNavigator)
     // ─────────────────────────────────────────────────────────────
     public void setData(
             String icon,
@@ -163,86 +119,27 @@ public class AuctionDetailController {
             return;
         }
 
-        this.currentPrice = price;
-        this.bidStep      = bidStep;
-        this.totalBids    = bids;
-        this.auctionId    = auctionId;
-        this.icon         = icon;
+        viewModel.initData(icon, category, name, price, bidStep, bids, time, status, auctionId);
 
-        productTitleLabel.setText(name);
-        currentPriceLabel.setText(String.format("%.0f VND", price));
-        totalBidsLabel.setText(String.valueOf(bids));
+        productTitleLabel.setText(viewModel.getName());
+        currentPriceLabel.setText(String.format("%.0f VND", viewModel.getCurrentPrice()));
+        totalBidsLabel.setText(String.valueOf(viewModel.getTotalBids()));
         endTimeLabel.setText(DateTimeUtils.formatDateTimeForDisplay(time));
         startTimeLabel.setText("Loading...");
         sellerNameLabel.setText("Unknown");
         descriptionLabel.setText("Loading description...");
-        if (productIconLabel != null && icon != null) {
-            productIconLabel.setText(icon);
+        if (productIconLabel != null && viewModel.getIcon() != null) {
+            productIconLabel.setText(viewModel.getIcon());
         }
-        minBidLabel.setText(String.format("Minimum bid: %.0f VND", price + bidStep));
+        minBidLabel.setText(String.format("Minimum bid: %.0f VND", viewModel.getMinimumBid()));
         resetAutoBidState();
 
-        // Parse end time for countdown
-        this.endTime = DateTimeUtils.parseDateTime(time);
-        if (countdownTimer != null) countdownTimer.start(this.endTime);
+        if (countdownTimer != null) {
+            countdownTimer.start(viewModel.getEndTime());
+        }
 
         refreshAuctionDetail();
         registerBidPushRefresh();
-    }
-
-
-
-    // ─────────────────────────────────────────────────────────────
-    // Static factory – opens a new Stage with AuctionDetailv2.fxml
-    // ─────────────────────────────────────────────────────────────
-    // Track các Stage đang mở theo auctionId
-    private static final java.util.Map<String, Stage> openStages = java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
-
-    public static void open(
-            String icon,
-            String category,
-            String name,
-            double price,
-            double bidStep,
-            int    bids,
-            String time,
-            String status,
-            String auctionId
-    ) {
-        // Nếu đã mở rồi → focus cửa sổ cũ, không tạo mới
-        Stage existingStage = openStages.get(auctionId);
-        if (existingStage != null && existingStage.isShowing()) {
-            existingStage.requestFocus();
-            return;
-        }
-
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    AuctionDetailController.class.getResource(
-                            "/com/auction/client/view/AuctionDetailv2.fxml")
-            );
-            Parent root = loader.load();
-
-            AuctionDetailController ctrl = loader.getController();
-            ctrl.setServices(com.auction.client.ClientContext.bidService(), com.auction.client.ClientContext.auctionService(), com.auction.client.ClientContext.socketClient());
-            ctrl.setData(icon, category, name, price, bidStep, bids, time, status, auctionId);
-
-            Stage stage = new Stage();
-            stage.setTitle("Auction – " + name);
-            stage.setScene(new Scene(root));
-            
-            // Đăng ký vào map
-            openStages.put(auctionId, stage);
-
-            stage.setOnCloseRequest(event -> {
-                ctrl.cleanup();
-                openStages.remove(auctionId); // Dọn khỏi map khi đóng
-            });
-            stage.show();
-        } catch (java.io.IOException e) {
-            e.printStackTrace();
-            System.err.println("Error loading AuctionDetailv2.fxml");
-        }
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -254,11 +151,9 @@ public class AuctionDetailController {
 
         try {
             double amount = Double.parseDouble(input);
-            bidService.placeBid(this.auctionId, amount, currentPrice, response ->
+            bidService.placeBid(viewModel.getAuctionId(), amount, viewModel.getCurrentPrice(), response ->
                 Platform.runLater(() -> {
                     if (response != null && response.isSuccess()) {
-                        // A1: Server là nguồn sự thật duy nhất — không tự cập nhật giá
-                        // Auto-bid có thể đã xử lý sau khi server nhận lệnh, giá thực > giá user nhập
                         bidInputField.clear();
                         refreshAuctionDetail();
                     } else {
@@ -284,13 +179,13 @@ public class AuctionDetailController {
             double maxBid = Double.parseDouble(maxStr);
             double increment = Double.parseDouble(incStr);
             bidService.setAutoBid(
-                    this.auctionId,
+                    viewModel.getAuctionId(),
                     maxBid,
                     increment,
-                    currentPrice,
+                    viewModel.getCurrentPrice(),
                     response -> Platform.runLater(() -> {
                         if (response != null && response.isSuccess()) {
-                            autoBidEnabled = true;
+                            viewModel.setAutoBidEnabled(true);
                             updateAutoBidControls();
                             autoBidStatusLabel.setStyle("-fx-text-fill: #D4AF37; -fx-font-size: 11px;");
                             autoBidStatusLabel.setText("Auto-bid is active");
@@ -308,9 +203,9 @@ public class AuctionDetailController {
 
     private void handleCancelAutoBid() {
         try {
-            bidService.cancelAutoBid(this.auctionId, response -> Platform.runLater(() -> {
+            bidService.cancelAutoBid(viewModel.getAuctionId(), response -> Platform.runLater(() -> {
                 if (response != null && response.isSuccess()) {
-                    autoBidEnabled = false;
+                    viewModel.setAutoBidEnabled(false);
                     updateAutoBidControls();
                     autoBidStatusLabel.setStyle("-fx-text-fill: #888888; -fx-font-size: 11px;");
                     autoBidStatusLabel.setText("Auto-bid is off");
@@ -323,19 +218,10 @@ public class AuctionDetailController {
         }
     }
 
-
-
-    // ─────────────────────────────────────────────────────────────
-    // Price-history chart
-    // ─────────────────────────────────────────────────────────────
-
-
-
     // ─────────────────────────────────────────────────────────────
     // Helpers
     // ─────────────────────────────────────────────────────────────
     private void showBidError(String message) {
-        // Display inline near bid button via minBidLabel (repurposed for error)
         minBidLabel.setStyle("-fx-text-fill: #FF4444; -fx-font-size: 11px;");
         minBidLabel.setText(message);
     }
@@ -346,185 +232,112 @@ public class AuctionDetailController {
     }
 
     private void resetAutoBidState() {
-        autoBidEnabled = false;
+        viewModel.setAutoBidEnabled(false);
         updateAutoBidControls();
         autoBidStatusLabel.setStyle("-fx-text-fill: #888888; -fx-font-size: 11px;");
         autoBidStatusLabel.setText("Auto-bid is off");
     }
 
     private void registerBidPushRefresh() {
-        if (bidPushListener != null) {
-            socketClient.removePushListener(bidPushListener);
+        if (pushHandler != null) {
+            pushHandler.unregister();
         }
-        bidPushListener = response -> {
-            if (response != null && response.isSuccess()) {
-                if (response.getData() instanceof BidUpdateEvent event) {
-                    if (this.auctionId != null && this.auctionId.equals(event.getAuctionId())) {
-                        Platform.runLater(() -> applyBidUpdate(event));
-                    }
-                } else if ("AUCTION_CANCELLED".equals(response.getMessage()) && response.getData() instanceof String cancelledId) {
-                    if (this.auctionId != null && this.auctionId.equals(cancelledId)) {
-                        Platform.runLater(this::refreshAuctionDetail);
-                    }
-                } else if ("AUCTION_FINISHED".equals(response.getMessage()) && response.getData() instanceof String finishedId) {
-                    if (this.auctionId != null && this.auctionId.equals(finishedId)) {
-                        Platform.runLater(this::refreshAuctionDetail);
-                    }
-                }
+        pushHandler = new AuctionPushRegistry(socketClient, viewModel.getAuctionId());
+        pushHandler.setOnBidUpdate(event -> {
+            if (viewModel.applyBidUpdate(event)) {
+                applyBidUpdateUI(event);
             }
-        };
-        if (socketClient != null) {
-            socketClient.addPushListener(bidPushListener);
-        }
+        });
+        pushHandler.setOnAuctionCancelled(this::refreshAuctionDetail);
+        pushHandler.setOnAuctionFinished(this::refreshAuctionDetail);
+        pushHandler.setOnBidStepUpdate(newBidStep -> {
+            viewModel.setBidStep(newBidStep);
+            minBidLabel.setStyle("");
+            minBidLabel.setText(String.format("Minimum bid: %.0f VND", viewModel.getMinimumBid()));
+        });
+        pushHandler.register();
     }
 
-    private void refreshAuctionDetail() {
-        if (isRefreshing) return;
-        isRefreshing = true;
-        if (auctionService == null) {
-            isRefreshing = false;
-            return;
-        }
-        auctionService.getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
-            isRefreshing = false;
-            if (response == null || !response.isSuccess()) return;
-            if (!(response.getData() instanceof AuctionDetailDTO detail)) return;
-
-            updatePriceInfo(detail);
-            updateTimeInfo(detail);
-            updateProductImage(detail);
-            updateBidHistory(detail);
-
-            if (isAuctionEnded(detail)) {
-                if (countdownTimer != null) countdownTimer.stop();
-                if ("CANCELED".equals(detail.getStatus())) {
-                    endsInLabel.setText("Cancelled");
-                    placeBidButton.setDisable(true);
-                    enableAutoBidButton.setDisable(true);
-                }
-                showWinnerInfo(detail);
-            }
-        }));
-    }
-
-    private void updatePriceInfo(AuctionDetailDTO detail) {
-        this.currentPrice = detail.getCurrentPrice();
-        this.bidStep = detail.getBidStep();
-        this.totalBids = detail.getBidHistory() != null ? detail.getBidHistory().size() : this.totalBids;
-        this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));
-        this.totalBidsLabel.setText(String.valueOf(this.totalBids));
-        this.minBidLabel.setStyle("");
-        this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
-        this.sellerNameLabel.setText(detail.getSellerName());
-        this.descriptionLabel.setText(detail.getDescription() != null ? detail.getDescription() : "No description.");
-        this.lastProcessedBidCount = detail.getBidCount();
-    }
-
-    private void updateTimeInfo(AuctionDetailDTO detail) {
-        this.startTimeISO = detail.getStartTime();
-        if (detail.getStartTime() != null) {
-            this.startTimeLabel.setText(DateTimeUtils.formatDateTimeForDisplay(detail.getStartTime()));
-        }
-        if (detail.getEndTime() != null) {
-            this.endTimeLabel.setText(DateTimeUtils.formatDateTimeForDisplay(detail.getEndTime()));
-            this.endTime = DateTimeUtils.parseDateTime(detail.getEndTime());
-        }
-    }
-
-    private void updateProductImage(AuctionDetailDTO detail) {
-        if (detail.getImageUrl() != null && !detail.getImageUrl().isBlank()) {
-            String currentUrl = productIconLabel.getGraphic() instanceof ImageView iv
-                ? (String) iv.getUserData() : null;
-            if (!detail.getImageUrl().equals(currentUrl)) {
-                ImageView imageView = new ImageView();
-                imageView.setFitWidth(280);
-                imageView.setFitHeight(280);
-                imageView.setPreserveRatio(true);
-                imageView.setUserData(detail.getImageUrl());
-                imageView.setImage(new javafx.scene.image.Image(detail.getImageUrl(), 280, 280, true, true, true));
-                productIconLabel.setGraphic(imageView);
-                productIconLabel.setText("");
-            }
-        } else {
-            productIconLabel.setGraphic(null);
-            if (icon != null) productIconLabel.setText(icon);
-        }
-    }
-
-    private void updateBidHistory(AuctionDetailDTO detail) {
-        this.bidHistory = detail.getBidHistory() != null
-            ? detail.getBidHistory() : new ArrayList<>();
-        this.startingPrice = detail.getStartingPrice();
+    private void applyBidUpdateUI(BidUpdateEvent event) {
+        currentPriceLabel.setText(String.format("%.0f VND", viewModel.getCurrentPrice()));
+        minBidLabel.setStyle(""); // clear style
+        minBidLabel.setText(String.format("Minimum bid: %.0f VND", viewModel.getMinimumBid()));
+        totalBidsLabel.setText(String.valueOf(viewModel.getTotalBids()));
         if (chartManager != null) {
-            chartManager.loadData(bidHistory, startTimeISO, startingPrice, currentPrice);
+            chartManager.appendPoint(viewModel.getCurrentPrice());
         }
-    }
-
-    private boolean isAuctionEnded(AuctionDetailDTO detail) {
-        return "FINISHED".equals(detail.getStatus())
-            || "CANCELED".equals(detail.getStatus())
-            || (this.endTime != null && LocalDateTime.now().isAfter(this.endTime));
-    }
-
-    private void applyBidUpdate(BidUpdateEvent event) {
-        if (event == null) return;
-        
-        if (event.getBidCount() <= lastProcessedBidCount) {
-            return; // Ignore outdated bid update
-        }
-        lastProcessedBidCount = event.getBidCount();
-
-        this.currentPrice = event.getCurrentHighestBid();
-        this.currentPriceLabel.setText(String.format("%.0f VND", this.currentPrice));
-        this.minBidLabel.setStyle(""); // clear style lỗi nếu có
-        this.minBidLabel.setText(String.format("Minimum bid: %.0f VND", this.currentPrice + this.bidStep));
-
-        if (this.bidHistory == null) {
-            this.bidHistory = new java.util.ArrayList<>();
-        }
-
-        boolean exists = false;
-        for (BidDTO b : this.bidHistory) {
-            if (Double.compare(b.getAmount(), event.getAmount()) == 0
-                    && b.getBidderName().equals(event.getBidderName())
-                    && b.getTimestamp().equals(event.getBidTime())) {
-                exists = true;
-                break;
-            }
-        }
-
-        if (!exists) {
-            this.bidHistory.add(new BidDTO(event.getBidderName(), event.getAmount(), event.getBidTime()));
-            this.totalBids = this.bidHistory.size();
-            this.totalBidsLabel.setText(String.valueOf(this.totalBids));
-            if (chartManager != null) chartManager.appendPoint(this.currentPrice);
-        }
-
         if (winnerNameLabel != null) {
             winnerNameLabel.setText(event.getBidderName());
         }
     }
 
-    private void updateAutoBidControls() {
-        enableAutoBidButton.setDisable(autoBidEnabled);
-        cancelAutoBidButton.setDisable(!autoBidEnabled);
-        autoBidMaxInputField.setDisable(autoBidEnabled);
-        autoBidIncrementInputField.setDisable(autoBidEnabled);
+    private void refreshAuctionDetail() {
+        if (auctionService == null) {
+            return;
+        }
+        auctionService.getAuctionDetail(viewModel.getAuctionId(), response -> Platform.runLater(() -> {
+            if (response == null || !response.isSuccess()) return;
+            if (!(response.getData() instanceof AuctionDetailDTO detail)) return;
+
+            viewModel.updateFrom(detail);
+            updateUIFromViewModel();
+        }));
     }
 
-    private void showWinnerInfo(com.auction.share.DTO.AuctionDetailDTO detail) {
+    private void updateUIFromViewModel() {
+        currentPriceLabel.setText(String.format("%.0f VND", viewModel.getCurrentPrice()));
+        totalBidsLabel.setText(String.valueOf(viewModel.getTotalBids()));
+        minBidLabel.setStyle("");
+        minBidLabel.setText(String.format("Minimum bid: %.0f VND", viewModel.getMinimumBid()));
+        sellerNameLabel.setText(viewModel.getSellerName());
+        descriptionLabel.setText(viewModel.getDescription());
+
+        if (viewModel.getStartTimeISO() != null) {
+            startTimeLabel.setText(DateTimeUtils.formatDateTimeForDisplay(viewModel.getStartTimeISO()));
+        }
+        if (viewModel.getEndTime() != null) {
+            endTimeLabel.setText(DateTimeUtils.formatDateTimeForDisplay(viewModel.getEndTime().toString()));
+        }
+
+
+
+        if (chartManager != null) {
+            chartManager.loadData(viewModel.getBidHistory(), viewModel.getStartTimeISO(), viewModel.getStartingPrice(), viewModel.getCurrentPrice());
+        }
+
+        if (viewModel.isEnded()) {
+            if (countdownTimer != null) countdownTimer.stop();
+            if ("CANCELED".equals(viewModel.getStatus())) {
+                endsInLabel.setText("Cancelled");
+                placeBidButton.setDisable(true);
+                enableAutoBidButton.setDisable(true);
+            }
+            showWinnerInfoUI();
+        }
+    }
+
+
+    private void showWinnerInfoUI() {
         if (winnerCard != null && winnerSpacer != null && winnerNameLabel != null) {
             winnerSpacer.setVisible(true);
             winnerSpacer.setManaged(true);
             winnerCard.setVisible(true);
             winnerCard.setManaged(true);
-            if (detail != null && "CANCELED".equals(detail.getStatus())) {
+            if ("CANCELED".equals(viewModel.getStatus())) {
                 winnerNameLabel.setText("Auction Cancelled");
-            } else if (detail != null && detail.getHighestBidderName() != null && !detail.getHighestBidderName().trim().isEmpty()) {
-                winnerNameLabel.setText(detail.getHighestBidderName());
+            } else if (viewModel.getHighestBidderName() != null && !viewModel.getHighestBidderName().trim().isEmpty()) {
+                winnerNameLabel.setText(viewModel.getHighestBidderName());
             } else {
                 winnerNameLabel.setText("No winner identified (No bids)");
             }
         }
+    }
+
+    private void updateAutoBidControls() {
+        boolean autoBidEnabled = viewModel.isAutoBidEnabled();
+        enableAutoBidButton.setDisable(autoBidEnabled);
+        cancelAutoBidButton.setDisable(!autoBidEnabled);
+        autoBidMaxInputField.setDisable(autoBidEnabled);
+        autoBidIncrementInputField.setDisable(autoBidEnabled);
     }
 }

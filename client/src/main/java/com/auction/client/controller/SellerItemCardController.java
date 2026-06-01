@@ -86,7 +86,19 @@ public class SellerItemCardController {
     priceLabel.setText(String.format("%,.0f VND", price));
 
     bidsLabel.setText(bids + (bids <= 1 ? " bid" : " bids"));
-    timeLabel.setText("Ending In : " + DateTimeUtils.formatDateTimeForDisplay(time));
+
+    // B2: Dùng AuctionStatus enum thay vì magic string
+    AuctionStatus auctionStatus = AuctionStatus.from(status);
+    statusLabel.setText(auctionStatus.getDisplayName());
+    statusLabel.setStyle(auctionStatus.getBadgeStyle());
+
+    if (auctionStatus == AuctionStatus.FINISHED) {
+      timeLabel.setText("Ended: " + DateTimeUtils.formatDateTimeForDisplay(time));
+    } else if (auctionStatus == AuctionStatus.CANCELED) {
+      timeLabel.setText("Cancelled");
+    } else {
+      timeLabel.setText("Ending In : " + DateTimeUtils.formatDateTimeForDisplay(time));
+    }
 
     // A3: bidCount đã được server tính sẵn trong AuctionSummaryDTO.getBidCount()
     // Không cần fetch lại getAuctionDetail() — tránh N+1 request
@@ -94,17 +106,13 @@ public class SellerItemCardController {
     if (cardRoot != null) {
       cardRoot.setOnMouseClicked(event -> handleCardClick());
     }
-
-    // B2: Dùng AuctionStatus enum thay vì magic string
-    AuctionStatus auctionStatus = AuctionStatus.from(status);
-    statusLabel.setText(auctionStatus.getDisplayName());
-    statusLabel.setStyle(auctionStatus.getBadgeStyle());
   }
 
 
 
   @FXML
   private void handleCardClick() {
-    SellerAuctionDetailController.open(icon, category, name, price, bids, time, status, auctionId, refreshCallback);
+    com.auction.client.factory.DashboardNavigator.openSellerDetail(
+        icon, category, name, price, bids, time, status, auctionId, refreshCallback);
   }
 }

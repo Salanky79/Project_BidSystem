@@ -20,18 +20,6 @@ public class AuctionService {
     this.socketClient = socketClient;
   }
 
-  /** Tạo một phiên đấu giá mới. */
-  public void createAuction(
-      String itemName,
-      String description,
-      String category,
-      double startingPrice,
-      LocalDateTime startTime,
-      LocalDateTime endTime,
-      Consumer<Response<?>> onResponse)
-      throws ValidationException {
-    createAuction(itemName, description, category, startingPrice, startTime, endTime, null, null, onResponse);
-  }
 
   /** Tạo một phiên đấu giá mới kèm theo ảnh. */
   public void createAuction(
@@ -45,7 +33,6 @@ public class AuctionService {
       String imageName,
       Consumer<Response<?>> onResponse)
       throws ValidationException {
-    // Bỏ UI-rule validation (itemName/category empty) — SellController đã kiểm tra
     // Chỉ giữ business-rule validation
     if (startingPrice <= 0) {
       throw new ValidationException("Giá khởi điểm phải lớn hơn 0!");
@@ -74,21 +61,18 @@ public class AuctionService {
   }
 
   public void cancelAuction(String auctionId, Consumer<Response<?>> onResponse) {
-    com.auction.share.DTO.CancelAuctionRequest request =
-        new com.auction.share.DTO.CancelAuctionRequest(auctionId);
+    CancelAuctionRequest request = new CancelAuctionRequest(auctionId);
     socketClient.send(request, onResponse);
   }
 
   public void setBidStep(String auctionId, double bidStep, Consumer<Response<?>> onResponse) {
-    com.auction.share.DTO.SetBidStepRequest request =
-        new com.auction.share.DTO.SetBidStepRequest(auctionId, bidStep, null);
+    SetBidStepRequest request = new SetBidStepRequest(auctionId, bidStep, null);
     socketClient.send(request, onResponse);
   }
 
 
   public void getAuctionDetail(String auctionId, Consumer<Response<?>> onResponse) {
-    GetAuctionDetailRequest request =
-        new com.auction.share.DTO.GetAuctionDetailRequest(auctionId);
+    GetAuctionDetailRequest request = new GetAuctionDetailRequest(auctionId);
     socketClient.send(request, onResponse);
   }
 }
