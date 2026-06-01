@@ -21,11 +21,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class SignupController {
-  private UserService userService;
+public class SignupController implements ChangeView {
+  private UserService userService = ClientContext.userService();
 
   public void setUserService(UserService userService) {
-    this.userService = userService;
+    if (userService != null) {
+      this.userService = userService;
+    }
   }
 
   @FXML private TextField fullnameField;
@@ -132,16 +134,15 @@ public class SignupController {
     }
   }
 
-  private void openDashboard(String role, String fullName) {
-    statusLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #228B22;");
-    statusLabel.setText("Dang ky thanh cong! Chao mung, " + fullName);
-
+  private void redirectToLogin() {
     try {
-      Stage stage = (Stage) statusLabel.getScene().getWindow();
-      DashboardNavigator.openDashboard(stage, role);
-    } catch (IOException e) {
+      Stage stage = getStage(statusLabel);
+      if (stage != null) {
+        DashboardNavigator.showLogin(stage);
+      }
+    } catch (Exception e) {
       e.printStackTrace();
-      statusLabel.setText("Loi khi chuyen man hinh!");
+      statusLabel.setText("Lỗi khi chuyển màn hình!");
       statusLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #cc3333;");
     }
   }
@@ -170,7 +171,7 @@ public class SignupController {
               Platform.runLater(
                   () -> {
                     if (response != null && response.isSuccess()) {
-                      openDashboard(role, fullName);
+                      redirectToLogin();
                     } else {
                       String msg = (response != null && response.getMessage() != null)
                           ? response.getMessage()
@@ -185,8 +186,7 @@ public class SignupController {
   }
 
   public void handleLogin(ActionEvent event) {
-    Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-    com.auction.client.factory.DashboardNavigator.showLogin(stage);
+    changeView(event, "/com/auction/client/view/Login.fxml", "HanoiBid - Đăng nhập");
   }
 
   public void selectSeller() {

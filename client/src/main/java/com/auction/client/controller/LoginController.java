@@ -21,11 +21,13 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-public class LoginController {
-  private UserService userService;
+public class LoginController implements ChangeView {
+  private UserService userService = ClientContext.userService();
 
   public void setUserService(UserService userService) {
-    this.userService = userService;
+    if (userService != null) {
+      this.userService = userService;
+    }
   }
 
   @FXML private TextField usernameField;
@@ -75,9 +77,10 @@ public class LoginController {
 
   protected void loadDashboard(ActionEvent event, String role) {
     try {
-      // lấy cửa sổ hiện tại
-      Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-      DashboardNavigator.openDashboard(stage, role);
+      Stage stage = getStage(event);
+      if (stage != null) {
+        com.auction.client.factory.DashboardNavigator.openDashboard(stage, role);
+      }
     } catch (IOException e) {
       e.printStackTrace();
       errorLabel.setText("Loi giao dien: " + e.getMessage());
@@ -124,7 +127,6 @@ public class LoginController {
   }
 
   public void handleSignup(ActionEvent event) {
-    Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-    com.auction.client.factory.DashboardNavigator.showSignup(stage);
+    changeView(event, "/com/auction/client/view/SignupView.fxml", "HanoiBid - Đăng ký");
   }
 }
