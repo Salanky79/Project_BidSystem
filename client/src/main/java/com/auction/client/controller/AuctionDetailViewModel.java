@@ -81,7 +81,10 @@ public class AuctionDetailViewModel {
         this.startingPrice = detail.getStartingPrice();
         this.sellerName = detail.getSellerName();
         this.description = detail.getDescription() != null ? detail.getDescription() : "No description.";
-        this.lastProcessedBidCount = detail.getBidCount();
+        // Chỉ cập nhật nếu server data MỚI HƠN push event đã xử lý
+        if (detail.getBidCount() > this.lastProcessedBidCount) {
+            this.lastProcessedBidCount = detail.getBidCount();
+        }
         this.imageUrl = detail.getImageUrl();
         this.status = detail.getStatus();
         this.highestBidderName = detail.getHighestBidderName();

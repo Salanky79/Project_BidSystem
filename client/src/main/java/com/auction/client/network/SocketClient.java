@@ -80,13 +80,14 @@ public class SocketClient {
       return;
     }
 
-    if (onResponse != null) {
-      callbacks.put(request.getRequestId(), onResponse);
-    }
+
 
     // C1: Submit I/O vào sendExecutor — không block caller thread
     sendExecutor.submit(() -> {
       synchronized (socketLock) {
+        if (onResponse != null) {
+          callbacks.put(request.getRequestId(), onResponse);
+        }
         try {
           outputStream.writeObject(request);
           outputStream.flush();
