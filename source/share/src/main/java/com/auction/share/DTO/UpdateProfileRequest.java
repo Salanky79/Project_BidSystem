@@ -4,7 +4,6 @@ package com.auction.share.DTO;
 public class UpdateProfileRequest extends Request {
   private static final long serialVersionUID = 1L;
 
-  private final String userId;
   private final String fullName;
   private final String password;
   private final String phoneNumber;
@@ -19,16 +18,12 @@ public class UpdateProfileRequest extends Request {
       String email,
       String address) {
     super(Action.UPDATE_PROFILE);
-    this.userId = userId;
+    withUserId(userId);
     this.fullName = fullName;
     this.password = password;
     this.phoneNumber = phoneNumber;
     this.email = email;
     this.address = address;
-  }
-
-  public String getUserId() {
-    return userId;
   }
 
   public String getFullName() {
