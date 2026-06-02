@@ -1,7 +1,7 @@
 package com.auction.server.controller;
 
 import com.auction.server.mapper.UserMapper;
-import com.auction.server.service.IUserService;
+import com.auction.server.service.UserService;
 import com.auction.share.DTO.GetProfileRequest;
 import com.auction.share.DTO.LoginRequest;
 import com.auction.share.DTO.ProfileDTO;
@@ -20,10 +20,10 @@ import com.auction.share.models.user.User;
  */
 public class UserController {
   private static final int MIN_PASSWORD_LENGTH = 6;
-  private final IUserService userService;
+  private final UserService userService;
   private final UserMapper mapUserDTO;
 
-  public UserController(IUserService userService, UserMapper mapUserDTO) {
+  public UserController(UserService userService, UserMapper mapUserDTO) {
     this.userService = userService;
     this.mapUserDTO = mapUserDTO;
   }
@@ -107,3 +107,4 @@ public class UserController {
     }
   }
 }
+

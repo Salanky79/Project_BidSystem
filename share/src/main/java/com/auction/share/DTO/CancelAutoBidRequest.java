@@ -20,13 +20,4 @@ public class CancelAutoBidRequest extends Request {
   public String getBidderId() {
     return bidderId;
   }
-
-  @Override
-  public Request withUserId(String userId) {
-    if (userId == null || userId.isBlank()) {
-      return this;
-    }
-    // Always trust server-side session userId, never client-supplied bidderId.
-    return new CancelAutoBidRequest(auctionId, userId);
-  }
 }

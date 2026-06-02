@@ -21,9 +21,6 @@ public class FrameController {
     scrollContent.setContent(node);
   }
 
-  protected void changeView(String fxmlFile) {
-    changeView(fxmlFile, null);
-  }
 
   protected void changeView(String fxmlFile, Consumer<Object> controllerConfigurator) {
     try {
@@ -50,6 +47,6 @@ public class FrameController {
 
   protected void showLogin(ActionEvent event) {
     Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-    com.auction.client.factory.DashboardNavigator.showLogin(stage);
+    com.auction.client.factory.AppNavigator.showLogin(stage);
   }
 }

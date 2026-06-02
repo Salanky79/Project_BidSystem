@@ -10,7 +10,7 @@ public class RegisterAutoBidRequest extends Request {
   private final String bidderId;
 
   public RegisterAutoBidRequest(
-      String auctionId, double maxBid, double increment, String bidderId) {
+          String auctionId, double maxBid, double increment, String bidderId) {
     super(Action.REGISTER_AUTO_BID);
     this.auctionId = auctionId;
     this.maxBid = maxBid;
@@ -32,13 +32,5 @@ public class RegisterAutoBidRequest extends Request {
 
   public String getBidderId() {
     return bidderId;
-  }
-
-  @Override
-  public Request withUserId(String userId) {
-    if (this.bidderId == null || this.bidderId.isBlank()) {
-      return new RegisterAutoBidRequest(auctionId, maxBid, increment, userId);
-    }
-    return this;
   }
 }

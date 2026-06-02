@@ -13,13 +13,13 @@ import org.slf4j.LoggerFactory;
  */
 public class AuctionStatusScheduler implements Runnable {
   private static final Logger LOGGER = LoggerFactory.getLogger(AuctionStatusScheduler.class);
-  private final IAuctionService auctionService;
+  private final AuctionService auctionService;
   private final List<AuctionLifecycleCleaner> listeners = new CopyOnWriteArrayList<>();
   private final long intervalMillis;
   private volatile boolean running = false;
 
   public AuctionStatusScheduler(
-      IAuctionService auctionService,
+      AuctionService auctionService,
       long intervalMillis) {
     this.auctionService = auctionService;
     this.intervalMillis = intervalMillis;
@@ -44,7 +44,8 @@ public class AuctionStatusScheduler implements Runnable {
       running = true;
       while (running && !Thread.currentThread().isInterrupted()) {
         try {
-          List<String> finishedIds = auctionService.updateAuctionStatusesAndGetFinishedIds();
+          auctionService.markRunningAuctions();
+          List<String> finishedIds = auctionService.settleFinishedAuctions();
           if (!finishedIds.isEmpty()) {
             notifyListeners(finishedIds);
           }
@@ -77,3 +78,4 @@ public class AuctionStatusScheduler implements Runnable {
     }
   }
 }
+

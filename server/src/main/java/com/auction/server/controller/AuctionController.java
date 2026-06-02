@@ -1,7 +1,7 @@
 package com.auction.server.controller;
 
-import com.auction.server.service.IAuctionService;
-import com.auction.server.service.IAutoBidService;
+import com.auction.server.service.AuctionService;
+import com.auction.server.service.AutoBidService;
 import com.auction.share.DTO.*;
 import com.auction.server.mapper.AuctionMapper;
 import com.auction.share.exceptions.ValidationException;
@@ -14,17 +14,17 @@ import java.util.List;
  * giá).
  */
 public class AuctionController {
-  private final IAuctionService auctionService;
-  private final IAutoBidService autoBidService;
-  private final com.auction.server.service.IBidService bidService;
+  private final AuctionService auctionService;
+  private final AutoBidService autoBidService;
+  private final com.auction.server.service.BidService bidService;
   private final com.auction.server.service.AuctionQueryService auctionQueryService;
   private final com.auction.server.service.BroadcastService broadcastService;
 
   // khởi tạo controller với các service tương ứng
   public AuctionController(
-      IAuctionService auctionService,
-      IAutoBidService autoBidService,
-      com.auction.server.service.IBidService bidService,
+      AuctionService auctionService,
+      AutoBidService autoBidService,
+      com.auction.server.service.BidService bidService,
       com.auction.server.service.AuctionQueryService auctionQueryService,
       com.auction.server.service.BroadcastService broadcastService) {
     this.auctionService = auctionService;
@@ -36,7 +36,7 @@ public class AuctionController {
 
   // xử lý logic tạo phiên đấu giá và chuẩn bị DTO trả về cho client
   public Response<AuctionSummaryDTO> createAuction(CreateAuctionRequest request) throws Exception {
-    validateRequiredText(request.getSellerId(), "Seller ID is required.");
+    validateRequiredText(request.getUserId(), "Seller ID is required.");
     validateRequiredText(request.getItemName(), "Item Name is required.");
     validateRequiredText(request.getStartTime(), "Start Time is required.");
     validateRequiredText(request.getEndTime(), "End Time is required.");
@@ -52,18 +52,18 @@ public class AuctionController {
     return Response.success("Auction created successfully.", summaryDTO);
   }
 
-  public Response<Boolean> cancelAuction(CancelAuctionRequest request, String requesterUserId)
+  public Response<Boolean> cancelAuction(CancelAuctionRequest request)
       throws Exception {
     validateRequiredText(request.getAuctionId(), "Auction ID is required.");
-    validateRequiredText(requesterUserId, "Authentication required.");
-    auctionService.cancelAuction(request.getAuctionId(), requesterUserId);
+    validateRequiredText(request.getUserId(), "Authentication required.");
+    auctionService.cancelAuction(request.getAuctionId(), request.getUserId());
     broadcastService.broadcastAuctionCancelled(request.getAuctionId());
     return Response.success("Auction canceled successfully.", true);
   }
 
   public Response<Boolean> placeBid(PlaceBidRequest request) throws Exception {
     validateRequiredText(request.getAuctionId(), "Auction ID is required.");
-    validateRequiredText(request.getBidderId(), "Bidder ID is required.");
+    validateRequiredText(request.getUserId(), "Bidder ID is required.");
 
     if (request.getAmount() <= 0) {
       throw new ValidationException("Bid amount must be greater than 0.");
@@ -75,7 +75,7 @@ public class AuctionController {
 
   public Response<Boolean> registerAutoBid(RegisterAutoBidRequest request) throws Exception {
     validateRequiredText(request.getAuctionId(), "Auction ID is required.");
-    validateRequiredText(request.getBidderId(), "Bidder ID is required.");
+    validateRequiredText(request.getUserId(), "Bidder ID is required.");
 
     if (request.getMaxBid() <= 0) {
       throw new ValidationException("Auto-bid max must be greater than 0.");
@@ -90,7 +90,7 @@ public class AuctionController {
 
   public Response<Boolean> cancelAutoBid(CancelAutoBidRequest request) throws Exception {
     validateRequiredText(request.getAuctionId(), "Auction ID is required.");
-    validateRequiredText(request.getBidderId(), "Bidder ID is required.");
+    validateRequiredText(request.getUserId(), "Bidder ID is required.");
 
     boolean success = autoBidService.cancel(request);
     String message = success ? "Auto-bid canceled successfully." : "No active auto-bid found.";
@@ -113,7 +113,7 @@ public class AuctionController {
 
   public Response<Boolean> setBidStep(SetBidStepRequest request) throws Exception {
     validateRequiredText(request.getAuctionId(), "Auction ID is required.");
-    validateRequiredText(request.getSellerId(), "Seller ID is required.");
+    validateRequiredText(request.getUserId(), "Seller ID is required.");
     if (request.getBidStep() <= 0) {
       throw new ValidationException("Bid step must be greater than 0.");
     }
@@ -134,3 +134,4 @@ public class AuctionController {
     }
   }
 }
+

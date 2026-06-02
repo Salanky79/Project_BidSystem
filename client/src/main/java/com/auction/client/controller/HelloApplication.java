@@ -11,7 +11,7 @@ public class HelloApplication extends Application {
   @Override
   public void start(Stage stage) throws IOException {
     stage.setTitle("HanoiBid");
-    com.auction.client.factory.DashboardNavigator.showLogin(stage);
+    com.auction.client.factory.AppNavigator.showLogin(stage);
   }
 
   @Override

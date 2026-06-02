@@ -13,19 +13,19 @@ import com.auction.share.models.auction.Auction;
 import com.auction.share.models.auction.BidTransaction;
 import com.auction.share.models.user.Bidder;
 import com.auction.share.models.user.User;
-import java.util.Set;
+
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 
-public class BidService implements IBidService {
+public class BidService  {
     private final DataSource dataSource;
     private final AuctionDAO auctionDAO;
     private final BidTransactionDAO bidTransactionDAO;
     private final UserDAO userDAO;
     private final BroadcastService bidBroadcastService;
-    private IAutoBidService autoBidService;
+    private AutoBidService autoBidService;
 
 
     public BidService(
@@ -41,8 +41,7 @@ public class BidService implements IBidService {
         this.bidBroadcastService = bidBroadcastService;
     }
 
-    @Override
-    public void setAutoBidService(IAutoBidService autoBidService) {
+    public void setAutoBidService(AutoBidService autoBidService) {
         this.autoBidService = autoBidService;
     }
 
@@ -55,7 +54,7 @@ public class BidService implements IBidService {
                         auction == null ? "Auction not found." : "Auction is not running.");
             }
 
-            Bidder bidder = requireBidder(conn, req.getBidderId());
+            Bidder bidder = requireBidder(conn, req.getUserId());
             if (req.getAmount() <= auction.getCurrentHighestBid()) {
                 throw new ConcurrentBidException("Bid amount must be higher than current highest bid.");
             }
@@ -132,3 +131,4 @@ public class BidService implements IBidService {
 
 
 }
+

@@ -50,12 +50,4 @@ public class UpdateProfileRequest extends Request {
   public String getPassword() {
     return password;
   }
-
-  @Override
-  public Request withUserId(String userId) {
-    if (this.userId == null || this.userId.isBlank()) {
-      return new UpdateProfileRequest(userId, fullName, password, phoneNumber, email, address);
-    }
-    return this;
-  }
 }

@@ -1,14 +1,16 @@
 package com.auction.server;
 
+import com.auction.server.controller.AuctionController;
 import com.auction.server.controller.RequestDispatcher;
+import com.auction.server.controller.UserController;
 import com.auction.server.dao.AuctionDAO;
 import com.auction.server.dao.BidTransactionDAO;
 import com.auction.server.dao.ItemDAO;
 import com.auction.server.dao.UserDAO;
-import com.auction.server.dao.AuctionDAOImpl;
-import com.auction.server.dao.BidTransactionDAOImpl;
-import com.auction.server.dao.ItemDAOImpl;
-import com.auction.server.dao.UserDAOImpl;
+import com.auction.server.dao.AuctionDAO;
+import com.auction.server.dao.BidTransactionDAO;
+import com.auction.server.dao.ItemDAO;
+import com.auction.server.dao.UserDAO;
 import com.auction.server.mapper.UserMapper;
 import com.auction.server.network.ClientConnectionHandler;
 import com.auction.server.service.AuctionSubscriptionRegistry;
@@ -38,11 +40,11 @@ public class ServerApplication {
     HikariDataSource dataSource = DatabaseConnection.createDataSource();
 
     // === DAO Layer ===
-    UserDAO userDao = new UserDAOImpl();
+    UserDAO userDao = new UserDAO();
     UserMapper userMapper = new UserMapper();
-    ItemDAO itemDao = new ItemDAOImpl();
-    AuctionDAO auctionDao = new AuctionDAOImpl();
-    BidTransactionDAO bidTransactionDao = new BidTransactionDAOImpl();
+    ItemDAO itemDao = new ItemDAO();
+    AuctionDAO auctionDao = new AuctionDAO();
+    BidTransactionDAO bidTransactionDao = new BidTransactionDAO();
     
     // === Core Service Layer ===
     UserService userService = new UserService(dataSource, userDao, bidTransactionDao, auctionDao, userMapper);
@@ -65,14 +67,14 @@ public class ServerApplication {
     // === Background Schedulers ===
     AuctionStatusScheduler auctionStatusScheduler = new AuctionStatusScheduler(auctionService, 2000L);
     auctionStatusScheduler.addListener(bidBroadcastService);
-    auctionStatusScheduler.addListener(subscriptionRegistry);
     auctionStatusScheduler.addListener(autoBidRegistry);
     // chạy ngầm bộ đếm thời gian đấu giá (cập nhật trạng thái liên tục)
     backgroundExecutor.submit(auctionStatusScheduler);
 
     // === Controllers / Request Dispatching ===
-    RequestDispatcher requestDispatcher =
-        new RequestDispatcher(userService, auctionService, autoBidService, bidService, auctionQueryService, subscriptionRegistry, bidBroadcastService);
+    UserController userController = new UserController(userService, new UserMapper());
+    AuctionController auctionController = new AuctionController(auctionService, autoBidService, bidService, auctionQueryService, bidBroadcastService);
+    RequestDispatcher requestDispatcher = new RequestDispatcher(userController, auctionController, subscriptionRegistry);
 
     try (ServerSocket serverSocket = new ServerSocket(port)) {
       System.out.println("Server start on port: " + port);
@@ -92,4 +94,5 @@ public class ServerApplication {
     }
   }
 }
+
 

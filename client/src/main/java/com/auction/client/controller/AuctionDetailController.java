@@ -1,6 +1,6 @@
 package com.auction.client.controller;
 
-import com.auction.client.network.SocketClient;
+
 import com.auction.client.service.BidService;
 import com.auction.client.service.AuctionService;
 import com.auction.client.utils.AuctionCountdownTimer;
@@ -23,12 +23,10 @@ public class AuctionDetailController {
 
     private BidService bidService;
     private AuctionService auctionService;
-    private SocketClient socketClient;
 
-    public void setServices(BidService bidService, AuctionService auctionService, SocketClient socketClient) {
+    public void setServices(BidService bidService, AuctionService auctionService) {
         this.bidService = bidService;
         this.auctionService = auctionService;
-        this.socketClient = socketClient;
     }
 
     // ── HEADER ──────────────────────────────────────────────────
@@ -75,9 +73,8 @@ public class AuctionDetailController {
     public void initialize() {
         // Close button
         closeButton.setOnAction(e -> {
-            cleanup();
             Stage stage = (Stage) closeButton.getScene().getWindow();
-            stage.close();
+            stage.fireEvent(new javafx.stage.WindowEvent(stage, javafx.stage.WindowEvent.WINDOW_CLOSE_REQUEST));
         });
 
         // Event handlers
@@ -101,7 +98,7 @@ public class AuctionDetailController {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // Public API – called by the opener (DashboardNavigator)
+    // Public API – called by the opener (AppNavigator)
     // ─────────────────────────────────────────────────────────────
     public void setData(
             String icon,
@@ -122,7 +119,7 @@ public class AuctionDetailController {
         viewModel.initData(icon, category, name, price, bidStep, bids, time, status, auctionId);
 
         productTitleLabel.setText(viewModel.getName());
-        currentPriceLabel.setText(String.format("%.0f VND", viewModel.getCurrentPrice()));
+        currentPriceLabel.setText(String.format("%,.0f VND", viewModel.getCurrentPrice()));
         totalBidsLabel.setText(String.valueOf(viewModel.getTotalBids()));
         endTimeLabel.setText(DateTimeUtils.formatDateTimeForDisplay(time));
         startTimeLabel.setText("Loading...");
@@ -131,7 +128,7 @@ public class AuctionDetailController {
         if (productIconLabel != null && viewModel.getIcon() != null) {
             productIconLabel.setText(viewModel.getIcon());
         }
-        minBidLabel.setText(String.format("Minimum bid: %.0f VND", viewModel.getMinimumBid()));
+        minBidLabel.setText(String.format("Minimum bid: %,.0f VND", viewModel.getMinimumBid()));
         resetAutoBidState();
 
         if (countdownTimer != null) {
@@ -151,7 +148,7 @@ public class AuctionDetailController {
 
         try {
             double amount = Double.parseDouble(input);
-            bidService.placeBid(viewModel.getAuctionId(), amount, viewModel.getCurrentPrice(), response ->
+            bidService.placeBid(viewModel.getAuctionId(), amount, viewModel.getMinimumBid(), response ->
                 Platform.runLater(() -> {
                     if (response != null && response.isSuccess()) {
                         bidInputField.clear();
@@ -242,7 +239,7 @@ public class AuctionDetailController {
         if (pushHandler != null) {
             pushHandler.unregister();
         }
-        pushHandler = new AuctionPushRegistry(socketClient, viewModel.getAuctionId());
+        pushHandler = auctionService.createPushRegistry(viewModel.getAuctionId());
         pushHandler.setOnBidUpdate(event -> {
             if (viewModel.applyBidUpdate(event)) {
                 applyBidUpdateUI(event);
@@ -253,18 +250,18 @@ public class AuctionDetailController {
         pushHandler.setOnBidStepUpdate(newBidStep -> {
             viewModel.setBidStep(newBidStep);
             minBidLabel.setStyle("");
-            minBidLabel.setText(String.format("Minimum bid: %.0f VND", viewModel.getMinimumBid()));
+            minBidLabel.setText(String.format("Minimum bid: %,.0f VND", viewModel.getMinimumBid()));
         });
         pushHandler.register();
     }
 
     private void applyBidUpdateUI(BidUpdateEvent event) {
-        currentPriceLabel.setText(String.format("%.0f VND", viewModel.getCurrentPrice()));
+        currentPriceLabel.setText(String.format("%,.0f VND", viewModel.getCurrentPrice()));
         minBidLabel.setStyle(""); // clear style
-        minBidLabel.setText(String.format("Minimum bid: %.0f VND", viewModel.getMinimumBid()));
+        minBidLabel.setText(String.format("Minimum bid: %,.0f VND", viewModel.getMinimumBid()));
         totalBidsLabel.setText(String.valueOf(viewModel.getTotalBids()));
         if (chartManager != null) {
-            chartManager.appendPoint(viewModel.getCurrentPrice());
+            chartManager.appendPoint(viewModel.getCurrentPrice(), event.getBidTime());
         }
         if (winnerNameLabel != null) {
             winnerNameLabel.setText(event.getBidderName());
@@ -285,10 +282,10 @@ public class AuctionDetailController {
     }
 
     private void updateUIFromViewModel() {
-        currentPriceLabel.setText(String.format("%.0f VND", viewModel.getCurrentPrice()));
+        currentPriceLabel.setText(String.format("%,.0f VND", viewModel.getCurrentPrice()));
         totalBidsLabel.setText(String.valueOf(viewModel.getTotalBids()));
         minBidLabel.setStyle("");
-        minBidLabel.setText(String.format("Minimum bid: %.0f VND", viewModel.getMinimumBid()));
+        minBidLabel.setText(String.format("Minimum bid: %,.0f VND", viewModel.getMinimumBid()));
         sellerNameLabel.setText(viewModel.getSellerName());
         descriptionLabel.setText(viewModel.getDescription());
 
@@ -306,11 +303,13 @@ public class AuctionDetailController {
         }
 
         if (viewModel.isEnded()) {
-            if (countdownTimer != null) countdownTimer.stop();
+            if (countdownTimer != null) {
+                countdownTimer.stop();
+            }
+            placeBidButton.setDisable(true);      // ← thêm
+            enableAutoBidButton.setDisable(true); // ← thêm
             if ("CANCELED".equals(viewModel.getStatus())) {
                 endsInLabel.setText("Cancelled");
-                placeBidButton.setDisable(true);
-                enableAutoBidButton.setDisable(true);
             }
             showWinnerInfoUI();
         }

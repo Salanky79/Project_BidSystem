@@ -1,7 +1,7 @@
 package com.auction.client.controller;
 
 import com.auction.client.service.AuctionService;
-import com.auction.client.network.SocketClient;
+
 import com.auction.client.utils.AuctionCountdownTimer;
 import com.auction.client.utils.BidHistoryChartManager;
 import com.auction.client.service.AuctionPushRegistry;
@@ -13,6 +13,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,11 +22,9 @@ import java.util.List;
 public class SellerAuctionDetailController {
 
   private AuctionService auctionService;
-  private SocketClient socketClient;
 
-  public void setServices(AuctionService auctionService, SocketClient socketClient) {
+  public void setServices(AuctionService auctionService) {
     this.auctionService = auctionService;
-    this.socketClient = socketClient;
   }
 
   // ── HEADER ──────────────────────────────────────────────────
@@ -44,6 +43,8 @@ public class SellerAuctionDetailController {
   @FXML private Label winnerIdLabel;
 
   // ── CONTROLS ────────────────────────────────────────────────
+  @FXML private VBox controlPanelCard;
+  @FXML private VBox bidStepContainer;
   @FXML private Button cancelAuctionButton;
   @FXML private TextField bidStepField;
   @FXML private Button saveBidStepButton;
@@ -69,7 +70,7 @@ public class SellerAuctionDetailController {
     if (pushHandler != null) {
       pushHandler.unregister();
     }
-    pushHandler = new AuctionPushRegistry(socketClient, this.auctionId);
+    pushHandler = auctionService.createPushRegistry(this.auctionId);
     pushHandler.setOnBidUpdate(event -> refreshData());
     pushHandler.setOnAuctionCancelled(this::refreshData);
     pushHandler.register();
@@ -90,6 +91,7 @@ public class SellerAuctionDetailController {
         if (chartManager != null && detail.getBidHistory() != null) {
           chartManager.loadData(detail.getBidHistory(), startTimeISO, startingPrice, currentPrice);
         }
+        updateVisibilityBasedOnStatus(detail.getStatus());
       }
     }));
   }
@@ -99,9 +101,8 @@ public class SellerAuctionDetailController {
     if (closeButton != null) {
       closeButton.setOnAction(
           e -> {
-            cleanup();
             Stage stage = (Stage) closeButton.getScene().getWindow();
-            stage.close();
+            stage.fireEvent(new javafx.stage.WindowEvent(stage, javafx.stage.WindowEvent.WINDOW_CLOSE_REQUEST));
           });
     }
 
@@ -195,7 +196,20 @@ public class SellerAuctionDetailController {
     if (startTimeLabel != null) startTimeLabel.setText("Loading...");
 
     this.endTime = DateTimeUtils.parseDateTime(time);
-    if (countdownTimer != null) countdownTimer.start(this.endTime);
+    boolean isCancelled = "CANCELED".equalsIgnoreCase(status);
+    if (countdownTimer != null) {
+      if (!isCancelled) {
+        countdownTimer.start(this.endTime);
+      } else {
+        countdownTimer.stop();
+        if (endsInLabel != null) {
+          endsInLabel.setText("Cancelled");
+        }
+      }
+    }
+
+    // Initial visibility check from passed status
+    updateVisibilityBasedOnStatus(status);
 
     if (auctionService != null) {
       auctionService.getAuctionDetail(this.auctionId, response -> Platform.runLater(() -> {
@@ -222,8 +236,16 @@ public class SellerAuctionDetailController {
             LocalDateTime parsedEnd = DateTimeUtils.parseDateTime(detail.getEndTime());
             if (parsedEnd != null) {
               this.endTime = parsedEnd;
+              boolean detailCancelled = "CANCELED".equalsIgnoreCase(detail.getStatus());
               if (countdownTimer != null) {
-                countdownTimer.start(this.endTime);
+                if (!detailCancelled) {
+                  countdownTimer.start(this.endTime);
+                } else {
+                  countdownTimer.stop();
+                  if (endsInLabel != null) {
+                    endsInLabel.setText("Cancelled");
+                  }
+                }
               }
             }
           }
@@ -243,12 +265,39 @@ public class SellerAuctionDetailController {
           if (chartManager != null) {
             chartManager.loadData(bidHistory, startTimeISO, startingPrice, currentPrice);
           }
+          
+          // Recheck visibility from detailed status loaded from server
+          updateVisibilityBasedOnStatus(detail.getStatus());
         } else {
           if (chartManager != null) {
             chartManager.loadData(bidHistory, startTimeISO, startingPrice, currentPrice);
           }
         }
       }));
+    }
+  }
+
+  private void updateVisibilityBasedOnStatus(String status) {
+    boolean isCancelled = "CANCELED".equalsIgnoreCase(status);
+    if (cancelAuctionButton != null) {
+      cancelAuctionButton.setVisible(!isCancelled);
+      cancelAuctionButton.setManaged(!isCancelled);
+    }
+    if (bidStepContainer != null) {
+      bidStepContainer.setVisible(!isCancelled);
+      bidStepContainer.setManaged(!isCancelled);
+    }
+    if (controlPanelCard != null) {
+      controlPanelCard.setVisible(!isCancelled);
+      controlPanelCard.setManaged(!isCancelled);
+    }
+    if (isCancelled) {
+      if (countdownTimer != null) {
+        countdownTimer.stop();
+      }
+      if (endsInLabel != null) {
+        endsInLabel.setText("Cancelled");
+      }
     }
   }
 }

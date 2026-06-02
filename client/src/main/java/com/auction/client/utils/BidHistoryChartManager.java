@@ -64,10 +64,19 @@ public class BidHistoryChartManager {
         series.getData().addAll(points.subList(from, points.size()));
     }
 
-    public void appendPoint(double amount) {
+    public void appendPoint(double amount, String bidTimeISO) {
         if (chart == null) return;
-        String nowStr = LocalDateTime.now().format(DateTimeUtils.CHART_FMT);
-        series.getData().add(new XYChart.Data<>(nowStr, amount));
+        String timeStr;
+        if (bidTimeISO != null) {
+            try {
+                timeStr = LocalDateTime.parse(bidTimeISO, DateTimeUtils.ISO_FMT).format(DateTimeUtils.CHART_FMT);
+            } catch (Exception e) {
+                timeStr = LocalDateTime.now().format(DateTimeUtils.CHART_FMT);
+            }
+        } else {
+            timeStr = LocalDateTime.now().format(DateTimeUtils.CHART_FMT);
+        }
+        series.getData().add(new XYChart.Data<>(timeStr, amount));
         if (series.getData().size() > MAX_CHART_POINTS) {
             series.getData().remove(0);
         }

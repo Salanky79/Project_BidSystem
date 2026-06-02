@@ -28,6 +28,7 @@ public class SocketClient {
   private ObjectInputStream inputStream;
   private volatile boolean listening;
   private final Object socketLock = new Object();
+  private Runnable onConnectionLost;
 
   // Executor riêng cho I/O gửi — tránh block caller thread (JavaFX thread)
   private final ExecutorService sendExecutor;
@@ -54,6 +55,10 @@ public class SocketClient {
     });
   }
 
+  public void setOnConnectionLost(Runnable onConnectionLost) {
+    this.onConnectionLost = onConnectionLost;
+  }
+
 
 
   public void addPushListener(Consumer<Response<?>> listener) {
@@ -71,19 +76,17 @@ public class SocketClient {
   // gửi request lên server
   // khi có response => chạy callback onResponse
   public void send(Request request, Consumer<Response<?>> onResponse) {
-    try {
-      ensureConnected();
-    } catch (IOException e) {
-      if (onResponse != null) {
-        onResponse.accept(Response.fail("Cannot connect to server: " + e.getMessage()));
-      }
-      return;
-    }
-
-
-
     // C1: Submit I/O vào sendExecutor — không block caller thread
     sendExecutor.submit(() -> {
+      try {
+        ensureConnected();
+      } catch (IOException e) {
+        if (onResponse != null) {
+          Platform.runLater(() -> onResponse.accept(Response.fail("Cannot connect to server: " + e.getMessage())));
+        }
+        return;
+      }
+
       synchronized (socketLock) {
         if (onResponse != null) {
           callbacks.put(request.getRequestId(), onResponse);
@@ -152,13 +155,16 @@ public class SocketClient {
               }
             }
           } catch (EOFException e) {
-            // Server đóng kết nối — onDisconnected() sẽ được gọi ở finally
+
           } catch (IOException | ClassNotFoundException e) {
             NotificationManager.showError("Lỗi kết nối: " + e.getMessage());
           } finally {
             listening = false;
             closeConnection();
             failCallbacks("Connection closed.");
+            if (onConnectionLost != null) {
+                Platform.runLater(onConnectionLost);
+            }
           }
         });
   }

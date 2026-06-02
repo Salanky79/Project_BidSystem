@@ -10,7 +10,7 @@ package com.auction.share.enums;
  * string rải rác.
  */
 public enum AuctionStatus {
-  OPEN("In Queue", "#4C8CE4"),
+  OPEN("Open", "#4C8CE4"),
   RUNNING("Active", "#2ecc71"),
   FINISHED("End", "#FF3737"),
   CANCELED("Canceled", "#605B51");

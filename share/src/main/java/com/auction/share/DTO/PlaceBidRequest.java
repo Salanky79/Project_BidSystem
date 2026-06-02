@@ -26,13 +26,4 @@ public class PlaceBidRequest extends Request {
   public double getAmount() {
     return amount;
   }
-
-  @Override
-  public Request withUserId(String userId) {
-    if (userId == null || userId.isBlank()) {
-      return this;
-    }
-    // Always trust server-side session userId, never client-supplied bidderId.
-    return new PlaceBidRequest(auctionId, userId, amount);
-  }
 }

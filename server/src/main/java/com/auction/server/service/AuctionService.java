@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Dịch vụ xử lý Command liên quan đến phiên đấu giá (tạo, hủy, thay đổi cấu hình).
  */
-public class AuctionService implements IAuctionService {
+public class AuctionService  {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuctionService.class);
     private final DataSource dataSource;
     private final AuctionDAO auctionDAO;
@@ -51,7 +51,7 @@ public class AuctionService implements IAuctionService {
 
     public Auction createAuction(CreateAuctionRequest req) throws SQLException, ValidationException {
         try (Connection conn = dataSource.getConnection()) {
-            User sellerUser = userDAO.findById(conn, req.getSellerId());
+            User sellerUser = userDAO.findById(conn, req.getUserId());
             if (!(sellerUser instanceof Seller seller)) {
                 throw new ValidationException("User is not a seller.");
             }
@@ -68,7 +68,7 @@ public class AuctionService implements IAuctionService {
                             req.getItemName(),
                             req.getDescription(),
                             req.getStartingPrice(),
-                            req.getSellerId(),
+                            req.getUserId(),
                             category);
 
             // Upload image to ImageStorage if provided
@@ -108,16 +108,20 @@ public class AuctionService implements IAuctionService {
             if (auction.getStatus() != AuctionStatus.OPEN && auction.getStatus() != AuctionStatus.RUNNING) {
                 throw new ValidationException("Can only cancel OPEN or RUNNING auctions.");
             }
-            auctionDAO.updateStatus(conn, auctionId, AuctionStatus.CANCELED);
+                auctionDAO.updateStatus(conn, auctionId, AuctionStatus.CANCELED);
         }
     }
 
-    public List<String> updateAuctionStatusesAndGetFinishedIds() throws SQLException {
+    public void markRunningAuctions() throws SQLException {
+        try (Connection conn = dataSource.getConnection()) {
+            auctionDAO.markOpenAuctionsAsRunning(conn);
+        }
+    }
+
+    public List<String> settleFinishedAuctions() throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                auctionDAO.markOpenAuctionsAsRunning(conn);
-
                 Timestamp now = Timestamp.valueOf(LocalDateTime.now());
                 List<String> endedIds = auctionDAO.findEndedRunningAuctionIds(conn, now.toLocalDateTime());
                 if (endedIds.isEmpty()) {
@@ -144,7 +148,7 @@ public class AuctionService implements IAuctionService {
             if (auction == null) {
                 throw new ValidationException("Auction not found.");
             }
-            if (!auction.getSeller().getId().equals(req.getSellerId())) {
+            if (!auction.getSeller().getId().equals(req.getUserId())) {
                 throw new ValidationException("You are not allowed to update this auction.");
             }
             if (req.getBidStep() <= 0) {
@@ -163,3 +167,4 @@ public class AuctionService implements IAuctionService {
         }
     }
 }
+

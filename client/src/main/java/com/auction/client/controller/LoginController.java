@@ -1,7 +1,7 @@
 package com.auction.client.controller;
 
 import com.auction.client.ClientContext;
-import com.auction.client.factory.DashboardNavigator;
+import com.auction.client.factory.AppNavigator;
 import com.auction.client.service.UserService;
 import com.auction.share.DTO.LoginRequest;
 import com.auction.share.DTO.Response;
@@ -21,7 +21,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-public class LoginController implements ChangeView {
+public class LoginController {
   private UserService userService = ClientContext.userService();
 
   public void setUserService(UserService userService) {
@@ -77,9 +77,9 @@ public class LoginController implements ChangeView {
 
   protected void loadDashboard(ActionEvent event, String role) {
     try {
-      Stage stage = getStage(event);
+      Stage stage = AppNavigator.getStage(event);
       if (stage != null) {
-        com.auction.client.factory.DashboardNavigator.openDashboard(stage, role);
+        AppNavigator.openDashboard(stage, role);
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -127,6 +127,9 @@ public class LoginController implements ChangeView {
   }
 
   public void handleSignup(ActionEvent event) {
-    changeView(event, "/com/auction/client/view/SignupView.fxml", "HanoiBid - Đăng ký");
+    Stage stage = AppNavigator.getStage(event);
+    if (stage != null) {
+        AppNavigator.showSignup(stage);
+    }
   }
 }

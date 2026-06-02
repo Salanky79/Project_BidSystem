@@ -70,9 +70,19 @@ public class AuctionService {
     socketClient.send(request, onResponse);
   }
 
+  public void registerAutoBid(
+      String auctionId, double maxBid, double increment, Consumer<Response<?>> onResponse) {
+    RegisterAutoBidRequest request = new RegisterAutoBidRequest(auctionId, maxBid, increment, null);
+    socketClient.send(request, onResponse);
+  }
+
 
   public void getAuctionDetail(String auctionId, Consumer<Response<?>> onResponse) {
     GetAuctionDetailRequest request = new GetAuctionDetailRequest(auctionId);
     socketClient.send(request, onResponse);
+  }
+
+  public AuctionPushRegistry createPushRegistry(String auctionId) {
+    return new AuctionPushRegistry(socketClient, auctionId);
   }
 }

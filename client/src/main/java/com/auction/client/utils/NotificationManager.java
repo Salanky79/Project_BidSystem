@@ -53,7 +53,7 @@ public final class NotificationManager {
   }
 
   public static void showInfo(String message) {
-    show(message, "#3498db", "ℹ");
+    show(message, "#3498db", "i");
   }
 
   private static void show(String message, String color, String icon) {

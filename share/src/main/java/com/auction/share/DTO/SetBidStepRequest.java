@@ -26,12 +26,4 @@ public class SetBidStepRequest extends Request {
   public String getSellerId() {
     return sellerId;
   }
-
-  @Override
-  public Request withUserId(String userId) {
-    if (this.sellerId == null || this.sellerId.isBlank()) {
-      return new SetBidStepRequest(auctionId, bidStep, userId);
-    }
-    return this;
-  }
 }

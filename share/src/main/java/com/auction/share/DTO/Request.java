@@ -9,8 +9,9 @@ import java.util.UUID;
  */
 public abstract class Request implements Serializable {
   private String requestId = UUID.randomUUID().toString();
+  private String userId;
 
-  /** Cho phép copy requestId gốc sang object mới tạo bởi withUserId(). */
+  /** Cho phép copy requestId gốc khi request được truyền qua các lớp xử lý khác nhau. */
   public void setRequestId(String requestId) {
     this.requestId = requestId;
   }
@@ -24,11 +25,13 @@ public abstract class Request implements Serializable {
     return action;
   }
 
-  /**
-   * Phương thức builder pattern để gắn userId vào request.
-   * Cú pháp return this giúp gọi liên tiếp các hàm (method chaining).
-   */
+  public String getUserId() {
+    return userId;
+  }
+
+  /** Gắn userId vào request hiện tại và trả về chính nó để dùng chaining nếu cần. */
   public Request withUserId(String userId) {
+    this.userId = userId;
     return this;
   }
 

@@ -8,7 +8,7 @@ import java.util.List;
 import com.auction.server.network.ClientSession;
 
 /** Sổ đăng ký (Registry) quản lý các phiên bản Client đang theo dõi realtime từng phiên đấu giá. */
-public class AuctionSubscriptionRegistry implements AuctionLifecycleCleaner {
+public class AuctionSubscriptionRegistry {
   private final Map<String, Set<ClientSession>> subscribersByAuction = new ConcurrentHashMap<>();
   private final Map<ClientSession, Set<String>> auctionsBySession = new ConcurrentHashMap<>();
 
@@ -107,11 +107,4 @@ public class AuctionSubscriptionRegistry implements AuctionLifecycleCleaner {
     }
   }
 
-  @Override
-  public void onAuctionsFinished(List<String> auctionIds) {
-    if (auctionIds == null) return;
-    for (String id : auctionIds) {
-      clearAuction(id);
-    }
-  }
 }

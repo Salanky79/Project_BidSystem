@@ -213,7 +213,7 @@
                 <Region prefHeight="14" />
 
                 <!-- ══ AUCTION CONTROL PANEL CARD ══ -->
-                <VBox spacing="14"
+                <VBox fx:id="controlPanelCard" spacing="14"
                       style="-fx-background-color: #111111; -fx-padding: 20;
                              -fx-background-radius: 10; -fx-border-radius: 10;
                              -fx-border-color: #3A1A1A; -fx-border-width: 1;">
@@ -237,7 +237,7 @@
 
 
                     <!-- Set Bid Step row -->
-                    <VBox spacing="6">
+                    <VBox fx:id="bidStepContainer" spacing="6">
                         <Label style="-fx-text-fill: #888888; -fx-font-size: 11px;
                                       -fx-font-weight: bold;"
                                text="SET BID STEP (VND)" />

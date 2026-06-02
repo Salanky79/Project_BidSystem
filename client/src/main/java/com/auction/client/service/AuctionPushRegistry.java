@@ -1,6 +1,7 @@
 package com.auction.client.service;
 
 import com.auction.client.network.SocketClient;
+import com.auction.share.DTO.BidStepUpdateEvent;
 import com.auction.share.DTO.BidUpdateEvent;
 import com.auction.share.DTO.Response;
 import javafx.application.Platform;
@@ -65,7 +66,7 @@ public class AuctionPushRegistry {
                             Platform.runLater(onAuctionFinished);
                         }
                     }
-                } else if ("BID_STEP_UPDATED".equals(response.getMessage()) && response.getData() instanceof com.auction.share.DTO.BidStepUpdateEvent stepEvent) {
+                } else if ("BID_STEP_UPDATED".equals(response.getMessage()) && response.getData() instanceof BidStepUpdateEvent stepEvent) {
                     if (auctionId.equals(stepEvent.getAuctionId())) {
                         if (onBidStepUpdate != null) {
                             Platform.runLater(() -> onBidStepUpdate.accept(stepEvent.getBidStep()));
@@ -80,6 +81,7 @@ public class AuctionPushRegistry {
 
     public void unregister() {
         if (socketClient != null && pushListener != null) {
+            socketClient.send(new com.auction.share.DTO.UnsubscribeAuctionRequest(auctionId), null);
             socketClient.removePushListener(pushListener);
             pushListener = null;
         }

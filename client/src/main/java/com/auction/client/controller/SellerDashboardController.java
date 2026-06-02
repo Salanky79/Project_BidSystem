@@ -133,6 +133,7 @@ public class SellerDashboardController {
 
       try {
         javafx.scene.Node card = cardCache.get(dto.getAuctionId());
+        SellerItemCardController ctrl;
         if (card == null) {
           FXMLLoader loader =
               new FXMLLoader(
@@ -140,7 +141,8 @@ public class SellerDashboardController {
                       .getResource(
                           "/com/auction/client/view/SellerItemCard.fxml"));
           card = loader.load();
-          SellerItemCardController ctrl = loader.getController();
+          ctrl = loader.getController();
+          card.setUserData(ctrl); // Lưu controller vào UserData để tái sử dụng
 
           ctrl.setRefreshCallback(() -> {
             allAuctions = null;
@@ -148,17 +150,23 @@ public class SellerDashboardController {
             loadAuctionCards(getCurrentFilterStatus());
           });
 
+          cardCache.put(dto.getAuctionId(), card);
+        } else {
+          ctrl = (SellerItemCardController) card.getUserData();
+        }
+
+        // Luôn cập nhật data mới nhất cho card (kể cả card lấy từ cache)
+        if (ctrl != null) {
           ctrl.setData(
               CategoryUtils.iconFor(dto.getCategory()),
               dto.getCategory(),
               dto.getItemName(),
               dto.getCurrentPrice(),
-              0, // bids
+              dto.getBidCount(),
               dto.getEndTime(),
               dto.getStatus(),
               dto.getAuctionId(),
               dto.getImageUrl());
-          cardCache.put(dto.getAuctionId(), card);
         }
 
         auctionGrid.add(card, col++, row);

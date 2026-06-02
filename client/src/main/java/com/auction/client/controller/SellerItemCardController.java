@@ -112,7 +112,7 @@ public class SellerItemCardController {
 
   @FXML
   private void handleCardClick() {
-    com.auction.client.factory.DashboardNavigator.openSellerDetail(
+    com.auction.client.factory.AppNavigator.openSellerDetail(
         icon, category, name, price, bids, time, status, auctionId, refreshCallback);
   }
 }

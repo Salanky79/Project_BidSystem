@@ -26,12 +26,7 @@ public class ListAuctionRequest extends Request {
     return sellerId;
   }
 
-  @Override
-  public Request withUserId(String userId) {
-    // Chỉ tự động điền userId vào sellerId nếu yêu cầu này thuộc về Seller Dashboard (sellerOnly = true)
-    if (sellerOnly && (sellerId == null || sellerId.isBlank())) {
-      return new ListAuctionRequest(status, userId, true);
-    }
-    return this;
+  public boolean isSellerOnly() {
+    return sellerOnly;
   }
 }

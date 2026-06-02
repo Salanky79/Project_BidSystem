@@ -97,7 +97,7 @@ class AuctionServiceTest {
 
 
     private static CreateAuctionRequest createRequest(String sellerId, LocalDateTime start, LocalDateTime end) {
-        return new CreateAuctionRequest(
+        return (CreateAuctionRequest) new CreateAuctionRequest(
                 sellerId,
                 "Phone",
                 "Desc",
@@ -105,7 +105,7 @@ class AuctionServiceTest {
                 100.0,
                 start.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 end.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        );
+        ).withUserId(sellerId);
     }
 
     private static Seller seller(String id) {

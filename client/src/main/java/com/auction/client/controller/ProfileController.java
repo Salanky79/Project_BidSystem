@@ -60,7 +60,7 @@ public class ProfileController implements Initializable {
     colTime.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
   }
 
-  private void loadProfileData() {
+  public void loadProfileData() {
     userService.getProfile(response -> Platform.runLater(() -> bindProfileResponse(response)));
   }
 

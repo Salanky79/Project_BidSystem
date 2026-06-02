@@ -16,12 +16,12 @@ public class BidService {
   }
 
   public void placeBid(
-      String auctionId, double amount, double currentPrice, Consumer<Response<?>> onResponse)
+      String auctionId, double amount, double minBid, Consumer<Response<?>> onResponse)
       throws ValidationException {
 
-    if (amount <= currentPrice) {
+    if (amount < minBid) {
       throw new ValidationException(
-          "Giá bid phải cao hơn giá hiện tại: " + String.format("%,.0f VND", currentPrice));
+          "Giá bid phải lớn hơn hoặc bằng mức giá tối thiểu: " + String.format("%,.0f VND", minBid));
     }
     PlaceBidRequest request = new PlaceBidRequest(auctionId, null, amount);
     socketClient.send(request, onResponse);

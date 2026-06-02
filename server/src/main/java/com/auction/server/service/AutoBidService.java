@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Dịch vụ xử lý logic đặt giá tự động (Proxy Bidding giống eBay). */
-public class AutoBidService implements IAutoBidService {
+public class AutoBidService  {
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoBidService.class);
 
     private final DataSource dataSource;
@@ -66,7 +66,7 @@ public class AutoBidService implements IAutoBidService {
                 throw new ValidationException("Auto-bid max must be higher than current highest bid.");
             }
 
-            User bidderUser = userDAO.findById(conn, request.getBidderId());
+            User bidderUser = userDAO.findById(conn, request.getUserId());
             if (!(bidderUser instanceof Bidder)) {
                 throw new ValidationException("User is not a bidder.");
             }
@@ -74,18 +74,18 @@ public class AutoBidService implements IAutoBidService {
 
         AutoBidConfig config =
                 new AutoBidConfig(
-                        request.getBidderId(),
+                        request.getUserId(),
                         request.getAuctionId(),
                         request.getMaxBid(),
                         request.getIncrement(),
                         LocalDateTime.now());
         registry.register(config);
-        triggerAutoBid(request.getAuctionId(), request.getBidderId());
+        triggerAutoBid(request.getAuctionId(), request.getUserId());
         return true;
     }
 
     public boolean cancel(CancelAutoBidRequest request) {
-        return registry.cancel(request.getAuctionId(), request.getBidderId());
+        return registry.cancel(request.getAuctionId(), request.getUserId());
     }
 
     /** Điểm kích hoạt đặt giá tự động đồng bộ có sử dụng Lock cục bộ theo từng Auction */
@@ -109,17 +109,27 @@ public class AutoBidService implements IAutoBidService {
             String currentHighestBidderId;
 
             try (Connection conn = dataSource.getConnection()) {
-                // 1. Lấy thông tin đấu giá hiện tại từ CSDL
-                auction = auctionDAO.findById(conn, auctionId);
-                if (auction == null || !auction.isRunning()) {
-                    return;
+                conn.setAutoCommit(false);
+                try {
+                    // 1. Lấy thông tin đấu giá hiện tại từ CSDL
+                    auction = auctionDAO.findById(conn, auctionId);
+                    if (auction == null || !auction.isRunning()) {
+                        conn.rollback();
+                        return;
+                    }
+
+                    currentHighestBidderId = auction.getHighestBidder() != null 
+                            ? auction.getHighestBidder().getId() : null;
+
+                    // 2. Lấy toàn bộ cấu hình Auto-bid của phiên này và lọc ra các cấu hình hợp lệ
+                    configs = getAndValidateConfigs(conn, auctionId, auction.getCurrentHighestBid(), auction.getBidStep(), currentHighestBidderId);
+                    conn.commit();
+                } catch (SQLException e) {
+                    conn.rollback();
+                    throw e;
+                } finally {
+                    conn.setAutoCommit(true);
                 }
-
-                currentHighestBidderId = auction.getHighestBidder() != null 
-                        ? auction.getHighestBidder().getId() : null;
-
-                // 2. Lấy toàn bộ cấu hình Auto-bid của phiên này và lọc ra các cấu hình hợp lệ
-                configs = getAndValidateConfigs(conn, auctionId, auction.getCurrentHighestBid(), currentHighestBidderId);
             } catch (SQLException e) {
                 LOGGER.error("Database error in processAutoBid for auction {}", auctionId, e);
                 return;
@@ -145,6 +155,7 @@ public class AutoBidService implements IAutoBidService {
                 AutoBidConfig runnerUpConfig = configs.get(1);
                 finalPrice = Math.min(winnerConfig.getMaxBid(), runnerUpConfig.getMaxBid() + winnerConfig.getIncrement());
                 finalPrice = Math.max(finalPrice, auction.getCurrentHighestBid() + winnerConfig.getIncrement());
+                finalPrice = Math.max(finalPrice, auction.getCurrentHighestBid() + auction.getBidStep());
                 finalPrice = Math.min(finalPrice, winnerConfig.getMaxBid());
             } else {
                 // Kịch bản chỉ có duy nhất 1 người cấu hình Auto-bid
@@ -153,6 +164,7 @@ public class AutoBidService implements IAutoBidService {
                     return;
                 }
                 finalPrice = auction.getCurrentHighestBid() + winnerConfig.getIncrement();
+                finalPrice = Math.max(finalPrice, auction.getCurrentHighestBid() + auction.getBidStep());
                 finalPrice = Math.min(finalPrice, winnerConfig.getMaxBid());
             }
 
@@ -179,6 +191,7 @@ public class AutoBidService implements IAutoBidService {
             Connection conn, 
             String auctionId, 
             double currentHighestBid, 
+            double bidStep,
             String currentHighestBidderId) throws SQLException {
         List<AutoBidConfig> configs = registry.getConfigs(auctionId);
         List<AutoBidConfig> validConfigs = new ArrayList<>();
@@ -188,6 +201,12 @@ public class AutoBidService implements IAutoBidService {
 
             // Quy tắc 1: Hạn mức maxBid <= Giá cao nhất hiện tại
             if (config.getMaxBid() <= currentHighestBid) {
+                registry.cancel(auctionId, bidderId);
+                continue;
+            }
+
+            // Quy tắc 1.5: Max bid không đủ để vượt qua giá tối thiểu yêu cầu (current + bidStep)
+            if (config.getMaxBid() < currentHighestBid + bidStep) {
                 registry.cancel(auctionId, bidderId);
                 continue;
             }
@@ -202,7 +221,7 @@ public class AutoBidService implements IAutoBidService {
                 currentBid = currentHighestBid;
             }
 
-            if (available + currentBid < currentHighestBid + config.getIncrement()) {
+            if (available + currentBid < currentHighestBid + Math.max(config.getIncrement(), bidStep)) {
                 registry.cancel(auctionId, bidderId);
                 continue;
             }
@@ -221,3 +240,4 @@ public class AutoBidService implements IAutoBidService {
         }
     }
 }
+

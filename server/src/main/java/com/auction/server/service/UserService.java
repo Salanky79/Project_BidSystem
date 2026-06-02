@@ -24,7 +24,7 @@ import java.util.List;
 // luồng xử lý: Controller → Service → DAO → Database
 
 /** Dịch vụ xử lý nghiệp vụ liên quan đến người dùng (đăng nhập, đăng ký, cập nhật thông tin). */
-public class UserService implements IUserService {
+public class UserService  {
   private final DataSource dataSource;
   private final UserDAO userDAO;
   private final BidTransactionDAO bidTransactionDAO;
@@ -52,7 +52,14 @@ public class UserService implements IUserService {
       }
 
       user.setPassword(PasswordUtil.hashPassword(user.getPassword()));
-      return userDAO.saveUser(conn, user);
+      try {
+          return userDAO.saveUser(conn, user);
+      } catch (SQLException e) {
+          if (e.getSQLState() != null && e.getSQLState().startsWith("23")) {
+              throw new DuplicateResourceException("Tên đăng nhập hoặc Email đã tồn tại.");
+          }
+          throw e;
+      }
     }
   }
 
@@ -134,3 +141,4 @@ public class UserService implements IUserService {
     return null;
   }
 }
+

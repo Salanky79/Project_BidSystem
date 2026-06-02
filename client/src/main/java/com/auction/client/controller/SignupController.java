@@ -1,7 +1,7 @@
 package com.auction.client.controller;
 
 import com.auction.client.ClientContext;
-import com.auction.client.factory.DashboardNavigator;
+import com.auction.client.factory.AppNavigator;
 import com.auction.client.service.UserService;
 import com.auction.share.DTO.RegisterRequest;
 import com.auction.share.exceptions.ValidationException;
@@ -21,7 +21,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class SignupController implements ChangeView {
+public class SignupController {
   private UserService userService = ClientContext.userService();
 
   public void setUserService(UserService userService) {
@@ -136,9 +136,9 @@ public class SignupController implements ChangeView {
 
   private void redirectToLogin() {
     try {
-      Stage stage = getStage(statusLabel);
+      Stage stage = AppNavigator.getStage(statusLabel);
       if (stage != null) {
-        DashboardNavigator.showLogin(stage);
+        AppNavigator.showLogin(stage);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -186,7 +186,10 @@ public class SignupController implements ChangeView {
   }
 
   public void handleLogin(ActionEvent event) {
-    changeView(event, "/com/auction/client/view/Login.fxml", "HanoiBid - Đăng nhập");
+    Stage stage = AppNavigator.getStage(event);
+    if (stage != null) {
+        AppNavigator.showLogin(stage);
+    }
   }
 
   public void selectSeller() {

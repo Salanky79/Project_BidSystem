@@ -64,6 +64,8 @@ public class BroadcastService implements AuctionLifecycleCleaner {
       }
     } catch (Exception e) {
       LOGGER.error("Broadcast cancel failed entirely for auction {}", auctionId, e);
+    } finally {
+      subscriptionRegistry.clearAuction(auctionId);
     }
   }
 
@@ -83,6 +85,8 @@ public class BroadcastService implements AuctionLifecycleCleaner {
       }
     } catch (Exception e) {
       LOGGER.error("Broadcast finish failed entirely for auction {}", auctionId, e);
+    } finally {
+      subscriptionRegistry.clearAuction(auctionId);
     }
   }
 

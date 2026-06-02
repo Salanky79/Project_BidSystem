@@ -1,7 +1,7 @@
 package com.auction.client.controller;
 
 
-import com.auction.client.factory.DashboardNavigator;
+import com.auction.client.factory.AppNavigator;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -65,7 +65,6 @@ public class ItemCardController {
       String auctionId,
       String imageUrl,
       String highestBidderName) {
-    statusLabel.setText(status);
     categoryLabel.setText(category);
     nameLabel.setText(name);
 
@@ -103,14 +102,15 @@ public class ItemCardController {
       cardRoot.setOnMouseClicked(event -> handleCardClick());
     }
 
-    // Set màu cho status
+    // Lấy display name và style từ AuctionStatus enum
     AuctionStatus auctionStatus = AuctionStatus.from(status);
+    statusLabel.setText(auctionStatus.getDisplayName());
     statusLabel.setStyle(auctionStatus.getBadgeStyle());
   }
 
   @FXML
   private void handleCardClick() {
-    DashboardNavigator.openBidderDetail(
+    AppNavigator.openBidderDetail(
         icon, category, name, price, bidStep, bids, time, status, auctionId);
   }
 }

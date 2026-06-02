@@ -238,4 +238,31 @@ public class HomeController {
     return currentStatusFilter;
   }
 
+  public void updateCardOnBidEvent(com.auction.share.DTO.BidUpdateEvent event) {
+      Platform.runLater(() -> {
+          for (int i = 0; i < allAuctions.size(); i++) {
+              AuctionSummaryDTO dto = allAuctions.get(i);
+              if (dto.getAuctionId().equals(event.getAuctionId())) {
+                  AuctionSummaryDTO updatedDto = new AuctionSummaryDTO(
+                      dto.getAuctionId(),
+                      dto.getItemName(),
+                      dto.getCategory(),
+                      event.getCurrentHighestBid(),
+                      dto.getBidStep(),
+                      dto.getStatus(),
+                      dto.getStartTime(),
+                      dto.getEndTime(),
+                      event.getBidCount(),
+                      dto.getImageUrl(),
+                      event.getBidderName()
+                  );
+                  allAuctions.set(i, updatedDto);
+                  cardCache.remove(event.getAuctionId());
+                  renderGrid();
+                  break;
+              }
+          }
+      });
+  }
+
 }

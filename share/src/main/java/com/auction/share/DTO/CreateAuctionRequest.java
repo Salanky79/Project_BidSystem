@@ -82,13 +82,4 @@ public class CreateAuctionRequest extends Request {
   public String getImageName() {
     return imageName;
   }
-
-  @Override
-  public Request withUserId(String userId) {
-    if (this.sellerId == null || this.sellerId.isBlank()) {
-      return new CreateAuctionRequest(
-          userId, itemName, description, category, startingPrice, startTime, endTime, imageBytes, imageName);
-    }
-    return this;
-  }
 }

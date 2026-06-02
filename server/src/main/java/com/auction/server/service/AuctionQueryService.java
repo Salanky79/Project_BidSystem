@@ -65,6 +65,9 @@ public class AuctionQueryService {
 
     private List<Auction> resolveAuctionsByFilter(Connection conn, ListAuctionRequest req) throws SQLException {
         String sellerId = req.getSellerId();
+        if ((sellerId == null || sellerId.isBlank()) && req.isSellerOnly()) {
+            sellerId = req.getUserId();
+        }
         String statusStr = req.getStatus();
         boolean hasSeller = sellerId != null && !sellerId.isBlank();
         boolean hasStatus = statusStr != null && !statusStr.isBlank();

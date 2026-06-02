@@ -3,10 +3,10 @@ package com.auction.server.controller;
 import com.auction.server.mapper.UserMapper;
 import com.auction.server.service.AuctionSubscriptionRegistry;
 import com.auction.server.network.ClientSession;
-import com.auction.server.service.IAuctionService;
-import com.auction.server.service.IAutoBidService;
-import com.auction.server.service.IUserService;
-import com.auction.server.service.IBidService;
+import com.auction.server.service.AuctionService;
+import com.auction.server.service.AutoBidService;
+import com.auction.server.service.UserService;
+import com.auction.server.service.BidService;
 import com.auction.server.service.AuctionQueryService;
 import com.auction.share.DTO.*;
 import org.slf4j.Logger;
@@ -21,45 +21,38 @@ public class RequestDispatcher {
     private final Map<String, ActionProcessor<Request>> processors = new HashMap<>();
     private final GlobalExceptionHandler exceptionHandler = new GlobalExceptionHandler();
     private final AuctionSubscriptionRegistry subscriptionRegistry;
+    private final UserController userController;
+    private final AuctionController auctionController;
 
-    public RequestDispatcher(
-            IUserService userService,
-            IAuctionService auctionService,
-            IAutoBidService autoBidService,
-            IBidService bidService,
-            AuctionQueryService auctionQueryService,
-            AuctionSubscriptionRegistry subscriptionRegistry,
-            com.auction.server.service.BroadcastService bidBroadcastService) {
+    public RequestDispatcher(UserController userController, AuctionController auctionController, AuctionSubscriptionRegistry subscriptionRegistry) {
         
-        UserController userController = new UserController(userService, new UserMapper());
-        AuctionController auctionController = new AuctionController(auctionService, autoBidService, bidService, auctionQueryService, bidBroadcastService);
+        this.userController = userController;
+        this.auctionController = auctionController;
         this.subscriptionRegistry = subscriptionRegistry;
 
         // Đăng ký các processors
-        register(Action.LOGIN, (req, session) -> {
+        register(Action.LOGIN, req -> {
             Response<UserDTO> res = userController.login((LoginRequest) req);
             if (res.isSuccess() && res.getData() != null) {
                 res.setAuthenticatedUserId(res.getData().getId());
             }
             return res;
         });
-        register(Action.REGISTER, (req, session) -> userController.register((RegisterRequest) req));
-        register(Action.UPDATE_PROFILE, (req, session) -> userController.updateProfile((UpdateProfileRequest) req));
-        register(Action.GET_PROFILE, (req, session) -> userController.getProfile((GetProfileRequest) req));
+        register(Action.REGISTER, req -> userController.register((RegisterRequest) req));
+        register(Action.UPDATE_PROFILE, req -> userController.updateProfile((UpdateProfileRequest) req));
+        register(Action.GET_PROFILE, req -> userController.getProfile((GetProfileRequest) req));
 
-        register(Action.CREATE_AUCTION, (req, session) -> auctionController.createAuction((CreateAuctionRequest) req));
-        register(Action.CANCEL_AUCTION, (req, session) -> auctionController.cancelAuction((CancelAuctionRequest) req, session == null ? null : session.getUserId()));
-        register(Action.PLACE_BID, (req, session) -> auctionController.placeBid((PlaceBidRequest) req));
+        register(Action.CREATE_AUCTION, req -> auctionController.createAuction((CreateAuctionRequest) req));
+        register(Action.CANCEL_AUCTION, req -> auctionController.cancelAuction((CancelAuctionRequest) req));
+        register(Action.PLACE_BID, req -> auctionController.placeBid((PlaceBidRequest) req));
         
-        register(Action.SET_AUTO_BID, (req, session) -> auctionController.registerAutoBid(toRegisterAutoBidRequest((SetAutoBidRequest) req)));
-        register(Action.REGISTER_AUTO_BID, (req, session) -> auctionController.registerAutoBid((RegisterAutoBidRequest) req));
-        register(Action.CANCEL_AUTO_BID, (req, session) -> auctionController.cancelAutoBid((CancelAutoBidRequest) req));
+        register(Action.REGISTER_AUTO_BID, req -> auctionController.registerAutoBid((RegisterAutoBidRequest) req));
+        register(Action.CANCEL_AUTO_BID, req -> auctionController.cancelAutoBid((CancelAutoBidRequest) req));
         
-        register(Action.GET_AUCTION_DETAIL, (req, session) -> auctionController.getAuctionDetail((GetAuctionDetailRequest) req));
-        register(Action.LIST_AUCTIONS, (req, session) -> auctionController.listAuctions((ListAuctionRequest) req));
-        register(Action.SET_BID_STEP, (req, session) -> auctionController.setBidStep((SetBidStepRequest) req));
+        register(Action.GET_AUCTION_DETAIL, req -> auctionController.getAuctionDetail((GetAuctionDetailRequest) req));
+        register(Action.LIST_AUCTIONS, req -> auctionController.listAuctions((ListAuctionRequest) req));
+        register(Action.SET_BID_STEP, req -> auctionController.setBidStep((SetBidStepRequest) req));
         
-        register(Action.UNSUBSCRIBE_AUCTION, (req, session) -> handleUnsubscribe((UnsubscribeAuctionRequest) req, session));
     }
 
     private <T extends Request> void register(String action, ActionProcessor<T> processor) {
@@ -74,6 +67,12 @@ public class RequestDispatcher {
             return response;
         }
 
+        if (Action.UNSUBSCRIBE_AUCTION.equals(request.getAction())) {
+            response = handleUnsubscribe((UnsubscribeAuctionRequest) request, session);
+            response.setRequestId(request.getRequestId());
+            return response;
+        }
+
         ActionProcessor<Request> processor = processors.get(request.getAction());
         if (processor == null) {
             response = Response.fail("Unsupported action: " + request.getAction());
@@ -82,7 +81,7 @@ public class RequestDispatcher {
         }
 
         try {
-            response = processor.process(request, session);
+            response = processor.process(request);
         } catch (Exception e) {
             response = exceptionHandler.handle(e, request.getAction());
         }
@@ -105,9 +104,5 @@ public class RequestDispatcher {
         subscriptionRegistry.unsubscribe(auctionId, session);
         return Response.success("Unsubscribed from auction: " + auctionId, true);
     }
-
-    private RegisterAutoBidRequest toRegisterAutoBidRequest(SetAutoBidRequest request) {
-        return new RegisterAutoBidRequest(
-                request.getAuctionId(), request.getMaxBid(), request.getIncrement(), request.getBidderId());
-    }
 }
+

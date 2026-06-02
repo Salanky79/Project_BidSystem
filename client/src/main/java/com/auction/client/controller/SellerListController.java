@@ -5,6 +5,8 @@ import com.auction.client.utils.CategoryUtils;
 import com.auction.share.DTO.AuctionSummaryDTO;
 import java.io.IOException;
 import java.util.List;
+
+import com.auction.share.enums.AuctionStatus;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -71,14 +73,14 @@ public class SellerListController {
   }
 
   private boolean matchesMode(String mode, AuctionSummaryDTO dto) {
-    com.auction.share.enums.AuctionStatus status = com.auction.share.enums.AuctionStatus.from(dto.getStatus());
-    if (status == com.auction.share.enums.AuctionStatus.CANCELED && !"Sold".equals(mode)) {
+    AuctionStatus status = AuctionStatus.from(dto.getStatus());
+    if (status == AuctionStatus.CANCELED && !"Sold".equals(mode)) {
       return false;
     }
 
     return switch (mode) {
       case "Active" -> status.isActive();
-      case "Sold" -> status == com.auction.share.enums.AuctionStatus.FINISHED || status == com.auction.share.enums.AuctionStatus.CANCELED;
+      case "Sold" -> status == AuctionStatus.FINISHED || status == AuctionStatus.CANCELED;
       default -> true;
     };
   }
@@ -96,7 +98,7 @@ public class SellerListController {
           dto.getCategory(),
           dto.getItemName(),
           dto.getCurrentPrice(),
-          0,
+          dto.getBidCount(),
           dto.getEndTime(),
           dto.getStatus(),
           dto.getAuctionId(),
