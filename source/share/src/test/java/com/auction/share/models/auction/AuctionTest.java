@@ -30,12 +30,13 @@ class AuctionTest {
     void isRunning_whenStatusNotRunning_returnsFalse() {
         Item item = new Item("Laptop", "Desc", 1000, "s-1", Category.ELECTRONIC);
         Seller seller = new Seller("seller", "pass", "Seller", "01", "a@a", "Addr");
-        LocalDateTime start = LocalDateTime.now().minusDays(1);
-        LocalDateTime end = LocalDateTime.now().plusDays(1);
+        // startTime in the future → constructor sets OPEN status
+        LocalDateTime start = LocalDateTime.now().plusDays(1);
+        LocalDateTime end = LocalDateTime.now().plusDays(2);
         
         Auction auction = new Auction(item, seller, start, end);
         
-        // Initial status is OPEN, not RUNNING
+        // Status is OPEN (not RUNNING), so isRunning() must return false
         assertFalse(auction.isRunning());
     }
 

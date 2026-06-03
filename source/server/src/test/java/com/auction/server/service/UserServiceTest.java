@@ -144,6 +144,33 @@ class UserServiceTest {
         verify(mockConn).setAutoCommit(true);
     }
 
+    // ── deposit ───────────────────────────────────────────────────
+
+    @Test
+    void deposit_negativeAmount_throwsValidation() throws Exception {
+        assertThrows(ValidationException.class, () -> userService.deposit("u-1", -100));
+    }
+
+    @Test
+    void deposit_zeroAmount_throwsValidation() throws Exception {
+        assertThrows(ValidationException.class, () -> userService.deposit("u-1", 0));
+    }
+
+    @Test
+    void deposit_success_returnsUpdatedBalance() throws Exception {
+        Bidder user = bidder("alice", "pass", "alice@mail.com");
+        user.setID("u-1");
+        when(userDAO.updateBalance(any(Connection.class), eq("u-1"), eq(500.0))).thenReturn(true);
+        when(userDAO.findById(any(Connection.class), eq("u-1"))).thenReturn(user);
+        when(auctionDAO.sumAuctionCurrentPrices(any(Connection.class), eq("u-1"), eq(null))).thenReturn(0.0);
+
+        var dto = userService.deposit("u-1", 500.0);
+
+        verify(userDAO).updateBalance(any(Connection.class), eq("u-1"), eq(500.0));
+        verify(mockConn).commit();
+        assert dto != null;
+    }
+
     private static Bidder bidder(String username, String password, String email) {
         return new Bidder(username, password, "Alice", "090", email, "HCM");
     }

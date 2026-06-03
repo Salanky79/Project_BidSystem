@@ -27,6 +27,7 @@ public class SocketClient {
   private ObjectOutputStream outputStream;
   private ObjectInputStream inputStream;
   private volatile boolean listening;
+  private volatile boolean isShuttingDown = false;
   private final Object socketLock = new Object();
   private Runnable onConnectionLost;
 
@@ -157,12 +158,14 @@ public class SocketClient {
           } catch (EOFException e) {
 
           } catch (IOException | ClassNotFoundException e) {
-            NotificationManager.showError("Connection error: " + e.getMessage());
+            if (!isShuttingDown) {
+                NotificationManager.showError("Connection error: " + e.getMessage());
+            }
           } finally {
             listening = false;
             closeConnection();
             failCallbacks("Connection closed.");
-            if (onConnectionLost != null) {
+            if (onConnectionLost != null && !isShuttingDown) {
                 Platform.runLater(onConnectionLost);
             }
           }
@@ -170,6 +173,7 @@ public class SocketClient {
   }
 
   public void shutdown() {
+    isShuttingDown = true;
     closeConnection();
     receiveExecutor.shutdownNow();
     sendExecutor.shutdownNow();

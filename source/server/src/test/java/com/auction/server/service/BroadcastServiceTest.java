@@ -81,4 +81,59 @@ class BroadcastServiceTest {
             verify(registry).removeSession(session1)
         );
     }
+
+    @Test
+    void broadcastAutoBidCancelled_onlySendsToTargetUser() throws Exception {
+        ClientSession targetSession = mock(ClientSession.class);
+        ClientSession otherSession = mock(ClientSession.class);
+
+        when(targetSession.getUserId()).thenReturn("u-target");
+        when(otherSession.getUserId()).thenReturn("u-other");
+        when(registry.getAllSessions()).thenReturn(Set.of(targetSession, otherSession));
+
+        broadcastService.broadcastAutoBidCancelled("u-target", "a-1", "Insufficient balance");
+
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            verify(targetSession, times(1)).send(any(com.auction.share.DTO.Response.class));
+            verify(otherSession, never()).send(any());
+        });
+    }
+
+    @Test
+    void broadcastAutoBidCancelled_payloadContainsReasonAndAuctionId() throws Exception {
+        ClientSession session = mock(ClientSession.class);
+        when(session.getUserId()).thenReturn("u-1");
+        when(registry.getAllSessions()).thenReturn(Set.of(session));
+
+        CopyOnWriteArrayList<com.auction.share.DTO.Response<?>> captured = new CopyOnWriteArrayList<>();
+        doAnswer(inv -> { captured.add(inv.getArgument(0)); return null; }).when(session).send(any());
+
+        broadcastService.broadcastAutoBidCancelled("u-1", "a-1", "Max bid reached");
+
+        await().atMost(5, TimeUnit.SECONDS).until(() -> !captured.isEmpty());
+
+        com.auction.share.DTO.Response<?> response = captured.get(0);
+        assertEquals("AUTO_BID_CANCELLED", response.getMessage());
+        com.auction.share.DTO.AutoBidCancelledEvent event =
+                (com.auction.share.DTO.AutoBidCancelledEvent) response.getData();
+        assertEquals("a-1", event.getAuctionId());
+        assertEquals("Max bid reached", event.getReason());
+    }
+
+    @Test
+    void broadcastBidStepUpdated_sendsToAllSessions() throws Exception {
+        ClientSession session1 = mock(ClientSession.class);
+        ClientSession session2 = mock(ClientSession.class);
+        when(registry.getAllSessions()).thenReturn(Set.of(session1, session2));
+
+        AtomicInteger count = new AtomicInteger();
+        doAnswer(inv -> { count.incrementAndGet(); return null; }).when(session1).send(any());
+        doAnswer(inv -> { count.incrementAndGet(); return null; }).when(session2).send(any());
+
+        broadcastService.broadcastBidStepUpdated("a-1", 50.0);
+
+        await().atMost(5, TimeUnit.SECONDS).until(() -> count.get() == 2);
+        verify(session1, times(1)).send(any());
+        verify(session2, times(1)).send(any());
+    }
 }

@@ -8,7 +8,6 @@ import com.auction.share.DTO.PlaceBidRequest;
 import com.auction.share.enums.Category;
 import com.auction.share.exceptions.ConcurrentBidException;
 import com.auction.share.exceptions.InsufficientBalanceException;
-import com.auction.share.exceptions.ValidationException;
 import com.auction.share.models.auction.Auction;
 import com.auction.share.models.item.Item;
 import com.auction.share.models.user.Bidder;
@@ -110,6 +109,94 @@ class BidServiceTest {
         
         // Verify auto bid triggered
         verify(autoBidService).triggerAutoBid("a-1", "b-1");
+    }
+
+    @Test
+    void placeBid_auctionNotFound_throwsValidation() throws Exception {
+        when(auctionDAO.findById(connection, "missing")).thenReturn(null);
+
+        PlaceBidRequest request = (PlaceBidRequest) new PlaceBidRequest("missing", "b-1", 200).withUserId("b-1");
+
+        assertThrows(
+                com.auction.share.exceptions.ValidationException.class,
+                () -> bidService.placeBid(request, false),
+                "Should throw ValidationException when auction does not exist");
+    }
+
+    @Test
+    void placeBid_auctionNotRunning_throwsValidation() throws Exception {
+        Auction auction = createRunningAuction("a-1", 100, 10);
+        // Simulate a finished auction by setting end time in the past
+        Seller seller = new Seller("s", "p", "Seller", "0", "s@mail.com", "Addr");
+        seller.setID("s-1");
+        com.auction.share.models.item.Item item =
+                new com.auction.share.models.item.Item("I", "D", 100, "s-1",
+                        com.auction.share.enums.Category.ITEM);
+        // Use an auction that is OPEN (not yet marked running)
+        com.auction.share.models.auction.Auction openAuction =
+                new com.auction.share.models.auction.Auction(
+                        item, seller,
+                        java.time.LocalDateTime.now().plusHours(1),
+                        java.time.LocalDateTime.now().plusHours(2));
+        openAuction.setID("a-open");
+
+        when(auctionDAO.findById(connection, "a-open")).thenReturn(openAuction);
+
+        PlaceBidRequest request =
+                (PlaceBidRequest) new PlaceBidRequest("a-open", "b-1", 200).withUserId("b-1");
+
+        assertThrows(
+                com.auction.share.exceptions.ValidationException.class,
+                () -> bidService.placeBid(request, false),
+                "Should throw ValidationException when auction is not running");
+    }
+
+    @Test
+    void placeBid_userIsNotBidder_throwsValidation() throws Exception {
+        Auction auction = createRunningAuction("a-1", 100, 10);
+        when(auctionDAO.findById(connection, "a-1")).thenReturn(auction);
+
+        // Return a Seller instead of a Bidder
+        com.auction.share.models.user.Seller seller =
+                new com.auction.share.models.user.Seller("s", "p", "Seller", "0", "s@mail.com", "Addr");
+        seller.setID("s-1");
+        when(userDAO.findById(connection, "s-1")).thenReturn(seller);
+
+        PlaceBidRequest request =
+                (PlaceBidRequest) new PlaceBidRequest("a-1", "s-1", 200).withUserId("s-1");
+
+        assertThrows(
+                com.auction.share.exceptions.ValidationException.class,
+                () -> bidService.placeBid(request, false),
+                "Should throw ValidationException when user is not a Bidder");
+    }
+
+    @Test
+    void placeBid_currentHighestBidderRaisesOwnBid_onlyPaysIncrement() throws Exception {
+        // b-1 is already highest bidder at 100. They bid 200.
+        // Reserved for this auction = 100 (their current bid), so effective cost = 200 - 100 = 100.
+        Auction auction = createRunningAuction("a-1", 100, 10);
+        Bidder leader = createBidder("b-1");
+        auction.setHighestBid(leader, 100);
+
+        when(auctionDAO.findById(connection, "a-1")).thenReturn(auction);
+        when(userDAO.findById(connection, "b-1")).thenReturn(leader);
+
+        // balance = 150, reserved elsewhere = 0, increment needed = 200 - 100 = 100 → enough
+        when(userDAO.findBalanceForUpdate(connection, "b-1")).thenReturn(150.0);
+        when(auctionDAO.sumAuctionCurrentPrices(connection, "b-1", "a-1")).thenReturn(0.0);
+        when(auctionDAO.updateHighestBid(
+                eq(connection), eq("a-1"), eq("b-1"), eq(200.0),
+                any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(true);
+        when(auctionDAO.findById(connection, "a-1")).thenReturn(auction);
+
+        PlaceBidRequest request =
+                (PlaceBidRequest) new PlaceBidRequest("a-1", "b-1", 200).withUserId("b-1");
+
+        boolean result = bidService.placeBid(request, false);
+
+        assertTrue(result);
+        verify(bidTransactionDAO).saveBidTransaction(eq(connection), any());
     }
 
     private Auction createRunningAuction(String id, double currentPrice, double step) {
