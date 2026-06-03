@@ -640,7 +640,7 @@
 <error line="125" column="21" severity="warning" message="&apos;if&apos; has incorrect indentation level 20, expected level should be 18." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
 <error line="127" column="73" severity="warning" message="Abbreviation in name &apos;profileDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
 <error line="130" column="25" severity="warning" message="&apos;if&apos; has incorrect indentation level 24, expected level should be 20." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="131" severity="warning" message="Line is longer than 100 characters (found 115)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="131" severity="warning" message="Line is longer than 100 characters (found 116)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 <error line="131" column="29" severity="warning" message="&apos;if&apos; child has incorrect indentation level 28, expected level should be 22." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
 <error line="132" column="25" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 24, expected level should be 20." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
 <error line="134" column="25" severity="warning" message="&apos;if&apos; has incorrect indentation level 24, expected level should be 20." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
@@ -739,12 +739,15 @@
 <file name="D:\code\Project_BidSystem\source\client\src\main\java\com\auction\client\controller\ProfileController.java">
 <error line="22" column="1" severity="warning" message="Wrong lexicographical order for &apos;javafx.scene.control.PasswordField&apos; import. Should be before &apos;javafx.scene.control.TextField&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
 <error line="25" column="1" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocTypeCheck"/>
-<error line="62" severity="warning" message="Line is longer than 100 characters (found 109)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="67" column="17" severity="warning" message="&apos;if&apos; child has incorrect indentation level 16, expected level should be one of the following: 10, 12, 14." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="69" column="17" severity="warning" message="&apos;else&apos; child has incorrect indentation level 16, expected level should be one of the following: 10, 12, 14." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="82" column="55" severity="warning" message="Abbreviation in name &apos;profileDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
-<error line="135" column="66" severity="warning" message="Abbreviation in name &apos;userDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
-<error line="150" severity="warning" message="Line is longer than 100 characters (found 115)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="60" severity="warning" message="Line is longer than 100 characters (found 108)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="65" column="17" severity="warning" message="&apos;if&apos; child has incorrect indentation level 16, expected level should be one of the following: 10, 12, 14." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="67" column="17" severity="warning" message="&apos;else&apos; child has incorrect indentation level 16, expected level should be one of the following: 10, 12, 14." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="73" severity="warning" message="Line is longer than 100 characters (found 109)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="78" column="17" severity="warning" message="&apos;if&apos; child has incorrect indentation level 16, expected level should be one of the following: 10, 12, 14." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="80" column="17" severity="warning" message="&apos;else&apos; child has incorrect indentation level 16, expected level should be one of the following: 10, 12, 14." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="93" column="55" severity="warning" message="Abbreviation in name &apos;profileDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="146" column="66" severity="warning" message="Abbreviation in name &apos;userDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="161" severity="warning" message="Line is longer than 100 characters (found 115)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 </file>
 <file name="D:\code\Project_BidSystem\source\client\src\main\java\com\auction\client\controller\SellController.java">
 <error line="6" column="1" severity="warning" message="Wrong lexicographical order for &apos;com.auction.client.utils.FormatUtils&apos; import. Should be before &apos;com.auction.share.exceptions.ValidationException&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
@@ -851,26 +854,35 @@
 <error line="90" column="27" severity="warning" message="&apos;if&apos; child has incorrect indentation level 26, expected level should be 22." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
 <error line="91" column="23" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 22, expected level should be 20." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
 <error line="93" column="15" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 14, expected level should be 10." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="94" column="11" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 10, expected level should be 8." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="96" column="7" severity="warning" message="&apos;method def&apos; child has incorrect indentation level 6, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="99" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
-<error line="100" column="7" severity="warning" message="&apos;if&apos; has incorrect indentation level 6, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="101" column="11" severity="warning" message="&apos;if&apos; child has incorrect indentation level 10, expected level should be 6." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="102" column="11" severity="warning" message="&apos;if&apos; child has incorrect indentation level 10, expected level should be 6." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="103" column="7" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 6, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="116" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
-<error line="140" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
-<error line="150" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
-<error line="214" column="7" severity="warning" message="&apos;method def&apos; child has incorrect indentation level 6, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="216" column="19" severity="warning" message="&apos;if&apos; has incorrect indentation level 18, expected level should be 16." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="218" severity="warning" message="Line is longer than 100 characters (found 102)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="218" column="93" severity="warning" message="Abbreviation in name &apos;profileDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
-<error line="221" column="23" severity="warning" message="&apos;if&apos; has incorrect indentation level 22, expected level should be 18." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="222" severity="warning" message="Line is longer than 100 characters (found 114)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="222" column="27" severity="warning" message="&apos;if&apos; child has incorrect indentation level 26, expected level should be 20." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="223" column="23" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 22, expected level should be 18." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="224" column="19" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 18, expected level should be 16." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
-<error line="226" column="7" severity="warning" message="&apos;method call rparen&apos; has incorrect indentation level 6, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="94" column="19" severity="warning" message="&apos;if&apos; child has incorrect indentation level 18, expected level should be 12." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="95" column="23" severity="warning" message="&apos;if&apos; has incorrect indentation level 22, expected level should be 20." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="96" severity="warning" message="Line is longer than 100 characters (found 123)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="96" column="27" severity="warning" message="&apos;if&apos; child has incorrect indentation level 26, expected level should be 22." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="97" column="23" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 22, expected level should be 20." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="98" column="23" severity="warning" message="&apos;if&apos; has incorrect indentation level 22, expected level should be 20." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="99" column="27" severity="warning" message="&apos;if&apos; child has incorrect indentation level 26, expected level should be 22." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="100" column="23" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 22, expected level should be 20." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="102" column="15" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 14, expected level should be 10." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="103" column="11" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 10, expected level should be 8." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="105" column="7" severity="warning" message="&apos;method def&apos; child has incorrect indentation level 6, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="108" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+<error line="109" column="7" severity="warning" message="&apos;if&apos; has incorrect indentation level 6, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="110" column="11" severity="warning" message="&apos;if&apos; child has incorrect indentation level 10, expected level should be 6." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="111" column="11" severity="warning" message="&apos;if&apos; child has incorrect indentation level 10, expected level should be 6." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="112" column="7" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 6, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="125" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+<error line="149" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+<error line="159" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+<error line="223" column="7" severity="warning" message="&apos;method def&apos; child has incorrect indentation level 6, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="225" column="19" severity="warning" message="&apos;if&apos; has incorrect indentation level 18, expected level should be 16." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="227" severity="warning" message="Line is longer than 100 characters (found 102)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="227" column="93" severity="warning" message="Abbreviation in name &apos;profileDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="230" column="23" severity="warning" message="&apos;if&apos; has incorrect indentation level 22, expected level should be 18." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="231" severity="warning" message="Line is longer than 100 characters (found 114)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="231" column="27" severity="warning" message="&apos;if&apos; child has incorrect indentation level 26, expected level should be 20." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="232" column="23" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 22, expected level should be 18." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="233" column="19" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 18, expected level should be 16." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="235" column="7" severity="warning" message="&apos;method call rparen&apos; has incorrect indentation level 6, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
 </file>
 <file name="D:\code\Project_BidSystem\source\client\src\main\java\com\auction\client\controller\SellerItemCardController.java">
 <error line="13" column="1" severity="warning" message="Wrong lexicographical order for &apos;javafx.scene.image.Image&apos; import. Should be before &apos;javafx.scene.layout.StackPane&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
@@ -1256,8 +1268,6 @@
 <error line="82" column="9" severity="warning" message="&apos;if rcurly&apos; has incorrect indentation level 8, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
 <error line="83" column="5" severity="warning" message="&apos;method def rcurly&apos; has incorrect indentation level 4, expected level should be 2." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
 </file>
-<file name="D:\code\Project_BidSystem\source\client\src\main\java\com\auction\client\utils\CardImageLoader.java">
-</file>
 <file name="D:\code\Project_BidSystem\source\client\src\main\java\com\auction\client\utils\CategoryUtils.java">
 <error line="3" column="1" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocTypeCheck"/>
 <error line="4" column="5" severity="warning" message="&apos;ctor def modifier&apos; has incorrect indentation level 4, expected level should be 2." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
@@ -1348,7 +1358,5 @@
 </file>
 <file name="D:\code\Project_BidSystem\source\client\src\main\java\com\auction\client\utils\NotificationManager.java">
 <error line="75" column="5" severity="warning" message="&apos;if&apos; construct must use &apos;{}&apos;s." source="com.puppycrawl.tools.checkstyle.checks.blocks.NeedBracesCheck"/>
-</file>
-<file name="D:\code\Project_BidSystem\source\client\src\main\resources\config.properties">
 </file>
 </checkstyle>

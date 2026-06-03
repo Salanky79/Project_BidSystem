@@ -5,18 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="87774572-814c-454f-89c7-64d9db09cb7e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../release/client.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../release/client.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../release/server.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../release/server.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main/java/com/auction/client/controller/HomeFrameController.java" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/java/com/auction/client/controller/HomeFrameController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main/java/com/auction/client/controller/ProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/java/com/auction/client/controller/ProfileController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/main/java/com/auction/client/controller/SellerDashboardFrameController.java" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/java/com/auction/client/controller/SellerDashboardFrameController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/main/resources/com/auction/client/view/SellerDashboardFrame.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/resources/com/auction/client/view/SellerDashboardFrame.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/checkstyle-cachefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/target/checkstyle-result.xml" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/checkstyle-result.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/target/classes/com/auction/client/controller/HomeFrameController.class" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/classes/com/auction/client/controller/HomeFrameController.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/target/classes/com/auction/client/controller/SellerDashboardFrameController.class" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/classes/com/auction/client/controller/SellerDashboardFrameController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/target/classes/com/auction/client/view/SellerDashboardFrame.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/classes/com/auction/client/view/SellerDashboardFrame.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT-jar-with-dependencies.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/checkstyle-cachefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/classes/com/auction/server/dao/AuctionDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/classes/com/auction/server/dao/AuctionDAO.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT-jar-with-dependencies.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/share/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/share/target/checkstyle-cachefile" afterDir="false" />
@@ -29,7 +29,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="162" />
+    <option name="cachedIndexableFilesCount" value="164" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
@@ -104,7 +104,7 @@
       <recent name="com.auction.server.mapper" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="JAR Application.client-1.0-SNAPSHOT-jar-with-dependencies.jar">
     <configuration name="client-1.0-SNAPSHOT-jar-with-dependencies.jar" type="JarApplication" temporary="true">
       <option name="JAR_PATH" value="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT-jar-with-dependencies.jar" />
       <method v="2" />
@@ -162,6 +162,7 @@
       <workItem from="1780426075468" duration="2871000" />
       <workItem from="1780456325821" duration="238000" />
       <workItem from="1780458638456" duration="10785000" />
+      <workItem from="1780480130707" duration="1629000" />
     </task>
     <servers />
   </component>

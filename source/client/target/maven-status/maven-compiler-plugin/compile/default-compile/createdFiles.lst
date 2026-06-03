@@ -29,6 +29,7 @@ com\auction\client\controller\ProfileController$1.class
 com\auction\client\factory\RoleUIFactory.class
 com\auction\client\controller\SellerDashboardController.class
 com\auction\client\factory\SellerDashboardProduct.class
+com\auction\client\controller\ProfileController$2.class
 com\auction\client\factory\BidderDashboard.class
 com\auction\client\utils\CategoryUtils.class
 com\auction\client\controller\SignupController.class

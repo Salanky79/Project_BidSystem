@@ -90,6 +90,15 @@ public class SellerDashboardFrameController extends FrameController {
                           currentListController.loadItems(currentListController.getCurrentMode());
                       }
                   });
+              } else if ("AUCTION_STARTED".equals(response.getMessage())) {
+                  javafx.application.Platform.runLater(() -> {
+                      if (currentDashboardController != null) {
+                          currentDashboardController.loadAuctionCards(currentDashboardController.getCurrentFilterStatus());
+                      }
+                      if (currentListController != null) {
+                          currentListController.loadItems(currentListController.getCurrentMode());
+                      }
+                  });
               }
           }
       };

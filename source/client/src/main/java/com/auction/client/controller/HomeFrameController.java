@@ -128,7 +128,7 @@ public class HomeFrameController extends FrameController {
                             && profileDTO.getUser() != null) {
                         
                         if (budgetLabel != null) {
-                            budgetLabel.setText(String.format("%.1f", profileDTO.getUser().getAvailableBalance()));
+                            budgetLabel.setText(String.format("%,.0f", profileDTO.getUser().getAvailableBalance()));
                         }
 
                         if (currentProfileController != null) {
