@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="9.3">
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\Action.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\AuctionDetailDTO.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="7" column="14" severity="warning" message="Abbreviation in name &apos;AuctionDetailDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="27" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\AuctionSummaryDTO.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="6" column="14" severity="warning" message="Abbreviation in name &apos;AuctionSummaryDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="21" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\BidDTO.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="6" column="14" severity="warning" message="Abbreviation in name &apos;BidDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="13" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\BidStepUpdateEvent.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\BidUpdateEvent.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="18" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\CancelAuctionRequest.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\CancelAutoBidRequest.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="10" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\CreateAuctionRequest.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="28" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\GetAuctionDetailRequest.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\GetProfileRequest.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\ListAuctionRequest.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="14" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\LoginRequest.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="10" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\PlaceBidRequest.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="11" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\ProfileBidTransactionDTO.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="6" column="14" severity="warning" message="Abbreviation in name &apos;ProfileBidTransactionDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="14" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\ProfileDTO.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="7" column="14" severity="warning" message="Abbreviation in name &apos;ProfileDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\RegisterAutoBidRequest.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="12" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\RegisterRequest.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="15" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\Request.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="18" column="3" severity="warning" message="&apos;VARIABLE_DEF&apos; should be separated from previous line." source="com.puppycrawl.tools.checkstyle.checks.whitespace.EmptyLineSeparatorCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\Response.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="18" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+<error line="25" column="7" severity="warning" message="&apos;method def&apos; child has incorrect indentation level 6, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="29" column="7" severity="warning" message="&apos;method def&apos; child has incorrect indentation level 6, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\SetBidStepRequest.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="11" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\UnsubscribeAuctionRequest.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\UpdateProfileRequest.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="13" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\UserDTO.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+<error line="6" column="14" severity="warning" message="Abbreviation in name &apos;UserDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+<error line="19" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\enums\AuctionStatus.java">
+<error line="31" column="5" severity="warning" message="&apos;if&apos; construct must use &apos;{}&apos;s." source="com.puppycrawl.tools.checkstyle.checks.blocks.NeedBracesCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\exceptions\ConcurrentBidException.java">
+<error line="7" column="5" severity="warning" message="&apos;ctor def modifier&apos; has incorrect indentation level 4, expected level should be 2." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="8" column="9" severity="warning" message="&apos;ctor def&apos; child has incorrect indentation level 8, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="9" column="5" severity="warning" message="&apos;ctor def rcurly&apos; has incorrect indentation level 4, expected level should be 2." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\exceptions\InsufficientBalanceException.java">
+<error line="7" column="5" severity="warning" message="&apos;ctor def modifier&apos; has incorrect indentation level 4, expected level should be 2." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="8" column="9" severity="warning" message="&apos;ctor def&apos; child has incorrect indentation level 8, expected level should be 4." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+<error line="9" column="5" severity="warning" message="&apos;ctor def rcurly&apos; has incorrect indentation level 4, expected level should be 2." source="com.puppycrawl.tools.checkstyle.checks.indentation.IndentationCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\models\auction\Auction.java">
+<error line="9" column="1" severity="warning" message="Extra separation in import group before &apos;java.time.LocalDateTime&apos;" source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\models\core\Entity.java">
+<error line="21" column="15" severity="warning" message="Abbreviation in name &apos;setID&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\models\user\Bidder.java">
+<error line="4" column="1" severity="warning" message="Wrong lexicographical order for &apos;com.auction.share.enums.Role&apos; import. Should be before &apos;com.auction.share.models.auction.BidTransaction&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+</file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\models\user\Seller.java">
+<error line="5" column="1" severity="warning" message="Wrong lexicographical order for &apos;com.auction.share.enums.Role&apos; import. Should be before &apos;com.auction.share.models.item.Item&apos;." source="com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck"/>
+</file>
+</checkstyle>

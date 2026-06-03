@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="701.0" prefWidth="744.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.ProfileController">
+   <children>
+      <Label fx:id="nameLabel" layoutX="23.0" layoutY="41.0" prefHeight="56.0" prefWidth="501.0" text="" textFill="#1a1a1a" AnchorPane.bottomAnchor="603.0" AnchorPane.leftAnchor="23.0" AnchorPane.topAnchor="41.0">
+         <font>
+            <Font name="System Bold" size="36.0" />
+         </font>
+      </Label>
+
+      <Button fx:id="editButton" layoutX="603.0" layoutY="52.0" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #1a1a1a; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand;" text="Edit Profile" AnchorPane.bottomAnchor="613.0" AnchorPane.rightAnchor="21.0" AnchorPane.topAnchor="52.0" />
+
+      <GridPane hgap="30.0" layoutX="23.0" layoutY="142.0" prefWidth="700.0" vgap="20.0" AnchorPane.bottomAnchor="418.0" AnchorPane.leftAnchor="23.0" AnchorPane.rightAnchor="21.0" AnchorPane.topAnchor="142.0">
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <VBox spacing="5.0">
+               <Label text="Name" textFill="#888888" />
+               <TextField fx:id="nameField" editable="false" prefHeight="45.0" style="-fx-background-radius: 8; -fx-border-color: #ddd; -fx-border-radius: 8;" />
+            </VBox>
+            <VBox spacing="5.0" GridPane.columnIndex="1">
+               <Label text="Username" textFill="#888888" />
+               <TextField fx:id="usernameField" editable="false" prefHeight="45.0" style="-fx-background-radius: 8; -fx-border-color: #ddd; -fx-border-radius: 8;" />
+            </VBox>
+            <VBox spacing="5.0" GridPane.rowIndex="1">
+               <Label text="Email" textFill="#888888" />
+               <TextField fx:id="emailField" editable="false" prefHeight="45.0" style="-fx-background-radius: 8; -fx-border-color: #ddd; -fx-border-radius: 8;" />
+            </VBox>
+            <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <Label text="Phone Number" textFill="#888888" />
+               <TextField fx:id="phoneField" editable="false" prefHeight="45.0" style="-fx-background-radius: 8; -fx-border-color: #ddd; -fx-border-radius: 8;" />
+            </VBox>
+            <VBox spacing="5.0" GridPane.rowIndex="2">
+               <Label text="New Password" textFill="#888888" />
+               <PasswordField fx:id="passwordField" editable="false" prefHeight="45.0" style="-fx-background-radius: 8; -fx-border-color: #ddd; -fx-border-radius: 8;" />
+            </VBox>
+         </children>
+      </GridPane>
+
+      <Label layoutX="23.0" layoutY="350.0" prefHeight="27.0" prefWidth="142.0" text="Auction History" textFill="#1a1a1a" AnchorPane.bottomAnchor="323.0" AnchorPane.leftAnchor="23.0" AnchorPane.topAnchor="350.0">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <TableView fx:id="table" layoutX="14.0" layoutY="389.0" prefHeight="250.0" prefWidth="700.0" style="-fx-background-radius: 8; -fx-border-color: #ddd; -fx-border-radius: 8;" AnchorPane.bottomAnchor="61.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="389.0">
+         <columns>
+            <TableColumn fx:id="colItem" prefWidth="250.0" text="Item" />
+            <TableColumn fx:id="colStatus" prefWidth="150.0" text="Status" />
+            <TableColumn fx:id="colBid" prefWidth="150.0" text="Your Bid" />
+            <TableColumn fx:id="colTime" prefWidth="148.0" text="Time" />
+         </columns>
+      </TableView>
+   </children>
+</AnchorPane>
