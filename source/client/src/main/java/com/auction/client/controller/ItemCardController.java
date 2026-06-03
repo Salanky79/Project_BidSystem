@@ -49,19 +49,6 @@ public class ItemCardController {
       int bids,
       String time,
       String status,
-      String auctionId) {
-    setData(icon, category, name, price, bidStep, bids, time, status, auctionId, null, null);
-  }
-
-  public void setData(
-      String icon,
-      String category,
-      String name,
-      double price,
-      double bidStep,
-      int bids,
-      String time,
-      String status,
       String auctionId,
       String imageUrl,
       String highestBidderName) {

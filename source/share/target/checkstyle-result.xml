@@ -23,7 +23,7 @@
 </file>
 <file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\BidUpdateEvent.java">
 <error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
-<error line="18" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
+<error line="19" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
 </file>
 <file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\CancelAuctionRequest.java">
 <error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>

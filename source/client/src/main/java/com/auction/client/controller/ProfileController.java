@@ -58,6 +58,18 @@ public class ProfileController implements Initializable {
     colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
     colBid.setCellValueFactory(new PropertyValueFactory<>("bidAmount"));
     colTime.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
+
+    colTime.setCellFactory(column -> new javafx.scene.control.TableCell<ProfileBidTransactionDTO, String>() {
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setText(null);
+            } else {
+                setText(com.auction.client.utils.DateTimeUtils.formatDateTimeForDisplay(item));
+            }
+        }
+    });
   }
 
   public void loadProfileData() {

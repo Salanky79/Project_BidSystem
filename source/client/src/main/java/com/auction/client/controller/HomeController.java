@@ -252,7 +252,7 @@ public class HomeController {
                       dto.getBidStep(),
                       dto.getStatus(),
                       dto.getStartTime(),
-                      dto.getEndTime(),
+                      event.getNewEndTime() != null ? event.getNewEndTime() : dto.getEndTime(),
                       event.getBidCount(),
                       dto.getImageUrl(),
                       event.getBidderName()

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 public class AuctionDAO  {
-    private static final int SNIPE_THRESHOLD_SECONDS = 10;
+    private static final int SNIPE_THRESHOLD_SECONDS = 30;
     private static final int SNIPE_EXTENSION_SECONDS = 30;
 
 

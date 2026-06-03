@@ -111,6 +111,9 @@ public class AuctionDetailViewModel {
         this.lastProcessedBidCount = event.getBidCount();
         this.currentPrice = event.getCurrentHighestBid();
         this.highestBidderName = event.getBidderName();
+        if (event.getNewEndTime() != null) {
+            this.endTime = DateTimeUtils.parseDateTime(event.getNewEndTime());
+        }
 
         if (this.bidHistory == null) {
             this.bidHistory = new ArrayList<>();

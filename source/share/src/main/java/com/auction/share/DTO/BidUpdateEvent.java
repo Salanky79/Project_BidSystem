@@ -14,6 +14,7 @@ public class BidUpdateEvent implements Serializable {
   private final double currentHighestBid;
   private final String bidTime;
   private final int bidCount;
+  private final String newEndTime;
 
   public BidUpdateEvent(
       String eventType,
@@ -23,7 +24,8 @@ public class BidUpdateEvent implements Serializable {
       double amount,
       double currentHighestBid,
       String bidTime,
-      int bidCount) {
+      int bidCount,
+      String newEndTime) {
     this.eventType = eventType;
     this.auctionId = auctionId;
     this.bidderId = bidderId;
@@ -32,6 +34,7 @@ public class BidUpdateEvent implements Serializable {
     this.currentHighestBid = currentHighestBid;
     this.bidTime = bidTime;
     this.bidCount = bidCount;
+    this.newEndTime = newEndTime;
   }
 
   public String getEventType() {
@@ -64,5 +67,9 @@ public class BidUpdateEvent implements Serializable {
 
   public int getBidCount() {
     return bidCount;
+  }
+
+  public String getNewEndTime() {
+    return newEndTime;
   }
 }

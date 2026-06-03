@@ -143,15 +143,38 @@ public class HomeFrameController extends FrameController {
 
     @FXML
     public void handleDeposit(ActionEvent event) {
-        TextInputDialog dialog = new TextInputDialog("1000");
+        TextInputDialog dialog = new TextInputDialog("1,000");
         dialog.setTitle("Nạp tiền");
         dialog.setHeaderText("Nạp tiền vào tài khoản");
         dialog.setContentText("Nhập số tiền (VND):");
 
+        java.text.DecimalFormat df = new java.text.DecimalFormat("#,###");
+        javafx.scene.control.TextField editor = dialog.getEditor();
+        editor.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null || newVal.isEmpty()) return;
+            String plain = newVal.replaceAll("[^\\d]", "");
+            if (plain.isEmpty()) {
+                Platform.runLater(() -> editor.setText(""));
+                return;
+            }
+            try {
+                long parsed = Long.parseLong(plain);
+                String formatted = df.format(parsed);
+                if (!newVal.equals(formatted)) {
+                    Platform.runLater(() -> {
+                        editor.setText(formatted);
+                        editor.positionCaret(formatted.length());
+                    });
+                }
+            } catch (NumberFormatException e) {
+                Platform.runLater(() -> editor.setText(oldVal));
+            }
+        });
+
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(amountStr -> {
             try {
-                double amount = Double.parseDouble(amountStr);
+                double amount = Double.parseDouble(amountStr.replace(",", ""));
                 if (amount <= 0) {
                     NotificationManager.showError("Số tiền nạp phải lớn hơn 0.");
                     return;

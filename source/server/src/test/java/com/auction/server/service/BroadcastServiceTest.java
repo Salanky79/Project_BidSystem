@@ -55,7 +55,7 @@ class BroadcastServiceTest {
             return null;
         }).when(session2).send(any(Response.class));
 
-        BidUpdateEvent event = new BidUpdateEvent(BroadcastService.BID_UPDATED, "a-1", "b-1", "Bidder 1", 100, 100, "now", 1);
+        BidUpdateEvent event = new BidUpdateEvent(BroadcastService.BID_UPDATED, "a-1", "b-1", "Bidder 1", 100, 100, "now", 1, "future");
         broadcastService.broadcastBidUpdate(event);
 
         // Use Awaitility since sending happens in an ExecutorService
@@ -73,7 +73,7 @@ class BroadcastServiceTest {
 
         doThrow(new IOException("Connection reset by peer")).when(session1).send(any(Response.class));
 
-        BidUpdateEvent event = new BidUpdateEvent(BroadcastService.BID_UPDATED, "a-1", "b-1", "Bidder 1", 100, 100, "now", 1);
+        BidUpdateEvent event = new BidUpdateEvent(BroadcastService.BID_UPDATED, "a-1", "b-1", "Bidder 1", 100, 100, "now", 1, "future");
         broadcastService.broadcastBidUpdate(event);
 
         // Await until unsubscribeAll is called

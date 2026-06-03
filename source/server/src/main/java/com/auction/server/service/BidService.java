@@ -105,7 +105,8 @@ public class BidService  {
                                 req.getAmount(),
                                 req.getAmount(),
                                 transaction.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                                updatedAuction.getBidCount()));
+                                updatedAuction.getBidCount(),
+                                updatedAuction.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
 
                 // 6. Trigger Auto Bid if required
                 if (triggerAuto && autoBidService != null) {

@@ -25,6 +25,7 @@ com\auction\client\utils\FormatUtils.class
 com\auction\client\controller\SellerItemCardController.class
 com\auction\client\service\UserService.class
 com\auction\client\controller\FrameController.class
+com\auction\client\controller\ProfileController$1.class
 com\auction\client\factory\RoleUIFactory.class
 com\auction\client\controller\SellerDashboardController.class
 com\auction\client\factory\SellerDashboardProduct.class

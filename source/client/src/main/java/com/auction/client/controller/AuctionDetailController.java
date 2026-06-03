@@ -273,6 +273,12 @@ public class AuctionDetailController {
         if (winnerNameLabel != null) {
             winnerNameLabel.setText(event.getBidderName());
         }
+        if (event.getNewEndTime() != null) {
+            if (countdownTimer != null) {
+                countdownTimer.start(viewModel.getEndTime());
+            }
+            endTimeLabel.setText(DateTimeUtils.formatDateTimeForDisplay(viewModel.getEndTime().toString()));
+        }
     }
 
     private void refreshAuctionDetail() {
