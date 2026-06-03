@@ -212,9 +212,9 @@ class AutoBidServiceTest {
         Auction auction = runningAuction(100);
 
         when(auctionDAO.findById(any(), eq("a-1"))).thenReturn(auction);
-        when(registry.getConfigs("a-1")).thenReturn(List.of(
-                new AutoBidConfig("b-1", "a-1", 500, 50, LocalDateTime.now())
-        ));
+        when(registry.getConfigs("a-1"))
+            .thenReturn(List.of(new AutoBidConfig("b-1", "a-1", 500, 50, LocalDateTime.now())))
+            .thenReturn(List.of());
         when(userDAO.findBalanceForUpdate(any(), eq("b-1"))).thenReturn(1000.0);
         when(auctionDAO.sumAuctionCurrentPrices(any(), eq("b-1"), eq("a-1"))).thenReturn(0.0);
 

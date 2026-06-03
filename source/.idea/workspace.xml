@@ -5,38 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="87774572-814c-454f-89c7-64d9db09cb7e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../release/client.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../release/client/client.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../release/client/client.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../release/server.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../release/server/server.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../release/server/server.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/main/java/com/auction/client/network/SocketClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/java/com/auction/client/network/SocketClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/checkstyle-cachefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/target/checkstyle-result.xml" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/checkstyle-result.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/target/classes/com/auction/client/network/SocketClient.class" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/classes/com/auction/client/network/SocketClient.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT-jar-with-dependencies.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/server/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/test/java/com/auction/server/service/AuctionServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/test/java/com/auction/server/service/AuctionServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT-jar-with-dependencies.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/target/maven-archiver/pom.properties" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/test/java/com/auction/server/service/AutoBidServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/test/java/com/auction/server/service/AutoBidServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/test/java/com/auction/server/service/BidServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/test/java/com/auction/server/service/BidServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/test/java/com/auction/server/service/BroadcastServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/test/java/com/auction/server/service/BroadcastServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/test/java/com/auction/server/service/UserServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/test/java/com/auction/server/service/UserServiceTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/checkstyle-cachefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT-jar-with-dependencies.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/test-classes/com/auction/server/service/AuctionServiceTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/test-classes/com/auction/server/service/AuctionServiceTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/test-classes/com/auction/server/service/AutoBidServiceTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/test-classes/com/auction/server/service/AutoBidServiceTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/test-classes/com/auction/server/service/BidServiceTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/test-classes/com/auction/server/service/BidServiceTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/test-classes/com/auction/server/service/BroadcastServiceTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/test-classes/com/auction/server/service/BroadcastServiceTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/test-classes/com/auction/server/service/UserServiceTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/test-classes/com/auction/server/service/UserServiceTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/share/src/test/java/com/auction/share/models/auction/AuctionTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/share/src/test/java/com/auction/share/models/auction/AuctionTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/target/checkstyle-result.xml" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/checkstyle-result.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/target/maven-archiver/pom.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT-jar-with-dependencies.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT.jar" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/share/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/share/target/checkstyle-cachefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/share/target/checkstyle-result.xml" beforeDir="false" afterPath="$PROJECT_DIR$/share/target/checkstyle-result.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/share/target/share-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/share/target/share-1.0-SNAPSHOT.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/share/target/test-classes/com/auction/share/models/auction/AuctionTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/share/target/test-classes/com/auction/share/models/auction/AuctionTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/share/target/maven-archiver/pom.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/share/target/share-1.0-SNAPSHOT.jar" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/target/checkstyle-cachefile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -182,6 +163,7 @@
       <workItem from="1780486867971" duration="4120000" />
       <workItem from="1780494560816" duration="64000" />
       <workItem from="1780495655819" duration="62000" />
+      <workItem from="1780497015162" duration="334000" />
     </task>
     <servers />
   </component>
