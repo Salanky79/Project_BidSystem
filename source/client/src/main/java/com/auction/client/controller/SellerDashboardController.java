@@ -29,6 +29,12 @@ public class SellerDashboardController {
     loadAuctionCards("All");
   }
 
+  public void forceReload() {
+    this.allAuctions = null;
+    this.cardCache.clear();
+    loadAuctionCards(this.currentFilterStatus != null ? this.currentFilterStatus : "All");
+  }
+
   // ===== FILTER BUTTONS =====
   @FXML private Button btnFilterAll;
   @FXML private Button btnFilterActive;

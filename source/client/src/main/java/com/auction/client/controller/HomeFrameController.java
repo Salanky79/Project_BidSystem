@@ -49,6 +49,12 @@ public class HomeFrameController extends FrameController {
                             currentHomeController.loadAuction(currentHomeController.getCurrentStatusFilter());
                         }
                     });
+                } else if ("AUCTION_STARTED".equals(response.getMessage())) {
+                    javafx.application.Platform.runLater(() -> {
+                        if (currentHomeController != null) {
+                            currentHomeController.loadAuction(currentHomeController.getCurrentStatusFilter());
+                        }
+                    });
                 }
             }
         };

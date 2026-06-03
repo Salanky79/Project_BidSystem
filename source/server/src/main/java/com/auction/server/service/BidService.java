@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 public class BidService  {
     private final DataSource dataSource;
@@ -81,8 +82,19 @@ public class BidService  {
                     throw new InsufficientBalanceException("Insufficient balance.");
                 }
 
-                // 3. Atomic check & update auction
-                boolean updated = auctionDAO.updateHighestBid(conn, auction.getId(), bidder.getId(), req.getAmount(), LocalDateTime.now());
+                // 3. Calculate anti-snipe extension using JVM time
+                LocalDateTime now = LocalDateTime.now();
+                LocalDateTime newEndTime = auction.getEndTime();
+                long secondsLeft = ChronoUnit.SECONDS.between(now, newEndTime);
+                
+                if (secondsLeft >= 0 && secondsLeft <= com.auction.server.dao.AuctionDAO.SNIPE_THRESHOLD_SECONDS) {
+                    if (auction.getHighestBidder() == null || !auction.getHighestBidder().getId().equals(bidder.getId())) {
+                        newEndTime = newEndTime.plusSeconds(com.auction.server.dao.AuctionDAO.SNIPE_EXTENSION_SECONDS);
+                    }
+                }
+
+                // 3.5 Atomic check & update auction
+                boolean updated = auctionDAO.updateHighestBid(conn, auction.getId(), bidder.getId(), req.getAmount(), newEndTime, now);
                 if (!updated) {
                     throw new ConcurrentBidException(
                             "Bid rejected: auction is not running, already ended, or current price changed.");

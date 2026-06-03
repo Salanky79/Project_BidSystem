@@ -170,7 +170,9 @@ public class AutoBidService  {
 
             // 3. Thực hiện đặt bid sử dụng phương thức đặt bid có sẵn ở BidService
             try {
-                bidService.placeBid(new PlaceBidRequest(auctionId, winnerBidderId, finalPrice), false);
+                PlaceBidRequest req = new PlaceBidRequest(auctionId, winnerBidderId, finalPrice);
+                req.withUserId(winnerBidderId);
+                bidService.placeBid(req, false);
                 // Đặt bid thành công! Kết thúc quá trình xử lý.
                 break;
             } catch (ConcurrentBidException e) {
@@ -179,7 +181,13 @@ public class AutoBidService  {
             } catch (InsufficientBalanceException e) {
                 // Người thắng bị cạn kiệt số dư khả dụng. Hủy cấu hình của họ và chạy lại vòng lặp chọn người thắng mới
                 registry.cancel(auctionId, winnerBidderId);
-            } catch (SQLException | ValidationException e) {
+            } catch (ValidationException e) {
+                // Config của winner không còn hợp lệ (user không phải Bidder, auction đã kết thúc, v.v.)
+                // Hủy config lỗi và thử lại với người tiếp theo thay vì abort toàn bộ
+                LOGGER.warn("Cancelling invalid auto-bid config for bidder {} in auction {}: {}",
+                        winnerBidderId, auctionId, e.getMessage());
+                registry.cancel(auctionId, winnerBidderId);
+            } catch (SQLException e) {
                 LOGGER.error("Error placing proxy bid for auction {}", auctionId, e);
                 return;
             }
@@ -240,4 +248,3 @@ public class AutoBidService  {
         }
     }
 }
-

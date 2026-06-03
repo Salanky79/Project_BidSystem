@@ -44,7 +44,10 @@ public class AuctionStatusScheduler implements Runnable {
       running = true;
       while (running && !Thread.currentThread().isInterrupted()) {
         try {
-          auctionService.markRunningAuctions();
+          int startedCount = auctionService.markRunningAuctions();
+          if (startedCount > 0) {
+            notifyStarted();
+          }
           List<String> finishedIds = auctionService.settleFinishedAuctions();
           if (!finishedIds.isEmpty()) {
             notifyListeners(finishedIds);
@@ -74,6 +77,16 @@ public class AuctionStatusScheduler implements Runnable {
         listener.onAuctionsFinished(finishedIds);
       } catch (Exception e) {
         LOGGER.error("Listener failed", e);
+      }
+    }
+  }
+
+  private void notifyStarted() {
+    for (AuctionLifecycleCleaner listener : listeners) {
+      try {
+        listener.onAuctionsStarted();
+      } catch (Exception e) {
+        LOGGER.error("Listener failed on start", e);
       }
     }
   }

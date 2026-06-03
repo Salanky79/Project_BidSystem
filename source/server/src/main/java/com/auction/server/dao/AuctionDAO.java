@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 public class AuctionDAO  {
-    private static final int SNIPE_THRESHOLD_SECONDS = 30;
-    private static final int SNIPE_EXTENSION_SECONDS = 30;
+    public static final int SNIPE_THRESHOLD_SECONDS = 30;
+    public static final int SNIPE_EXTENSION_SECONDS = 30;
 
 
     private List<Auction> queryAuctions(Connection conn, String whereAndOrderClause, Object... params) throws SQLException {
@@ -48,7 +48,6 @@ public class AuctionDAO  {
         return list;
     }
 
-    public AuctionDAO() {}
 
     public boolean saveAuction(Connection conn, Auction auction) throws SQLException {
         String sql = "INSERT INTO auctions (id, item_id, seller_id, current_price, highest_bidder_id, start_time, end_time, bid_step, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -141,37 +140,29 @@ public class AuctionDAO  {
 
 
 
-    public boolean updateHighestBid(Connection conn, String id, String bidderId, double amount, LocalDateTime now) throws SQLException {
+    public boolean updateHighestBid(Connection conn, String id, String bidderId, double amount, LocalDateTime newEndTime, LocalDateTime now) throws SQLException {
         String sql = """
                 UPDATE auctions a
                 SET a.current_price = ?,
                     a.highest_bidder_id = ?,
                     a.bid_count = a.bid_count + 1,
-                    a.end_time = CASE
-                        WHEN TIMESTAMPDIFF(SECOND, ?, a.end_time) <= %d
-                             AND TIMESTAMPDIFF(SECOND, ?, a.end_time) >= 0
-                             AND (a.highest_bidder_id IS NULL OR a.highest_bidder_id <> ?)
-                        THEN DATE_ADD(a.end_time, INTERVAL %d SECOND)
-                        ELSE a.end_time
-                    END
+                    a.end_time = ?
                 WHERE a.id = ?
                   AND a.status = ?
                   AND a.start_time <= ?
                   AND a.end_time > ?
                   AND ? >= (a.current_price + a.bid_step)
-             """.formatted(SNIPE_THRESHOLD_SECONDS, SNIPE_EXTENSION_SECONDS);
+             """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             Timestamp nowTs = Timestamp.valueOf(now);
             ps.setDouble(1, amount);
             ps.setString(2, bidderId);
-            ps.setTimestamp(3, nowTs);
-            ps.setTimestamp(4, nowTs);
-            ps.setString(5, bidderId);
-            ps.setString(6, id);
-            ps.setString(7, AuctionStatus.RUNNING.name());
-            ps.setTimestamp(8, nowTs);
-            ps.setTimestamp(9, nowTs);
-            ps.setDouble(10, amount);
+            ps.setTimestamp(3, Timestamp.valueOf(newEndTime));
+            ps.setString(4, id);
+            ps.setString(5, AuctionStatus.RUNNING.name());
+            ps.setTimestamp(6, nowTs);
+            ps.setTimestamp(7, nowTs);
+            ps.setDouble(8, amount);
             return ps.executeUpdate() > 0;
         }
     }

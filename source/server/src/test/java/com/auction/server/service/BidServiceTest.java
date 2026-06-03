@@ -92,7 +92,7 @@ class BidServiceTest {
         when(userDAO.findBalanceForUpdate(connection, "b-1")).thenReturn(1000.0);
         when(auctionDAO.sumAuctionCurrentPrices(connection, "b-1", "a-1")).thenReturn(0.0);
         
-        when(auctionDAO.updateHighestBid(eq(connection), eq("a-1"), eq("b-1"), eq(150.0), any(LocalDateTime.class))).thenReturn(true);
+        when(auctionDAO.updateHighestBid(eq(connection), eq("a-1"), eq("b-1"), eq(150.0), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(true);
 
         PlaceBidRequest request = (PlaceBidRequest) new PlaceBidRequest("a-1", "b-1", 150).withUserId("b-1");
         

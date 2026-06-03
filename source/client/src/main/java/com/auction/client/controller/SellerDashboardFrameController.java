@@ -21,6 +21,7 @@ public class SellerDashboardFrameController extends FrameController {
   private Consumer<Response<?>> bidPushListener;
 
   @FXML private Label usernameLabel;
+  @FXML private Label budgetLabel;
 
   // Sidebar buttons – cần fx:id để highlight
   @FXML private Button btnHome;
@@ -55,6 +56,7 @@ public class SellerDashboardFrameController extends FrameController {
 
   @FXML
   public void initialize() {
+    refreshCurrentBudget(null);
     setupPushListener();
     changeView("/com/auction/client/view/SellerDashboard.fxml", controller -> {
       if (controller instanceof SellerDashboardController sdc) {
@@ -71,6 +73,7 @@ public class SellerDashboardFrameController extends FrameController {
           if (response != null && response.isSuccess()) {
               if (response.getData() instanceof BidUpdateEvent event
                       && "BID_UPDATED".equals(response.getMessage())) {
+                  refreshCurrentBudget(event);
                   if (currentDashboardController != null) {
                       currentDashboardController.updateCardOnBidEvent(event);
                   }
@@ -153,6 +156,7 @@ public class SellerDashboardFrameController extends FrameController {
           changeView("/com/auction/client/view/SellerDashboard.fxml", sdCtrl -> {
             if (sdCtrl instanceof SellerDashboardController sdc) {
               sdc.setAuctionService(com.auction.client.ClientContext.auctionService());
+              sdc.forceReload();
             }
           });
           highlightButton("Home");
@@ -204,5 +208,21 @@ public class SellerDashboardFrameController extends FrameController {
       btnSold.setStyle(
           "Sold".equals(active) ? STYLE_SIDEBAR_ACTIVE_INDENT : STYLE_SIDEBAR_INACTIVE_INDENT);
     }
+  }
+
+  private void refreshCurrentBudget(BidUpdateEvent event) {
+      ClientContext.userService().getProfile(response ->
+              javafx.application.Platform.runLater(() -> {
+                  if (response != null
+                          && response.isSuccess()
+                          && response.getData() instanceof com.auction.share.DTO.ProfileDTO profileDTO
+                          && profileDTO.getUser() != null) {
+                      
+                      if (budgetLabel != null) {
+                          budgetLabel.setText(String.format("%,.0f", profileDTO.getUser().getAvailableBalance()));
+                      }
+                  }
+              })
+      );
   }
 }

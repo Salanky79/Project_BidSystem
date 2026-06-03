@@ -112,9 +112,9 @@ public class AuctionService  {
         }
     }
 
-    public void markRunningAuctions() throws SQLException {
+    public int markRunningAuctions() throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
-            auctionDAO.markOpenAuctionsAsRunning(conn, LocalDateTime.now());
+            return auctionDAO.markOpenAuctionsAsRunning(conn, LocalDateTime.now());
         }
     }
 

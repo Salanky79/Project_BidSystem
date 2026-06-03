@@ -5,8 +5,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="87774572-814c-454f-89c7-64d9db09cb7e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../release/client/client.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../release/client/client.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../release/server/server.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../release/server/server.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../release/client.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../release/client.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../release/server.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../release/server.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main/java/com/auction/client/controller/SellerDashboardFrameController.java" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/java/com/auction/client/controller/SellerDashboardFrameController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main/resources/com/auction/client/view/SellerDashboardFrame.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/resources/com/auction/client/view/SellerDashboardFrame.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/checkstyle-cachefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/target/checkstyle-result.xml" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/checkstyle-result.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/target/classes/com/auction/client/controller/SellerDashboardFrameController.class" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/classes/com/auction/client/controller/SellerDashboardFrameController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/target/classes/com/auction/client/view/SellerDashboardFrame.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/classes/com/auction/client/view/SellerDashboardFrame.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT-jar-with-dependencies.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/checkstyle-cachefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/target/classes/com/auction/server/dao/AuctionDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/classes/com/auction/server/dao/AuctionDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT-jar-with-dependencies.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/share/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/share/target/checkstyle-cachefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/share/target/share-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/share/target/share-1.0-SNAPSHOT.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/target/checkstyle-cachefile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -146,7 +161,7 @@
       <workItem from="1780425740295" duration="19000" />
       <workItem from="1780426075468" duration="2871000" />
       <workItem from="1780456325821" duration="238000" />
-      <workItem from="1780458638456" duration="5176000" />
+      <workItem from="1780458638456" duration="10785000" />
     </task>
     <servers />
   </component>

@@ -16,6 +16,7 @@ public class BroadcastService implements AuctionLifecycleCleaner {
   public static final String AUCTION_FINISHED = "AUCTION_FINISHED";
   public static final String AUCTION_CANCELLED = "AUCTION_CANCELLED";
   public static final String BID_STEP_UPDATED = "BID_STEP_UPDATED";
+  public static final String AUCTION_STARTED = "AUCTION_STARTED";
   private static final Logger LOGGER = LoggerFactory.getLogger(BroadcastService.class);
 
   private final AuctionSubscriptionRegistry subscriptionRegistry;
@@ -85,6 +86,25 @@ public class BroadcastService implements AuctionLifecycleCleaner {
     }
   }
 
+  public void broadcastAuctionStarted() {
+    try {
+      Response<String> pushMessage = Response.success(AUCTION_STARTED, "New auctions started");
+      for (ClientSession session : subscriptionRegistry.getAllSessions()) {
+        broadcastExecutor.submit(
+            () -> {
+              try {
+                session.send(pushMessage);
+              } catch (IOException e) {
+                LOGGER.warn("Failed to push started to session, removing: {}", e.getMessage());
+                subscriptionRegistry.removeSession(session);
+              }
+            });
+      }
+    } catch (Exception e) {
+      LOGGER.error("Broadcast started failed entirely", e);
+    }
+  }
+
   public void broadcastBidStepUpdated(String auctionId, double newBidStep) {
     try {
       BidStepUpdateEvent event = new BidStepUpdateEvent(auctionId, newBidStep);
@@ -111,6 +131,11 @@ public class BroadcastService implements AuctionLifecycleCleaner {
     for (String id : auctionIds) {
       broadcastAuctionFinished(id);
     }
+  }
+
+  @Override
+  public void onAuctionsStarted() {
+    broadcastAuctionStarted();
   }
 
   public void shutdown() {
