@@ -89,7 +89,13 @@ public class AuctionDetailController {
         FormatUtils.setupNumberField(autoBidIncrementInputField);
 
         countdownTimer = new AuctionCountdownTimer(endsInLabel);
-        countdownTimer.setOnEndedAction(() -> refreshAuctionDetail());
+        countdownTimer.setOnEndedAction(() -> {
+            Platform.runLater(() -> {
+                placeBidButton.setDisable(true);
+                enableAutoBidButton.setDisable(true);
+            });
+            refreshAuctionDetail();
+        });
 
         chartManager = new BidHistoryChartManager(priceHistoryChart);
     }
@@ -319,12 +325,18 @@ public class AuctionDetailController {
             if (countdownTimer != null) {
                 countdownTimer.stop();
             }
-            placeBidButton.setDisable(true);      // ← thêm
-            enableAutoBidButton.setDisable(true); // ← thêm
+            placeBidButton.setDisable(true);
+            enableAutoBidButton.setDisable(true);
             if ("CANCELED".equals(viewModel.getStatus())) {
                 endsInLabel.setText("Cancelled");
             }
             showWinnerInfoUI();
+        } else {
+            if (countdownTimer != null && viewModel.getEndTime() != null) {
+                countdownTimer.start(viewModel.getEndTime());
+            }
+            placeBidButton.setDisable(false);
+            enableAutoBidButton.setDisable(false);
         }
     }
 
