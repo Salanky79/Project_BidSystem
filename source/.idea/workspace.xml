@@ -5,8 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="87774572-814c-454f-89c7-64d9db09cb7e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/share/src/main/java/com/auction/share/DTO/GetProfileRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/share/src/main/java/com/auction/share/DTO/GetProfileRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/share/src/main/java/com/auction/share/DTO/UpdateProfileRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/share/src/main/java/com/auction/share/DTO/UpdateProfileRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/../Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../release/client/client.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../release/client/client.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../release/client/run.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../release/clientrelease/client.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../release/server/.env.example" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../release/server/run.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../release/server/server.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../release/server/server.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../release/serverrelease/server.jar" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -14,7 +20,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="157" />
+    <option name="cachedIndexableFilesCount" value="162" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
@@ -145,6 +151,7 @@
       <workItem from="1780421308073" duration="3750000" />
       <workItem from="1780425740295" duration="19000" />
       <workItem from="1780426075468" duration="2871000" />
+      <workItem from="1780456325821" duration="238000" />
     </task>
     <servers />
   </component>

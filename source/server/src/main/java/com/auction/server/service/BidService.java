@@ -17,6 +17,7 @@ import com.auction.share.models.user.User;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class BidService  {
@@ -81,7 +82,7 @@ public class BidService  {
                 }
 
                 // 3. Atomic check & update auction
-                boolean updated = auctionDAO.updateHighestBid(conn, auction.getId(), bidder.getId(), req.getAmount());
+                boolean updated = auctionDAO.updateHighestBid(conn, auction.getId(), bidder.getId(), req.getAmount(), LocalDateTime.now());
                 if (!updated) {
                     throw new ConcurrentBidException(
                             "Bid rejected: auction is not running, already ended, or current price changed.");

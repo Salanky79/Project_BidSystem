@@ -141,32 +141,37 @@ public class AuctionDAO  {
 
 
 
-    public boolean updateHighestBid(Connection conn, String id, String bidderId, double amount) throws SQLException {
+    public boolean updateHighestBid(Connection conn, String id, String bidderId, double amount, LocalDateTime now) throws SQLException {
         String sql = """
                 UPDATE auctions a
                 SET a.current_price = ?,
                     a.highest_bidder_id = ?,
                     a.bid_count = a.bid_count + 1,
                     a.end_time = CASE
-                        WHEN TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP, a.end_time) <= %d
-                             AND TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP, a.end_time) >= 0
+                        WHEN TIMESTAMPDIFF(SECOND, ?, a.end_time) <= %d
+                             AND TIMESTAMPDIFF(SECOND, ?, a.end_time) >= 0
                              AND (a.highest_bidder_id IS NULL OR a.highest_bidder_id <> ?)
                         THEN DATE_ADD(a.end_time, INTERVAL %d SECOND)
                         ELSE a.end_time
                     END
                 WHERE a.id = ?
                   AND a.status = ?
-                  AND a.start_time <= CURRENT_TIMESTAMP
-                  AND a.end_time > CURRENT_TIMESTAMP
+                  AND a.start_time <= ?
+                  AND a.end_time > ?
                   AND ? >= (a.current_price + a.bid_step)
              """.formatted(SNIPE_THRESHOLD_SECONDS, SNIPE_EXTENSION_SECONDS);
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            Timestamp nowTs = Timestamp.valueOf(now);
             ps.setDouble(1, amount);
             ps.setString(2, bidderId);
-            ps.setString(3, bidderId);
-            ps.setString(4, id);
-            ps.setString(5, AuctionStatus.RUNNING.name());
-            ps.setDouble(6, amount);
+            ps.setTimestamp(3, nowTs);
+            ps.setTimestamp(4, nowTs);
+            ps.setString(5, bidderId);
+            ps.setString(6, id);
+            ps.setString(7, AuctionStatus.RUNNING.name());
+            ps.setTimestamp(8, nowTs);
+            ps.setTimestamp(9, nowTs);
+            ps.setDouble(10, amount);
             return ps.executeUpdate() > 0;
         }
     }
@@ -180,17 +185,20 @@ public class AuctionDAO  {
         }
     }
 
-    public int markOpenAuctionsAsRunning(Connection conn) throws SQLException {
+    public int markOpenAuctionsAsRunning(Connection conn, LocalDateTime now) throws SQLException {
         String sql = """
                 UPDATE auctions
                 SET status = ?
                 WHERE status = ?
-                  AND start_time <= CURRENT_TIMESTAMP
-                  AND end_time > CURRENT_TIMESTAMP
+                  AND start_time <= ?
+                  AND end_time > ?
                 """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            Timestamp nowTs = Timestamp.valueOf(now);
             ps.setString(1, AuctionStatus.RUNNING.name());
             ps.setString(2, AuctionStatus.OPEN.name());
+            ps.setTimestamp(3, nowTs);
+            ps.setTimestamp(4, nowTs);
             return ps.executeUpdate();
         }
     }
@@ -214,7 +222,6 @@ public class AuctionDAO  {
         }
     }
 
-    /** Lấy danh sách auction RUNNING đã hết giờ (end_time <= now). */
     public List<String> findEndedRunningAuctionIds(Connection conn, LocalDateTime now) throws SQLException {
         if (now == null) {
             now = LocalDateTime.now();

@@ -1,16 +1,14 @@
 # Stage 1: Build the Maven project
-FROM eclipse-temurin:17-jdk-jammy AS builder
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 
 # Copy the source folder containing the project code
 COPY source/ ./source/
 
-# Ensure the Maven wrapper has execution permissions
-RUN chmod +x ./source/mvnw
-
-# Build the project (skipping tests for faster deployments on Railway)
-RUN cd source && ./mvnw clean package -DskipTests
+# Build the project using the pre-installed Maven (skipping tests)
+# Note: We use 'mvn' directly instead of './mvnw' to avoid CRLF (Windows line endings) issues on Linux
+RUN cd source && mvn clean package -DskipTests
 
 # Stage 2: Create the minimal runtime image
 FROM eclipse-temurin:21-jre-jammy
