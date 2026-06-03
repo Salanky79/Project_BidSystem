@@ -41,11 +41,13 @@ class AutoBidServiceTest {
     private DataSource dataSource;
     @Mock
     private Connection connection;
+    @Mock
+    private BroadcastService broadcastService;
 
     private AutoBidService createService() throws Exception {
         lenient().when(dataSource.getConnection()).thenReturn(connection);
         return new AutoBidService(
-                dataSource, registry, bidService, userDAO, auctionDAO
+                dataSource, registry, bidService, userDAO, auctionDAO, broadcastService
         );
     }
 

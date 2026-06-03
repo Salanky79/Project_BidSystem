@@ -17,6 +17,7 @@ public class BroadcastService implements AuctionLifecycleCleaner {
   public static final String AUCTION_CANCELLED = "AUCTION_CANCELLED";
   public static final String BID_STEP_UPDATED = "BID_STEP_UPDATED";
   public static final String AUCTION_STARTED = "AUCTION_STARTED";
+  public static final String AUTO_BID_CANCELLED = "AUTO_BID_CANCELLED";
   private static final Logger LOGGER = LoggerFactory.getLogger(BroadcastService.class);
 
   private final AuctionSubscriptionRegistry subscriptionRegistry;
@@ -122,6 +123,27 @@ public class BroadcastService implements AuctionLifecycleCleaner {
       }
     } catch (Exception e) {
       LOGGER.error("Broadcast bid step update failed entirely for auction {}", auctionId, e);
+    }
+  }
+
+  public void broadcastAutoBidCancelled(String userId, String auctionId, String reason) {
+    try {
+      Response<String> pushMessage = Response.success(AUTO_BID_CANCELLED, auctionId);
+      for (ClientSession session : subscriptionRegistry.getAllSessions()) {
+        if (userId.equals(session.getUserId())) {
+          broadcastExecutor.submit(
+              () -> {
+                try {
+                  session.send(pushMessage);
+                } catch (IOException e) {
+                  LOGGER.warn("Failed to push auto-bid cancel to session: {}", e.getMessage());
+                  subscriptionRegistry.removeSession(session);
+                }
+              });
+        }
+      }
+    } catch (Exception e) {
+      LOGGER.error("Broadcast auto-bid cancel failed for user {}", userId, e);
     }
   }
 

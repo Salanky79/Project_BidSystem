@@ -61,7 +61,7 @@ public class ServerApplication {
     
     AutoBidRegistry autoBidRegistry = new AutoBidRegistry();
     AutoBidService autoBidService = new AutoBidService(
-        dataSource, autoBidRegistry, bidService, userDao, auctionDao);
+        dataSource, autoBidRegistry, bidService, userDao, auctionDao, bidBroadcastService);
     bidService.setAutoBidService(autoBidService);
     
     // === Background Schedulers ===

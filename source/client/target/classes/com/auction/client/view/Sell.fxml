@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane maxHeight="730.0" maxWidth="600.0" minHeight="730.0" minWidth="600.0" prefHeight="730.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controller.SellController">
+   <children>
+      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="33.0" layoutY="40.0" prefHeight="35.0" prefWidth="535.0" text="Add Listing" textAlignment="CENTER" AnchorPane.leftAnchor="33.0" AnchorPane.rightAnchor="32.0" AnchorPane.topAnchor="20.0">
+         <font>
+            <Font name="Berlin Sans FB" size="31.0" />
+         </font>
+      </Label>
+      <TextField fx:id="name" layoutX="112.0" layoutY="99.0" prefHeight="52.0" prefWidth="354.0" promptText="Title" styleClass="fields" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0" />
+      <ComboBox fx:id="category" layoutX="112.0" layoutY="177.0" prefHeight="52.0" prefWidth="354.0" promptText="Category" styleClass="fields" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0" />
+      <TextField fx:id="startingprice" layoutX="112.0" layoutY="261.0" prefHeight="52.0" prefWidth="354.0" promptText="Starting Price" styleClass="fields" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0" />
+      <HBox layoutX="112.0" layoutY="337.0" prefHeight="54.0" prefWidth="354.0" spacing="10" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0">
+         <DatePicker fx:id="startdate" prefHeight="54.0" prefWidth="200.0" promptText="Start Date" styleClass="fields" HBox.hgrow="ALWAYS" />
+         <ComboBox fx:id="startHour" prefHeight="54.0" prefWidth="75.0" promptText="HH" styleClass="fields" />
+         <ComboBox fx:id="startMinute" prefHeight="54.0" prefWidth="75.0" promptText="mm" styleClass="fields" />
+      </HBox>
+      <HBox layoutX="112.0" layoutY="417.0" prefHeight="54.0" prefWidth="354.0" spacing="10" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0">
+         <DatePicker fx:id="enddate" prefHeight="54.0" prefWidth="200.0" promptText="End Date" styleClass="fields" HBox.hgrow="ALWAYS" />
+         <ComboBox fx:id="endHour" prefHeight="54.0" prefWidth="75.0" promptText="HH" styleClass="fields" />
+         <ComboBox fx:id="endMinute" prefHeight="54.0" prefWidth="75.0" promptText="mm" styleClass="fields" />
+      </HBox>
+      <TextField fx:id="description" alignment="TOP_LEFT" layoutX="112.0" layoutY="502.0" prefHeight="87.0" prefWidth="354.0" promptText="Description" styleClass="fields" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0" />
+      <Label fx:id="validationLabel" layoutX="112.0" layoutY="598.0" prefHeight="18.0" prefWidth="348.0" text="This is a validation label" textFill="RED" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="123.0" />
+      <Button fx:id="chooseImageButton" layoutX="368.0" layoutY="622.0" styleClass="myButtons" text="Choose Image" AnchorPane.rightAnchor="123.0" />
+      <Label fx:id="imageLabel" layoutX="112.0" layoutY="621.0" prefHeight="26.0" prefWidth="196.0" text="File Upload Label" AnchorPane.leftAnchor="123.0" />
+      <Button fx:id="addButton" layoutX="329.0" layoutY="675.0" prefHeight="35.0" prefWidth="102.0" styleClass="myButtons" text="Add" AnchorPane.rightAnchor="150.0" />
+      <ImageView fx:id="closeButton" fitHeight="26.0" fitWidth="25.0" layoutX="660.0" layoutY="14.0" pickOnBounds="true">
+      </ImageView>
+   </children>
+</AnchorPane>

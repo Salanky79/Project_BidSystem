@@ -33,6 +33,7 @@ public class AutoBidService  {
     private final BidService bidService;
     private final UserDAO userDAO;
     private final AuctionDAO auctionDAO;
+    private final BroadcastService broadcastService;
 
     // Quản lý Lock theo từng mã phiên đấu giá (AuctionId)
     private final ConcurrentHashMap<String, ReentrantLock> auctionLocks = new ConcurrentHashMap<>();
@@ -42,12 +43,14 @@ public class AutoBidService  {
             AutoBidRegistry registry,
             BidService bidService,
             UserDAO userDAO,
-            AuctionDAO auctionDAO) {
+            AuctionDAO auctionDAO,
+            BroadcastService broadcastService) {
         this.dataSource = dataSource;
         this.registry = registry;
         this.bidService = bidService;
         this.userDAO = userDAO;
         this.auctionDAO = auctionDAO;
+        this.broadcastService = broadcastService;
     }
 
     public void shutdown() {
@@ -181,6 +184,7 @@ public class AutoBidService  {
             } catch (InsufficientBalanceException e) {
                 // Người thắng bị cạn kiệt số dư khả dụng. Hủy cấu hình của họ và chạy lại vòng lặp chọn người thắng mới
                 registry.cancel(auctionId, winnerBidderId);
+                broadcastService.broadcastAutoBidCancelled(winnerBidderId, auctionId, "Insufficient balance");
             } catch (ValidationException e) {
                 // Config của winner không còn hợp lệ (user không phải Bidder, auction đã kết thúc, v.v.)
                 // Hủy config lỗi và thử lại với người tiếp theo thay vì abort toàn bộ
@@ -231,6 +235,7 @@ public class AutoBidService  {
 
             if (available + currentBid < currentHighestBid + Math.max(config.getIncrement(), bidStep)) {
                 registry.cancel(auctionId, bidderId);
+                broadcastService.broadcastAutoBidCancelled(bidderId, auctionId, "Insufficient balance");
                 continue;
             }
 

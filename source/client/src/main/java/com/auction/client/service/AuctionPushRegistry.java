@@ -14,6 +14,7 @@ public class AuctionPushRegistry {
     private Runnable onAuctionCancelled;
     private Runnable onAuctionFinished;
     private Consumer<Double> onBidStepUpdate;
+    private Runnable onAutoBidCancelled;
     private Consumer<Response<?>> pushListener;
 
     public AuctionPushRegistry(SocketClient socketClient, String auctionId) {
@@ -35,6 +36,10 @@ public class AuctionPushRegistry {
 
     public void setOnBidStepUpdate(Consumer<Double> onBidStepUpdate) {
         this.onBidStepUpdate = onBidStepUpdate;
+    }
+
+    public void setOnAutoBidCancelled(Runnable onAutoBidCancelled) {
+        this.onAutoBidCancelled = onAutoBidCancelled;
     }
 
     public void register() {
@@ -70,6 +75,12 @@ public class AuctionPushRegistry {
                     if (auctionId.equals(stepEvent.getAuctionId())) {
                         if (onBidStepUpdate != null) {
                             Platform.runLater(() -> onBidStepUpdate.accept(stepEvent.getBidStep()));
+                        }
+                    }
+                } else if ("AUTO_BID_CANCELLED".equals(response.getMessage()) && response.getData() instanceof String cancelledId) {
+                    if (auctionId.equals(cancelledId)) {
+                        if (onAutoBidCancelled != null) {
+                            Platform.runLater(onAutoBidCancelled);
                         }
                     }
                 }

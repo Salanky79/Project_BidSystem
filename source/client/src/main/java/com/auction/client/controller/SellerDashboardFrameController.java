@@ -83,6 +83,7 @@ public class SellerDashboardFrameController extends FrameController {
               } else if (("AUCTION_FINISHED".equals(response.getMessage()) || "AUCTION_CANCELLED".equals(response.getMessage()))
                       && response.getData() instanceof String auctionId) {
                   javafx.application.Platform.runLater(() -> {
+                      refreshCurrentBudget(null);
                       if (currentDashboardController != null) {
                           currentDashboardController.loadAuctionCards(currentDashboardController.getCurrentFilterStatus());
                       }
