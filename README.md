@@ -119,5 +119,5 @@ Hệ thống đã triển khai thành công các nhóm chức năng chính yếu
 - [x] Hủy đăng ký đấu giá tự động (Cancel Auto-bid).
 
 ## 7. Link báo cáo PDF và video demo
-- **Báo cáo PDF:** [Link Google Drive / OneDrive báo cáo của nhóm](#)
+- **Báo cáo PDF:** [Xem Báo cáo (Google Drive)](https://drive.google.com/file/d/18QEeqrBY4U3qRsXKBS0FSHK6CMW-OjAN/view?usp=sharing)
 - **Video Demo:** [Link Youtube / Google Drive video chạy thử ứng dụng](#)

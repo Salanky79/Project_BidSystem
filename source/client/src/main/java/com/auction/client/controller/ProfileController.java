@@ -64,7 +64,7 @@ public class ProfileController implements Initializable {
             if (empty || item == null) {
                 setText(null);
             } else {
-                setText(String.format("%,.0f VND", item));
+                setText(String.format(java.util.Locale.US, "%,.0f VND", item));
             }
         }
     });
