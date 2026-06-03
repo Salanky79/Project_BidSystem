@@ -165,5 +165,14 @@ public class UserDAO  {
             return ps.executeUpdate();
         }
     }
+
+    public boolean updateBalance(Connection conn, String userId, double amount) throws SQLException {
+        String sql = "UPDATE users SET balance = balance + ? WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, amount);
+            ps.setString(2, userId);
+            return ps.executeUpdate() > 0;
+        }
+    }
 }
 

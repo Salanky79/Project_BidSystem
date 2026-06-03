@@ -1,6 +1,9 @@
+com\auction\server\service\BidServiceTest.class
 com\auction\server\controller\RequestDispatcherTest$RawRequest.class
 com\auction\server\service\UserServiceTest.class
 com\auction\server\service\BroadcastServiceTest.class
 com\auction\server\dao\BidTransactionDAOTest.class
 com\auction\server\controller\RequestDispatcherTest.class
+com\auction\server\dao\UserDAOTest.class
 com\auction\server\service\AuctionServiceTest.class
+com\auction\server\service\AutoBidServiceTest.class

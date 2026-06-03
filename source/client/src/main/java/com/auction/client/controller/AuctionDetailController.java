@@ -10,6 +10,8 @@ import com.auction.share.DTO.AuctionDetailDTO;
 import com.auction.share.DTO.BidUpdateEvent;
 import com.auction.share.exceptions.ValidationException;
 import com.auction.client.utils.DateTimeUtils;
+import com.auction.client.utils.FormatUtils;
+import com.auction.client.utils.NotificationManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
@@ -81,6 +83,10 @@ public class AuctionDetailController {
         placeBidButton.setOnAction(e -> handlePlaceBid());
         enableAutoBidButton.setOnAction(e -> handleEnableAutoBid());
         cancelAutoBidButton.setOnAction(e -> handleCancelAutoBid());
+        
+        FormatUtils.setupNumberField(bidInputField);
+        FormatUtils.setupNumberField(autoBidMaxInputField);
+        FormatUtils.setupNumberField(autoBidIncrementInputField);
 
         countdownTimer = new AuctionCountdownTimer(endsInLabel);
         countdownTimer.setOnEndedAction(() -> refreshAuctionDetail());
@@ -147,11 +153,12 @@ public class AuctionDetailController {
         if (input.isEmpty()) return;
 
         try {
-            double amount = Double.parseDouble(input);
+            double amount = FormatUtils.parseFormattedNumber(input);
             bidService.placeBid(viewModel.getAuctionId(), amount, viewModel.getMinimumBid(), response ->
                 Platform.runLater(() -> {
                     if (response != null && response.isSuccess()) {
                         bidInputField.clear();
+                        NotificationManager.showSuccess("Bid placed successfully!");
                         refreshAuctionDetail();
                     } else {
                         showBidError(response != null ? response.getMessage() : "Server connection error");
@@ -173,8 +180,8 @@ public class AuctionDetailController {
                 showAutoBidError("Please enter both max bid and increment.");
                 return;
             }
-            double maxBid = Double.parseDouble(maxStr);
-            double increment = Double.parseDouble(incStr);
+            double maxBid = FormatUtils.parseFormattedNumber(maxStr);
+            double increment = FormatUtils.parseFormattedNumber(incStr);
             bidService.setAutoBid(
                     viewModel.getAuctionId(),
                     maxBid,

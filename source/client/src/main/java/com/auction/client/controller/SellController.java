@@ -3,6 +3,7 @@ package com.auction.client.controller;
 import com.auction.client.ClientContext;
 import com.auction.client.service.AuctionService;
 import com.auction.share.exceptions.ValidationException;
+import com.auction.client.utils.FormatUtils;
 import java.io.File;
 import java.net.URL;
 import java.time.LocalDate;
@@ -62,6 +63,7 @@ public class SellController implements Initializable {
   public void initialize(URL url, ResourceBundle resourceBundle) {
     category.setItems(CATEGORIES);
     validationLabel.setVisible(false);
+    FormatUtils.setupNumberField(startingprice);
 
     // Populate Hour and Minute ComboBoxes
     ObservableList<String> hours = FXCollections.observableArrayList();
@@ -183,7 +185,7 @@ public class SellController implements Initializable {
       return false;
     }
     try {
-      double price = Double.parseDouble(startingprice.getText().trim());
+      double price = FormatUtils.parseFormattedNumber(startingprice.getText().trim());
       if (price <= 0) {
         showError("Starting price must be greater than 0!");
         return false;
@@ -268,7 +270,7 @@ public class SellController implements Initializable {
 
     double listingPrice;
     try {
-      listingPrice = Double.parseDouble(listingPriceStr);
+      listingPrice = FormatUtils.parseFormattedNumber(listingPriceStr);
     } catch (NumberFormatException e) {
       showError("Invalid starting price!");
       return;

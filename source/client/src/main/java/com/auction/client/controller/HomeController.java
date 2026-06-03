@@ -174,6 +174,7 @@ public class HomeController {
               dto.getAuctionId(),
               dto.getImageUrl(),
               dto.getHighestBidderName());
+          node.setUserData(cardController);
           return node;
         } catch (IOException e) {
           e.printStackTrace();
@@ -257,8 +258,16 @@ public class HomeController {
                       event.getBidderName()
                   );
                   allAuctions.set(i, updatedDto);
-                  cardCache.remove(event.getAuctionId());
-                  renderGrid();
+                  HBox card = cardCache.get(event.getAuctionId());
+                  if (card != null && card.getUserData() instanceof ItemCardController ctrl) {
+                      ctrl.updateDynamicData(
+                              event.getCurrentHighestBid(),
+                              event.getBidCount(),
+                              updatedDto.getStatus(),
+                              updatedDto.getEndTime(),
+                              event.getBidderName()
+                      );
+                  }
                   break;
               }
           }

@@ -37,8 +37,6 @@ public class SellerItemCardController {
   private String time;
   private String auctionId;
 
-
-
   private Runnable refreshCallback;
 
   public void setRefreshCallback(Runnable refreshCallback) {
@@ -100,15 +98,32 @@ public class SellerItemCardController {
       timeLabel.setText("Ending In : " + DateTimeUtils.formatDateTimeForDisplay(time));
     }
 
-    // A3: bidCount đã được server tính sẵn trong AuctionSummaryDTO.getBidCount()
-    // Không cần fetch lại getAuctionDetail() — tránh N+1 request
-
     if (cardRoot != null) {
       cardRoot.setOnMouseClicked(event -> handleCardClick());
     }
   }
 
+  public void updateDynamicData(double price, int bids, String status, String time) {
+    this.price = price;
+    this.bids = bids;
+    this.status = status;
+    this.time = time;
+    
+    priceLabel.setText(String.format("%,.0f VND", price));
+    bidsLabel.setText(bids + (bids <= 1 ? " bid" : " bids"));
 
+    AuctionStatus auctionStatus = AuctionStatus.from(status);
+    statusLabel.setText(auctionStatus.getDisplayName());
+    statusLabel.setStyle(auctionStatus.getBadgeStyle());
+
+    if (auctionStatus == AuctionStatus.FINISHED) {
+      timeLabel.setText("Ended: " + DateTimeUtils.formatDateTimeForDisplay(time));
+    } else if (auctionStatus == AuctionStatus.CANCELED) {
+      timeLabel.setText("Cancelled");
+    } else {
+      timeLabel.setText("Ending In : " + DateTimeUtils.formatDateTimeForDisplay(time));
+    }
+  }
 
   @FXML
   private void handleCardClick() {

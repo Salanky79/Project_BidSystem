@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c81197a4-db33-4b3d-8a9f-170e368821ab" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/source/client/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/source/client/target/checkstyle-cachefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/server/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/source/server/target/checkstyle-cachefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/server/target/checkstyle-result.xml" beforeDir="false" afterPath="$PROJECT_DIR$/source/server/target/checkstyle-result.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/server/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/source/server/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/share/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/source/share/target/checkstyle-cachefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/share/target/checkstyle-result.xml" beforeDir="false" afterPath="$PROJECT_DIR$/source/share/target/checkstyle-result.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/share/target/maven-archiver/pom.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/share/target/share-1.0-SNAPSHOT.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/share/target/surefire-reports/2026-06-03T10-48-38_120.dumpstream" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/share/target/surefire-reports/TEST-com.auction.share.models.auction.AuctionTest.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/share/target/surefire-reports/com.auction.share.models.auction.AuctionTest.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/source/target/checkstyle-cachefile" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="178" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;tung1234yb-prog&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Salanky79/Project_BidSystem.git&quot;,
+    &quot;accountId&quot;: &quot;19ef4c9d-9b58-4a77-9d3f-20ef7b86f89d&quot;
+  }
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3EauQe9Y8L9TmhCA4UrEzVVUtYO" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Maven.AuctionSystem [install].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/code/Project_BidSystem",
+    "settings.editor.selected.configurable": "preferences.keymap",
+    "to.speed.mode.migration.done": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.32098.101" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c81197a4-db33-4b3d-8a9f-170e368821ab" name="Changes" comment="" />
+      <created>1780428987034</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1780428987034</updated>
+      <workItem from="1780428988181" duration="1646000" />
+      <workItem from="1780456568145" duration="2051000" />
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

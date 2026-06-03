@@ -21,6 +21,7 @@ com\auction\client\factory\BidderUIFactory.class
 com\auction\client\controller\ItemCardController.class
 com\auction\client\controller\AuctionDetailViewModel.class
 com\auction\client\controller\LoginController.class
+com\auction\client\utils\FormatUtils.class
 com\auction\client\controller\SellerItemCardController.class
 com\auction\client\service\UserService.class
 com\auction\client\controller\FrameController.class

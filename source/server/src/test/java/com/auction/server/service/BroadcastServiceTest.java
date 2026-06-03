@@ -42,7 +42,7 @@ class BroadcastServiceTest {
         ClientSession session1 = mock(ClientSession.class);
         ClientSession session2 = mock(ClientSession.class);
         
-        when(registry.getSubscribers("a-1")).thenReturn(Set.of(session1, session2));
+        when(registry.getAllSessions()).thenReturn(Set.of(session1, session2));
 
         AtomicInteger sentCount = new AtomicInteger(0);
         doAnswer(invocation -> {
@@ -69,7 +69,7 @@ class BroadcastServiceTest {
     void broadcastBidUpdate_ioException_unsubscribesClient() throws Exception {
         ClientSession session1 = mock(ClientSession.class);
         
-        when(registry.getSubscribers("a-1")).thenReturn(Set.of(session1));
+        when(registry.getAllSessions()).thenReturn(Set.of(session1));
 
         doThrow(new IOException("Connection reset by peer")).when(session1).send(any(Response.class));
 
@@ -78,7 +78,7 @@ class BroadcastServiceTest {
 
         // Await until unsubscribeAll is called
         await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> 
-            verify(registry).unsubscribeAll(session1)
+            verify(registry).removeSession(session1)
         );
     }
 }

@@ -41,6 +41,7 @@ public class RequestDispatcher {
         register(Action.REGISTER, req -> userController.register((RegisterRequest) req));
         register(Action.UPDATE_PROFILE, req -> userController.updateProfile((UpdateProfileRequest) req));
         register(Action.GET_PROFILE, req -> userController.getProfile((GetProfileRequest) req));
+        register(Action.DEPOSIT, req -> userController.deposit((DepositRequest) req));
 
         register(Action.CREATE_AUCTION, req -> auctionController.createAuction((CreateAuctionRequest) req));
         register(Action.CANCEL_AUCTION, req -> auctionController.cancelAuction((CancelAuctionRequest) req));
@@ -96,13 +97,10 @@ public class RequestDispatcher {
         }
 
         String auctionId = request == null ? null : request.getAuctionId();
-        if (auctionId == null || auctionId.isBlank()) {
-            subscriptionRegistry.unsubscribeAll(session);
+        if (auctionId == null || auctionId.isEmpty()) {
             return Response.success("Unsubscribed from all auctions.", true);
         }
 
-        subscriptionRegistry.unsubscribe(auctionId, session);
         return Response.success("Unsubscribed from auction: " + auctionId, true);
     }
 }
-

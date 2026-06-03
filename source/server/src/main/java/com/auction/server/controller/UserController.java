@@ -13,6 +13,8 @@ import com.auction.share.exceptions.ValidationException;
 import com.auction.share.models.user.Bidder;
 import com.auction.share.models.user.Seller;
 import com.auction.share.models.user.User;
+import com.auction.server.network.ClientSession;
+import com.auction.share.DTO.DepositRequest;
 
 /**
  * Controller xử lý các yêu cầu liên quan đến tài khoản người dùng (đăng nhập, đăng ký, cập nhật hồ
@@ -61,6 +63,14 @@ public class UserController {
     }
     ProfileDTO profile = userService.getProfile(request.getUserId());
     return Response.success("Profile loaded successfully.", profile);
+  }
+
+  public Response<UserDTO> deposit(DepositRequest request) throws Exception {
+    if (request == null || request.getUserId() == null) {
+      return Response.fail("Unauthorized.");
+    }
+    UserDTO updatedUser = userService.deposit(request.getUserId(), request.getAmount());
+    return Response.success("Deposit successful.", updatedUser);
   }
 
   // HELPER

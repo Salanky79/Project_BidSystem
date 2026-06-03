@@ -13,6 +13,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
+import java.util.Optional;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -137,5 +139,38 @@ public class HomeFrameController extends FrameController {
                     }
                 })
         );
+    }
+
+    @FXML
+    public void handleDeposit(ActionEvent event) {
+        TextInputDialog dialog = new TextInputDialog("1000");
+        dialog.setTitle("Nạp tiền");
+        dialog.setHeaderText("Nạp tiền vào tài khoản");
+        dialog.setContentText("Nhập số tiền (VND):");
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(amountStr -> {
+            try {
+                double amount = Double.parseDouble(amountStr);
+                if (amount <= 0) {
+                    NotificationManager.showError("Số tiền nạp phải lớn hơn 0.");
+                    return;
+                }
+                ClientContext.userService().deposit(amount, response -> {
+                    Platform.runLater(() -> {
+                        if (response != null && response.isSuccess()) {
+                            NotificationManager.showSuccess("Nạp tiền thành công!");
+                            refreshCurrentBudget(null);
+                        } else {
+                            NotificationManager.showError("Nạp tiền thất bại: " + (response != null ? response.getMessage() : "Unknown"));
+                        }
+                    });
+                });
+            } catch (NumberFormatException e) {
+                NotificationManager.showError("Số tiền không hợp lệ.");
+            } catch (Exception e) {
+                NotificationManager.showError("Lỗi hệ thống.");
+            }
+        });
     }
 }

@@ -48,6 +48,7 @@ public class ClientConnectionHandler implements Runnable {
       ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
 
       session = new ClientSession(outputStream);
+      subscriptionRegistry.addSession(session);
 
       while (!socket.isClosed()) {
 
@@ -95,11 +96,6 @@ public class ClientConnectionHandler implements Runnable {
             elapsedMs);
 
         session.send(response);
-        if (response.isSuccess()) {
-          if (request instanceof GetAuctionDetailRequest detailRequest) {
-            subscriptionRegistry.subscribe(detailRequest.getAuctionId(), session);
-          }
-        }
         
         LOGGER.info(
             "Sent response: requestId={}, action={}, success={}, message={}",
@@ -124,7 +120,7 @@ public class ClientConnectionHandler implements Runnable {
       }
 
       if (session != null) {
-        subscriptionRegistry.unsubscribeAll(session);
+        subscriptionRegistry.removeSession(session);
       }
       LOGGER.info("Client session closed.");
     }

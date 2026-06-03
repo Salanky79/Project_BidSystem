@@ -7,6 +7,7 @@ D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\BidUp
 D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\CancelAuctionRequest.java
 D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\CancelAutoBidRequest.java
 D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\CreateAuctionRequest.java
+D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\DepositRequest.java
 D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\GetAuctionDetailRequest.java
 D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\GetProfileRequest.java
 D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\ListAuctionRequest.java

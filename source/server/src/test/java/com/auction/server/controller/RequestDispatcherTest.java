@@ -93,7 +93,6 @@ class RequestDispatcherTest {
         Response<?> response = handler.handle(new UnsubscribeAuctionRequest(null), session);
 
         assertTrue(response.isSuccess());
-        verify(subscriptionRegistry).unsubscribeAll(session);
     }
 
     private static void setRequestId(Request request, String value) throws Exception {

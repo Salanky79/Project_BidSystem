@@ -9,6 +9,7 @@ import com.auction.client.utils.NotificationManager;
 import com.auction.client.utils.DateTimeUtils;
 import com.auction.share.DTO.AuctionDetailDTO;
 import com.auction.share.DTO.BidDTO;
+import com.auction.client.utils.FormatUtils;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
@@ -142,6 +143,9 @@ public class SellerAuctionDetailController {
     if (saveBidStepButton != null) {
       saveBidStepButton.setOnAction(e -> handleSetBidStep());
     }
+    if (bidStepField != null) {
+      FormatUtils.setupNumberField(bidStepField);
+    }
   }
 
   public void cleanup() {
@@ -156,7 +160,7 @@ public class SellerAuctionDetailController {
   private void handleSetBidStep() {
     if (bidStepField == null || bidStepField.getText().trim().isEmpty()) return;
     try {
-      double step = Double.parseDouble(bidStepField.getText().trim());
+      double step = FormatUtils.parseFormattedNumber(bidStepField.getText().trim());
       if (auctionService == null) return;
       auctionService.setBidStep(
           auctionId,

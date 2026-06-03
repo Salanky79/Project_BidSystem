@@ -108,6 +108,34 @@ public class ItemCardController {
     statusLabel.setStyle(auctionStatus.getBadgeStyle());
   }
 
+  public void updateDynamicData(double price, int bids, String status, String time, String highestBidderName) {
+    this.price = price;
+    this.bids = bids;
+    this.status = status;
+    this.time = time;
+    
+    // Format số tiền
+    priceLabel.setText(String.format("%,.0f VND", price));
+
+    // Hiển thị số lượt bid
+    bidsLabel.setText(bids + (bids <= 1 ? " bid" : " bids"));
+
+    // Hiển thị thời gian kết thúc hoặc người thắng cuộc nếu đã kết thúc
+    if ("FINISHED".equalsIgnoreCase(status) || "End".equalsIgnoreCase(status)) {
+      if (highestBidderName != null && !highestBidderName.trim().isEmpty()) {
+        timeLabel.setText("Winner: " + highestBidderName);
+      } else {
+        timeLabel.setText("Winner: None (No bids)");
+      }
+    } else {
+      timeLabel.setText("Ending In : " + DateTimeUtils.formatDateTimeForDisplay(time));
+    }
+
+    AuctionStatus auctionStatus = AuctionStatus.from(status);
+    statusLabel.setText(auctionStatus.getDisplayName());
+    statusLabel.setStyle(auctionStatus.getBadgeStyle());
+  }
+
   @FXML
   private void handleCardClick() {
     AppNavigator.openBidderDetail(

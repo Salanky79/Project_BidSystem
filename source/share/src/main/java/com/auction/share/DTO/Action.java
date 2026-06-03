@@ -15,6 +15,7 @@ public final class Action {
   public static final String UPDATE_PROFILE = "UPDATE_PROFILE";
   public static final String GET_PROFILE = "GET_PROFILE";
   public static final String CANCEL_AUCTION = "CANCEL_AUCTION";
+  public static final String DEPOSIT = "DEPOSIT";
 
   private Action() {}
 }

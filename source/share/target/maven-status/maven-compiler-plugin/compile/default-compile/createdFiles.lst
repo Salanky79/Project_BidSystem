@@ -5,6 +5,7 @@ com\auction\share\exceptions\AuctionSystemException.class
 com\auction\share\DTO\GetProfileRequest.class
 com\auction\share\DTO\RegisterRequest.class
 com\auction\share\models\user\Seller.class
+com\auction\share\DTO\DepositRequest.class
 com\auction\share\DTO\Request.class
 com\auction\share\models\user\User.class
 com\auction\share\DTO\UserDTO.class

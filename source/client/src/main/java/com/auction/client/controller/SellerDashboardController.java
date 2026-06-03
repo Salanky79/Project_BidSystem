@@ -86,13 +86,13 @@ public class SellerDashboardController {
 
   private String currentFilterStatus = "All";
 
-  private String getCurrentFilterStatus() {
+  public String getCurrentFilterStatus() {
       return currentFilterStatus;
   }
 
   // ===== LOAD CARDS =====
 
-  private void loadAuctionCards(String filterStatus) {
+  public void loadAuctionCards(String filterStatus) {
     this.currentFilterStatus = filterStatus;
     if (allAuctions != null) {
       renderGrid(filterStatus);
@@ -179,6 +179,41 @@ public class SellerDashboardController {
         e.printStackTrace();
       }
     }
+  }
+
+  public void updateCardOnBidEvent(com.auction.share.DTO.BidUpdateEvent event) {
+      Platform.runLater(() -> {
+          if (allAuctions == null) return;
+          for (int i = 0; i < allAuctions.size(); i++) {
+              AuctionSummaryDTO dto = allAuctions.get(i);
+              if (dto.getAuctionId().equals(event.getAuctionId())) {
+                  AuctionSummaryDTO updatedDto = new AuctionSummaryDTO(
+                      dto.getAuctionId(),
+                      dto.getItemName(),
+                      dto.getCategory(),
+                      event.getCurrentHighestBid(),
+                      dto.getBidStep(),
+                      dto.getStatus(),
+                      dto.getStartTime(),
+                      dto.getEndTime(),
+                      event.getBidCount(),
+                      dto.getImageUrl(),
+                      event.getBidderName()
+                  );
+                  allAuctions.set(i, updatedDto);
+                  javafx.scene.Node card = cardCache.get(event.getAuctionId());
+                  if (card != null && card.getUserData() instanceof SellerItemCardController ctrl) {
+                      ctrl.updateDynamicData(
+                              event.getCurrentHighestBid(),
+                              event.getBidCount(),
+                              updatedDto.getStatus(),
+                              updatedDto.getEndTime()
+                      );
+                  }
+                  break;
+              }
+          }
+      });
   }
 
   // B3: Dùng AuctionStatus enum thay vì so sánh magic string trực tiếp

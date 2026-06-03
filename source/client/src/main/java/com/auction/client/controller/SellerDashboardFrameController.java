@@ -8,7 +8,17 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
+import java.util.function.Consumer;
+import javafx.application.Platform;
+import com.auction.client.ClientContext;
+import com.auction.share.DTO.BidUpdateEvent;
+import com.auction.share.DTO.Response;
+
 public class SellerDashboardFrameController extends FrameController {
+
+  private SellerDashboardController currentDashboardController;
+  private SellerListController currentListController;
+  private Consumer<Response<?>> bidPushListener;
 
   @FXML private Label usernameLabel;
 
@@ -45,18 +55,56 @@ public class SellerDashboardFrameController extends FrameController {
 
   @FXML
   public void initialize() {
+    setupPushListener();
     changeView("/com/auction/client/view/SellerDashboard.fxml", controller -> {
       if (controller instanceof SellerDashboardController sdc) {
+        currentDashboardController = sdc;
+        currentListController = null;
         sdc.setAuctionService(com.auction.client.ClientContext.auctionService());
       }
     });
     highlightButton("Home");
   }
 
+  private void setupPushListener() {
+      bidPushListener = response -> {
+          if (response != null && response.isSuccess()) {
+              if (response.getData() instanceof BidUpdateEvent event
+                      && "BID_UPDATED".equals(response.getMessage())) {
+                  if (currentDashboardController != null) {
+                      currentDashboardController.updateCardOnBidEvent(event);
+                  }
+                  if (currentListController != null) {
+                      currentListController.updateCardOnBidEvent(event);
+                  }
+              } else if (("AUCTION_FINISHED".equals(response.getMessage()) || "AUCTION_CANCELLED".equals(response.getMessage()))
+                      && response.getData() instanceof String auctionId) {
+                  javafx.application.Platform.runLater(() -> {
+                      if (currentDashboardController != null) {
+                          currentDashboardController.loadAuctionCards(currentDashboardController.getCurrentFilterStatus());
+                      }
+                      if (currentListController != null) {
+                          currentListController.loadItems(currentListController.getCurrentMode());
+                      }
+                  });
+              }
+          }
+      };
+      ClientContext.socketClient().addPushListener(bidPushListener);
+  }
+
+  public void cleanup() {
+      if (bidPushListener != null) {
+          ClientContext.socketClient().removePushListener(bidPushListener);
+          bidPushListener = null;
+      }
+  }
+
   // ===== TOPBAR =====
 
   @FXML
   public void handleLogout(ActionEvent event) {
+    cleanup();
     showLogin(event);
   }
 
@@ -66,6 +114,8 @@ public class SellerDashboardFrameController extends FrameController {
   public void handleHome() {
     changeView("/com/auction/client/view/SellerDashboard.fxml", controller -> {
       if (controller instanceof SellerDashboardController sdc) {
+        currentDashboardController = sdc;
+        currentListController = null;
         sdc.setAuctionService(com.auction.client.ClientContext.auctionService());
       }
     });
@@ -125,6 +175,8 @@ public class SellerDashboardFrameController extends FrameController {
       scrollContent.setContent(view);
 
       SellerListController ctrl = loader.getController();
+      currentListController = ctrl;
+      currentDashboardController = null;
       ctrl.setAuctionService(com.auction.client.ClientContext.auctionService());
       ctrl.loadItems(mode);
     } catch (IOException e) {

@@ -31,15 +31,14 @@ public class BroadcastService implements AuctionLifecycleCleaner {
     try {
       Response<BidUpdateEvent> pushMessage = Response.success(BID_UPDATED, event);
 
-      for (ClientSession session : subscriptionRegistry.getSubscribers(event.getAuctionId())) {
+      for (ClientSession session : subscriptionRegistry.getAllSessions()) {
         broadcastExecutor.submit(
             () -> {
               try {
                 session.send(pushMessage);
               } catch (IOException e) {
                 LOGGER.warn("Failed to push to session, removing: {}", e.getMessage());
-                // xoá client đó khỏi tất cả auction subscription
-                subscriptionRegistry.unsubscribeAll(session);
+                subscriptionRegistry.removeSession(session);
               }
             });
       }
@@ -51,42 +50,38 @@ public class BroadcastService implements AuctionLifecycleCleaner {
   public void broadcastAuctionCancelled(String auctionId) {
     try {
       Response<String> pushMessage = Response.success(AUCTION_CANCELLED, auctionId);
-      for (ClientSession session : subscriptionRegistry.getSubscribers(auctionId)) {
+      for (ClientSession session : subscriptionRegistry.getAllSessions()) {
         broadcastExecutor.submit(
             () -> {
               try {
                 session.send(pushMessage);
               } catch (IOException e) {
                 LOGGER.warn("Failed to push cancel to session, removing: {}", e.getMessage());
-                subscriptionRegistry.unsubscribeAll(session);
+                subscriptionRegistry.removeSession(session);
               }
             });
       }
     } catch (Exception e) {
       LOGGER.error("Broadcast cancel failed entirely for auction {}", auctionId, e);
-    } finally {
-      subscriptionRegistry.clearAuction(auctionId);
     }
   }
 
   public void broadcastAuctionFinished(String auctionId) {
     try {
       Response<String> pushMessage = Response.success(AUCTION_FINISHED, auctionId);
-      for (ClientSession session : subscriptionRegistry.getSubscribers(auctionId)) {
+      for (ClientSession session : subscriptionRegistry.getAllSessions()) {
         broadcastExecutor.submit(
             () -> {
               try {
                 session.send(pushMessage);
               } catch (IOException e) {
                 LOGGER.warn("Failed to push finish to session, removing: {}", e.getMessage());
-                subscriptionRegistry.unsubscribeAll(session);
+                subscriptionRegistry.removeSession(session);
               }
             });
       }
     } catch (Exception e) {
       LOGGER.error("Broadcast finish failed entirely for auction {}", auctionId, e);
-    } finally {
-      subscriptionRegistry.clearAuction(auctionId);
     }
   }
 
@@ -94,14 +89,14 @@ public class BroadcastService implements AuctionLifecycleCleaner {
     try {
       BidStepUpdateEvent event = new BidStepUpdateEvent(auctionId, newBidStep);
       Response<BidStepUpdateEvent> pushMessage = Response.success(BID_STEP_UPDATED, event);
-      for (ClientSession session : subscriptionRegistry.getSubscribers(auctionId)) {
+      for (ClientSession session : subscriptionRegistry.getAllSessions()) {
         broadcastExecutor.submit(
             () -> {
               try {
                 session.send(pushMessage);
               } catch (IOException e) {
                 LOGGER.warn("Failed to push bid step update to session, removing: {}", e.getMessage());
-                subscriptionRegistry.unsubscribeAll(session);
+                subscriptionRegistry.removeSession(session);
               }
             });
       }

@@ -112,4 +112,10 @@ public class UserService {
         onResponse);
   }
 
+  public void deposit(double amount, Consumer<Response<?>> onResponse) throws ValidationException {
+    if (amount <= 0) {
+      throw new ValidationException("Deposit amount must be positive!");
+    }
+    socketClient.send(new com.auction.share.DTO.DepositRequest(null, amount), onResponse);
+  }
 }

@@ -140,5 +140,43 @@ public class UserService  {
     }
     return null;
   }
+
+  public UserDTO deposit(String userId, double amount) throws SQLException, ValidationException {
+    if (amount <= 0) {
+      throw new ValidationException("Deposit amount must be positive.");
+    }
+    try (Connection conn = dataSource.getConnection()) {
+      conn.setAutoCommit(false);
+      try {
+        boolean updated = userDAO.updateBalance(conn, userId, amount);
+        if (!updated) {
+          throw new ValidationException("User not found.");
+        }
+        User user = userDAO.findById(conn, userId);
+        if (user == null) {
+          throw new ValidationException("User not found after update.");
+        }
+        conn.commit();
+        
+        UserDTO baseUserDTO = userMapper.fromUserToUserDTO(user);
+        double availableBalance = baseUserDTO.getBalance() - auctionDAO.sumAuctionCurrentPrices(conn, user.getId(), null);
+        return new UserDTO(
+            baseUserDTO.getId(),
+            baseUserDTO.getUsername(),
+            baseUserDTO.getFullName(),
+            baseUserDTO.getRole(),
+            baseUserDTO.getPhoneNumber(),
+            baseUserDTO.getEmail(),
+            baseUserDTO.getAddress(),
+            baseUserDTO.getBalance(),
+            availableBalance);
+      } catch (SQLException | ValidationException e) {
+        conn.rollback();
+        throw e;
+      } finally {
+        conn.setAutoCommit(true);
+      }
+    }
+  }
 }
 

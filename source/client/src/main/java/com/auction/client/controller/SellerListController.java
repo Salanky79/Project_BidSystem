@@ -24,6 +24,13 @@ public class SellerListController {
   @FXML private Label emptyIcon;
   @FXML private Label emptyMessage;
 
+  private final List<AuctionSummaryDTO> allAuctions = new java.util.ArrayList<>();
+  private String currentMode = "Active";
+
+  public String getCurrentMode() {
+      return currentMode;
+  }
+
   private AuctionService auctionService;
 
   public void setAuctionService(AuctionService auctionService) {
@@ -31,10 +38,12 @@ public class SellerListController {
   }
 
   public void loadItems(String mode) {
+    this.currentMode = mode;
     titleLabel.setText(labelFor(mode));
 
     showLoading(true);
     cardList.getChildren().clear();
+    allAuctions.clear();
 
     if (auctionService == null) return;
     auctionService.getSellerAuctions(
@@ -61,6 +70,7 @@ public class SellerListController {
                   for (Object obj : list) {
                     if (obj instanceof AuctionSummaryDTO dto) {
                       if (matchesMode(mode, dto)) {
+                        allAuctions.add(dto);
                         appendCard(dto, () -> loadItems(mode));
                         count++;
                       }
@@ -92,6 +102,8 @@ public class SellerListController {
       HBox card = loader.load();
 
       SellerItemCardController ctrl = loader.getController();
+      card.setUserData(ctrl);
+      card.getProperties().put("auctionId", dto.getAuctionId());
       ctrl.setRefreshCallback(refreshCallback);
       ctrl.setData(
           CategoryUtils.iconFor(dto.getCategory()),
@@ -108,6 +120,45 @@ public class SellerListController {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public void updateCardOnBidEvent(com.auction.share.DTO.BidUpdateEvent event) {
+      Platform.runLater(() -> {
+          for (int i = 0; i < allAuctions.size(); i++) {
+              AuctionSummaryDTO dto = allAuctions.get(i);
+              if (dto.getAuctionId().equals(event.getAuctionId())) {
+                  AuctionSummaryDTO updatedDto = new AuctionSummaryDTO(
+                      dto.getAuctionId(),
+                      dto.getItemName(),
+                      dto.getCategory(),
+                      event.getCurrentHighestBid(),
+                      dto.getBidStep(),
+                      dto.getStatus(),
+                      dto.getStartTime(),
+                      dto.getEndTime(),
+                      event.getBidCount(),
+                      dto.getImageUrl(),
+                      event.getBidderName()
+                  );
+                  allAuctions.set(i, updatedDto);
+                  
+                  for (javafx.scene.Node node : cardList.getChildren()) {
+                      if (event.getAuctionId().equals(node.getProperties().get("auctionId"))) {
+                          if (node.getUserData() instanceof SellerItemCardController ctrl) {
+                              ctrl.updateDynamicData(
+                                  event.getCurrentHighestBid(),
+                                  event.getBidCount(),
+                                  updatedDto.getStatus(),
+                                  updatedDto.getEndTime()
+                              );
+                          }
+                          break;
+                      }
+                  }
+                  break;
+              }
+          }
+      });
   }
 
   private void showLoading(boolean show) {
