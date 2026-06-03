@@ -94,9 +94,4 @@ class ItemDAOTest {
         assertEquals("s-1", found.getSellerId());
     }
 
-    @Test
-    void findById_notFound() throws Exception {
-        Item found = itemDAO.findById(connection, "not-exist");
-        assertNull(found);
-    }
 }

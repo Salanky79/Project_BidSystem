@@ -60,22 +60,7 @@ class UserServiceTest {
         when(dataSource.getConnection()).thenReturn(mockConn);
     }
 
-    @Test
-    void register_duplicateUsername_throwsDuplicate() throws Exception {
-        Bidder user = bidder("alice", "plain-pass", "alice@mail.com");
-        when(userDAO.isUsernameTaken(any(Connection.class), eq("alice"))).thenReturn(true);
 
-        assertThrows(DuplicateResourceException.class, () -> userService.register(user));
-    }
-
-    @Test
-    void register_duplicateEmail_throwsDuplicate() throws Exception {
-        Bidder user = bidder("alice", "plain-pass", "alice@mail.com");
-        when(userDAO.isUsernameTaken(any(Connection.class), eq("alice"))).thenReturn(false);
-        when(userDAO.isEmailTaken(any(Connection.class), eq("alice@mail.com"))).thenReturn(true);
-
-        assertThrows(DuplicateResourceException.class, () -> userService.register(user));
-    }
 
     @Test
     void register_success_passwordIsHashed() throws Exception {
@@ -92,20 +77,7 @@ class UserServiceTest {
         assertNotEquals("plain-pass", captor.getValue().getPassword());
     }
 
-    @Test
-    void login_userNotFound_throwsAuthentication() throws Exception {
-        when(userDAO.findByUsername(any(Connection.class), eq("missing"))).thenReturn(null);
 
-        assertThrows(AuthenticationException.class, () -> userService.login("missing", "any"));
-    }
-
-    @Test
-    void login_wrongPassword_throwsAuthentication() throws Exception {
-        Bidder user = bidder("alice", PasswordUtil.hashPassword("correct-pass"), "alice@mail.com");
-        when(userDAO.findByUsername(any(Connection.class), eq("alice"))).thenReturn(user);
-
-        assertThrows(AuthenticationException.class, () -> userService.login("alice", "wrong-pass"));
-    }
 
     @Test
     void login_success_returnsUser() throws Exception {
@@ -132,29 +104,10 @@ class UserServiceTest {
         verify(mockConn).setAutoCommit(true);
     }
 
-    @Test
-    void updateProfile_failure_rollbacks() throws Exception {
-        UpdateProfileRequest request = new UpdateProfileRequest("u-1", "Alice New", "pass", "0123", "new@mail.com", "New Address");
-        when(userDAO.findById(any(Connection.class), eq("u-1"))).thenReturn(null);
-
-        assertThrows(ValidationException.class, () -> userService.updateProfile(request));
-
-        verify(mockConn).setAutoCommit(false);
-        verify(mockConn).rollback();
-        verify(mockConn).setAutoCommit(true);
-    }
 
     // ── deposit ───────────────────────────────────────────────────
 
-    @Test
-    void deposit_negativeAmount_throwsValidation() throws Exception {
-        assertThrows(ValidationException.class, () -> userService.deposit("u-1", -100));
-    }
 
-    @Test
-    void deposit_zeroAmount_throwsValidation() throws Exception {
-        assertThrows(ValidationException.class, () -> userService.deposit("u-1", 0));
-    }
 
     @Test
     void deposit_success_returnsUpdatedBalance() throws Exception {

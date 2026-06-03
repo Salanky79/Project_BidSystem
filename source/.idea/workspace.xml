@@ -5,20 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="87774572-814c-454f-89c7-64d9db09cb7e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/client/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/client/target/checkstyle-cachefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT-jar-with-dependencies.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/target/client-1.0-SNAPSHOT.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/target/maven-archiver/pom.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/test/java/com/auction/server/service/AutoBidServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/test/java/com/auction/server/service/AutoBidServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/checkstyle-cachefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/checkstyle-result.xml" beforeDir="false" afterPath="$PROJECT_DIR$/server/target/checkstyle-result.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/maven-archiver/pom.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT-jar-with-dependencies.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/target/server-1.0-SNAPSHOT.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/share/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/share/target/checkstyle-cachefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/share/target/maven-archiver/pom.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/share/target/share-1.0-SNAPSHOT.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/target/checkstyle-cachefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/test/java/com/auction/server/service/UserServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/test/java/com/auction/server/service/UserServiceTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -163,7 +150,7 @@
       <workItem from="1780486867971" duration="4120000" />
       <workItem from="1780494560816" duration="64000" />
       <workItem from="1780495655819" duration="62000" />
-      <workItem from="1780497015162" duration="334000" />
+      <workItem from="1780497015162" duration="654000" />
     </task>
     <servers />
   </component>

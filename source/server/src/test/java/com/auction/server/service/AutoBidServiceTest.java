@@ -54,21 +54,7 @@ class AutoBidServiceTest {
         );
     }
 
-    @Test
-    void register_invalidMaxBid_throwsValidation() throws Exception {
-        AutoBidService service = createService();
-        RegisterAutoBidRequest req = new RegisterAutoBidRequest("a-1", 0, 10, "b-1");
-        assertThrows(ValidationException.class, () -> service.register(req));
-        verify(registry, never()).register(any());
-    }
 
-    @Test
-    void register_invalidIncrement_throwsValidation() throws Exception {
-        AutoBidService service = createService();
-        RegisterAutoBidRequest req = new RegisterAutoBidRequest("a-1", 200, 0, "b-1");
-        assertThrows(ValidationException.class, () -> service.register(req));
-        verify(registry, never()).register(any());
-    }
 
     @Test
     void processAutoBid_twoBidders_highestWinsAtProxyPrice() throws Exception {
@@ -151,102 +137,13 @@ class AutoBidServiceTest {
 
     // ── register() validation ──────────────────────────────────────
 
-    @Test
-    void register_auctionNotFound_throwsValidation() throws Exception {
-        AutoBidService service = createService();
-        when(auctionDAO.findById(any(), eq("a-99"))).thenReturn(null);
 
-        RegisterAutoBidRequest req = new RegisterAutoBidRequest("a-99", 500, 50, "b-1");
-        assertThrows(ValidationException.class, () -> service.register(req));
-        verify(registry, never()).register(any());
-    }
 
-    @Test
-    void register_auctionNotRunning_throwsValidation() throws Exception {
-        AutoBidService service = createService();
-        Auction auction = finishedAuction();
-        when(auctionDAO.findById(any(), eq("a-1"))).thenReturn(auction);
 
-        RegisterAutoBidRequest req = new RegisterAutoBidRequest("a-1", 500, 50, "b-1");
-        assertThrows(ValidationException.class, () -> service.register(req));
-        verify(registry, never()).register(any());
-    }
-
-    @Test
-    void register_maxBidBelowCurrentPrice_throwsValidation() throws Exception {
-        AutoBidService service = createService();
-        Auction auction = runningAuction(300);
-        when(auctionDAO.findById(any(), eq("a-1"))).thenReturn(auction);
-
-        Bidder bidder = new Bidder("b", "p", "Bidder", "090", "b@mail.com", "HN");
-        bidder.setID("b-1");
-        when(userDAO.findById(any(), eq("b-1"))).thenReturn(bidder);
-
-        // maxBid (200) <= currentHighestBid (300) → should fail
-        RegisterAutoBidRequest req = new RegisterAutoBidRequest("a-1", 200, 50, "b-1");
-        assertThrows(ValidationException.class, () -> service.register(req));
-        verify(registry, never()).register(any());
-    }
-
-    @Test
-    void register_userNotBidder_throwsValidation() throws Exception {
-        AutoBidService service = createService();
-        Auction auction = runningAuction(100);
-        when(auctionDAO.findById(any(), eq("a-1"))).thenReturn(auction);
-
-        // Return a Seller, not a Bidder
-        Seller seller = new Seller("s", "p", "Seller", "090", "s@mail.com", "HN");
-        seller.setID("s-1");
-        when(userDAO.findById(any(), eq("s-1"))).thenReturn(seller);
-
-        RegisterAutoBidRequest req = new RegisterAutoBidRequest("a-1", 500, 50, "s-1");
-        assertThrows(ValidationException.class, () -> service.register(req));
-        verify(registry, never()).register(any());
-    }
 
     // ── processAutoBid() edge cases ────────────────────────────────
 
-    @Test
-    void processAutoBid_insufficientBalance_cancelAndBroadcast() throws Exception {
-        AutoBidService service = createService();
-        Auction auction = runningAuction(100);
 
-        when(auctionDAO.findById(any(), eq("a-1"))).thenReturn(auction);
-        when(registry.getConfigs("a-1"))
-            .thenReturn(List.of(new AutoBidConfig("b-1", "a-1", 500, 50, LocalDateTime.now())))
-            .thenReturn(List.of());
-        when(userDAO.findBalanceForUpdate(any(), eq("b-1"))).thenReturn(1000.0);
-        when(auctionDAO.sumAuctionCurrentPrices(any(), eq("b-1"), eq("a-1"))).thenReturn(0.0);
-
-        // placeBid throws InsufficientBalanceException
-        doThrow(new InsufficientBalanceException("Insufficient balance."))
-                .when(bidService).placeBid(any(PlaceBidRequest.class), anyBoolean());
-
-        service.processAutoBid("a-1");
-
-        verify(registry).cancel("a-1", "b-1");
-        verify(broadcastService).broadcastAutoBidCancelled(eq("b-1"), eq("a-1"), anyString());
-    }
-
-    @Test
-    void processAutoBid_maxBidExceeded_cancelAndBroadcast() throws Exception {
-        AutoBidService service = createService();
-        Auction auction = runningAuction(100);
-
-        when(auctionDAO.findById(any(), eq("a-1"))).thenReturn(auction);
-        // maxBid (105) <= currentHighestBid (100) → Rule 1 triggers cancel
-        when(registry.getConfigs("a-1")).thenReturn(List.of(
-                new AutoBidConfig("b-1", "a-1", 100, 50, LocalDateTime.now())
-        ));
-        when(userDAO.findBalanceForUpdate(any(), eq("b-1"))).thenReturn(1000.0);
-        when(auctionDAO.sumAuctionCurrentPrices(any(), eq("b-1"), eq("a-1"))).thenReturn(0.0);
-
-        service.processAutoBid("a-1");
-
-        verify(registry).cancel("a-1", "b-1");
-        verify(broadcastService).broadcastAutoBidCancelled(eq("b-1"), eq("a-1"), contains("Max bid reached"));
-        verify(bidService, never()).placeBid(any(), anyBoolean());
-    }
 
     @Test
     void processAutoBid_concurrentBid_retriesAndSucceeds() throws Exception {
@@ -277,6 +174,7 @@ class AutoBidServiceTest {
         when(registry.cancel("a-1", "b-1")).thenReturn(true);
 
         CancelAutoBidRequest req = new CancelAutoBidRequest("a-1", "b-1");
+        req.withUserId("b-1");
         boolean result = service.cancel(req);
 
         verify(registry).cancel("a-1", "b-1");

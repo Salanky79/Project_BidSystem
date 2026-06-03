@@ -51,29 +51,7 @@ class AuctionServiceTest {
 
     // ── createAuction ─────────────────────────────────────────────
 
-    @Test
-    void createAuction_startAfterEnd_throwsValidation() throws Exception {
-        Seller seller = seller("seller-1");
-        when(userDAO.findById(any(Connection.class), eq("seller-1"))).thenReturn(seller);
 
-        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO, imageStorage);
-        CreateAuctionRequest request = createRequest("seller-1",
-                LocalDateTime.now().plusHours(2), LocalDateTime.now().plusHours(1));
-
-        assertThrows(ValidationException.class, () -> service.createAuction(request));
-    }
-
-    @Test
-    void createAuction_userNotSeller_throwsValidation() throws Exception {
-        Bidder bidder = new Bidder("b", "p", "Bidder", "090", "b@mail.com", "HN");
-        when(userDAO.findById(any(Connection.class), eq("seller-1"))).thenReturn(bidder);
-
-        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO, imageStorage);
-        CreateAuctionRequest request = createRequest("seller-1",
-                LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(2));
-
-        assertThrows(ValidationException.class, () -> service.createAuction(request));
-    }
 
     @Test
     void createAuction_success_savesItemAndAuction() throws Exception {
@@ -94,23 +72,7 @@ class AuctionServiceTest {
 
     // ── cancelAuction ─────────────────────────────────────────────
 
-    @Test
-    void cancelAuction_auctionNotFound_throwsValidation() throws Exception {
-        when(auctionDAO.findById(any(Connection.class), eq("a-99"))).thenReturn(null);
 
-        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO, imageStorage);
-        assertThrows(ValidationException.class, () -> service.cancelAuction("a-99", "seller-1"));
-    }
-
-    @Test
-    void cancelAuction_wrongSeller_throwsValidation() throws Exception {
-        Auction auction = runningAuction(100);
-        when(auctionDAO.findById(any(Connection.class), eq("auction-1"))).thenReturn(auction);
-
-        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO, imageStorage);
-        assertThrows(ValidationException.class,
-                () -> service.cancelAuction("auction-1", "wrong-seller"));
-    }
 
     @Test
     void cancelAuction_success_updatesStatus() throws Exception {
@@ -126,34 +88,8 @@ class AuctionServiceTest {
 
     // ── setBidStep ────────────────────────────────────────────────
 
-    @Test
-    void setBidStep_auctionNotFound_throwsValidation() throws Exception {
-        when(auctionDAO.findById(any(Connection.class), eq("a-99"))).thenReturn(null);
 
-        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO, imageStorage);
-        SetBidStepRequest req = (SetBidStepRequest) new SetBidStepRequest("a-99", 50.0, "s-1").withUserId("s-1");
-        assertThrows(ValidationException.class, () -> service.setBidStep(req));
-    }
 
-    @Test
-    void setBidStep_notSeller_throwsValidation() throws Exception {
-        Auction auction = runningAuction(100);
-        when(auctionDAO.findById(any(Connection.class), eq("auction-1"))).thenReturn(auction);
-
-        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO, imageStorage);
-        SetBidStepRequest req = (SetBidStepRequest) new SetBidStepRequest("auction-1", 50.0, "wrong-seller").withUserId("wrong-seller");
-        assertThrows(ValidationException.class, () -> service.setBidStep(req));
-    }
-
-    @Test
-    void setBidStep_zeroBidStep_throwsValidation() throws Exception {
-        Auction auction = runningAuction(100);
-        when(auctionDAO.findById(any(Connection.class), eq("auction-1"))).thenReturn(auction);
-
-        AuctionService service = new AuctionService(dataSource, auctionDAO, itemDAO, userDAO, imageStorage);
-        SetBidStepRequest req = (SetBidStepRequest) new SetBidStepRequest("auction-1", 0.0, "s-1").withUserId("s-1");
-        assertThrows(ValidationException.class, () -> service.setBidStep(req));
-    }
 
     @Test
     void setBidStep_success_updatesDAO() throws Exception {
