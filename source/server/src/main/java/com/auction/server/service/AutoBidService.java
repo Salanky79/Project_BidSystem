@@ -214,12 +214,14 @@ public class AutoBidService  {
             // Quy tắc 1: Hạn mức maxBid <= Giá cao nhất hiện tại
             if (config.getMaxBid() <= currentHighestBid) {
                 registry.cancel(auctionId, bidderId);
+                broadcastService.broadcastAutoBidCancelled(bidderId, auctionId, "Auto-bid cancelled (Max bid reached)");
                 continue;
             }
 
             // Quy tắc 1.5: Max bid không đủ để vượt qua giá tối thiểu yêu cầu (current + bidStep)
             if (config.getMaxBid() < currentHighestBid + bidStep) {
                 registry.cancel(auctionId, bidderId);
+                broadcastService.broadcastAutoBidCancelled(bidderId, auctionId, "Auto-bid cancelled (Max bid reached)");
                 continue;
             }
 

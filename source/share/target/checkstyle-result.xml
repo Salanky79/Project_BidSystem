@@ -13,6 +13,9 @@
 <error line="6" column="14" severity="warning" message="Abbreviation in name &apos;AuctionSummaryDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>
 <error line="21" column="3" severity="warning" message="Missing a Javadoc comment." source="com.puppycrawl.tools.checkstyle.checks.javadoc.MissingJavadocMethodCheck"/>
 </file>
+<file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\AutoBidCancelledEvent.java">
+<error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
+</file>
 <file name="D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\BidDTO.java">
 <error line="1" column="9" severity="warning" message="Package name &apos;com.auction.share.DTO&apos; must match pattern &apos;^[a-z]+(\.[a-z][a-z0-9]*)*$&apos;." source="com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck"/>
 <error line="6" column="14" severity="warning" message="Abbreviation in name &apos;BidDTO&apos; must contain no more than &apos;1&apos; consecutive capital letters." source="com.puppycrawl.tools.checkstyle.checks.naming.AbbreviationAsWordInNameCheck"/>

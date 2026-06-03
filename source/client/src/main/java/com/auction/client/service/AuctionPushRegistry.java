@@ -1,6 +1,7 @@
 package com.auction.client.service;
 
 import com.auction.client.network.SocketClient;
+import com.auction.share.DTO.AutoBidCancelledEvent;
 import com.auction.share.DTO.BidStepUpdateEvent;
 import com.auction.share.DTO.BidUpdateEvent;
 import com.auction.share.DTO.Response;
@@ -14,7 +15,7 @@ public class AuctionPushRegistry {
     private Runnable onAuctionCancelled;
     private Runnable onAuctionFinished;
     private Consumer<Double> onBidStepUpdate;
-    private Runnable onAutoBidCancelled;
+    private Consumer<String> onAutoBidCancelled;
     private Consumer<Response<?>> pushListener;
 
     public AuctionPushRegistry(SocketClient socketClient, String auctionId) {
@@ -38,7 +39,7 @@ public class AuctionPushRegistry {
         this.onBidStepUpdate = onBidStepUpdate;
     }
 
-    public void setOnAutoBidCancelled(Runnable onAutoBidCancelled) {
+    public void setOnAutoBidCancelled(Consumer<String> onAutoBidCancelled) {
         this.onAutoBidCancelled = onAutoBidCancelled;
     }
 
@@ -77,10 +78,10 @@ public class AuctionPushRegistry {
                             Platform.runLater(() -> onBidStepUpdate.accept(stepEvent.getBidStep()));
                         }
                     }
-                } else if ("AUTO_BID_CANCELLED".equals(response.getMessage()) && response.getData() instanceof String cancelledId) {
-                    if (auctionId.equals(cancelledId)) {
+                } else if ("AUTO_BID_CANCELLED".equals(response.getMessage()) && response.getData() instanceof AutoBidCancelledEvent event) {
+                    if (auctionId.equals(event.getAuctionId())) {
                         if (onAutoBidCancelled != null) {
-                            Platform.runLater(onAutoBidCancelled);
+                            Platform.runLater(() -> onAutoBidCancelled.accept(event.getReason()));
                         }
                     }
                 }

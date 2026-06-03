@@ -1,6 +1,7 @@
 D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\Action.java
 D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\AuctionDetailDTO.java
 D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\AuctionSummaryDTO.java
+D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\AutoBidCancelledEvent.java
 D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\BidDTO.java
 D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\BidStepUpdateEvent.java
 D:\code\Project_BidSystem\source\share\src\main\java\com\auction\share\DTO\BidUpdateEvent.java

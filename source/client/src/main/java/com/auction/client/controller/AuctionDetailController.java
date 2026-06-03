@@ -265,11 +265,11 @@ public class AuctionDetailController {
             minBidLabel.setStyle("");
             minBidLabel.setText(String.format("Minimum bid: %,.0f VND", viewModel.getMinimumBid()));
         });
-        pushHandler.setOnAutoBidCancelled(() -> {
+        pushHandler.setOnAutoBidCancelled(reason -> {
             viewModel.setAutoBidEnabled(false);
             updateAutoBidControls();
             autoBidStatusLabel.setStyle("-fx-text-fill: #FF4444; -fx-font-size: 11px;");
-            autoBidStatusLabel.setText("Auto-bid cancelled (Insufficient balance)");
+            autoBidStatusLabel.setText(reason != null ? reason : "Auto-bid cancelled");
         });
         pushHandler.register();
     }

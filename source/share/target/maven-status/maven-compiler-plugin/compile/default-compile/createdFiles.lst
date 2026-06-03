@@ -36,6 +36,7 @@ com\auction\share\DTO\BidDTO.class
 com\auction\share\DTO\PlaceBidRequest.class
 com\auction\share\DTO\AuctionSummaryDTO.class
 com\auction\share\exceptions\InvalidBidException.class
+com\auction\share\DTO\AutoBidCancelledEvent.class
 com\auction\share\exceptions\ValidationException.class
 com\auction\share\models\item\Item.class
 com\auction\share\DTO\UnsubscribeAuctionRequest.class

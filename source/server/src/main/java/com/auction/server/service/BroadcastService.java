@@ -1,6 +1,7 @@
 package com.auction.server.service;
 
 import com.auction.server.network.ClientSession;
+import com.auction.share.DTO.AutoBidCancelledEvent;
 import com.auction.share.DTO.BidStepUpdateEvent;
 import com.auction.share.DTO.BidUpdateEvent;
 import com.auction.share.DTO.Response;
@@ -128,7 +129,8 @@ public class BroadcastService implements AuctionLifecycleCleaner {
 
   public void broadcastAutoBidCancelled(String userId, String auctionId, String reason) {
     try {
-      Response<String> pushMessage = Response.success(AUTO_BID_CANCELLED, auctionId);
+      AutoBidCancelledEvent event = new AutoBidCancelledEvent(auctionId, reason);
+      Response<AutoBidCancelledEvent> pushMessage = Response.success(AUTO_BID_CANCELLED, event);
       for (ClientSession session : subscriptionRegistry.getAllSessions()) {
         if (userId.equals(session.getUserId())) {
           broadcastExecutor.submit(
