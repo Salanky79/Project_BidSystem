@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.auction.server.controller.RequestDispatcherTest
--------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.091 s -- in com.auction.server.controller.RequestDispatcherTest

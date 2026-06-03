@@ -212,6 +212,14 @@
 
                 <Region prefHeight="14" />
 
+                <!-- PRODUCT IMAGE -->
+                <VBox alignment="CENTER" style="-fx-background-color: #111111; -fx-padding: 14; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #D4AF37; -fx-border-width: 2; -fx-min-height: 320; -fx-min-width: 320;">
+                    <javafx.scene.image.ImageView fx:id="productImageView" fitHeight="280.0" fitWidth="280.0" preserveRatio="true" visible="false" managed="false"/>
+                    <Label fx:id="productIconLabel" style="-fx-font-size: 150px;" text="📦" />
+                </VBox>
+
+                <Region prefHeight="14" />
+
                 <!-- ══ AUCTION CONTROL PANEL CARD ══ -->
                 <VBox fx:id="controlPanelCard" spacing="14"
                       style="-fx-background-color: #111111; -fx-padding: 20;

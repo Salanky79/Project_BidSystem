@@ -15,6 +15,9 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,6 +34,8 @@ public class SellerAuctionDetailController {
   // ── HEADER ──────────────────────────────────────────────────
   @FXML private Button closeButton;
   @FXML private Label productTitleLabel;
+  @FXML private Label productIconLabel;
+  @FXML private ImageView productImageView;
 
   // ── CHART ───────────────────────────────────────────────────
   @FXML private LineChart<String, Number> priceHistoryChart;
@@ -272,6 +277,27 @@ public class SellerAuctionDetailController {
           
           // Recheck visibility from detailed status loaded from server
           updateVisibilityBasedOnStatus(detail.getStatus());
+
+          if (detail.getImageUrl() != null && !detail.getImageUrl().trim().isEmpty()) {
+              if (productImageView != null) {
+                  try {
+                      String imgUrl = detail.getImageUrl();
+                      if (!imgUrl.startsWith("http") && !imgUrl.startsWith("file:")) {
+                          imgUrl = "file:///" + imgUrl.replace("\\", "/");
+                      }
+                      Image image = new Image(imgUrl, true);
+                      productImageView.setImage(image);
+                      productImageView.setVisible(true);
+                      productImageView.setManaged(true);
+                      if (productIconLabel != null) {
+                          productIconLabel.setVisible(false);
+                          productIconLabel.setManaged(false);
+                      }
+                  } catch (Exception e) {
+                      System.err.println("Failed to load image: " + e.getMessage());
+                  }
+              }
+          }
         } else {
           if (chartManager != null) {
             chartManager.loadData(bidHistory, startTimeISO, startingPrice, currentPrice);

@@ -19,6 +19,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Region;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class AuctionDetailController {
@@ -52,6 +53,7 @@ public class AuctionDetailController {
     @FXML private Label     endTimeLabel;
     @FXML private Label     endsInLabel;
     @FXML private Label     productIconLabel;
+    @FXML private ImageView productImageView;
     @FXML private TextField bidInputField;
     @FXML private Button    placeBidButton;
     @FXML private Label     minBidLabel;
@@ -321,7 +323,27 @@ public class AuctionDetailController {
             endTimeLabel.setText(DateTimeUtils.formatDateTimeForDisplay(viewModel.getEndTime().toString()));
         }
 
-
+        if (viewModel.getImageUrl() != null && !viewModel.getImageUrl().trim().isEmpty()) {
+            if (productImageView != null) {
+                try {
+                    String imgUrl = viewModel.getImageUrl();
+                    // Add scheme if local path is returned (for testing, normally server returns full URL)
+                    if (!imgUrl.startsWith("http") && !imgUrl.startsWith("file:")) {
+                        imgUrl = "file:///" + imgUrl.replace("\\", "/");
+                    }
+                    Image image = new Image(imgUrl, true); // true for background loading
+                    productImageView.setImage(image);
+                    productImageView.setVisible(true);
+                    productImageView.setManaged(true);
+                    if (productIconLabel != null) {
+                        productIconLabel.setVisible(false);
+                        productIconLabel.setManaged(false);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Failed to load image: " + e.getMessage());
+                }
+            }
+        }
 
         if (chartManager != null) {
             chartManager.loadData(viewModel.getBidHistory(), viewModel.getStartTimeISO(), viewModel.getStartingPrice(), viewModel.getCurrentPrice());
